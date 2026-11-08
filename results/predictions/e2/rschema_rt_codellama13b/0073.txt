@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0073
+CREATE TABLE `insurance_agent` (
+  `agent_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_phone` varchar(15) DEFAULT NULL,
+  `hire_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`agent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_phone` varchar(15) DEFAULT NULL,
+  `id_card_number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `insurance_policy` (
+  `policy_id` int(11) NOT NULL AUTO_INCREMENT,
+  `agent_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `insurance_term` int(11) DEFAULT NULL,
+  `insurance_type` varchar(255) DEFAULT NULL,
+  `insured_amount` decimal(10,2) DEFAULT NULL,
+  `premium` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`policy_id`),
+  CONSTRAINT `insurance_policy_ibfk_1` FOREIGN KEY (`agent_id`) REFERENCES `insurance_agent` (`agent_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `insurance_policy_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment_record` (
+  `payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `policy_id` int(11) NOT NULL,
+  `payment_amount` decimal(10,2) NOT NULL,
+  `payment_method` varchar(50) DEFAULT NULL,
+  `payment_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`payment_id`),
+  CONSTRAINT `payment_record_ibfk_1` FOREIGN KEY (`policy_id`) REFERENCES `insurance_policy` (`policy_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `claim_record` (
+  `claim_id` int(11) NOT NULL AUTO_INCREMENT,
+  `policy_id` int(11) NOT NULL,
+  `claim_amount` decimal(10,2) NOT NULL,
+  `claim_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`claim_id`),
+  CONSTRAINT `claim_record_ibfk_1` FOREIGN KEY (`policy_id`) REFERENCES `payment_record` (`payment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

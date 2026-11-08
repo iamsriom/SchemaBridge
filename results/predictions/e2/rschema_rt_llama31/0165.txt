@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0165
+CREATE TABLE `meteorological_station` (
+  `station_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `elevation` float DEFAULT NULL,
+  `latitude` float NOT NULL,
+  `longitude` float NOT NULL,
+  `observation_elements` varchar(255) DEFAULT NULL,
+  `instruments` varchar(255) DEFAULT NULL,
+  `standards` varchar(255) DEFAULT NULL,
+  `geographic_environment` varchar(255) DEFAULT NULL,
+  `time_of_observation` datetime NOT NULL,
+  PRIMARY KEY (`station_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `operator` (
+  `operator_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `role` varchar(100) DEFAULT NULL,
+  `level` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`operator_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `historical_evolution_information` (
+  `change_id` int(11) NOT NULL,
+  `belonging_station_id` int(11) NOT NULL,
+  `type_of_change` varchar(255) NOT NULL,
+  `old_value` varchar(255) DEFAULT NULL,
+  `new_value` varchar(255) DEFAULT NULL,
+  `reason_for_change` varchar(255) DEFAULT NULL,
+  `time_of_change` datetime NOT NULL,
+  PRIMARY KEY (`change_id`),
+  CONSTRAINT `historical_evolution_information_ibfk_1` FOREIGN KEY (`belonging_station_id`) REFERENCES `meteorological_station` (`station_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `audit_information` (
+  `change_id` int(11) NOT NULL,
+  `operator_id` int(11) NOT NULL,
+  `audit_time` datetime NOT NULL,
+  `comments` varchar(255) DEFAULT NULL,
+  `status` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`change_id`, `operator_id`, `audit_time`),
+  CONSTRAINT `audit_information_ibfk_1` FOREIGN KEY (`change_id`) REFERENCES `historical_evolution_information` (`change_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `audit_information_ibfk_2` FOREIGN KEY (`operator_id`) REFERENCES `operator` (`operator_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

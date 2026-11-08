@@ -1,0 +1,63 @@
+-- Schema for database: rschema_0457
+
+CREATE TABLE `supermarkets` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`address` varchar(255) NOT NULL,
+`contact_info` varchar(255) NOT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`inventory_quantity` int(11) NOT NULL,
+`last_update_date` datetime NOT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `suppliers` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`address` varchar(255) NOT NULL,
+`contact_info` varchar(255) NOT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supply_requests` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`chain_supermarket_id` int(11) NOT NULL,
+`product_id` int(11) NOT NULL,
+`requested_quantity` int(11) NOT NULL,
+`request_date` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`chain_supermarket_id`) REFERENCES `supermarkets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `delivery_notifications` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`request_id` int(11) NOT NULL,
+`delivery_date` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`request_id`) REFERENCES `supply_requests` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stock_out_notifications` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`request_id` int(11) NOT NULL,
+`stock_out_date` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`request_id`) REFERENCES `supply_requests` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `procurement_lists` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`product_id` int(11) NOT NULL,
+`supplier_id` int(11) NOT NULL,
+`purchase_quantity` int(11) NOT NULL,
+`purchase_date` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

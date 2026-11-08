@@ -1,0 +1,106 @@
+-- Schema for database: schemabench_0147
+CREATE TABLE `Chat` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `userid` int(11) NOT NULL,
+  `participantid` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `chat_ibfk_1` FOREIGN KEY (`userid`) REFERENCES `User` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `chat_ibfk_2` FOREIGN KEY (`participantid`) REFERENCES `User` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Like` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `postid` int(11) NOT NULL,
+  `userid` int(11) NOT NULL,
+  `createdat` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `like_ibfk_1` FOREIGN KEY (`postid`) REFERENCES `Post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `like_ibfk_2` FOREIGN KEY (`userid`) REFERENCES `User` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Session` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `refreshtoken` varchar(255) NOT NULL,
+  `expirationtime` datetime NOT NULL,
+  `userid` int(11) NOT NULL,
+  `createdat` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `session_ibfk_1` FOREIGN KEY (`userid`) REFERENCES `User` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `UserFollows` (
+  `userid` int(11) NOT NULL,
+  `followerid` int(11) NOT NULL,
+  PRIMARY KEY (`userid`, `followerid`),
+  CONSTRAINT `userfollows_ibfk_1` FOREIGN KEY (`userid`) REFERENCES `User` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `userfollows_ibfk_2` FOREIGN KEY (`followerid`) REFERENCES `User` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Notification` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `senderid` int(11) NOT NULL,
+  `recipientid` int(11) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `objecttype` varchar(50) NOT NULL,
+  `objecturi` varchar(255) NOT NULL,
+  `read` tinyint(1) NOT NULL,
+  `createdat` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`senderid`) REFERENCES `User` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `notification_ibfk_2` FOREIGN KEY (`recipientid`) REFERENCES `User` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Message` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `userid` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `read` tinyint(1) NOT NULL,
+  `createdat` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `message_ibfk_1` FOREIGN KEY (`userid`) REFERENCES `User` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Repost` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `postid` int(11) NOT NULL,
+  `userid` int(11) NOT NULL,
+  `createdat` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `repost_ibfk_1` FOREIGN KEY (`postid`) REFERENCES `Post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `repost_ibfk_2` FOREIGN KEY (`userid`) REFERENCES `User` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL UNIQUE,
+  `username` varchar(255) NOT NULL UNIQUE,
+  `newuser` tinyint(1) NOT NULL,
+  `hashedpassword` varchar(255) NOT NULL,
+  `googleid` varchar(255) DEFAULT NULL UNIQUE,
+  `provider` varchar(50) DEFAULT NULL UNIQUE,
+  `createdat` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Profile` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `bio` text DEFAULT NULL,
+  `img` varchar(255) DEFAULT NULL,
+  `website` varchar(255) DEFAULT NULL,
+  `dob` date DEFAULT NULL,
+  `userid` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `profile_ibfk_1` FOREIGN KEY (`userid`) REFERENCES `User` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Post` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content` text NOT NULL,
+  `userid` int(11) NOT NULL,
+  `parentpostid` int(11) DEFAULT NULL,
+  `createdat` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `post_ibfk_1` FOREIGN KEY (`parentpostid`) REFERENCES `Post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `post_ibfk_2` FOREIGN KEY (`userid`) REFERENCES `User` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,22 @@
+{
+  "text_number": 28,
+  "id": "SB-028",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0028",
+  "question": "1) Background / Context\nThe project involves implementing a two-factor authentication system for Django applications, enhancing security by requiring additional steps beyond the standard username and password. This solution builds upon Django's existing authentication frameworks, specifically `django-otp` and `django.contrib.auth`, providing seamless integration into Django projects.\n\n2) Objectives\nThe objective is to develop a comprehensive two-factor authentication feature that supports multiple authentication methods. Users should be able to authenticate via phone call, SMS, token generator apps like Google Authenticator, or a YubiKey hardware token.\n\n3) Stakeholders & Users\n- Users: Individuals requiring secure access to Django-based applications.\n- Administrators: Manage the security settings and user access control within the system.\n- Developers: Integrate and maintain the two-factor authentication feature in various Django projects.\n\n4) Functional Descriptions\n- User Authentication: Allow users to authenticate using:\n  - Phone call\n  - Text messages (SMS)\n  - Token generator apps (e.g., Google Authenticator)\n  - YubiKey (optional)\n- Integration: Ensure compatibility and effortless integration with Django's authentication framework and `django-otp`.\n- Account Management: Administrators can monitor and configure two-factor authentication settings for users.\n\n5) Non-Functional Descriptions\n- Security: Provide a robust authentication mechanism to protect user accounts.\n- Scalability: Support the integration into various Django projects without performance issues.\n- Usability: Deliver a user-friendly authentication experience inspired by Google’s Two-Step Authentication.",
+  "ddl": "-- Schema for database: schemabench_0028\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `phone_number` varchar(20) DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `username` (`username`),\n  UNIQUE KEY `email` (`email`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `two_factor_auth_methods` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `method` enum('phone_call','sms','google_authenticator','yubikey') NOT NULL,\n  `secret_key` varchar(255) DEFAULT NULL,\n  `phone_number` varchar(20) DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `two_factor_auth_methods_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `auth_logs` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `auth_method` enum('phone_call','sms','google_authenticator','yubikey') NOT NULL,\n  `timestamp` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `auth_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "two_factor_auth_methods",
+      "auth_logs"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "two_factor_auth_methods": [],
+      "auth_logs": []
+    }
+  }
+}

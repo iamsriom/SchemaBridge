@@ -1,0 +1,96 @@
+-- Schema for database: rschema_0479
+
+CREATE TABLE `subsidiaries` (
+`subsidiary_id` int(11) NOT NULL,
+`name` varchar(255) NOT NULL,
+`manager_id` int(11) NOT NULL,
+`contact_address` varchar(255) NOT NULL,
+`phone_number` varchar(255) NOT NULL,
+PRIMARY KEY (`subsidiary_id`),
+FOREIGN KEY (`manager_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `business_departments` (
+`department_id` int(11) NOT NULL,
+`name` varchar(255) NOT NULL,
+`address` varchar(255) NOT NULL,
+`phone_number` varchar(255) NOT NULL,
+`affiliated_subsidiary_id` int(11) NOT NULL,
+PRIMARY KEY (`department_id`),
+FOREIGN KEY (`affiliated_subsidiary_id`) REFERENCES `subsidiaries` (`subsidiary_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employees` (
+`employee_id` int(11) NOT NULL,
+`name` varchar(255) NOT NULL,
+`position` varchar(255) NOT NULL,
+`affiliated_department_id` int(11) NOT NULL,
+`phone_number` varchar(255) NOT NULL,
+`family_member_names` varchar(255) NOT NULL,
+`relationships` varchar(255) NOT NULL,
+PRIMARY KEY (`employee_id`),
+FOREIGN KEY (`affiliated_department_id`) REFERENCES `business_departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `real_estate_agents` (
+`agent_id` int(11) NOT NULL,
+`name` varchar(255) NOT NULL,
+`phone_number` varchar(255) NOT NULL,
+`approved` tinyint(1) NOT NULL DEFAULT 0,
+PRIMARY KEY (`agent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `real_estate_properties` (
+`property_id` int(11) NOT NULL,
+`name` varchar(255) NOT NULL,
+`address` varchar(255) NOT NULL,
+`price` decimal(10,2) NOT NULL,
+`agent_id` int(11) NOT NULL,
+PRIMARY KEY (`property_id`),
+FOREIGN KEY (`agent_id`) REFERENCES `real_estate_agents` (`agent_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `real_estate_property_history` (
+`property_id` int(11) NOT NULL,
+`date` datetime NOT NULL,
+`status` varchar(255) NOT NULL,
+PRIMARY KEY (`property_id`, `date`),
+FOREIGN KEY (`property_id`) REFERENCES `real_estate_properties` (`property_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+`user_id` int(11) NOT NULL,
+`name` varchar(255) NOT NULL,
+`email` varchar(255) NOT NULL,
+`password` varchar(255) NOT NULL,
+`role` varchar(255) NOT NULL,
+PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_roles` (
+`role_id` int(11) NOT NULL,
+`name` varchar(255) NOT NULL,
+PRIMARY KEY (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_role_permissions` (
+`role_id` int(11) NOT NULL,
+`permission_id` int(11) NOT NULL,
+PRIMARY KEY (`role_id`, `permission_id`),
+FOREIGN KEY (`role_id`) REFERENCES `user_roles` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`permission_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permissions` (
+`permission_id` int(11) NOT NULL,
+`name` varchar(255) NOT NULL,
+PRIMARY KEY (`permission_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_permissions` (
+`user_id` int(11) NOT NULL,
+`permission_id` int(11) NOT NULL,
+PRIMARY KEY (`user_id`, `permission_id`),
+FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`permission_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

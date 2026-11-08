@@ -1,0 +1,32 @@
+-- Schema for database: rschema_0385
+CREATE TABLE `accounts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `currency` varchar(255) NOT NULL,
+  `balance` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `frozen_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transactions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `initiating_account_id` int(11) NOT NULL,
+  `receiving_account_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `status` enum('success','failure','processing') NOT NULL DEFAULT 'processing',
+  `error_info` text,
+  PRIMARY KEY (`id`),
+  KEY `FK_transactions_accounts` (`initiating_account_id`),
+  KEY `FK_transactions_accounts_2` (`receiving_account_id`),
+  CONSTRAINT `FK_transactions_accounts` FOREIGN KEY (`initiating_account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_transactions_accounts_2` FOREIGN KEY (`receiving_account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction_statuses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_id` int(11) NOT NULL,
+  `status` enum('success','failure','processing') NOT NULL DEFAULT 'processing',
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `FK_transaction_statuses_transactions` (`transaction_id`),
+  CONSTRAINT `FK_transaction_statuses_transactions` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

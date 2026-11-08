@@ -1,0 +1,42 @@
+-- Schema for database: rschema_0002
+CREATE TABLE `cargo` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `carrier` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_number` varchar(255) NOT NULL,
+  `origin` varchar(255) NOT NULL,
+  `destination` varchar(255) NOT NULL,
+  `transportation_method` enum('rail','road','water','air') NOT NULL,
+  `cargo_id` int(11) NOT NULL,
+  `carrier_id` int(11) NOT NULL,
+  `weight` decimal(10,2) NOT NULL,
+  `transportation_time` datetime NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `task_ibfk_1` (`cargo_id`),
+  KEY `task_ibfk_2` (`carrier_id`),
+  CONSTRAINT `task_ibfk_1` FOREIGN KEY (`cargo_id`) REFERENCES `cargo` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_ibfk_2` FOREIGN KEY (`carrier_id`) REFERENCES `carrier` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_status` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `update_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `task_status_ibfk_1` (`task_id`),
+  CONSTRAINT `task_status_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

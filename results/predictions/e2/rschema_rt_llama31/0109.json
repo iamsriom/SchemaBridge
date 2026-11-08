@@ -1,0 +1,241 @@
+{
+  "text_number": 109,
+  "id": "67552f0a13602ec03b41a8e6",
+  "llm": "gpt4omini",
+  "model_id": "gpt-4o-mini",
+  "source_schema2text_llm": "llama31",
+  "database": "rschema_0109",
+  "nl_text": "The rschema_0109 database is designed to store information about countries, members, their addresses, and the management of these addresses. The Country table contains a list of countries, with each country identified by a unique code and a corresponding name. The Member table stores details about individual members, including their company name, country of origin, a unique member ID, name, name pronunciation, and public status, with the country of origin being a foreign key referencing the Country table to ensure data consistency. The Address table holds information about the physical addresses of members, with each address having a unique ID, a contact number, a country code that references the Country table, a postal code, and a specific address. The Member_Address_Management table is used to manage the relationships between members and their addresses, with each entry consisting of an address ID and a member ID, both of which are foreign keys referencing the Address and Member tables respectively, and together forming a composite primary key to uniquely identify each address-member pair.",
+  "gold_question": "The membership management system shall record each member's country code, name (with optional pronunciation), and company name, allowing the option to set whether this information is publicly accessible. To expedite the retrieval of certain member information, these details shall be cached in a data cache table. The system shall also manage multiple address entries for each member, with each address containing detailed information such as country, postal code, specific address, and telephone number.",
+  "input_json": "/data/RSchema_ExpResults4/Experiment2/schema2text_llama31/0109.json",
+  "ddl": "-- Schema for database: rschema_0109\nCREATE TABLE `country` (\n  `country_code` char(3) NOT NULL,\n  `country_name` varchar(255) NOT NULL,\n  PRIMARY KEY (`country_code`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `member` (\n  `member_id` int(11) NOT NULL AUTO_INCREMENT,\n  `company_name` varchar(255) DEFAULT NULL,\n  `country_of_origin` char(3) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `name_pronunciation` varchar(255) DEFAULT NULL,\n  `public_status` boolean NOT NULL DEFAULT TRUE,\n  PRIMARY KEY (`member_id`),\n  CONSTRAINT `member_ibfk_1` FOREIGN KEY (`country_of_origin`) REFERENCES `country` (`country_code`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `address` (\n  `address_id` int(11) NOT NULL AUTO_INCREMENT,\n  `contact_number` varchar(20) DEFAULT NULL,\n  `country_code` char(3) NOT NULL,\n  `postal_code` varchar(10) DEFAULT NULL,\n  `specific_address` varchar(255) NOT NULL,\n  PRIMARY KEY (`address_id`),\n  CONSTRAINT `address_ibfk_1` FOREIGN KEY (`country_code`) REFERENCES `country` (`country_code`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `member_address_management` (\n  `address_id` int(11) NOT NULL,\n  `member_id` int(11) NOT NULL,\n  PRIMARY KEY (`address_id`, `member_id`),\n  CONSTRAINT `member_address_management_ibfk_1` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `member_address_management_ibfk_2` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "rschema_0109",
+    "tables": [
+      "country",
+      "member",
+      "address",
+      "member_address_management"
+    ],
+    "columns_by_table": {
+      "country": [
+        {
+          "COLUMN_NAME": "country_code",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "char",
+          "CHARACTER_MAXIMUM_LENGTH": 3,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "char(3)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "country_name",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "member": [
+        {
+          "COLUMN_NAME": "member_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "auto_increment",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "company_name",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "country_of_origin",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "char",
+          "CHARACTER_MAXIMUM_LENGTH": 3,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "char(3)",
+          "COLUMN_KEY": "MUL",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "name",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "name_pronunciation",
+          "ORDINAL_POSITION": 5,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "public_status",
+          "ORDINAL_POSITION": 6,
+          "COLUMN_DEFAULT": "1",
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "boolean",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "boolean",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "address": [
+        {
+          "COLUMN_NAME": "address_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "auto_increment",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "contact_number",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 20,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(20)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "country_code",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "char",
+          "CHARACTER_MAXIMUM_LENGTH": 3,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "char(3)",
+          "COLUMN_KEY": "MUL",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "postal_code",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 10,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(10)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "specific_address",
+          "ORDINAL_POSITION": 5,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "member_address_management": [
+        {
+          "COLUMN_NAME": "address_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "member_id",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0092
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `identity_status` varchar(50) NOT NULL,
+  `identity_type` varchar(50) NOT NULL,
+  `superior_user_id` int(11) NOT NULL,
+  `subordinate_user_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `expired_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`superior_user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_ibfk_2` FOREIGN KEY (`subordinate_user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `operator` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `permissions` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `change_superior_user` (
+  `operator_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `change_time` datetime NOT NULL,
+  `previous_superior_user_id` int(11) NOT NULL,
+  `new_superior_user_id` int(11) NOT NULL,
+  `remarks` text DEFAULT NULL,
+  PRIMARY KEY (`operator_id`, `user_id`, `change_time`),
+  CONSTRAINT `change_superior_user_ibfk_1` FOREIGN KEY (`operator_id`) REFERENCES `operator` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `change_superior_user_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `change_superior_user_ibfk_3` FOREIGN KEY (`previous_superior_user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `change_superior_user_ibfk_4` FOREIGN KEY (`new_superior_user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `change_subordinate_user` (
+  `operator_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `change_time` datetime NOT NULL,
+  `previous_subordinate_user_id` int(11) NOT NULL,
+  `new_subordinate_user_id` int(11) NOT NULL,
+  `remarks` text DEFAULT NULL,
+  PRIMARY KEY (`operator_id`, `user_id`, `change_time`),
+  CONSTRAINT `change_subordinate_user_ibfk_1` FOREIGN KEY (`operator_id`) REFERENCES `operator` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `change_subordinate_user_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `change_subordinate_user_ibfk_3` FOREIGN KEY (`previous_subordinate_user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `change_subordinate_user_ibfk_4` FOREIGN KEY (`new_subordinate_user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

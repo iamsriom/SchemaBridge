@@ -1,0 +1,43 @@
+-- Schema for database: rschema_0459
+CREATE TABLE `departments` (
+  `department_id` int(11) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
+  `manager_id` int(11) NOT NULL,
+  PRIMARY KEY (`department_id`),
+  KEY `department_ibfk_1` (`manager_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`manager_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employees` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `salary` decimal(10,2) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `education_level` varchar(255) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  KEY `employee_ibfk_1` (`department_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `projects` (
+  `project_id` int(11) NOT NULL,
+  `project_name` varchar(255) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `responsible_person_id` int(11) NOT NULL,
+  PRIMARY KEY (`project_id`),
+  KEY `project_ibfk_1` (`department_id`),
+  KEY `project_ibfk_2` (`responsible_person_id`),
+  CONSTRAINT `project_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_ibfk_2` FOREIGN KEY (`responsible_person_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_participations` (
+  `employee_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`, `project_id`),
+  KEY `project_participation_ibfk_1` (`employee_id`),
+  KEY `project_participation_ibfk_2` (`project_id`),
+  CONSTRAINT `project_participation_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_participation_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

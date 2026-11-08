@@ -1,0 +1,83 @@
+-- Schema for database: schemabench_0215
+CREATE TABLE `passenger` (
+  `account_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `age` int(11) NOT NULL,
+  `frequent_flyer_id` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`account_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `airport` (
+  `code` varchar(10) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `state` varchar(100) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `classification` varchar(50) DEFAULT NULL,
+  `time_zone` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `aircraft` (
+  `airplane_number` varchar(20) NOT NULL,
+  `make` varchar(100) NOT NULL,
+  `weight_limit` int(11) NOT NULL,
+  `flight_number` varchar(20) NOT NULL,
+  `airport_code` varchar(10) NOT NULL,
+  PRIMARY KEY (`airplane_number`),
+  CONSTRAINT `aircraft_ibfk_1` FOREIGN KEY (`airport_code`) REFERENCES `airport` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flightcrew` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `title` varchar(100) NOT NULL,
+  `age` int(11) NOT NULL,
+  `street_address` varchar(255) DEFAULT NULL,
+  `zip_code` varchar(10) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `airport_code` varchar(10) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `flightcrew_ibfk_1` FOREIGN KEY (`airport_code`) REFERENCES `airport` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flight` (
+  `flight_number` varchar(20) NOT NULL,
+  `departure_time` datetime NOT NULL,
+  `arrival_time` datetime NOT NULL,
+  `flight_price` decimal(10,2) NOT NULL,
+  `airport_code` varchar(10) NOT NULL,
+  `gate_number` varchar(10) DEFAULT NULL,
+  `airplane_number` varchar(20) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  PRIMARY KEY (`flight_number`),
+  CONSTRAINT `flight_ibfk_1` FOREIGN KEY (`airplane_number`) REFERENCES `aircraft` (`airplane_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `flightcrew` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticket` (
+  `ticket_id` int(11) NOT NULL,
+  `from_location` varchar(255) NOT NULL,
+  `to_location` varchar(255) NOT NULL,
+  `seat` varchar(10) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `flight_status` varchar(50) NOT NULL,
+  `class` varchar(50) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `flight_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`ticket_id`),
+  CONSTRAINT `ticket_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `passenger` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticket_ibfk_2` FOREIGN KEY (`flight_number`) REFERENCES `flight` (`flight_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `luggage` (
+  `luggage_id` int(11) NOT NULL,
+  `carousel_number` varchar(10) DEFAULT NULL,
+  `weight` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `airplane_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`luggage_id`),
+  CONSTRAINT `luggage_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `passenger` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `luggage_ibfk_2` FOREIGN KEY (`airplane_number`) REFERENCES `aircraft` (`airplane_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,50 @@
+-- Schema for database: schemabench_0117
+CREATE TABLE `atoms` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `elemental_type` varchar(255) NOT NULL,
+  `charge` int(11) DEFAULT NULL,
+  `type` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bonds` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `atom_id_1` int(11) NOT NULL,
+  `atom_id_2` int(11) NOT NULL,
+  `bond_type` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `bonds_ibfk_1` (`atom_id_1`),
+  KEY `bonds_ibfk_2` (`atom_id_2`),
+  CONSTRAINT `bonds_ibfk_1` FOREIGN KEY (`atom_id_1`) REFERENCES `atoms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bonds_ibfk_2` FOREIGN KEY (`atom_id_2`) REFERENCES `atoms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `compounds` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `activity` float DEFAULT NULL,
+  `logP` float DEFAULT NULL,
+  `LUMO` float DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ring_structures` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `compound_id` int(11) NOT NULL,
+  `atom_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ring_structures_ibfk_1` (`compound_id`),
+  KEY `ring_structures_ibfk_2` (`atom_id`),
+  CONSTRAINT `ring_structures_ibfk_1` FOREIGN KEY (`compound_id`) REFERENCES `compounds` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ring_structures_ibfk_2` FOREIGN KEY (`atom_id`) REFERENCES `atoms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `regression_data` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `compound_id` int(11) NOT NULL,
+  `mutagenicity` float DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `regression_data_ibfk_1` (`compound_id`),
+  CONSTRAINT `regression_data_ibfk_1` FOREIGN KEY (`compound_id`) REFERENCES `compounds` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,70 @@
+-- Schema for database: rschema_0350
+CREATE TABLE `ticket_type` (
+  `ticket_id` int(11) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `includes_workshop` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `price` float DEFAULT NULL,
+  PRIMARY KEY (`ticket_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `discount_code` (
+  `discount_code_id` int(11) NOT NULL,
+  `amount` float DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`discount_code_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `meeting` (
+  `meeting_id` int(11) NOT NULL,
+  `date` datetime DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `room` varchar(255) DEFAULT NULL,
+  `start_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`meeting_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `workshop` (
+  `workshop_id` int(11) NOT NULL,
+  `capacity` int(11) DEFAULT NULL,
+  `date` datetime DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `requirements` varchar(255) DEFAULT NULL,
+  `start_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`workshop_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `speaker` (
+  `speaker_id` int(11) NOT NULL,
+  `bio` varchar(255) DEFAULT NULL,
+  `company` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`speaker_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `participant` (
+  `participant_id` int(11) NOT NULL,
+  `company` varchar(255) DEFAULT NULL,
+  `discount_code_id` int(11) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `ticket_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`participant_id`),
+  CONSTRAINT `participant_ibfk_1` FOREIGN KEY (`discount_code_id`) REFERENCES `discount_code` (`discount_code_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `participant_ibfk_2` FOREIGN KEY (`ticket_id`) REFERENCES `ticket_type` (`ticket_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `meeting_speaker` (
+  `meeting_id` int(11) NOT NULL,
+  `speaker_id` int(11) NOT NULL,
+  PRIMARY KEY (`meeting_id`, `speaker_id`),
+  CONSTRAINT `meeting_speaker_ibfk_1` FOREIGN KEY (`meeting_id`) REFERENCES `meeting` (`meeting_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `meeting_speaker_ibfk_2` FOREIGN KEY (`speaker_id`) REFERENCES `speaker` (`speaker_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `workshop_speaker` (
+  `workshop_id` int(11) NOT NULL,
+  `speaker_id` int(11) NOT NULL,
+  PRIMARY KEY (`workshop_id`, `speaker_id`),
+  CONSTRAINT `workshop_speaker_ibfk_1` FOREIGN KEY (`workshop_id`) REFERENCES `workshop` (`workshop_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `workshop_speaker_ibfk_2` FOREIGN KEY (`speaker_id`) REFERENCES `speaker` (`speaker_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,57 @@
+-- Schema for database: rschema_0175
+CREATE TABLE `alumni` (
+  `alumni_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `employer` int(11) DEFAULT NULL,
+  `job_title` varchar(255) DEFAULT NULL,
+  `department` varchar(255) DEFAULT NULL,
+  `class` varchar(255) DEFAULT NULL,
+  `enrollment_year` int(11) DEFAULT NULL,
+  `id_number` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`alumni_id`),
+  CONSTRAINT `alumni_ibfk_1` FOREIGN KEY (`employer`) REFERENCES `unit` (`unit_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `donation_record` (
+  `donation_id` int(11) NOT NULL,
+  `donating_alumni` int(11) DEFAULT NULL,
+  `donation_time` datetime DEFAULT NULL,
+  `amount` decimal(10,2) DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `usage` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`donation_id`),
+  CONSTRAINT `donation_record_ibfk_1` FOREIGN KEY (`donating_alumni`) REFERENCES `alumni` (`alumni_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project` (
+  `project_id` int(11) NOT NULL,
+  `project_name` varchar(255) NOT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `total_donation_amount` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `benefit_detail` (
+  `donation_project_id` int(11) NOT NULL,
+  `beneficiary_unit` int(11) NOT NULL,
+  `benefit_percentage` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`donation_project_id`, `beneficiary_unit`),
+  CONSTRAINT `benefit_detail_ibfk_1` FOREIGN KEY (`donation_project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `benefit_detail_ibfk_2` FOREIGN KEY (`beneficiary_unit`) REFERENCES `unit` (`unit_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `unit` (
+  `unit_id` int(11) NOT NULL,
+  `unit_name` varchar(255) NOT NULL,
+  `unit_address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`unit_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `donation_project` (
+  `project_id` int(11) NOT NULL,
+  `donation_id` int(11) NOT NULL,
+  PRIMARY KEY (`project_id`, `donation_id`),
+  CONSTRAINT `donation_project_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `donation_project_ibfk_2` FOREIGN KEY (`donation_id`) REFERENCES `donation_record` (`donation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

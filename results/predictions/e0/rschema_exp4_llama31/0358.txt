@@ -1,0 +1,78 @@
+-- Schema for database: rschema_0358
+CREATE TABLE `task_definitions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tenant_id` int(11) NOT NULL,
+  `task_type` varchar(255) NOT NULL,
+  `lock_info` varchar(255) DEFAULT NULL,
+  `process_definition_id` int(11) NOT NULL,
+  `num_retries` int(11) NOT NULL DEFAULT 0,
+  `exception_info` text,
+  `expiration_time` datetime,
+  `repeat_config` text,
+  `processor_config` text,
+  PRIMARY KEY (`id`),
+  KEY `tenant_id` (`tenant_id`),
+  KEY `process_definition_id` (`process_definition_id`),
+  CONSTRAINT `task_definitions_ibfk_1` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_definitions_ibfk_2` FOREIGN KEY (`process_definition_id`) REFERENCES `process_definitions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `execution_instances` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tenant_id` int(11) NOT NULL,
+  `process_instance_id` int(11) NOT NULL,
+  `process_definition_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tenant_id` (`tenant_id`),
+  KEY `process_instance_id` (`process_instance_id`),
+  KEY `process_definition_id` (`process_definition_id`),
+  CONSTRAINT `execution_instances_ibfk_1` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `execution_instances_ibfk_2` FOREIGN KEY (`process_instance_id`) REFERENCES `process_instances` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `execution_instances_ibfk_3` FOREIGN KEY (`process_definition_id`) REFERENCES `process_definitions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tasks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tenant_id` int(11) NOT NULL,
+  `task_definition_id` int(11) NOT NULL,
+  `execution_instance_id` int(11) NOT NULL,
+  `start_time` datetime,
+  `end_time` datetime,
+  `execution_result` text,
+  `exception_info` text,
+  PRIMARY KEY (`id`),
+  KEY `tenant_id` (`tenant_id`),
+  KEY `task_definition_id` (`task_definition_id`),
+  KEY `execution_instance_id` (`execution_instance_id`),
+  CONSTRAINT `tasks_ibfk_1` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tasks_ibfk_2` FOREIGN KEY (`task_definition_id`) REFERENCES `task_definitions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tasks_ibfk_3` FOREIGN KEY (`execution_instance_id`) REFERENCES `execution_instances` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `process_definitions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tenant_id` int(11) NOT NULL,
+  `process_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tenant_id` (`tenant_id`),
+  CONSTRAINT `process_definitions_ibfk_1` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `process_instances` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tenant_id` int(11) NOT NULL,
+  `process_definition_id` int(11) NOT NULL,
+  `start_time` datetime,
+  `end_time` datetime,
+  PRIMARY KEY (`id`),
+  KEY `tenant_id` (`tenant_id`),
+  KEY `process_definition_id` (`process_definition_id`),
+  CONSTRAINT `process_instances_ibfk_1` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `process_instances_ibfk_2` FOREIGN KEY (`process_definition_id`) REFERENCES `process_definitions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tenants` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

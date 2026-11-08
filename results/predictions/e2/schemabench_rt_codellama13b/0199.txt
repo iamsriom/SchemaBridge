@@ -1,0 +1,48 @@
+-- Schema for database: schemabench_0199
+CREATE TABLE `product_hierarchy` (
+  `id` int(11) NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `level_text` varchar(255) NOT NULL,
+  `level_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  CONSTRAINT `product_hierarchy_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `product_hierarchy` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_prices` (
+  `id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`product_id`),
+  UNIQUE KEY `product_id_UNIQUE` (`product_id`),
+  CONSTRAINT `product_prices_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product_hierarchy` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_details` (
+  `product_id` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `segment_id` int(11) NOT NULL,
+  `style_id` int(11) NOT NULL,
+  `category_name` varchar(255) NOT NULL,
+  `segment_name` varchar(255) NOT NULL,
+  `style_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`product_id`),
+  UNIQUE KEY `product_id_UNIQUE` (`product_id`),
+  CONSTRAINT `product_details_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product_hierarchy` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales` (
+  `prod_id` int(11) NOT NULL,
+  `qty` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `discount` decimal(10,2) DEFAULT NULL,
+  `member` varchar(255) NOT NULL,
+  `txn_id` int(11) NOT NULL,
+  `start_txn_time` datetime NOT NULL,
+  PRIMARY KEY (`prod_id`, `txn_id`),
+  UNIQUE KEY `prod_id_txn_id_UNIQUE` (`prod_id`, `txn_id`),
+  CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`prod_id`) REFERENCES `product_details` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_ibfk_2` FOREIGN KEY (`txn_id`) REFERENCES `sales` (`txn_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

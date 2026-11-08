@@ -1,0 +1,68 @@
+-- Schema for database: rschema_0220
+CREATE TABLE `Product` (
+  `product_id` int(11) NOT NULL,
+  `product_title` varchar(255) NOT NULL,
+  `brand` varchar(255) NOT NULL,
+  `click_count` int(11) DEFAULT NULL,
+  `image_link` varchar(255) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `product_type` varchar(255) NOT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Address` (
+  `postal_code` varchar(10) NOT NULL,
+  `city` varchar(255) NOT NULL,
+  `state` varchar(255) NOT NULL,
+  PRIMARY KEY (`postal_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Customer` (
+  `customer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Product_Description` (
+  `description_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `description_content` text NOT NULL,
+  `description_type` varchar(255) NOT NULL,
+  PRIMARY KEY (`description_id`),
+  CONSTRAINT `product_description_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `Product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Tax_Rate` (
+  `tax_rate_id` int(11) NOT NULL,
+  `postal_code` varchar(10) NOT NULL,
+  `tax_rate` decimal(5,4) NOT NULL,
+  PRIMARY KEY (`tax_rate_id`),
+  CONSTRAINT `tax_rate_ibfk_1` FOREIGN KEY (`postal_code`) REFERENCES `Address` (`postal_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Order` (
+  `order_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `order_date` datetime NOT NULL,
+  `order_price` decimal(10,2) NOT NULL,
+  `payment_method` varchar(255) NOT NULL,
+  `postal_code` varchar(10) NOT NULL,
+  `shipping_method` varchar(255) NOT NULL,
+  `tax` decimal(10,2) NOT NULL,
+  `total_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `Customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_ibfk_2` FOREIGN KEY (`postal_code`) REFERENCES `Address` (`postal_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Order_Detail` (
+  `detail_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`detail_id`),
+  CONSTRAINT `order_detail_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `Order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_detail_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `Product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

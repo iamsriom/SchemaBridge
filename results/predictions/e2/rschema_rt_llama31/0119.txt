@@ -1,0 +1,41 @@
+-- Schema for database: rschema_0119
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `age` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `gender` char(6) NOT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `indicator` (
+  `indicator_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `calculation_method` varchar(255) DEFAULT NULL,
+  `target` float DEFAULT NULL,
+  `unit_of_measurement` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`indicator_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_assigned_indicator` (
+  `user_id` int(11) NOT NULL,
+  `indicator_id` int(11) NOT NULL,
+  `allocation_time` datetime NOT NULL,
+  PRIMARY KEY (`user_id`, `indicator_id`, `allocation_time`),
+  CONSTRAINT `user_assigned_indicator_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_assigned_indicator_ibfk_2` FOREIGN KEY (`indicator_id`) REFERENCES `indicator` (`indicator_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `indicator_data_record` (
+  `user_id` int(11) NOT NULL,
+  `indicator_id` int(11) NOT NULL,
+  `submission_record_time` datetime NOT NULL,
+  `value` float NOT NULL,
+  `improvement` float DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  PRIMARY KEY (`user_id`, `indicator_id`, `submission_record_time`),
+  CONSTRAINT `indicator_data_record_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `indicator_data_record_ibfk_2` FOREIGN KEY (`indicator_id`) REFERENCES `indicator` (`indicator_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

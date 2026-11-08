@@ -1,0 +1,64 @@
+-- Schema for database: schemabench_0025
+CREATE TABLE `silk_profile` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  `time_taken` float NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `line_numbers` varchar(255) NOT NULL,
+  `function_name` varchar(255) NOT NULL,
+  `exception_raised` tinyint(1) NOT NULL,
+  `is_dynamic` tinyint(1) NOT NULL,
+  `request_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `silk_profile_ibfk_1` FOREIGN KEY (`request_id`) REFERENCES `silk_request` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `silk_request` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `path` varchar(255) NOT NULL,
+  `query_parameters` text DEFAULT NULL,
+  `raw_body` text DEFAULT NULL,
+  `encoded_body` text DEFAULT NULL,
+  `method` varchar(10) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  `view_name` varchar(255) NOT NULL,
+  `time_taken` float NOT NULL,
+  `encoded_headers` text DEFAULT NULL,
+  `metadata` text DEFAULT NULL,
+  `profile_file` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `silk_response` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `status_code` int(11) NOT NULL,
+  `raw_body` text DEFAULT NULL,
+  `encoded_body` text DEFAULT NULL,
+  `encoded_headers` text DEFAULT NULL,
+  `request_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `silk_response_ibfk_1` FOREIGN KEY (`request_id`) REFERENCES `silk_request` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `silk_sqlquery` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `query` text NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  `time_taken` float NOT NULL,
+  `traceback` text DEFAULT NULL,
+  `request_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `silk_sqlquery_ibfk_1` FOREIGN KEY (`request_id`) REFERENCES `silk_request` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `silk_profile_queries` (
+  `profile_id` int(11) NOT NULL,
+  `query_id` int(11) NOT NULL,
+  PRIMARY KEY (`profile_id`, `query_id`),
+  CONSTRAINT `silk_profile_queries_ibfk_1` FOREIGN KEY (`profile_id`) REFERENCES `silk_profile` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `silk_profile_queries_ibfk_2` FOREIGN KEY (`query_id`) REFERENCES `silk_sqlquery` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

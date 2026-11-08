@@ -1,0 +1,49 @@
+-- Schema for database: rschema_0308
+
+-- Table: customers
+CREATE TABLE `customers` (
+    `customer_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `customer_name` VARCHAR(255) NOT NULL,
+    `address` VARCHAR(255) NOT NULL,
+    `contact_information` VARCHAR(255) NOT NULL,
+    `remarks` TEXT,
+    PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: projects
+CREATE TABLE `projects` (
+    `project_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `project_name` VARCHAR(255) NOT NULL,
+    `customer_id` INT(11) NOT NULL,
+    `start_date` DATETIME NOT NULL,
+    `status` VARCHAR(255) NOT NULL,
+    `scale` VARCHAR(255) NOT NULL,
+    `remarks` TEXT,
+    PRIMARY KEY (`project_id`),
+    FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: users
+CREATE TABLE `users` (
+    `user_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `username` VARCHAR(255) NOT NULL,
+    `abbreviation` VARCHAR(255) NOT NULL,
+    `password` VARCHAR(255) NOT NULL,
+    `active_status` ENUM('Active','Inactive') NOT NULL DEFAULT 'Active',
+    `status_information` TEXT,
+    PRIMARY KEY (`user_id`),
+    UNIQUE INDEX `abbreviation` (`abbreviation`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: reports
+CREATE TABLE `reports` (
+    `report_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `report_date` DATETIME NOT NULL,
+    `time` TIME NOT NULL,
+    `description` TEXT NOT NULL,
+    `creator` INT(11) NOT NULL,
+    `project_id` INT(11) NOT NULL,
+    PRIMARY KEY (`report_id`),
+    FOREIGN KEY (`creator`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

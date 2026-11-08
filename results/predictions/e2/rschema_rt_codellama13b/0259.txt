@@ -1,0 +1,55 @@
+-- Schema for database: rschema_0259
+CREATE TABLE `User` (
+  `Username` varchar(255) NOT NULL,
+  `Password` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Email_account` (
+  `Email_address` varchar(255) NOT NULL,
+  `Email_password` varchar(255) NOT NULL,
+  `Username` varchar(255) NOT NULL,
+  PRIMARY KEY (`Email_address`),
+  CONSTRAINT `Email_account_ibfk_1` FOREIGN KEY (`Username`) REFERENCES `User` (`Username`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Contact` (
+  `Contact_ID` int(11) NOT NULL AUTO_INCREMENT,
+  `Email_address_1` varchar(255) DEFAULT NULL,
+  `Email_address_2` varchar(255) DEFAULT NULL,
+  `Email_address_3` varchar(255) DEFAULT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Phone_number` varchar(255) DEFAULT NULL,
+  `Username` varchar(255) NOT NULL,
+  PRIMARY KEY (`Contact_ID`),
+  CONSTRAINT `Contact_ibfk_1` FOREIGN KEY (`Username`) REFERENCES `User` (`Username`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Email` (
+  `Email_ID` int(11) NOT NULL AUTO_INCREMENT,
+  `Content` varchar(255) DEFAULT NULL,
+  `Receiving_time` varchar(255) DEFAULT NULL,
+  `Sender_address` varchar(255) NOT NULL,
+  `Sending_time` varchar(255) DEFAULT NULL,
+  `Status` varchar(255) DEFAULT NULL,
+  `Subject` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Email_ID`),
+  CONSTRAINT `Email_ibfk_1` FOREIGN KEY (`Sender_address`) REFERENCES `Email_account` (`Email_address`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Receipt` (
+  `Recipient_address` varchar(255) NOT NULL,
+  `Email_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Recipient_address`, `Email_ID`),
+  CONSTRAINT `Receipt_ibfk_1` FOREIGN KEY (`Recipient_address`) REFERENCES `Email_account` (`Email_address`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Receipt_ibfk_2` FOREIGN KEY (`Email_ID`) REFERENCES `Email` (`Email_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Attachment` (
+  `Attachment_ID` int(11) NOT NULL AUTO_INCREMENT,
+  `Attachment_filename` varchar(255) DEFAULT NULL,
+  `Attachment_size` varchar(255) DEFAULT NULL,
+  `Email_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Attachment_ID`),
+  CONSTRAINT `Attachment_ibfk_1` FOREIGN KEY (`Email_ID`) REFERENCES `Email` (`Email_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

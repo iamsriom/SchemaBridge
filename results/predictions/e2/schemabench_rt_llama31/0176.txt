@@ -1,0 +1,77 @@
+-- Schema for database: schemabench_0176
+CREATE TABLE `suppliers` (
+  `supplier_code` varchar(50) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`supplier_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `water_types` (
+  `registration_number` int(11) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `supplier_code` varchar(50) NOT NULL,
+  PRIMARY KEY (`registration_number`),
+  CONSTRAINT `water_types_ibfk_1` FOREIGN KEY (`supplier_code`) REFERENCES `suppliers` (`supplier_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `unit_measures` (
+  `unit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  PRIMARY KEY (`unit_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `deliveries` (
+  `delivery_id` int(11) NOT NULL AUTO_INCREMENT,
+  `delivery_date` datetime NOT NULL,
+  `supplier_code` varchar(50) NOT NULL,
+  `registration_number` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `unit_id` int(11) NOT NULL,
+  PRIMARY KEY (`delivery_id`),
+  CONSTRAINT `deliveries_ibfk_1` FOREIGN KEY (`supplier_code`) REFERENCES `suppliers` (`supplier_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `deliveries_ibfk_2` FOREIGN KEY (`registration_number`) REFERENCES `water_types` (`registration_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `deliveries_ibfk_3` FOREIGN KEY (`unit_id`) REFERENCES `unit_measures` (`unit_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `jobs` (
+  `job_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `expected_workers` int(11) NOT NULL,
+  PRIMARY KEY (`job_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `departments` (
+  `department_code` varchar(50) NOT NULL,
+  `title` varchar(100) NOT NULL,
+  `expected_workers` int(11) NOT NULL,
+  PRIMARY KEY (`department_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `workers` (
+  `security_number` varchar(50) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `shift` int(11) NOT NULL CHECK (`shift` IN (1, 2, 3)),
+  `birth_date` date DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `employment_status` varchar(50) DEFAULT NULL,
+  `department_code` varchar(50) NOT NULL,
+  `job_id` int(11) NOT NULL,
+  PRIMARY KEY (`security_number`),
+  CONSTRAINT `workers_ibfk_1` FOREIGN KEY (`department_code`) REFERENCES `departments` (`department_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `workers_ibfk_2` FOREIGN KEY (`job_id`) REFERENCES `jobs` (`job_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `records_of_water_balance` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `security_number` varchar(50) NOT NULL,
+  `date` date NOT NULL,
+  `initial_balance` decimal(10,2) NOT NULL,
+  `end_balance` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `records_of_water_balance_ibfk_1` FOREIGN KEY (`security_number`) REFERENCES `workers` (`security_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

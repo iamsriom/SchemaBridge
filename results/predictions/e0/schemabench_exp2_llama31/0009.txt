@@ -1,0 +1,148 @@
+-- Schema for database: schemabench_0009
+CREATE TABLE `asset_categories` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `asset_custom_fields` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  `description` text,\n
+  `data_type` enum('text','integer','boolean') NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `asset_custom_field_values` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `asset_id` int(11) NOT NULL,\n
+  `custom_field_id` int(11) NOT NULL,\n
+  `value` text,\n
+  PRIMARY KEY (`id`),\n
+  KEY `asset_id` (`asset_id`),\n
+  KEY `custom_field_id` (`custom_field_id`),\n
+  CONSTRAINT `asset_custom_field_values_ibfk_1` FOREIGN KEY (`asset_id`) REFERENCES `assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `asset_custom_field_values_ibfk_2` FOREIGN KEY (`custom_field_id`) REFERENCES `asset_custom_fields` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `assets` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `asset_tag` varchar(255) NOT NULL,\n
+  `purchase_date` date NOT NULL,\n
+  `cost` decimal(10,2) NOT NULL,\n
+  `category_id` int(11) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `category_id` (`category_id`),\n
+  CONSTRAINT `assets_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `asset_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `licenses` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  `description` text,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `license_assignments` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `license_id` int(11) NOT NULL,\n
+  `asset_id` int(11) NOT NULL,\n
+  `seat_id` int(11) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `license_id` (`license_id`),\n
+  KEY `asset_id` (`asset_id`),\n
+  KEY `seat_id` (`seat_id`),\n
+  CONSTRAINT `license_assignments_ibfk_1` FOREIGN KEY (`license_id`) REFERENCES `licenses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `license_assignments_ibfk_2` FOREIGN KEY (`asset_id`) REFERENCES `assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `license_assignments_ibfk_3` FOREIGN KEY (`seat_id`) REFERENCES `seats` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `licenses_users` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `license_id` int(11) NOT NULL,\n
+  `user_id` int(11) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `license_id` (`license_id`),\n
+  KEY `user_id` (`user_id`),\n
+  CONSTRAINT `licenses_users_ibfk_1` FOREIGN KEY (`license_id`) REFERENCES `licenses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `licenses_users_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `permissions` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `permission_groups` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `permission_group_permissions` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `permission_group_id` int(11) NOT NULL,\n
+  `permission_id` int(11) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `permission_group_id` (`permission_group_id`),\n
+  KEY `permission_id` (`permission_id`),\n
+  CONSTRAINT `permission_group_permissions_ibfk_1` FOREIGN KEY (`permission_group_id`) REFERENCES `permission_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `permission_group_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `seats` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `superadmins` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `user_id` int(11) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `user_id` (`user_id`),\n
+  CONSTRAINT `superadmins_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `users` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `username` varchar(255) NOT NULL,\n
+  `email` varchar(255) NOT NULL,\n
+  `password` varchar(255) NOT NULL,\n
+  `permission_group_id` int(11) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `permission_group_id` (`permission_group_id`),\n
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`permission_group_id`) REFERENCES `permission_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `users_assets` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `user_id` int(11) NOT NULL,\n
+  `asset_id` int(11) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `user_id` (`user_id`),\n
+  KEY `asset_id` (`asset_id`),\n
+  CONSTRAINT `users_assets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `users_assets_ibfk_2` FOREIGN KEY (`asset_id`) REFERENCES `assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `users_seats` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `user_id` int(11) NOT NULL,\n
+  `seat_id` int(11) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `user_id` (`user_id`),\n
+  KEY `seat_id` (`seat_id`),\n
+  CONSTRAINT `users_seats_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `users_seats_ibfk_2` FOREIGN KEY (`seat_id`) REFERENCES `seats` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `users_licenses` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `user_id` int(11) NOT NULL,\n
+  `license_id` int(11) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `user_id` (`user_id`),\n
+  KEY `license_id` (`license_id`),\n
+  CONSTRAINT `users_licenses_ibfk_1` FOREIGN KEY (`user

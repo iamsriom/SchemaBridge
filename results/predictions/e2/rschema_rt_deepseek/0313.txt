@@ -1,0 +1,59 @@
+-- Schema for database: rschema_0313
+CREATE TABLE `Ingredient` (
+  `Ingredient_ID` int(11) NOT NULL,
+  `Ingredient_Name` varchar(255) NOT NULL,
+  `Ingredient_Type` varchar(255) NOT NULL,
+  PRIMARY KEY (`Ingredient_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Mexican_Tortilla_Design` (
+  `Mexican_Tortilla_ID` int(11) NOT NULL,
+  `Mexican_Tortilla_Name` varchar(255) NOT NULL,
+  `Creation_Time` datetime NOT NULL,
+  PRIMARY KEY (`Mexican_Tortilla_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User` (
+  `Username` varchar(255) NOT NULL,
+  `User_Password` varchar(255) NOT NULL,
+  `User_Activation_Status` varchar(255) NOT NULL,
+  PRIMARY KEY (`Username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Permission` (
+  `Permission_Name` varchar(255) NOT NULL,
+  `Permission_Description` varchar(255) NOT NULL,
+  PRIMARY KEY (`Permission_Name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Mexican_Tortilla_Ingredient` (
+  `Ingredient_ID` int(11) NOT NULL,
+  `Mexican_Tortilla_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Ingredient_ID`, `Mexican_Tortilla_ID`),
+  CONSTRAINT `mexican_tortilla_ingredient_ibfk_1` FOREIGN KEY (`Ingredient_ID`) REFERENCES `Ingredient` (`Ingredient_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `mexican_tortilla_ingredient_ibfk_2` FOREIGN KEY (`Mexican_Tortilla_ID`) REFERENCES `Mexican_Tortilla_Design` (`Mexican_Tortilla_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Order` (
+  `Mexican_Tortilla_ID` int(11) NOT NULL,
+  `Order_Creation_Time` datetime NOT NULL,
+  `Credit_Card_Number` int(11) NOT NULL,
+  `Credit_Card_Expiry_Date` datetime NOT NULL,
+  `Credit_Card_Security_Code` varchar(255) NOT NULL,
+  `Recipient` varchar(255) NOT NULL,
+  `Recipient_City` varchar(255) NOT NULL,
+  `Recipient_Postal_Code` varchar(255) NOT NULL,
+  `Recipient_State/Province` varchar(255) NOT NULL,
+  `Recipient_Street_Address` varchar(255) NOT NULL,
+  PRIMARY KEY (`Mexican_Tortilla_ID`, `Order_Creation_Time`),
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`Mexican_Tortilla_ID`) REFERENCES `Mexican_Tortilla_Design` (`Mexican_Tortilla_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Permission` (
+  `Username` varchar(255) NOT NULL,
+  `Permission_Name` varchar(255) NOT NULL,
+  `Grant_Time` datetime NOT NULL,
+  PRIMARY KEY (`Username`, `Permission_Name`),
+  CONSTRAINT `user_permission_ibfk_1` FOREIGN KEY (`Username`) REFERENCES `User` (`Username`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_permission_ibfk_2` FOREIGN KEY (`Permission_Name`) REFERENCES `Permission` (`Permission_Name`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

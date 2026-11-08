@@ -1,0 +1,56 @@
+-- Schema for database: `ConferenceManagementSystem`
+
+-- Table: `users`
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `authentication_method` varchar(255) NOT NULL,
+  `user_permission` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `conferences`
+CREATE TABLE `conferences` (
+  `conference_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `subtitle` varchar(255) NOT NULL,
+  `creator_id` int(11) NOT NULL,
+  `admin_id` int(11) NOT NULL,
+  `schedule` datetime NOT NULL,
+  PRIMARY KEY (`conference_id`),
+  FOREIGN KEY (`creator_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`admin_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `venues`
+CREATE TABLE `venues` (
+  `venue_id` int(11) NOT NULL AUTO_INCREMENT,
+  `venue_name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  PRIMARY KEY (`venue_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `sessions`
+CREATE TABLE `sessions` (
+  `session_id` int(11) NOT NULL AUTO_INCREMENT,
+  `conference_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `abstract` text NOT NULL,
+  `speaker_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `duration` int(11) NOT NULL,
+  PRIMARY KEY (`session_id`),
+  FOREIGN KEY (`conference_id`) REFERENCES `conferences` (`conference_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`speaker_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `conference_venue`
+CREATE TABLE `conference_venue` (
+  `conference_id` int(11) NOT NULL,
+  `venue_id` int(11) NOT NULL,
+  PRIMARY KEY (`conference_id`, `venue_id`),
+  FOREIGN KEY (`conference_id`) REFERENCES `conferences` (`conference_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`venue_id`) REFERENCES `venues` (`venue_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

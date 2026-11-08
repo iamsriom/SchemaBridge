@@ -1,0 +1,46 @@
+-- Schema for database: rschema_0351
+CREATE TABLE `object` (
+  `object_id` int(11) NOT NULL,
+  `category` varchar(255) NOT NULL,
+  PRIMARY KEY (`object_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permission_entry` (
+  `entry_id` int(11) NOT NULL,
+  `log_status` varchar(255) NOT NULL,
+  `log_path` varchar(255) NOT NULL,
+  PRIMARY KEY (`entry_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permission_inheritance` (
+  `parent_object_id` int(11) NOT NULL,
+  `child_object_id` int(11) NOT NULL,
+  PRIMARY KEY (`parent_object_id`, `child_object_id`),
+  CONSTRAINT `permission_inheritance_ibfk_1` FOREIGN KEY (`parent_object_id`) REFERENCES `object` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `permission_inheritance_ibfk_2` FOREIGN KEY (`child_object_id`) REFERENCES `object` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `authorization` (
+  `auth_id` int(11) NOT NULL,
+  `entry_id` int(11) NOT NULL,
+  `object_id` int(11) NOT NULL,
+  PRIMARY KEY (`auth_id`),
+  CONSTRAINT `authorization_ibfk_1` FOREIGN KEY (`entry_id`) REFERENCES `permission_entry` (`entry_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `authorization_ibfk_2` FOREIGN KEY (`object_id`) REFERENCES `object` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `object_assignment` (
+  `assignment_id` int(11) NOT NULL,
+  `object_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`assignment_id`),
+  CONSTRAINT `object_assignment_ibfk_1` FOREIGN KEY (`object_id`) REFERENCES `object` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `object_assignment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

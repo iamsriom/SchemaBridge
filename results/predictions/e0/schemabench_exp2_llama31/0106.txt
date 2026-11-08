@@ -1,0 +1,109 @@
+-- Schema for database: schemabench_0106
+CREATE TABLE `circuits` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `country` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `constructors` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `nationality` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `drivers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `nationality` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `drivers_constructors` (
+  `driver_id` int(11) NOT NULL,
+  `constructor_id` int(11) NOT NULL,
+  PRIMARY KEY (`driver_id`, `constructor_id`),
+  KEY `drivers_constructors_ibfk_1` (`driver_id`),
+  KEY `drivers_constructors_ibfk_2` (`constructor_id`),
+  CONSTRAINT `drivers_constructors_ibfk_1` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `drivers_constructors_ibfk_2` FOREIGN KEY (`constructor_id`) REFERENCES `constructors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `laps` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `race_id` int(11) NOT NULL,
+  `driver_id` int(11) NOT NULL,
+  `lap_number` int(11) NOT NULL,
+  `lap_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `laps_ibfk_1` (`race_id`),
+  KEY `laps_ibfk_2` (`driver_id`),
+  CONSTRAINT `laps_ibfk_1` FOREIGN KEY (`race_id`) REFERENCES `races` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `laps_ibfk_2` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pit_stops` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `race_id` int(11) NOT NULL,
+  `driver_id` int(11) NOT NULL,
+  `lap_number` int(11) NOT NULL,
+  `stop_number` int(11) NOT NULL,
+  `time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `pit_stops_ibfk_1` (`race_id`),
+  KEY `pit_stops_ibfk_2` (`driver_id`),
+  CONSTRAINT `pit_stops_ibfk_1` FOREIGN KEY (`race_id`) REFERENCES `races` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pit_stops_ibfk_2` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `qualifying_results` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `race_id` int(11) NOT NULL,
+  `driver_id` int(11) NOT NULL,
+  `lap_number` int(11) NOT NULL,
+  `lap_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `qualifying_results_ibfk_1` (`race_id`),
+  KEY `qualifying_results_ibfk_2` (`driver_id`),
+  CONSTRAINT `qualifying_results_ibfk_1` FOREIGN KEY (`race_id`) REFERENCES `races` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `qualifying_results_ibfk_2` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `races` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `year` int(11) NOT NULL,
+  `round` int(11) NOT NULL,
+  `circuit_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `races_ibfk_1` (`circuit_id`),
+  CONSTRAINT `races_ibfk_1` FOREIGN KEY (`circuit_id`) REFERENCES `circuits` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `standings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `race_id` int(11) NOT NULL,
+  `driver_id` int(11) NOT NULL,
+  `points` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `standings_ibfk_1` (`race_id`),
+  KEY `standings_ibfk_2` (`driver_id`),
+  CONSTRAINT `standings_ibfk_1` FOREIGN KEY (`race_id`) REFERENCES `races` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `standings_ibfk_2` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `results` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `race_id` int(11) NOT NULL,
+  `driver_id` int(11) NOT NULL,
+  `constructor_id` int(11) NOT NULL,
+  `points` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `results_ibfk_1` (`race_id`),
+  KEY `results_ibfk_2` (`driver_id`),
+  KEY `results_ibfk_3` (`constructor_id`),
+  CONSTRAINT `results_ibfk_1` FOREIGN KEY (`race_id`) REFERENCES `races` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `results_ibfk_2` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `results_ibfk_3` FOREIGN KEY (`constructor_id`) REFERENCES `constructors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

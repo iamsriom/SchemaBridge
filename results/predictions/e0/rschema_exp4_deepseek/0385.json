@@ -1,0 +1,24 @@
+{
+  "text_number": 385,
+  "id": "67552f0a13602ec03b41a973",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "rschema_0385",
+  "question": "The Bank Account and Transaction Management System is used to track and manage user accounts, transactions, and transaction statuses. The system can manage different currency types and record detailed information for each account, including account balance, frozen amount, and the currency used by the account. The system is able to record transactions between accounts, including the initiating account, receiving account, transaction amount, and transaction status. Each transaction has a status (such as success, failure, processing) and detailed error information is recorded when a transaction fails for subsequent analysis.\n\nThe system also includes transaction status management, supporting tracking and updating of transaction statuses to ensure transparency and traceability of the transaction process. The bank account information management function allows querying and updating of account balances and frozen amounts, ensuring the accuracy of account data. Through these functions, the system is able to support complex bank transaction processing flows, including transfer, deposit, withdrawal, and other operations, while supporting transaction status updates and failure reason recording.",
+  "ddl": "--Schemafordatabase:rschema_0385\n--Foreachtable:\n\nCREATE TABLE `accounts` (\n  `account_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `balance` decimal(10,2) NOT NULL DEFAULT 0.00,\n  `frozen_amount` decimal(10,2) NOT NULL DEFAULT 0.00,\n  `currency` varchar(3) NOT NULL,\n  PRIMARY KEY (`account_id`),\n  KEY `user_id` (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `transactions` (\n  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,\n  `from_account_id` int(11) NOT NULL,\n  `to_account_id` int(11) NOT NULL,\n  `amount` decimal(10,2) NOT NULL,\n  `status` enum('success','failure','processing') NOT NULL DEFAULT 'processing',\n  `error_info` text,\n  PRIMARY KEY (`transaction_id`),\n  KEY `from_account_id` (`from_account_id`),\n  KEY `to_account_id` (`to_account_id`),\n  CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`from_account_id`) REFERENCES `accounts` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`to_account_id`) REFERENCES `accounts` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `transaction_statuses` (\n  `transaction_id` int(11) NOT NULL,\n  `status` enum('success','failure','processing') NOT NULL,\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`transaction_id`),\n  CONSTRAINT `transaction_statuses_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `users` (\n  `user_id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  PRIMARY KEY (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "accounts",
+      "transactions",
+      "transaction_statuses",
+      "users"
+    ],
+    "columns_by_table": {
+      "accounts": [],
+      "transactions": [],
+      "transaction_statuses": [],
+      "users": []
+    }
+  }
+}

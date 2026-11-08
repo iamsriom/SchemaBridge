@@ -1,0 +1,49 @@
+The database schema named "schemabench_0126" contains four tables. The 'Customers' table is used to store information about customers, including their ID, first name, middle initial, and last name. It has a primary key, 'CustomerID', which is an integer and cannot be null. The 'Employees' table stores information about employees, including their ID, first name, middle initial, and last name. It also has a primary key, 'EmployeeID', which is an integer and cannot be null. The 'Products' table contains information about the products sold, including the product ID and name. The 'Sales' table keeps track of sales, including the sales ID, sales person ID, customer ID, product ID, and quantity of each sale. The 'SalesPersonID', 'CustomerID', and 'ProductID' columns are foreign keys referencing the 'Employees', 'Customers', and 'Products' tables respectively. If a record in any of these tables is deleted or updated, the corresponding records in the 'Sales' table will be automatically deleted or updated using the CASCADE rule.
+```python
+# This is a sample Python code to create the schema described above
+import mysql.connector
+db = mysql.connector.connect(
+host="localhost",
+user="yourusername",
+password="yourpassword",
+database="schemabench_0126"
+)
+cursor = db.cursor()
+cursor.execute("""
+CREATE TABLE `Customers` (
+`CustomerID` int(11) NOT NULL PRIMARY KEY,
+`FirstName` varchar(40) NOT NULL,
+`MiddleInitial` varchar(40) DEFAULT NULL,
+`LastName` varchar(40) NOT NULL
+);
+""")
+cursor.execute("""
+CREATE TABLE `Employees` (
+`EmployeeID` int(11) NOT NULL PRIMARY KEY,
+`FirstName` varchar(40) NOT NULL,
+`MiddleInitial` varchar(40) DEFAULT NULL,
+`LastName` varchar(40) NOT NULL
+);
+""")
+cursor.execute("""
+CREATE TABLE `Products` (
+`ProductID` int(11) NOT NULL PRIMARY KEY,
+`Name` varchar(50) NOT NULL,
+`Price` decimal(19,4) DEFAULT NULL
+);
+""")
+cursor.execute("""
+CREATE TABLE `Sales` (
+`SalesID` int(11) NOT NULL PRIMARY KEY,
+`SalesPersonID` int(11) NOT NULL,
+`CustomerID` int(11) NOT NULL,
+`ProductID` int(11) NOT NULL,
+`Quantity` int(11) NOT NULL,
+FOREIGN KEY (`SalesPersonID`) REFERENCES `Employees` (`EmployeeID`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`CustomerID`) REFERENCES `Customers` (`CustomerID`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`ProductID`) REFERENCES `Products` (`ProductID`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+""")
+db.commit()
+```
+This Python code uses the mysql-connector-python library to connect to the MySQL database and create the tables according to the schema described above.

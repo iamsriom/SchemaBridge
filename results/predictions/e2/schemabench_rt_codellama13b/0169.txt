@@ -1,0 +1,161 @@
+-- Schema for database: schemabench_0169
+CREATE TABLE `region` (
+  `postal_code` varchar(10) NOT NULL,
+  `state` varchar(100) NOT NULL,
+  `country` varchar(100) NOT NULL,
+  PRIMARY KEY (`postal_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `address` (
+  `address_id` int(11) NOT NULL AUTO_INCREMENT,
+  `building_number` varchar(10) NOT NULL,
+  `street` varchar(255) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `postal_code` varchar(10) NOT NULL,
+  PRIMARY KEY (`address_id`),
+  CONSTRAINT `address_ibfk_1` FOREIGN KEY (`postal_code`) REFERENCES `region` (`postal_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `publisher` (
+  `publisher_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `address_id` int(11) NOT NULL,
+  PRIMARY KEY (`publisher_id`),
+  CONSTRAINT `publisher_ibfk_1` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `book` (
+  `isbn` varchar(13) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `author_name` varchar(255) NOT NULL,
+  `genre` varchar(100) NOT NULL,
+  `publisher_id` int(11) NOT NULL,
+  `number_of_pages` int(11) NOT NULL,
+  `cost` decimal(10,2) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `publisher_percentage` decimal(5,2) NOT NULL,
+  `stock` int(11) NOT NULL,
+  `threshold` int(11) NOT NULL,
+  PRIMARY KEY (`isbn`),
+  CONSTRAINT `book_ibfk_1` FOREIGN KEY (`publisher_id`) REFERENCES `publisher` (`publisher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staff` (
+  `staff_id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  PRIMARY KEY (`staff_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `warehouse` (
+  `warehouse_id` int(11) NOT NULL AUTO_INCREMENT,
+  `address_id` int(11) NOT NULL,
+  PRIMARY KEY (`warehouse_id`),
+  CONSTRAINT `warehouse_ibfk_1` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `client` (
+  `client_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `address_id` int(11) NOT NULL,
+  PRIMARY KEY (`client_id`),
+  CONSTRAINT `client_ibfk_1` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bank_account` (
+  `account_number` varchar(20) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`account_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales` (
+  `isbn` varchar(13) NOT NULL,
+  `month` int(2) NOT NULL,
+  `year` int(4) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`isbn`, `month`, `year`),
+  CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`isbn`) REFERENCES `book` (`isbn`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_number` int(11) NOT NULL AUTO_INCREMENT,
+  `order_placement_date` datetime NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `final_total` decimal(10,2) NOT NULL,
+  `address_id` int(11) NOT NULL,
+  `warehouse_id` int(11) NOT NULL,
+  PRIMARY KEY (`order_number`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `manage` (
+  `isbn` varchar(13) NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  PRIMARY KEY (`isbn`, `staff_id`),
+  CONSTRAINT `manage_ibfk_1` FOREIGN KEY (`isbn`) REFERENCES `book` (`isbn`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `manage_ibfk_2` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `update_sales` (
+  `order_number` int(11) NOT NULL,
+  `isbn` varchar(13) NOT NULL,
+  `month` int(2) NOT NULL,
+  `year` int(4) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`order_number`, `isbn`, `month`, `year`),
+  CONSTRAINT `update_sales_ibfk_1` FOREIGN KEY (`order_number`) REFERENCES `orders` (`order_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `update_sales_ibfk_2` FOREIGN KEY (`isbn`, `month`, `year`) REFERENCES `sales` (`isbn`, `month`, `year`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `handle_account` (
+  `order_number` int(11) NOT NULL,
+  `account_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`order_number`, `account_number`),
+  CONSTRAINT `handle_account_ibfk_1` FOREIGN KEY (`order_number`) REFERENCES `orders` (`order_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `handle_account_ibfk_2` FOREIGN KEY (`account_number`) REFERENCES `bank_account` (`account_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `client_account` (
+  `client_id` int(11) NOT NULL,
+  `account_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`client_id`, `account_number`),
+  CONSTRAINT `client_account_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `client` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `client_account_ibfk_2` FOREIGN KEY (`account_number`) REFERENCES `bank_account` (`account_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `publisher_account` (
+  `publisher_id` int(11) NOT NULL,
+  `account_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`publisher_id`, `account_number`),
+  CONSTRAINT `publisher_account_ibfk_1` FOREIGN KEY (`publisher_id`) REFERENCES `publisher` (`publisher_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `publisher_account_ibfk_2` FOREIGN KEY (`account_number`) REFERENCES `bank_account` (`account_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracks` (
+  `order_number` int(11) NOT NULL,
+  `client_id` int(11) NOT NULL,
+  PRIMARY KEY (`order_number`, `client_id`),
+  CONSTRAINT `tracks_ibfk_1` FOREIGN KEY (`order_number`) REFERENCES `orders` (`order_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tracks_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `client` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `emails` (
+  `staff_id` int(11) NOT NULL,
+  `publisher_id` int(11) NOT NULL,
+  PRIMARY KEY (`staff_id`, `publisher_id`),
+  CONSTRAINT `emails_ibfk_1` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `emails_ibfk_2` FOREIGN KEY (`publisher_id`) REFERENCES `publisher` (`publisher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `checkout` (
+  `isbn` varchar(13) NOT NULL,
+  `order_number` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`isbn`, `order_number`),
+  CONSTRAINT `checkout_ibfk_1` FOREIGN KEY (`isbn`) REFERENCES `book` (`isbn`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `checkout_ibfk_2` FOREIGN KEY (`order_number`) REFERENCES `orders` (`order_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

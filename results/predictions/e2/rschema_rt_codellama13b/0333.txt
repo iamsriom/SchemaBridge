@@ -1,0 +1,72 @@
+-- Schema for database: rschema_0333
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `birthday` datetime NOT NULL,
+  `phone` varchar(15) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `hometown` varchar(255) DEFAULT NULL,
+  `current_location` varchar(255) DEFAULT NULL,
+  `relationship_status` varchar(50) DEFAULT NULL,
+  `interests` text DEFAULT NULL,
+  `motto` text DEFAULT NULL,
+  `personal_profile` text DEFAULT NULL,
+  `user_type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_homepage` (
+  `homepage_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `introduction` text DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `feed_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`homepage_id`),
+  CONSTRAINT `user_homepage_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_homepage_ibfk_2` FOREIGN KEY (`feed_id`) REFERENCES `feed` (`feed_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_connection_request_record` (
+  `record_id` int(11) NOT NULL,
+  `sender_user_id` int(11) NOT NULL,
+  `receiver_user_id` int(11) NOT NULL,
+  `send_time` datetime NOT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `user_connection_request_record_ibfk_1` FOREIGN KEY (`sender_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_connection_request_record_ibfk_2` FOREIGN KEY (`receiver_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_connection_establishment_record` (
+  `record_id` int(11) NOT NULL,
+  `sender_id` int(11) NOT NULL,
+  `receiver_id` int(11) NOT NULL,
+  `connection_time` datetime NOT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `user_connection_establishment_record_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_connection_establishment_record_ibfk_2` FOREIGN KEY (`receiver_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `feed` (
+  `feed_id` int(11) NOT NULL,
+  `feed_content` text NOT NULL,
+  `post_time` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `homepage_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`feed_id`),
+  CONSTRAINT `feed_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `feed_ibfk_2` FOREIGN KEY (`homepage_id`) REFERENCES `user_homepage` (`homepage_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_homepage_join` (
+  `join_time` datetime NOT NULL,
+  `homepage_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`join_time`, `homepage_id`, `user_id`),
+  CONSTRAINT `user_homepage_join_ibfk_1` FOREIGN KEY (`homepage_id`) REFERENCES `user_homepage` (`homepage_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_homepage_join_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,88 @@
+-- Schema for database: rschema_0448
+CREATE TABLE `User` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `role` varchar(50) NOT NULL,
+  `associated_unit` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Experimental_Equipment` (
+  `device_id` int(11) NOT NULL,
+  `device_name` varchar(255) NOT NULL,
+  `device_model` varchar(255) NOT NULL,
+  `manufacturer` varchar(255) NOT NULL,
+  `device_category` varchar(100) NOT NULL,
+  `acquisition_time` datetime DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`device_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Experimental_Consumables` (
+  `consumable_id` int(11) NOT NULL,
+  `consumable_name` varchar(255) NOT NULL,
+  `category` varchar(100) NOT NULL,
+  `inventory_quantity` int(11) NOT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`consumable_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Hazardous_Chemicals` (
+  `chemical_id` int(11) NOT NULL,
+  `chemical_name` varchar(255) NOT NULL,
+  `inventory_quantity` int(11) NOT NULL,
+  `issuance_time` datetime DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`chemical_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Experimental_Course` (
+  `course_id` int(11) NOT NULL,
+  `course_name` varchar(255) NOT NULL,
+  `class_location` varchar(255) NOT NULL,
+  `class_time` datetime DEFAULT NULL,
+  `participants` int(11) DEFAULT NULL,
+  `teacher_id` int(11) NOT NULL,
+  PRIMARY KEY (`course_id`),
+  CONSTRAINT `course_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `User` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Usage_of_Equipment` (
+  `device_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `usage_time` datetime NOT NULL,
+  `usage_purpose` varchar(255) NOT NULL,
+  PRIMARY KEY (`device_id`, `user_id`, `usage_time`),
+  CONSTRAINT `usage_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `Experimental_Equipment` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `usage_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `User` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Purchase_Consumables` (
+  `consumable_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `purchase_time` datetime NOT NULL,
+  PRIMARY KEY (`consumable_id`, `user_id`, `purchase_time`),
+  CONSTRAINT `purchase_consumables_ibfk_1` FOREIGN KEY (`consumable_id`) REFERENCES `Experimental_Consumables` (`consumable_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchase_consumables_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `User` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Purchase_Hazardous_Chemicals` (
+  `chemical_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `purchase_time` datetime NOT NULL,
+  PRIMARY KEY (`chemical_id`, `user_id`, `purchase_time`),
+  CONSTRAINT `purchase_hazardous_ibfk_1` FOREIGN KEY (`chemical_id`) REFERENCES `Hazardous_Chemicals` (`chemical_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchase_hazardous_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `User` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Participation_in_Course` (
+  `user_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `experimental_course_grade` float DEFAULT NULL,
+  `participation_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`user_id`, `course_id`),
+  CONSTRAINT `participation_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `Experimental_Course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `participation_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `User` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,97 @@
+-- Schema for database: rschema_0448
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(255) DEFAULT NULL,
+  `role` enum('Student','Teacher','Laboratory Administrator','Experimental Center Director Administrator','System Administrator') NOT NULL,
+  `unit_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `users_ibfk_1` (`unit_id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`unit_id`) REFERENCES `units` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `units` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `model` varchar(255) DEFAULT NULL,
+  `category` varchar(255) NOT NULL,
+  `manufacturer` varchar(255) NOT NULL,
+  `status` enum('inactive','in use','active') NOT NULL,
+  `acquisition_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `usage_records` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `usage_time` datetime NOT NULL,
+  `purpose` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `usage_records_ibfk_1` (`equipment_id`),
+  KEY `usage_records_ibfk_2` (`user_id`),
+  CONSTRAINT `usage_records_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `usage_records_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_equipment` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_id` int(11) NOT NULL,
+  `equipment_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `course_equipment_ibfk_1` (`course_id`),
+  KEY `course_equipment_ibfk_2` (`equipment_id`),
+  CONSTRAINT `course_equipment_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_equipment_ibfk_2` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `courses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `class_time` varchar(255) NOT NULL,
+  `class_location` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `consumables` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `category` varchar(255) NOT NULL,
+  `inventory_quantity` int(11) NOT NULL,
+  `status` enum('active','inactive') NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `consumable_purchases` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `consumable_id` int(11) NOT NULL,
+  `purchase_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `consumable_purchases_ibfk_1` (`consumable_id`),
+  CONSTRAINT `consumable_purchases_ibfk_1` FOREIGN KEY (`consumable_id`) REFERENCES `consumables` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `hazardous_chemicals` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `inventory_quantity` int(11) NOT NULL,
+  `issuance_time` datetime NOT NULL,
+  `status` enum('active','inactive') NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `hazardous_chemical_purchases` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `hazardous_chemical_id` int(11) NOT NULL,
+  `purchase_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `hazardous_chemical_purchases_ibfk_1` (`hazardous_chemical_id`),
+  CONSTRAINT `hazardous_chemical_purchases_ibfk_1` FOREIGN KEY (`hazardous_chemical_id`) REFERENCES `hazardous_chemicals` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

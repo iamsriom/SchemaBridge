@@ -1,0 +1,141 @@
+-- Schema for database: schemabench_0055
+CREATE TABLE users (
+  user_id INT(11) NOT NULL AUTO_INCREMENT,
+  username VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  PRIMARY KEY (user_id),
+  UNIQUE KEY (username),
+  UNIQUE KEY (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE albums (
+  album_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  PRIMARY KEY (album_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE photos (
+  photo_id INT(11) NOT NULL AUTO_INCREMENT,
+  album_id INT(11) NOT NULL,
+  user_id INT(11) NOT NULL,
+  image BLOB,
+  caption TEXT,
+  PRIMARY KEY (photo_id),
+  FOREIGN KEY (album_id) REFERENCES albums(album_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE comments (
+  comment_id INT(11) NOT NULL AUTO_INCREMENT,
+  photo_id INT(11) NOT NULL,
+  user_id INT(11) NOT NULL,
+  comment TEXT,
+  PRIMARY KEY (comment_id),
+  FOREIGN KEY (photo_id) REFERENCES photos(photo_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE direct_messages (
+  message_id INT(11) NOT NULL AUTO_INCREMENT,
+  sender_id INT(11) NOT NULL,
+  recipient_id INT(11) NOT NULL,
+  message TEXT,
+  PRIMARY KEY (message_id),
+  FOREIGN KEY (sender_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (recipient_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE filters (
+  filter_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  filter_name VARCHAR(255) NOT NULL,
+  PRIMARY KEY (filter_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE likes (
+  like_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  photo_id INT(11) NOT NULL,
+  PRIMARY KEY (like_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (photo_id) REFERENCES photos(photo_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE stories (
+  story_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  photo_id INT(11) NOT NULL,
+  PRIMARY KEY (story_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (photo_id) REFERENCES photos(photo_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE user_settings (
+  user_id INT(11) NOT NULL,
+  setting_name VARCHAR(255) NOT NULL,
+  setting_value VARCHAR(255) NOT NULL,
+  PRIMARY KEY (user_id, setting_name),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE system_settings (
+  setting_name VARCHAR(255) NOT NULL,
+  setting_value VARCHAR(255) NOT NULL,
+  PRIMARY KEY (setting_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE user_notifications (
+  notification_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  notification_type VARCHAR(255) NOT NULL,
+  notification_message TEXT,
+  PRIMARY KEY (notification_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE user_activity (
+  activity_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  activity_type VARCHAR(255) NOT NULL,
+  activity_data TEXT,
+  PRIMARY KEY (activity_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE user_devices (
+  device_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  device_name VARCHAR(255) NOT NULL,
+  device_token VARCHAR(255) NOT NULL,
+  PRIMARY KEY (device_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE user_sessions (
+  session_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  session_token VARCHAR(255) NOT NULL,
+  PRIMARY KEY (session_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE user_password_resets (
+  reset_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  reset_token VARCHAR(255) NOT NULL,
+  PRIMARY KEY (reset_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE user_emails (
+  email_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  email_address VARCHAR(255) NOT NULL,
+  PRIMARY KEY (email_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE

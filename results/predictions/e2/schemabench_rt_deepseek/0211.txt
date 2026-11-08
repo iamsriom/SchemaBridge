@@ -1,0 +1,45 @@
+-- Schema for database: schemabench_0211
+CREATE TABLE `company_dim` (
+  `company_id` int(11) NOT NULL,
+  `name` text DEFAULT NULL,
+  `link` text DEFAULT NULL,
+  `link_google` text DEFAULT NULL,
+  `thumbnail` text DEFAULT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `skills_dim` (
+  `skill_id` int(11) NOT NULL,
+  `skills` text DEFAULT NULL,
+  `type` text DEFAULT NULL,
+  PRIMARY KEY (`skill_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `job_postings_fact` (
+  `job_id` int(11) NOT NULL,
+  `company_id` int(11) DEFAULT NULL,
+  `job_title_short` varchar(255) DEFAULT NULL,
+  `job_title` text DEFAULT NULL,
+  `job_location` text DEFAULT NULL,
+  `job_via` text DEFAULT NULL,
+  `job_schedule_type` text DEFAULT NULL,
+  `job_work_from_home` boolean DEFAULT NULL,
+  `search_location` text DEFAULT NULL,
+  `job_posted_date` timestamp DEFAULT NULL,
+  `job_no_degree_mention` boolean DEFAULT NULL,
+  `job_health_insurance` boolean DEFAULT NULL,
+  `job_country` text DEFAULT NULL,
+  `salary_rate` text DEFAULT NULL,
+  `salary_year_avg` decimal(10,2) DEFAULT NULL,
+  `salary_hour_avg` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`job_id`),
+  CONSTRAINT `job_postings_fact_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `company_dim` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `skills_job_dim` (
+  `job_id` int(11) NOT NULL,
+  `skill_id` int(11) NOT NULL,
+  PRIMARY KEY (`job_id`, `skill_id`),
+  CONSTRAINT `skills_job_dim_ibfk_1` FOREIGN KEY (`job_id`) REFERENCES `job_postings_fact` (`job_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `skills_job_dim_ibfk_2` FOREIGN KEY (`skill_id`) REFERENCES `skills_dim` (`skill_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

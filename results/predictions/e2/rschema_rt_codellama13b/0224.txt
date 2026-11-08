@@ -1,0 +1,49 @@
+-- Schema for database: rschema_0224
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `avatar_url` varchar(255) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `failed_tasks` int(11) NOT NULL DEFAULT 0,
+  `completed_tasks` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task` (
+  `task_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `budget` decimal(10,2) NOT NULL,
+  `deadline` datetime NOT NULL,
+  `category` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`task_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_execution_status` (
+  `task_id` int(11) NOT NULL,
+  `task_executor` int(11) NOT NULL,
+  `progress` varchar(50) NOT NULL,
+  PRIMARY KEY (`task_id`),
+  CONSTRAINT `task_execution_status_ibfk_1` FOREIGN KEY (`task_executor`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_quote` (
+  `user_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `quote` decimal(10,2) NOT NULL,
+  `comments` text DEFAULT NULL,
+  PRIMARY KEY (`user_id`, `task_id`),
+  CONSTRAINT `user_quote_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_quote_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_evaluation` (
+  `evaluation_record_id` int(11) NOT NULL,
+  `evaluator` int(11) NOT NULL,
+  `executor` int(11) NOT NULL,
+  `rating` int(11) NOT NULL,
+  PRIMARY KEY (`evaluation_record_id`),
+  CONSTRAINT `user_evaluation_ibfk_1` FOREIGN KEY (`evaluator`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_evaluation_ibfk_2` FOREIGN KEY (`executor`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

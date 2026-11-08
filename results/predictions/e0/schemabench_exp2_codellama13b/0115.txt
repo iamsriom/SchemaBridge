@@ -1,0 +1,52 @@
+-- Schema for database: schemabench_0115
+
+CREATE TABLE `legal_acts` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`case_number` varchar(255) NOT NULL,
+`court_name` varchar(255) NOT NULL,
+`judge` varchar(255) NOT NULL,
+`decision_date` datetime NOT NULL,
+`legal_act_text` text NOT NULL,
+PRIMARY KEY (`id`),
+UNIQUE KEY `case_number` (`case_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `legal_act_link` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`legal_act_id` int(11) NOT NULL,
+`linked_legal_act_id` int(11) NOT NULL,
+`link_type` varchar(255) NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`legal_act_id`) REFERENCES `legal_acts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`linked_legal_act_id`) REFERENCES `legal_acts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `legal_act_people` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`legal_act_id` int(11) NOT NULL,
+`person_id` int(11) NOT NULL,
+`person_type` varchar(255) NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`legal_act_id`) REFERENCES `legal_acts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `people` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`email` varchar(255) NOT NULL,
+`phone` varchar(255) NOT NULL,
+PRIMARY KEY (`id`),
+UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `scrapefix` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`legal_act_id` int(11) NOT NULL,
+`contributor_id` int(11) NOT NULL,
+`fix_type` varchar(255) NOT NULL,
+`fix_date` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`legal_act_id`) REFERENCES `legal_acts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`contributor_id`) REFERENCES `people` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

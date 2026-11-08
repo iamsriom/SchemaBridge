@@ -1,0 +1,40 @@
+{
+  "text_number": 448,
+  "id": "67552f0b13602ec03b41aa5c",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "rschema_0448",
+  "question": "Business Requirements Description:\n1.User Management:\nManage user information, including user roles (Student, Teacher, Laboratory Administrator, Experimental Center Director Administrator, System Administrator), username, password, phone number, and associated unit.\n2.Experimental Equipment Management:\nEnter and manage the basic information of laboratory equipment, such as equipment name, model, category, manufacturer, status (inactive, in use, active), and acquisition time.\nUsage Records Management: Record the usage of equipment, including usage time, user, and purpose of use.\nCourse Association Management: Associate equipment with specific experimental courses for easier scheduling and management of the equipment.\n3.Laboratory Consumables Management:\nConsumables Management: Perform operations such as archiving, modifying, and querying consumables information. Manage the purchasing, storage, issuance, and return of consumables.\nRecord consumable name, category, inventory quantity, and status. Users can purchase consumables and record the purchase time.\n4.Hazardous Chemicals Management:\nArchive, modify, and query hazardous chemicals information. Manage the purchasing, storage, issuance, and return of hazardous chemicals to ensure safety.\nRecord chemical name, inventory quantity, issuance time, and status.\n5.Experimental Course Management:\nView and manage information for regular experimental courses, including course name, class time, and class location. Each course can have multiple students registered, and each course is assigned a corresponding teacher.",
+  "ddl": "-- Schema for database: rschema_0448\n\n-- Table: user\nCREATE TABLE `user` (\n  `user_id` int(11) NOT NULL AUTO_INCREMENT,\n  `role` enum('Student','Teacher','LaboratoryAdministrator','ExperimentalCenterDirectorAdministrator','SystemAdministrator') NOT NULL,\n  `username` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `phone_number` varchar(255) NOT NULL,\n  `unit` varchar(255) NOT NULL,\n  PRIMARY KEY (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: equipment\nCREATE TABLE `equipment` (\n  `equipment_id` int(11) NOT NULL AUTO_INCREMENT,\n  `equipment_name` varchar(255) NOT NULL,\n  `model` varchar(255) NOT NULL,\n  `category` varchar(255) NOT NULL,\n  `manufacturer` varchar(255) NOT NULL,\n  `status` enum('inactive','inuse','active') NOT NULL,\n  `acquisition_time` datetime NOT NULL,\n  PRIMARY KEY (`equipment_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: usage_records\nCREATE TABLE `usage_records` (\n  `usage_id` int(11) NOT NULL AUTO_INCREMENT,\n  `equipment_id` int(11) NOT NULL,\n  `usage_time` datetime NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `purpose` text NOT NULL,\n  PRIMARY KEY (`usage_id`),\n  FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: course\nCREATE TABLE `course` (\n  `course_id` int(11) NOT NULL AUTO_INCREMENT,\n  `course_name` varchar(255) NOT NULL,\n  `class_time` datetime NOT NULL,\n  `class_location` varchar(255) NOT NULL,\n  PRIMARY KEY (`course_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: course_association\nCREATE TABLE `course_association` (\n  `course_id` int(11) NOT NULL,\n  `equipment_id` int(11) NOT NULL,\n  PRIMARY KEY (`course_id`,`equipment_id`),\n  FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: consumables\nCREATE TABLE `consumables` (\n  `consumable_id` int(11) NOT NULL AUTO_INCREMENT,\n  `consumable_name` varchar(255) NOT NULL,\n  `category` varchar(255) NOT NULL,\n  `inventory_quantity` int(11) NOT NULL,\n  `status` enum('archived','inuse','available') NOT NULL,\n  PRIMARY KEY (`consumable_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: hazardous_chemicals\nCREATE TABLE `hazardous_chemicals` (\n  `chemical_id` int(11) NOT NULL AUTO_INCREMENT,\n  `chemical_name` varchar(255) NOT NULL,\n  `inventory_quantity` int(11) NOT NULL,\n  `issuance_time` datetime NOT NULL,\n  `status` enum('archived','inuse','available') NOT NULL,\n  PRIMARY KEY (`chemical_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: purchase_records\nCREATE TABLE `purchase_records` (\n  `purchase_id` int(11) NOT NULL AUTO_INCREMENT,\n  `consumable_id` int(11) NOT NULL,\n  `purchase_time` datetime NOT NULL,\n  PRIMARY KEY (`purchase_id`),\n  FOREIGN KEY (`consumable_id`) REFERENCES `consumables` (`consumable_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: issue_records\nCREATE TABLE `issue_records` (\n  `issue_id` int(11) NOT NULL AUTO_INCREMENT,\n  `chemical_id` int(11) NOT NULL,\n  `issue_time` datetime NOT NULL,\n  PRIMARY KEY (`issue_id`),\n  FOREIGN KEY (`chemical_id`) REFERENCES `hazardous_chemicals` (`chemical_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: return_records\nCREATE TABLE `return_records` (\n  `return_id` int(11) NOT NULL AUTO_INCREMENT,\n  `consumable_id` int(11) NOT NULL,\n  `return_time` datetime NOT NULL,\n  PRIMARY KEY (`return_id`),\n  FOREIGN KEY (`consumable_id`) REFERENCES `consumables` (`consumable_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: student_registration\nCREATE TABLE `student_registration` (\n  `course_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  PRIMARY KEY (`course_id`,`user_id`),\n  FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: teacher_assignment\nCREATE TABLE `teacher_assignment` (\n  `course_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  PRIMARY KEY (`course_id`,`user_id`),\n  FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "user",
+      "equipment",
+      "usage_records",
+      "course",
+      "course_association",
+      "consumables",
+      "hazardous_chemicals",
+      "purchase_records",
+      "issue_records",
+      "return_records",
+      "student_registration",
+      "teacher_assignment"
+    ],
+    "columns_by_table": {
+      "user": [],
+      "equipment": [],
+      "usage_records": [],
+      "course": [],
+      "course_association": [],
+      "consumables": [],
+      "hazardous_chemicals": [],
+      "purchase_records": [],
+      "issue_records": [],
+      "return_records": [],
+      "student_registration": [],
+      "teacher_assignment": []
+    }
+  }
+}

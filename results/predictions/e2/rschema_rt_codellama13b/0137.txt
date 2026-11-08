@@ -1,0 +1,44 @@
+-- Schema for database: rschema_0137
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `registration_time` datetime NOT NULL,
+  `username` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(255) NOT NULL,
+  `original_price` decimal(10,2) NOT NULL,
+  `discounted_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`product_id`),
+  UNIQUE KEY `product_name` (`product_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order` (
+  `order_number` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `amount_paid` decimal(10,2) NOT NULL,
+  `order_status` varchar(50) NOT NULL,
+  `order_time` datetime NOT NULL,
+  `payment_time` datetime DEFAULT NULL,
+  `shipping_address` varchar(255) NOT NULL,
+  PRIMARY KEY (`order_number`),
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  INDEX `order_time_index` (`order_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shopping_cart` (
+  `user_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `product_quantity` int(11) NOT NULL,
+  `discount_amount` decimal(10,2) DEFAULT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`user_id`, `product_id`),
+  CONSTRAINT `shopping_cart_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `shopping_cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  INDEX `user_product_index` (`user_id`, `product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

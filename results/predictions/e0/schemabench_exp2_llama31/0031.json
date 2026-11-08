@@ -1,0 +1,24 @@
+{
+  "text_number": 31,
+  "id": "SB-031",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0031",
+  "question": "1) Background / Context\n\nThe project involves developing an OAuth2 client and server for Django. This system will provide a comprehensive solution, including endpoints, data handling, and logic, to integrate OAuth2 authentication into Django projects, enabling secure API access and token management.\n\n2) Objectives\n\n- Implement OAuth2 authentication to protect web APIs within Django applications.\n- Provide an OAuth2 authorization server for token management.\n- Ensure adherence to RFC standards using OAuthLib for compliance and security.\n\n3) Stakeholders & Users\n\n- Developers: Integrating OAuth2 authentication into Django projects.\n- API Consumers: Accessing secured web APIs using OAuth2 tokens.\n- System Administrators: Managing OAuth2 clients, tokens, and user authentication.\n\n4) Functional Descriptions\n\n- Create multiple OAuth2 endpoints for authorization, token issuance, and token revocation.\n- Enable developers to manage applications (clients) with attributes like client ID, secret, and redirect URIs.\n- Handle OAuth2 grant types such as authorization code, implicit, and client credentials.\n- Allow users to authenticate and authorize third-party applications to access their data.\n- Utilize access and refresh tokens for session management, supporting token expiration and renewal.\n\n5) Non-Functional Descriptions\n\n- Ensure that the system is RFC-compliant for standardization and security.\n- Provide a scalable solution capable of handling multiple simultaneous API requests.\n- Utilize secure methods for storing and transmitting sensitive information, such as client secrets and user credentials.",
+  "ddl": "-- Schema for database: schemabench_0031\nCREATE TABLE `oauth_clients` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `client_id` varchar(255) NOT NULL,\n  `client_secret` char(255) NOT NULL,\n  `redirect_uri` varchar(255) NOT NULL,\n  `grant_types` set('authorization_code', 'implicit', 'client_credentials') NOT NULL DEFAULT 'authorization_code,implicit,client_credentials',\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `client_id` (`client_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `oauth_tokens` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `access_token` char(255) NOT NULL,\n  `refresh_token` char(255) NOT NULL,\n  `client_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `expires_in` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `client_id` (`client_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `oauth_tokens_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `oauth_clients` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `oauth_tokens_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `oauth_authorizations` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `client_id` int(11) NOT NULL,\n  `scopes` set('read', 'write', 'delete') NOT NULL DEFAULT 'read,write',\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  KEY `client_id` (`client_id`),\n  CONSTRAINT `oauth_authorizations_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `oauth_authorizations_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `oauth_clients` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `password` char(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "oauth_clients",
+      "oauth_tokens",
+      "oauth_authorizations",
+      "users"
+    ],
+    "columns_by_table": {
+      "oauth_clients": [],
+      "oauth_tokens": [],
+      "oauth_authorizations": [],
+      "users": []
+    }
+  }
+}

@@ -1,0 +1,99 @@
+-- Schema for database: schemabench_0131
+CREATE TABLE `C_Customer` (
+  `customer_id` int(11) NOT NULL,
+  `district_id` int(11) NOT NULL,
+  `warehouse_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `payment_history` text DEFAULT NULL,
+  `order_history` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`customer_id`, `district_id`, `warehouse_id`),
+  CONSTRAINT `C_Customer_ibfk_1` FOREIGN KEY (`district_id`, `warehouse_id`) REFERENCES `C_District` (`district_id`, `warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `C_Customer_ibfk_2` FOREIGN KEY (`warehouse_id`) REFERENCES `C_Warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `C_District` (
+  `district_id` int(11) NOT NULL,
+  `warehouse_id` int(11) NOT NULL,
+  `district_name` varchar(255) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `tax_rate` decimal(5,2) DEFAULT NULL,
+  `year_to_date_sales` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`district_id`, `warehouse_id`),
+  CONSTRAINT `C_District_ibfk_1` FOREIGN KEY (`warehouse_id`) REFERENCES `C_Warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `C_History` (
+  `customer_id` int(11) NOT NULL,
+  `district_id` int(11) NOT NULL,
+  `warehouse_id` int(11) NOT NULL,
+  `payment_date` datetime DEFAULT NULL,
+  `amount` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`, `district_id`, `warehouse_id`),
+  CONSTRAINT `C_History_ibfk_1` FOREIGN KEY (`customer_id`, `district_id`, `warehouse_id`) REFERENCES `C_Customer` (`customer_id`, `district_id`, `warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `C_History_ibfk_2` FOREIGN KEY (`district_id`, `warehouse_id`) REFERENCES `C_District` (`district_id`, `warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `C_Item` (
+  `item_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `price` decimal(10,2) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`item_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `C_New_Order` (
+  `order_id` int(11) NOT NULL,
+  `district_id` int(11) NOT NULL,
+  `warehouse_id` int(11) NOT NULL,
+  PRIMARY KEY (`order_id`, `district_id`, `warehouse_id`),
+  CONSTRAINT `C_New_Order_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `C_Order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `C_Order` (
+  `order_id` int(11) NOT NULL,
+  `district_id` int(11) NOT NULL,
+  `warehouse_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `entry_date` datetime DEFAULT NULL,
+  `carrier_id` int(11) DEFAULT NULL,
+  `order_line_count` int(11) DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `C_Order_ibfk_1` FOREIGN KEY (`customer_id`, `district_id`, `warehouse_id`) REFERENCES `C_Customer` (`customer_id`, `district_id`, `warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `C_Order_ibfk_2` FOREIGN KEY (`district_id`, `warehouse_id`) REFERENCES `C_District` (`district_id`, `warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `C_Order_ibfk_3` FOREIGN KEY (`warehouse_id`) REFERENCES `C_Warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `C_Order_Line` (
+  `order_id` int(11) NOT NULL,
+  `district_id` int(11) NOT NULL,
+  `warehouse_id` int(11) NOT NULL,
+  `order_line_number` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`order_id`, `district_id`, `warehouse_id`, `order_line_number`),
+  CONSTRAINT `C_Order_Line_ibfk_1` FOREIGN KEY (`order_id`, `district_id`, `warehouse_id`) REFERENCES `C_Order` (`order_id`, `district_id`, `warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `C_Order_Line_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `C_Item` (`item_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `C_Stock` (
+  `item_id` int(11) NOT NULL,
+  `warehouse_id` int(11) NOT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `distribution_info` text DEFAULT NULL,
+  PRIMARY KEY (`item_id`, `warehouse_id`),
+  CONSTRAINT `C_Stock_ibfk_1` FOREIGN KEY (`item_id`) REFERENCES `C_Item` (`item_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `C_Stock_ibfk_2` FOREIGN KEY (`warehouse_id`) REFERENCES `C_Warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `C_Warehouse` (
+  `warehouse_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `tax_rate` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`warehouse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

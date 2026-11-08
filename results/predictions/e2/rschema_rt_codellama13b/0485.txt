@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0485
+CREATE TABLE `wetland_protection_area` (
+  `protection_area_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `administrator` varchar(255) NOT NULL,
+  PRIMARY KEY (`protection_area_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flora_and_fauna` (
+  `organism_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `species` varchar(255) NOT NULL,
+  PRIMARY KEY (`organism_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `biological_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `recorder` varchar(255) NOT NULL,
+  `recording_time` datetime NOT NULL,
+  `protection_area_id` int(11) NOT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `biological_record_ibfk_1` FOREIGN KEY (`protection_area_id`) REFERENCES `wetland_protection_area` (`protection_area_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `environmental_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `recording_time` datetime NOT NULL,
+  `recording_location` varchar(255) NOT NULL,
+  `temperature` float NOT NULL,
+  `humidity` float NOT NULL,
+  `rainfall` float NOT NULL,
+  `protection_area_id` int(11) NOT NULL,
+  PRIMARY KEY (`record_id`),
+  UNIQUE KEY `recording_time_location` (`recording_time`, `recording_location`),
+  CONSTRAINT `environmental_record_ibfk_1` FOREIGN KEY (`protection_area_id`) REFERENCES `wetland_protection_area` (`protection_area_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `biological_record_contains_flora_and_fauna_information` (
+  `organism_id` int(11) NOT NULL,
+  `biological_record_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `growth_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`organism_id`, `biological_record_id`),
+  CONSTRAINT `biological_record_contains_flora_and_fauna_information_ibfk_1` FOREIGN KEY (`organism_id`) REFERENCES `flora_and_fauna` (`organism_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `biological_record_contains_flora_and_fauna_information_ibfk_2` FOREIGN KEY (`biological_record_id`) REFERENCES `biological_record` (`record_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

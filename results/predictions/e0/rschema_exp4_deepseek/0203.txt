@@ -1,0 +1,65 @@
+-- Schema for database: `retail_supermarket`
+
+-- For table: `stores`
+
+CREATE TABLE `stores` (
+  `store_number` int(11) NOT NULL,
+  `store_name` varchar(255) NOT NULL,
+  `store_address` varchar(255) NOT NULL,
+  PRIMARY KEY (`store_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `products`
+
+CREATE TABLE `products` (
+  `product_number` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `product_model` varchar(255) NOT NULL,
+  `product_barcode` varchar(255) NOT NULL,
+  `product_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`product_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `promotions`
+
+CREATE TABLE `promotions` (
+  `activity_number` int(11) NOT NULL,
+  `activity_name` varchar(255) NOT NULL,
+  `activity_time` datetime NOT NULL,
+  `discount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`activity_number`),
+  FOREIGN KEY (`activity_number`) REFERENCES `promotion_effects` (`activity_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `promotion_effects`
+
+CREATE TABLE `promotion_effects` (
+  `activity_number` int(11) NOT NULL,
+  `store_number` int(11) NOT NULL,
+  `sales` decimal(10,2) NOT NULL,
+  `sales_volume` int(11) NOT NULL,
+  `number_of_participating_members` int(11) NOT NULL,
+  PRIMARY KEY (`activity_number`,`store_number`),
+  FOREIGN KEY (`activity_number`) REFERENCES `promotions` (`activity_number`),
+  FOREIGN KEY (`store_number`) REFERENCES `stores` (`store_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `promotion_product`
+
+CREATE TABLE `promotion_product` (
+  `activity_number` int(11) NOT NULL,
+  `product_number` int(11) NOT NULL,
+  PRIMARY KEY (`activity_number`,`product_number`),
+  FOREIGN KEY (`activity_number`) REFERENCES `promotions` (`activity_number`),
+  FOREIGN KEY (`product_number`) REFERENCES `products` (`product_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `store_promotion`
+
+CREATE TABLE `store_promotion` (
+  `store_number` int(11) NOT NULL,
+  `activity_number` int(11) NOT NULL,
+  PRIMARY KEY (`store_number`,`activity_number`),
+  FOREIGN KEY (`store_number`) REFERENCES `stores` (`store_number`),
+  FOREIGN KEY (`activity_number`) REFERENCES `promotions` (`activity_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

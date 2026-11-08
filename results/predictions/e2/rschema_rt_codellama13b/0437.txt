@@ -1,0 +1,49 @@
+-- Schema for database: rschema_0437
+CREATE TABLE `student` (
+  `student_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `class` varchar(100) NOT NULL,
+  `major` varchar(100) NOT NULL,
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task` (
+  `task_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`task_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `simulation_module` (
+  `module_id` int(11) NOT NULL,
+  `code` varchar(100) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `type` varchar(100) NOT NULL,
+  PRIMARY KEY (`module_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `thesis` (
+  `thesis_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `submission_date` datetime NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text DEFAULT NULL,
+  PRIMARY KEY (`thesis_id`),
+  CONSTRAINT `thesis_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student_simulation_experiment_result` (
+  `student_id` int(11) NOT NULL,
+  `module_id` int(11) NOT NULL,
+  `simulation_date` datetime NOT NULL,
+  `result_analysis` text DEFAULT NULL,
+  `result_data` text DEFAULT NULL,
+  PRIMARY KEY (`student_id`, `module_id`, `simulation_date`),
+  CONSTRAINT `student_simulation_experiment_result_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `student_simulation_experiment_result_ibfk_2` FOREIGN KEY (`module_id`) REFERENCES `simulation_module` (`module_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `student_simulation_experiment_result_ibfk_3` FOREIGN KEY (`thesis_id`) REFERENCES `thesis` (`thesis_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

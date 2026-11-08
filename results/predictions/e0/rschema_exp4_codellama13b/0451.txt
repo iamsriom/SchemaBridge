@@ -1,0 +1,80 @@
+-- Schema for database: rschema_0451
+
+CREATE TABLE `intrusion_detection_records` (
+  `record_id` int(11) NOT NULL,
+  `detection_time` datetime NOT NULL,
+  `source_ip_address` varchar(255) NOT NULL,
+  `destination_ip_address` varchar(255) NOT NULL,
+  `source_port_number` int(11) NOT NULL,
+  `destination_port_number` int(11) NOT NULL,
+  `attack_type` varchar(255) NOT NULL,
+  `threat_level` varchar(255) NOT NULL,
+  PRIMARY KEY (`record_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `response_plans` (
+  `plan_id` int(11) NOT NULL,
+  `plan_generation_time` datetime NOT NULL,
+  `plan_type` varchar(255) NOT NULL,
+  `detailed_plan_content` text NOT NULL,
+  `execution_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`plan_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `knowledge_base` (
+  `knowledge_id` int(11) NOT NULL,
+  `knowledge_category` varchar(255) NOT NULL,
+  `knowledge_description` text NOT NULL,
+  `knowledge_source` varchar(255) NOT NULL,
+  `knowledge_reliability` varchar(255) NOT NULL,
+  PRIMARY KEY (`knowledge_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alarms` (
+  `alarm_id` int(11) NOT NULL,
+  `alarm_time` datetime NOT NULL,
+  `alarm_level` varchar(255) NOT NULL,
+  `alarm_content` text NOT NULL,
+  `processing_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`alarm_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `particle_swarm_optimization_support_vector_machine_models` (
+  `model_id` int(11) NOT NULL,
+  `model_name` varchar(255) NOT NULL,
+  `model_description` text NOT NULL,
+  `model_accuracy` float NOT NULL,
+  PRIMARY KEY (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `random_forest_algorithms` (
+  `algorithm_id` int(11) NOT NULL,
+  `algorithm_name` varchar(255) NOT NULL,
+  `algorithm_description` text NOT NULL,
+  `algorithm_accuracy` float NOT NULL,
+  PRIMARY KEY (`algorithm_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `intrusion_detection_records_response_plans` (
+  `record_id` int(11) NOT NULL,
+  `plan_id` int(11) NOT NULL,
+  PRIMARY KEY (`record_id`, `plan_id`),
+  CONSTRAINT `intrusion_detection_records_response_plans_ibfk_1` FOREIGN KEY (`record_id`) REFERENCES `intrusion_detection_records` (`record_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `intrusion_detection_records_response_plans_ibfk_2` FOREIGN KEY (`plan_id`) REFERENCES `response_plans` (`plan_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `knowledge_base_response_plans` (
+  `knowledge_id` int(11) NOT NULL,
+  `plan_id` int(11) NOT NULL,
+  PRIMARY KEY (`knowledge_id`, `plan_id`),
+  CONSTRAINT `knowledge_base_response_plans_ibfk_1` FOREIGN KEY (`knowledge_id`) REFERENCES `knowledge_base` (`knowledge_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `knowledge_base_response_plans_ibfk_2` FOREIGN KEY (`plan_id`) REFERENCES `response_plans` (`plan_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alarms_response_plans` (
+  `alarm_id` int(11) NOT NULL,
+  `plan_id` int(11) NOT NULL,
+  PRIMARY KEY (`alarm_id`, `plan_id`),
+  CONSTRAINT `alarms_response_plans_ibfk_1` FOREIGN KEY (`alarm_id`) REFERENCES `alarms` (`alarm_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `alarms_response_plans_ibfk_2` FOREIGN KEY (`plan_id`) REFERENCES `response_plans` (`plan_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

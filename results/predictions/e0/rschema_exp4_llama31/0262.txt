@@ -1,0 +1,65 @@
+-- Schema for database: rschema_0262
+CREATE TABLE `supermarkets` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `telephone` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `departments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `supermarket_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `manager` varchar(255) NOT NULL,
+  `telephone` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `department_ibfk_1` (`supermarket_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`supermarket_id`) REFERENCES `supermarkets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employees` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_id` int(11) NOT NULL,
+  `employee_number` varchar(20) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact` varchar(255) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `salary` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `employee_ibfk_1` (`department_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_number` varchar(20) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `inventory_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `salespersons` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `salesperson_ibfk_1` (`employee_id`),
+  CONSTRAINT `salesperson_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `allocations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `salesperson_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `allocation_time` datetime NOT NULL,
+  `allocation_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `allocation_ibfk_1` (`salesperson_id`),
+  KEY `allocation_ibfk_2` (`product_id`),
+  CONSTRAINT `allocation_ibfk_1` FOREIGN KEY (`salesperson_id`) REFERENCES `salespersons` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `allocation_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

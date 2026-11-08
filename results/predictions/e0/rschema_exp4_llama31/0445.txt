@@ -1,0 +1,78 @@
+-- Schema for database: rschema_0445
+CREATE TABLE `personnel` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `personnel_type` enum('teacher','student','third_party','visitor') NOT NULL,
+  `contact_phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `unit` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `unit_type` enum('secondary_unit','third_party_unit') NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `administrator` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `management_role` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `health_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `personnel_id` int(11) NOT NULL,
+  `temperature` decimal(10,2) DEFAULT NULL,
+  `symptoms` varchar(255) DEFAULT NULL,
+  `health_code_color` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_health_record_personnel` (`personnel_id`),
+  CONSTRAINT `FK_health_record_personnel` FOREIGN KEY (`personnel_id`) REFERENCES `personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `travel_trajectory` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `personnel_id` int(11) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_travel_trajectory_personnel` (`personnel_id`),
+  CONSTRAINT `FK_travel_trajectory_personnel` FOREIGN KEY (`personnel_id`) REFERENCES `personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `visitor_appointment` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `visitor_id` int(11) NOT NULL,
+  `visited_personnel_id` int(11) NOT NULL,
+  `scheduled_entry_time` datetime NOT NULL,
+  `scheduled_exit_time` datetime NOT NULL,
+  `status` enum('pending_review','approved','rejected') NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_visitor_appointment_visitor` (`visitor_id`),
+  KEY `FK_visitor_appointment_visited_personnel` (`visited_personnel_id`),
+  CONSTRAINT `FK_visitor_appointment_visitor` FOREIGN KEY (`visitor_id`) REFERENCES `personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_visitor_appointment_visited_personnel` FOREIGN KEY (`visited_personnel_id`) REFERENCES `personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `access_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `personnel_id` int(11) NOT NULL,
+  `entry_time` datetime NOT NULL,
+  `exit_time` datetime DEFAULT NULL,
+  `device_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_access_record_personnel` (`personnel_id`),
+  KEY `FK_access_record_device` (`device_id`),
+  CONSTRAINT `FK_access_record_personnel` FOREIGN KEY (`personnel_id`) REFERENCES `personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_access_record_device` FOREIGN KEY (`device_id`) REFERENCES `access_control_device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `access_control_device` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `status` enum('normal','fault') NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

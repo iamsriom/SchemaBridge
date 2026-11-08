@@ -1,0 +1,28 @@
+{
+  "text_number": 358,
+  "id": "67552f0a13602ec03b41a932",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "rschema_0358",
+  "question": "Business requirements description of workflow management system: The system is used to manage complex business processes and supports the recording and monitoring of scheduled tasks and execution instances. Each scheduled task has a task ID, task type, lock information, execution instance ID, process instance ID, process definition ID, number of retries, exception information, expiration time, repeat configuration, processor configuration, and tenant ID. The system needs to record the execution of each task, including the start time, end time, execution result, and exception information of the task. Each execution of a task needs to be associated with an execution instance, which has an execution instance ID, process instance ID, and process definition ID. An execution instance can include the execution of multiple tasks. By recording the relationship between tasks and execution instances, the system can track the execution of each task and support task scheduling, retries, and exception handling. At the same time, the system needs to support multi-tenant scenarios to ensure the isolation of task data of different tenants.",
+  "ddl": "-- Schema for database: rschema_0358\n\nCREATE TABLE `task` (\n  `task_id` int(11) NOT NULL,\n  `task_type` varchar(255) NOT NULL,\n  `lock_info` varchar(255) NOT NULL,\n  `execution_instance_id` int(11) NOT NULL,\n  `process_instance_id` int(11) NOT NULL,\n  `process_definition_id` int(11) NOT NULL,\n  `number_of_retries` int(11) NOT NULL,\n  `exception_info` varchar(255) NOT NULL,\n  `expiration_time` datetime NOT NULL,\n  `repeat_configuration` varchar(255) NOT NULL,\n  `processor_configuration` varchar(255) NOT NULL,\n  `tenant_id` int(11) NOT NULL,\n  PRIMARY KEY (`task_id`),\n  FOREIGN KEY (`execution_instance_id`) REFERENCES `execution_instance` (`execution_instance_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `execution_instance` (\n  `execution_instance_id` int(11) NOT NULL,\n  `process_instance_id` int(11) NOT NULL,\n  `process_definition_id` int(11) NOT NULL,\n  PRIMARY KEY (`execution_instance_id`),\n  FOREIGN KEY (`process_instance_id`) REFERENCES `process_instance` (`process_instance_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `process_instance` (\n  `process_instance_id` int(11) NOT NULL,\n  `process_definition_id` int(11) NOT NULL,\n  PRIMARY KEY (`process_instance_id`),\n  FOREIGN KEY (`process_definition_id`) REFERENCES `process_definition` (`process_definition_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `process_definition` (\n  `process_definition_id` int(11) NOT NULL,\n  PRIMARY KEY (`process_definition_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `task_execution` (\n  `task_id` int(11) NOT NULL,\n  `execution_instance_id` int(11) NOT NULL,\n  `start_time` datetime NOT NULL,\n  `end_time` datetime NOT NULL,\n  `execution_result` varchar(255) NOT NULL,\n  `exception_info` varchar(255) NOT NULL,\n  PRIMARY KEY (`task_id`, `execution_instance_id`),\n  FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`execution_instance_id`) REFERENCES `execution_instance` (`execution_instance_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tenant` (\n  `tenant_id` int(11) NOT NULL,\n  PRIMARY KEY (`tenant_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "task",
+      "execution_instance",
+      "process_instance",
+      "process_definition",
+      "task_execution",
+      "tenant"
+    ],
+    "columns_by_table": {
+      "task": [],
+      "execution_instance": [],
+      "process_instance": [],
+      "process_definition": [],
+      "task_execution": [],
+      "tenant": []
+    }
+  }
+}

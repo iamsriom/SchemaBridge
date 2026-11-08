@@ -1,0 +1,287 @@
+================================================================================
+LLM4DBdesign — PaperMethods runs vs paper Tables V / VII / VIII
+Updated: 2026-10-12 (failed/unrun cases scored as zero)
+================================================================================
+
+Contents (same experiment kept together):
+  1. E0  Text2Schema          — our PaperMethods + Table V + comparison
+  2. E1  Schema2Text          — Table VII (paper numbers)
+  3. E2  Round-trip           — Table VIII (paper numbers)
+
+Metric directions:
+  nGED, Hallucination  → lower is better
+  Tables / Attributes / Domain / Entity / Referential F1  → higher is better
+  BLEU-4 / ROUGE-L / BERTScore / SCR  → higher is better
+
+Our PaperMethods metric code:
+  /mnt/text2er-data/RSchema_ExpResults4/Code/evaluate_exp4_text2schema.py
+Gold:
+  /mnt/text2er-data/LLM4DBdesign-main/datasets/RSchema/annotation.jsonl  (518)
+
+ZERO-SCORE POLICY (updated):
+  Failed / missing / empty predictions are NOT excluded.
+  They are included in every mean over all 518 gold schemas as:
+    F1 (Tables / Attrs / Domain / Entity / Ref) = 0.0
+    nGED                                         = 1.0   (worst)
+    Hallucination                                = 1.0   (worst)
+  Eval = 518 for every method.
+  Zero = count of cases scored under this policy.
+  Reported F1 / nGED / Halluc = macro mean over all gold schemas.
+
+NOTE (Domain Integrity on PaperMethods):
+  PaperMethods emit structured schemas (no SQL types). Predictions are converted
+  with the same synthetic DDL helper as gold, so Domain F1 == Attributes F1 in
+  our runs. Table V baselines used real DDL types, so Domain is lower there.
+
+
+################################################################################
+# 1. EXPERIMENT E0 — TEXT2SCHEMA FROM GOLD NL
+#    mean nGED & mean Hallucination (lower better);
+#    F1 per content dimension (higher better).
+################################################################################
+
+--------------------------------------------------------------------------------
+1A. OUR RUNS — LLM4DBdesign PaperMethods on RSchema
+    Methods: one_shot / CoT (one_shot_cot) / few_shot / schema_agent
+    Models:  CodeLlama-13B, Llama-3.1-8B, DeepSeek-Coder-6.7B
+    Source:  LLM4DBdesign_PaperMethods/<model>/<method>/results.jsonl
+             (+ agent_chat_*.json for schema_agent)
+    Eval:    LLM4DBdesign_PaperMethods/Results/paper_methods_evaluation.json
+    Policy:  failed/unrun scored as zero (see above)
+--------------------------------------------------------------------------------
+
+Method                       Eval  Zero   nGED  Halluc  Tables  Attrs  Domain  Entity    Ref
+--------------------------------------------------------------------------------------------
+CodeLlama one_shot            518     3  0.613   0.621   0.602  0.384   0.384   0.142  0.038
+CodeLlama CoT                 518    24  0.668   0.724   0.582  0.333   0.333   0.050  0.007
+CodeLlama few_shot            518     4  0.541   0.490   0.614  0.466   0.466   0.367  0.112
+CodeLlama schema_agent        518   507  1.000   1.000   0.000  0.000   0.000   0.000  0.000
+Llama one_shot                518     1  0.603   0.669   0.583  0.405   0.405   0.241  0.106
+Llama CoT                     518    10  0.670   0.742   0.562  0.331   0.331   0.070  0.025
+Llama few_shot                518     1  0.548   0.594   0.608  0.467   0.467   0.391  0.167
+Llama schema_agent            518   466  0.991   0.993   0.012  0.009   0.009   0.004  0.003
+DeepSeek one_shot             518     3  0.720   0.734   0.386  0.283   0.283   0.240  0.120
+DeepSeek CoT                  518    38  0.849   0.857   0.237  0.149   0.149   0.088  0.044
+DeepSeek few_shot             518     0  0.530   0.547   0.613  0.480   0.480   0.432  0.211
+DeepSeek schema_agent         518   510  0.996   0.996   0.005  0.005   0.005   0.003  0.002
+
+
+--------------------------------------------------------------------------------
+1B. PAPER TABLE V — E0: Text2Schema from gold NL
+    (same metric columns as 1A; paper-reported baselines)
+--------------------------------------------------------------------------------
+
+Dataset: RSchema
+Model                nGED  Halluc  Tables  Attrs  Domain  Entity    Ref
+-----------------------------------------------------------------------
+CodeLlama-13B        0.734   0.694   0.554  0.415   0.217   0.301  0.139
+Llama-3.1            0.764   0.731   0.572  0.375   0.181   0.169  0.102
+DeepSeek             0.733   0.633   0.566  0.441   0.214   0.388  0.182
+Claude Sonnet 4.6    0.780   0.687   0.602  0.400   0.123   0.407  0.201
+GPT-5.4-mini         0.777   0.660   0.600  0.433   0.133   0.399  0.221
+
+Dataset: SchemaBench
+Model                nGED  Halluc  Tables  Attrs  Domain  Entity    Ref
+-----------------------------------------------------------------------
+CodeLlama-13B        0.831   0.793   0.351  0.126   0.088   0.182  0.083
+Llama-3.1            0.843   0.795   0.364  0.112   0.081   0.128  0.063
+DeepSeek             0.795   0.672   0.402  0.154   0.104   0.240  0.129
+Claude Sonnet 4.6    0.685   0.643   0.530  0.278   0.192   0.345  0.264
+GPT-5.4-mini         0.760   0.685   0.466  0.217   0.144   0.255  0.175
+
+
+--------------------------------------------------------------------------------
+1C. E0 COMPARISON — PaperMethods (RSchema, zeros included) vs Table V RSchema
+    Delta = Ours − Table V
+      nGED / Halluc: negative = better than Table V
+      F1 columns:    positive = better than Table V
+--------------------------------------------------------------------------------
+
+--- CodeLlama ---
+                            nGED  Halluc  Tables   Attrs  Domain  Entity     Ref
+Table V baseline           0.734   0.694   0.554   0.415   0.217   0.301   0.139
+our one_shot               0.613   0.621   0.602   0.384   0.384   0.142   0.038
+  Δ vs Table V           -0.121  -0.073  +0.048  -0.031  +0.167  -0.159  -0.101
+our CoT                    0.668   0.724   0.582   0.333   0.333   0.050   0.007
+  Δ vs Table V           -0.066  +0.030  +0.028  -0.082  +0.116  -0.251  -0.132
+our few_shot               0.541   0.490   0.614   0.466   0.466   0.367   0.112
+  Δ vs Table V           -0.193  -0.204  +0.060  +0.051  +0.249  +0.066  -0.027
+our schema_agent           1.000   1.000   0.000   0.000   0.000   0.000   0.000
+  (Zero=507/518 scored as zero — low coverage)
+
+--- Llama ---
+                            nGED  Halluc  Tables   Attrs  Domain  Entity     Ref
+Table V baseline           0.764   0.731   0.572   0.375   0.181   0.169   0.102
+our one_shot               0.603   0.669   0.583   0.405   0.405   0.241   0.106
+  Δ vs Table V           -0.161  -0.062  +0.011  +0.030  +0.224  +0.072  +0.004
+our CoT                    0.670   0.742   0.562   0.331   0.331   0.070   0.025
+  Δ vs Table V           -0.094  +0.011  -0.010  -0.044  +0.150  -0.099  -0.077
+our few_shot               0.548   0.594   0.608   0.467   0.467   0.391   0.167
+  Δ vs Table V           -0.216  -0.137  +0.036  +0.092  +0.286  +0.222  +0.065
+our schema_agent           0.991   0.993   0.012   0.009   0.009   0.004   0.003
+  (Zero=466/518 scored as zero — low coverage)
+
+--- DeepSeek ---
+                            nGED  Halluc  Tables   Attrs  Domain  Entity     Ref
+Table V baseline           0.733   0.633   0.566   0.441   0.214   0.388   0.182
+our one_shot               0.720   0.734   0.386   0.283   0.283   0.240   0.120
+  Δ vs Table V           -0.013  +0.101  -0.180  -0.158  +0.069  -0.148  -0.062
+our CoT                    0.849   0.857   0.237   0.149   0.149   0.088   0.044
+  Δ vs Table V           +0.116  +0.224  -0.329  -0.292  -0.065  -0.300  -0.138
+our few_shot               0.530   0.547   0.613   0.480   0.480   0.432   0.211
+  Δ vs Table V           -0.203  -0.086  +0.047  +0.039  +0.266  +0.044  +0.029
+our schema_agent           0.996   0.996   0.005   0.005   0.005   0.003   0.002
+  (Zero=510/518 scored as zero — low coverage)
+
+* Domain deltas are inflated vs Table V because our Domain == Attrs (no typed DDL).
+
+E0 side-by-side with closed models from Table V (RSchema only; for context):
+                        nGED  Halluc  Tables  Attrs  Domain  Entity    Ref
+Claude Sonnet 4.6      0.780   0.687   0.602  0.400   0.123   0.407  0.201
+GPT-5.4-mini           0.777   0.660   0.600  0.433   0.133   0.399  0.221
+best PaperMethods
+  (DeepSeek few_shot)  0.530   0.547   0.613  0.480   0.480   0.432  0.211
+
+E0 takeaways (RSchema, zeros included):
+  - Best overall PaperMethods run: DeepSeek few_shot (Zero=0).
+  - few_shot beats Table V on nGED for all three open models.
+  - CoT is worse than one_shot for all three models on most metrics.
+  - schema_agent is near floor after zeroing failures (Zero 466–510 / 518).
+  - SchemaBench Table V numbers are paper-only; we did not re-run PaperMethods
+    on SchemaBench.
+
+
+################################################################################
+# 2. EXPERIMENT E1 — SCHEMA2TEXT
+#    TABLE VII: Basic (B) and Detailed (D) describer prompts.
+#    BLEU-4, ROUGE-L, BERTScore-F1 vs gold description; SCR vs gold schema.
+#    (No PaperMethods re-run for E1 in this workspace dump.)
+################################################################################
+
+--------------------------------------------------------------------------------
+2A. PAPER TABLE VII — E1 results
+--------------------------------------------------------------------------------
+
+Dataset: Enterprise-145
+Describer            BLEU-4(B) BLEU-4(D) ROUGE-L(B) ROUGE-L(D) BERT(B) BERT(D)  SCR(B)  SCR(D)
+-------------------- --------- --------- ---------- ---------- ------- ------- ------- -------
+CodeLlama-13B              n/a       n/a        n/a        n/a     n/a     n/a   0.514   0.605
+Llama-3.1-8B               n/a       n/a        n/a        n/a     n/a     n/a   0.447   0.636
+DeepSeek-Coder             n/a       n/a        n/a        n/a     n/a     n/a   0.638   0.665
+Claude Sonnet 4.6          n/a       n/a        n/a        n/a     n/a     n/a   0.473   0.882
+GPT-5.4-mini               n/a       n/a        n/a        n/a     n/a     n/a   0.412   0.917
+
+Dataset: RSchema
+Describer            BLEU-4(B) BLEU-4(D) ROUGE-L(B) ROUGE-L(D) BERT(B) BERT(D)  SCR(B)  SCR(D)
+-------------------- --------- --------- ---------- ---------- ------- ------- ------- -------
+CodeLlama-13B            25.42     16.35      0.264      0.232   0.862   0.841   0.764   0.928
+Llama-3.1-8B             28.61     24.21      0.268      0.262   0.863   0.864   0.532   0.756
+DeepSeek-Coder           19.74     13.70      0.233      0.223   0.829   0.829   0.951   0.971
+Claude Sonnet 4.6        26.77     10.11      0.241      0.192   0.858   0.817   0.421   0.999
+GPT-5.4-mini             32.06     10.83      0.241      0.192   0.858   0.818   0.351   1.000
+
+Dataset: SchemaBench
+Describer            BLEU-4(B) BLEU-4(D) ROUGE-L(B) ROUGE-L(D) BERT(B) BERT(D)  SCR(B)  SCR(D)
+-------------------- --------- --------- ---------- ---------- ------- ------- ------- -------
+CodeLlama-13B            12.03     17.33      0.168      0.147   0.820   0.803   0.556   0.758
+Llama-3.1-8B             19.92     20.95      0.174      0.173   0.831   0.815   0.406   0.605
+DeepSeek-Coder           16.57      2.86      0.146      0.144   0.798   0.793   0.702   0.825
+Claude Sonnet 4.6         5.85      5.17      0.167      0.128   0.817   0.785   0.386   0.944
+GPT-5.4-mini              5.11      7.35      0.157      0.124   0.816   0.781   0.316   0.974
+
+E1 notes (from Table VII):
+  - Detailed (D) prompts usually raise SCR (schema coverage / fidelity) a lot,
+    especially for Claude / GPT, often at the cost of surface similarity
+    (BLEU / ROUGE / BERTScore) on RSchema.
+  - On RSchema: GPT-5.4-mini best BLEU-4 (B)=32.06; Llama best ROUGE-L / BERTScore;
+    DeepSeek best SCR (B)=0.951; GPT SCR (D)=1.000.
+  - PaperMethods one_shot/CoT/few_shot/schema_agent are Text2Schema constructors,
+    not Schema2Text describers — no direct E1 re-score for those runs.
+
+
+################################################################################
+# 3. EXPERIMENT E2 — ROUND-TRIP PRESERVATION
+#    TABLE VIII: Schema → Text (describer B/D) → Schema (constructor fixed
+#    to GPT-4o-mini). mean nGED (lower better); micro F1 per dimension.
+#    (No PaperMethods re-run for E2 in this workspace dump.)
+################################################################################
+
+--------------------------------------------------------------------------------
+3A. PAPER TABLE VIII — E2 results
+--------------------------------------------------------------------------------
+
+Dataset: Enterprise-145
+Describer            nGED(B) nGED(D) Tab(B) Tab(D) Attr(B) Attr(D) Dom(B) Dom(D) Ent(B) Ent(D) Ref(B) Ref(D)
+-------------------- ------- ------- ------ ------ ------- ------- ------ ------ ------ ------ ------ ------
+CodeLlama-13B          0.713   0.623  0.481  0.430   0.162   0.177  0.089  0.093  0.188  0.200  0.193  0.175
+Llama-3.1-8B           0.739   0.518  0.490  0.548   0.149   0.223  0.075  0.140  0.178  0.265  0.168  0.250
+DeepSeek-Coder         0.560   0.505  0.506  0.481   0.243   0.208  0.155  0.140  0.294  0.282  0.326  0.264
+Claude Sonnet 4.6      0.711   0.085  0.708  0.707   0.218   0.593  0.097  0.557  0.218  0.626  0.180  0.712
+GPT-5.4-mini           0.689   0.092  0.629  0.722   0.195   0.572  0.085  0.544  0.185  0.631  0.183  0.722
+
+Dataset: RSchema
+Describer            nGED(B) nGED(D) Tab(B) Tab(D) Attr(B) Attr(D) Dom(B) Dom(D) Ent(B) Ent(D) Ref(B) Ref(D)
+-------------------- ------- ------- ------ ------ ------- ------- ------ ------ ------ ------ ------ ------
+CodeLlama-13B          0.606   0.575  0.981  0.995   0.699   0.881  0.223  0.224  0.607  0.876  0.602  0.812
+Llama-3.1-8B           0.670   0.604  0.963  0.989   0.506   0.698  0.163  0.204  0.409  0.739  0.378  0.660
+DeepSeek-Coder         0.584   0.612  0.985  0.993   0.922   0.950  0.208  0.158  0.884  0.927  0.867  0.911
+Claude Sonnet 4.6      0.689   0.529  0.939  0.995   0.446   0.989  0.141  0.285  0.442  0.993  0.403  0.955
+GPT-5.4-mini           0.710   0.525  0.895  0.994   0.396   0.994  0.108  0.292  0.469  0.988  0.418  0.958
+
+Dataset: SchemaBench
+Describer            nGED(B) nGED(D) Tab(B) Tab(D) Attr(B) Attr(D) Dom(B) Dom(D) Ent(B) Ent(D) Ref(B) Ref(D)
+-------------------- ------- ------- ------ ------ ------- ------- ------ ------ ------ ------ ------ ------
+CodeLlama-13B          0.580   0.443  0.777  0.863   0.369   0.573  0.241  0.366  0.411  0.557  0.313  0.485
+Llama-3.1-8B           0.646   0.496  0.708  0.898   0.242   0.448  0.167  0.307  0.267  0.528  0.201  0.428
+DeepSeek-Coder         0.418   0.403  0.790  0.838   0.497   0.648  0.338  0.400  0.606  0.680  0.507  0.629
+Claude Sonnet 4.6      0.620   0.212  0.830  0.914   0.316   0.867  0.222  0.716  0.392  0.899  0.323  0.869
+GPT-5.4-mini           0.662   0.200  0.741  0.958   0.251   0.922  0.173  0.736  0.291  0.942  0.228  0.909
+
+E2 notes (from Table VIII):
+  - Constructor is fixed to GPT-4o-mini; only the describer (B vs D) varies.
+  - Detailed descriptions usually improve round-trip preservation a lot for
+    Claude / GPT (esp. Enterprise-145 and SchemaBench nGED).
+  - On RSchema (B): DeepSeek has best nGED (0.584), Attr/Entity/Ref F1.
+  - On RSchema (D): GPT-5.4-mini best nGED (0.525); Claude/GPT near-perfect
+    Entity / Attributes under detailed prompts.
+  - E2 is Schema→Text→Schema (round-trip). Our PaperMethods runs are direct
+    Text→Schema constructors (E0-style), so numbers are not interchangeable.
+
+
+################################################################################
+# CROSS-EXPERIMENT MAP (what compares to what)
+################################################################################
+
+Experiment   Task                         Paper table   Our PaperMethods runs?
+-----------  ---------------------------  ------------  ----------------------
+E0           Text → Schema (gold NL)      Table V       YES (RSchema only)
+E1           Schema → Text                Table VII     NO (paper numbers only)
+E2           Schema → Text → Schema       Table VIII    NO (paper numbers only)
+
+Overlapping open models across all three paper tables:
+  CodeLlama-13B, Llama-3.1-8B, DeepSeek-Coder
+Closed models in paper tables only:
+  Claude Sonnet 4.6, GPT-5.4-mini
+
+
+################################################################################
+# FILE PATHS
+################################################################################
+
+Our E0 eval outputs:
+  /mnt/text2er-data/LLM4DBdesign_PaperMethods/Results/paper_methods_report.txt
+  /mnt/text2er-data/LLM4DBdesign_PaperMethods/Results/paper_methods_evaluation.json
+  /mnt/text2er-data/LLM4DBdesign_PaperMethods/Results/<model>_<method>_evaluation.json
+
+Eval script used for our runs:
+  /mnt/text2er-data/LLM4DBdesign_PaperMethods/evaluate_paper_methods_exp4_metrics.py
+  (imports metrics from RSchema_ExpResults4/Code/evaluate_exp4_text2schema.py)
+
+Paper table sources (screenshots provided in chat):
+  Table V   — E0 Text2Schema
+  Table VII — E1 Schema2Text
+  Table VIII— E2 Round-trip
+
+================================================================================
+END
+================================================================================

@@ -1,0 +1,66 @@
+-- Schema for database: rschema_0373
+CREATE TABLE `projects` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text,
+  `budget_level` decimal(10,2) NOT NULL,
+  `source_of_funds` varchar(255) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `objective` varchar(255) NOT NULL,
+  `allocation_ratio` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organizations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_activities` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `activity_code` varchar(255) NOT NULL,
+  `activity_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `project_id` (`project_id`),
+  CONSTRAINT `project_activities_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `funding_sources` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `source_name` varchar(255) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_funding` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `funding_source_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `project_id` (`project_id`),
+  KEY `funding_source_id` (`funding_source_id`),
+  CONSTRAINT `project_funding_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_funding_ibfk_2` FOREIGN KEY (`funding_source_id`) REFERENCES `funding_sources` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_changes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `change_date` datetime NOT NULL,
+  `change_description` text,
+  PRIMARY KEY (`id`),
+  KEY `project_id` (`project_id`),
+  CONSTRAINT `project_changes_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department_management` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `project_id` (`project_id`),
+  CONSTRAINT `department_management_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

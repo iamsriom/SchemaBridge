@@ -1,0 +1,85 @@
+-- Schema for database: rschema_0250
+CREATE TABLE `User` (
+  `User_ID` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  `registration_time` datetime NOT NULL,
+  `role` varchar(50) NOT NULL,
+  PRIMARY KEY (`User_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Product` (
+  `Product_ID` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `category` varchar(100) NOT NULL,
+  `shelving_time` datetime NOT NULL,
+  PRIMARY KEY (`Product_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Order` (
+  `Order_ID` int(11) NOT NULL,
+  `delivery_address` varchar(255) NOT NULL,
+  `order_status` varchar(50) NOT NULL,
+  `order_time` datetime NOT NULL,
+  `payment_time` datetime DEFAULT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  `User_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Order_ID`),
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Shopping_Cart` (
+  `User_ID` int(11) NOT NULL,
+  `Product_ID` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`User_ID`, `Product_ID`),
+  CONSTRAINT `user_shopping_cart_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_shopping_cart_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `Product` (`Product_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Admin_Product_Management` (
+  `Admin_ID` int(11) NOT NULL,
+  `Product_ID` int(11) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `operation_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`Admin_ID`, `Product_ID`),
+  CONSTRAINT `admin_product_management_ibfk_1` FOREIGN KEY (`Admin_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `admin_product_management_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `Product` (`Product_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Order_Product` (
+  `Order_ID` int(11) NOT NULL,
+  `Product_ID` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`Order_ID`, `Product_ID`),
+  CONSTRAINT `order_product_ibfk_1` FOREIGN KEY (`Order_ID`) REFERENCES `Order` (`Order_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_product_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `Product` (`Product_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Order` (
+  `Order_ID` int(11) NOT NULL,
+  `User_ID` int(11) NOT NULL,
+  `delivery_address` varchar(255) NOT NULL,
+  `order_status` varchar(50) NOT NULL,
+  `order_time` datetime NOT NULL,
+  `payment_time` datetime DEFAULT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`Order_ID`, `User_ID`),
+  CONSTRAINT `user_order_ibfk_1` FOREIGN KEY (`Order_ID`) REFERENCES `Order` (`Order_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_order_ibfk_2` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Admin_Order_Management` (
+  `Admin_ID` int(11) NOT NULL,
+  `Order_ID` int(11) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `operation_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`Admin_ID`, `Order_ID`),
+  CONSTRAINT `admin_order_management_ibfk_1` FOREIGN KEY (`Admin_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `admin_order_management_ibfk_2` FOREIGN KEY (`Order_ID`) REFERENCES `Order` (`Order_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,42 @@
+{
+  "text_number": 4,
+  "id": "SB-004",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0004",
+  "question": "1) Background / Context\n\nThe project involves developing an open-source PHP-based Content Management System (CMS) that serves as a flexible platform for creating websites, blogs, or applications. This CMS is widely adopted by millions of users globally, ranging from individual creators and small businesses to large enterprises. It provides a customizable and intuitive user experience tailored for both beginners and advanced users.\n\n2) Objectives\n\n- Create a platform to build and customize websites seamlessly.\n- Enable real-time, code-free design and content editing.\n- Offer extensibility through a robust library of plugins and themes.\n- Facilitate integration with social media, analytics, and e-commerce features.\n- Support community interaction via comment tools and discussion forums.\n\n3) Stakeholders & Users\n\n- Site Owners: Individuals and organizations who build and manage websites.\n- Developers: Those extending or customizing the CMS functionality.\n- End Users: Visitors engaging with websites built on the platform.\n- Plugin/Theme Developers: Creators expanding the CMS's features and design options.\n\n4) Functional Descriptions\n\n- Theme Management: Select from thousands of themes; upload custom themes easily.\n- Content Editing: Intuitive block-based editor for real-time content updates.\n- Plugin System: Access thousands of plugins to add functionalities like galleries, forums, SEO, and spam protection.\n- E-Commerce Support: Add online store capabilities with third-party integrations.\n- Comment System: Manage discussions with comment moderation tools.\n- Analytics & SEO: Integrate with analytics tools and optimize for search engines.\n- Social Media Integration: Link and share across various social media platforms.\n\n5) Non-Functional Descriptions\n\n- Scalability: Sustain a diverse range of website sizes and types.\n- Usability: Provide a user-friendly interface requiring no coding skills.\n- Performance: Ensure smooth operation under high traffic conditions.\n- Security: Incorporate measures to protect against vulnerabilities.\n- Extensibility: Facilitate easy integration of new features via an extensive directory of themes and plugins.",
+  "ddl": "-- Schema for database: schemabench_0004\nCREATE TABLE `site_owners` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`name` varchar(255) NOT NULL,\n`email` varchar(255) NOT NULL,\n`password` varchar(255) NOT NULL,\nPRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sites` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`site_owner_id` int(11) NOT NULL,\n`name` varchar(255) NOT NULL,\n`url` varchar(255) NOT NULL,\n`theme` varchar(255) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`site_owner_id`) REFERENCES `site_owners` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `site_plugins` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`site_id` int(11) NOT NULL,\n`name` varchar(255) NOT NULL,\n`description` varchar(255) NOT NULL,\n`version` varchar(255) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `site_themes` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`site_id` int(11) NOT NULL,\n`name` varchar(255) NOT NULL,\n`description` varchar(255) NOT NULL,\n`version` varchar(255) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `site_content` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`site_id` int(11) NOT NULL,\n`title` varchar(255) NOT NULL,\n`content` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `site_comments` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`site_id` int(11) NOT NULL,\n`content` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `site_analytics` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`site_id` int(11) NOT NULL,\n`analytics_data` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `site_social_media` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`site_id` int(11) NOT NULL,\n`social_media_platform` varchar(255) NOT NULL,\n`social_media_handle` varchar(255) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `site_ecommerce` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`site_id` int(11) NOT NULL,\n`ecommerce_platform` varchar(255) NOT NULL,\n`ecommerce_store_url` varchar(255) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `site_users` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`site_id` int(11) NOT NULL,\n`name` varchar(255) NOT NULL,\n`email` varchar(255) NOT NULL,\n`password` varchar(255) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `site_user_roles` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`site_id` int(11) NOT NULL,\n`user_id` int(11) NOT NULL,\n`role` varchar(255) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`user_id`) REFERENCES `site_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `site_user_permissions` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`site_id` int(11) NOT NULL,\n`user_id` int(11) NOT NULL,\n`permission` varchar(255) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`user_id`) REFERENCES `site_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `site_user_sessions` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`site_id` int(11) NOT NULL,\n`user_id` int(11) NOT NULL,\n`session_id` varchar(255) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`user_id`) REFERENCES `site_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=",
+  "metadata": {
+    "database": "schemabench_0004",
+    "tables": [
+      "site_owners",
+      "sites",
+      "site_plugins",
+      "site_themes",
+      "site_content",
+      "site_comments",
+      "site_analytics",
+      "site_social_media",
+      "site_ecommerce",
+      "site_users",
+      "site_user_roles",
+      "site_user_permissions",
+      "site_user_sessions"
+    ],
+    "columns_by_table": {
+      "site_owners": [],
+      "sites": [],
+      "site_plugins": [],
+      "site_themes": [],
+      "site_content": [],
+      "site_comments": [],
+      "site_analytics": [],
+      "site_social_media": [],
+      "site_ecommerce": [],
+      "site_users": [],
+      "site_user_roles": [],
+      "site_user_permissions": [],
+      "site_user_sessions": []
+    }
+  }
+}

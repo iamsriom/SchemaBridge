@@ -1,0 +1,74 @@
+-- Schema for database: rschema_0490
+CREATE TABLE `part` (
+  `part_id` int(11) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `specifications` varchar(255) DEFAULT NULL,
+  `inventory_level` int(11) DEFAULT NULL,
+  `unit_price` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`part_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `geographic_location` (
+  `location_id` int(11) DEFAULT NULL,
+  `country` varchar(255) DEFAULT NULL,
+  `region` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`location_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order` (
+  `order_id` int(11) DEFAULT NULL,
+  `customer_id` int(11) DEFAULT NULL,
+  `order_time` datetime DEFAULT NULL,
+  `delivery_date` datetime DEFAULT NULL,
+  `order_status` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`order_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supplier` (
+  `supplier_id` int(11) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `contact_person` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  `country` varchar(255) DEFAULT NULL,
+  `region` varchar(255) DEFAULT NULL,
+  `credit_rating` int(11) DEFAULT NULL,
+  `location_id` int(11) NOT NULL,
+  PRIMARY KEY (`supplier_id`),
+  CONSTRAINT `supplier_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `geographic_location` (`location_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  `country` varchar(255) DEFAULT NULL,
+  `region` varchar(255) DEFAULT NULL,
+  `payment_method` varchar(255) DEFAULT NULL,
+  `location_id` int(11) NOT NULL,
+  PRIMARY KEY (`customer_id`),
+  CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `geographic_location` (`location_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_detail` (
+  `order_detail_id` int(11) DEFAULT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `part_id` int(11) DEFAULT NULL,
+  `supplier_id` int(11) DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `total_amount` decimal(10,2) DEFAULT NULL,
+  `unit_price` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`order_detail_id`),
+  CONSTRAINT `order_detail_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_detail_ibfk_2` FOREIGN KEY (`part_id`) REFERENCES `part` (`part_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_detail_ibfk_3` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supply` (
+  `supplier_id` int(11) DEFAULT NULL,
+  `part_id` int(11) DEFAULT NULL,
+  `quote` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`supplier_id`, `part_id`),
+  CONSTRAINT `supply_ibfk_1` FOREIGN KEY (`part_id`) REFERENCES `part` (`part_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `supply_ibfk_2` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,46 @@
+-- Schema for database: rschema_0367
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `birth_date` date NOT NULL,
+  `gender` enum('male','female') NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `address` text NOT NULL,
+  `insurance_status` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `appointments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `examination_description` text NOT NULL,
+  `examination_document` text NOT NULL,
+  `medical_institution_id` int(11) NOT NULL,
+  `payment_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `creation_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `appointment_date` date NOT NULL,
+  `status` enum('pending','confirmed','cancelled') NOT NULL DEFAULT 'pending',
+  PRIMARY KEY (`id`),
+  KEY `medical_institution_id` (`medical_institution_id`),
+  CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`medical_institution_id`) REFERENCES `medical_institutions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medical_institutions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` text NOT NULL,
+  `opening_time` time NOT NULL,
+  `closing_time` time NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `operators` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `medical_institution_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `medical_institution_id` (`medical_institution_id`),
+  CONSTRAINT `operators_ibfk_1` FOREIGN KEY (`medical_institution_id`) REFERENCES `medical_institutions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

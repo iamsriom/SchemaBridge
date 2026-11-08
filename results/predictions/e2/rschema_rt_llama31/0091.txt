@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0091
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
+  `person_in_charge` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `training` (
+  `training_id` int(11) NOT NULL,
+  `training_name` varchar(255) NOT NULL,
+  `training_content` text DEFAULT NULL,
+  `training_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`training_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  `salary` decimal(10,2) DEFAULT NULL,
+  `department_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attendance` (
+  `attendance_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `attendance_date` date NOT NULL,
+  `check_in_time` datetime DEFAULT NULL,
+  `check_out_time` datetime DEFAULT NULL,
+  `is_late` tinyint(1) DEFAULT NULL,
+  `departed_early` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`attendance_id`),
+  CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_training` (
+  `employee_id` int(11) NOT NULL,
+  `training_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`, `training_id`),
+  CONSTRAINT `employee_training_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_training_ibfk_2` FOREIGN KEY (`training_id`) REFERENCES `training` (`training_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0245
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `novel` (
+  `novel_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `author` varchar(255) NOT NULL,
+  `isbn` varchar(13) NOT NULL,
+  `publication_date` date NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`novel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bookshelf` (
+  `bookshelf_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `novel_id` int(11) NOT NULL,
+  `added_at` datetime NOT NULL,
+  PRIMARY KEY (`bookshelf_id`),
+  CONSTRAINT `bookshelf_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bookshelf_ibfk_2` FOREIGN KEY (`novel_id`) REFERENCES `novel` (`novel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `book_review` (
+  `review_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `novel_id` int(11) NOT NULL,
+  `rating` int(11) NOT NULL,
+  `review_content` text DEFAULT NULL,
+  PRIMARY KEY (`review_id`),
+  CONSTRAINT `book_review_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `book_review_ibfk_2` FOREIGN KEY (`novel_id`) REFERENCES `novel` (`novel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `novel_added_to_bookshelf` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `bookshelf_id` int(11) NOT NULL,
+  `novel_id` int(11) NOT NULL,
+  `added_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `novel_added_to_bookshelf_ibfk_1` FOREIGN KEY (`bookshelf_id`) REFERENCES `bookshelf` (`bookshelf_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `novel_added_to_bookshelf_ibfk_2` FOREIGN KEY (`novel_id`) REFERENCES `novel` (`novel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

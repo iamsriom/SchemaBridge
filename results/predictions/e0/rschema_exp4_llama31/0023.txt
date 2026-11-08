@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0023
+CREATE TABLE `donors` (
+  `donor_number` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `date_of_birth` datetime NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`donor_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `recipients` (
+  `recipient_number` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `date_of_birth` datetime NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`recipient_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `donated_items` (
+  `item_number` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`item_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `donation_records` (
+  `donation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `donor_number` int(11) NOT NULL,
+  `recipient_number` int(11) NOT NULL,
+  `donation_time` datetime NOT NULL,
+  `item_number` int(11) NOT NULL,
+  PRIMARY KEY (`donation_id`),
+  KEY `donor_ibfk_1` (`donor_number`),
+  KEY `recipient_ibfk_1` (`recipient_number`),
+  KEY `item_ibfk_1` (`item_number`),
+  CONSTRAINT `donor_ibfk_1` FOREIGN KEY (`donor_number`) REFERENCES `donors` (`donor_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `recipient_ibfk_1` FOREIGN KEY (`recipient_number`) REFERENCES `recipients` (`recipient_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `item_ibfk_1` FOREIGN KEY (`item_number`) REFERENCES `donated_items` (`item_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `donor_donations` (
+  `donor_number` int(11) NOT NULL,
+  `donation_count` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`donor_number`),
+  CONSTRAINT `donor_ibfk_2` FOREIGN KEY (`donor_number`) REFERENCES `donors` (`donor_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

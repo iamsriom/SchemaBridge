@@ -1,0 +1,151 @@
+-- Schema for database: rschema_0420
+CREATE TABLE `users` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `username` varchar(255) NOT NULL,\n
+  `password` varchar(255) NOT NULL,\n
+  `phone_number` varchar(255) DEFAULT NULL,\n
+  `wechat_openid` varchar(255) DEFAULT NULL,\n
+  `name` varchar(255) DEFAULT NULL,\n
+  `qq_number` varchar(255) DEFAULT NULL,\n
+  `email` varchar(255) DEFAULT NULL,\n
+  `registration_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n
+  `account_status` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  UNIQUE KEY `username` (`username`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `news` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `title` varchar(255) NOT NULL,\n
+  `content` text,\n
+  `publication_time` datetime NOT NULL,\n
+  `read_count` int(11) NOT NULL DEFAULT 0,\n
+  `category_id` int(11) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `category_id` (`category_id`),\n
+  CONSTRAINT `news_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `news_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `news_categories` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  `sort_order` int(11) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `news_status` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `news_status_news` (\n
+  `news_id` int(11) NOT NULL,\n
+  `status_id` int(11) NOT NULL,\n
+  PRIMARY KEY (`news_id`, `status_id`),\n
+  KEY `news_id` (`news_id`),\n
+  KEY `status_id` (`status_id`),\n
+  CONSTRAINT `news_status_news_ibfk_1` FOREIGN KEY (`news_id`) REFERENCES `news` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `news_status_news_ibfk_2` FOREIGN KEY (`status_id`) REFERENCES `news_status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `videos` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `title` varchar(255) NOT NULL,\n
+  `description` text,\n
+  `cover_image` varchar(255) DEFAULT NULL,\n
+  `duration` int(11) NOT NULL,\n
+  `directory_structure` text,\n
+  `course_count` int(11) NOT NULL DEFAULT 0,\n
+  `total_duration` int(11) NOT NULL DEFAULT 0,\n
+  `price` decimal(10,2) NOT NULL DEFAULT 0.00,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `video_categories` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  `parent_category_id` int(11) DEFAULT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `parent_category_id` (`parent_category_id`),\n
+  CONSTRAINT `video_categories_ibfk_1` FOREIGN KEY (`parent_category_id`) REFERENCES `video_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `video_status` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `video_status_videos` (\n
+  `video_id` int(11) NOT NULL,\n
+  `status_id` int(11) NOT NULL,\n
+  PRIMARY KEY (`video_id`, `status_id`),\n
+  KEY `video_id` (`video_id`),\n
+  KEY `status_id` (`status_id`),\n
+  CONSTRAINT `video_status_videos_ibfk_1` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `video_status_videos_ibfk_2` FOREIGN KEY (`status_id`) REFERENCES `video_status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `instructors` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  `avatar` varchar(255) DEFAULT NULL,\n
+  `title` varchar(255) DEFAULT NULL,\n
+  `introduction` text,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `instructor_qualifications` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `instructor_id` int(11) NOT NULL,\n
+  `years_of_experience` int(11) NOT NULL,\n
+  `professional_field` varchar(255) NOT NULL,\n
+  `teaching_achievements` text,\n
+  PRIMARY KEY (`id`),\n
+  KEY `instructor_id` (`instructor_id`),\n
+  CONSTRAINT `instructor_qualifications_ibfk_1` FOREIGN KEY (`instructor_id`) REFERENCES `instructors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `instructor_videos` (\n
+  `instructor_id` int(11) NOT NULL,\n
+  `video_id` int(11) NOT NULL,\n
+  PRIMARY KEY (`instructor_id`, `video_id`),\n
+  KEY `instructor_id` (`instructor_id`),\n
+  KEY `video_id` (`video_id`),\n
+  CONSTRAINT `instructor_videos_ibfk_1` FOREIGN KEY (`instructor_id`) REFERENCES `instructors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `instructor_videos_ibfk_2` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `collections` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `user_id` int(11) NOT NULL,\n
+  `video_id` int(11) NOT NULL,\n
+  `collection_time` datetime NOT NULL,\n
+  `status` tinyint(1) NOT NULL DEFAULT 1,\n
+  PRIMARY KEY (`id`),\n
+  KEY `user_id` (`user_id`),\n
+  KEY `video_id` (`video_id`),\n
+  CONSTRAINT `collections_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `collections_ibfk_2` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `orders` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `user_id` int(11) NOT NULL,\n
+  `video_id` int(11) NOT NULL,\n
+  `order_time` datetime NOT NULL,\n
+  `payment_amount` decimal(10,2) NOT NULL,\n
+  `payment_method` varchar(255) NOT NULL,\n
+  `payment_status` varchar(255) NOT NULL,\n
+  `payment_time` datetime NOT NULL,\n
+  `status` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `user_id` (`user_id`),\n
+  KEY `video_id` (`video_id`),\n
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `purchases` (\n
+  `id` int(

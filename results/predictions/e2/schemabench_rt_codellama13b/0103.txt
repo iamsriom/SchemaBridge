@@ -1,0 +1,116 @@
+-- Schema for database: schemabench_0103
+CREATE TABLE `category` (
+  `category_number` int(11) NOT NULL,
+  `category_code` varchar(50) NOT NULL,
+  `charge_description` varchar(255) NOT NULL,
+  PRIMARY KEY (`category_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `charge` (
+  `charge_number` int(11) NOT NULL,
+  `member_number` int(11) NOT NULL,
+  `provider_number` int(11) NOT NULL,
+  `category_number` int(11) NOT NULL,
+  `charge_date` datetime NOT NULL,
+  `charge_amount` decimal(10,2) NOT NULL,
+  `statement_number` int(11) NOT NULL,
+  `charge_code` varchar(50) NOT NULL,
+  PRIMARY KEY (`charge_number`),
+  CONSTRAINT `charge_ibfk_1` FOREIGN KEY (`member_number`) REFERENCES `member` (`member_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `charge_ibfk_2` FOREIGN KEY (`provider_number`) REFERENCES `provider` (`provider_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `charge_ibfk_3` FOREIGN KEY (`category_number`) REFERENCES `category` (`category_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `charge_ibfk_4` FOREIGN KEY (`statement_number`) REFERENCES `statement` (`statement_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `corporation` (
+  `corporation_number` int(11) NOT NULL,
+  `corporation_name` varchar(255) NOT NULL,
+  `street_address` varchar(255) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `state_province` varchar(100) NOT NULL,
+  `country` varchar(100) NOT NULL,
+  `postal_code` varchar(20) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `expiration_date` datetime NOT NULL,
+  `region_number` int(11) NOT NULL,
+  `corporation_code` varchar(50) NOT NULL,
+  PRIMARY KEY (`corporation_number`),
+  CONSTRAINT `corporation_ibfk_1` FOREIGN KEY (`region_number`) REFERENCES `region` (`region_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `member` (
+  `member_number` int(11) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `middle_initial` char(1) DEFAULT NULL,
+  `street_address` varchar(255) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `state_province` varchar(100) NOT NULL,
+  `country` varchar(100) NOT NULL,
+  `postal_code` varchar(20) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `photograph` varchar(255) DEFAULT NULL,
+  `issue_date` datetime NOT NULL,
+  `expiration_date` datetime NOT NULL,
+  `region_number` int(11) NOT NULL,
+  `corporation_number` int(11) NOT NULL,
+  `previous_balance` decimal(10,2) NOT NULL,
+  `current_balance` decimal(10,2) NOT NULL,
+  `member_code` varchar(50) NOT NULL,
+  PRIMARY KEY (`member_number`),
+  CONSTRAINT `member_ibfk_1` FOREIGN KEY (`region_number`) REFERENCES `region` (`region_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `member_ibfk_2` FOREIGN KEY (`corporation_number`) REFERENCES `corporation` (`corporation_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment` (
+  `payment_number` int(11) NOT NULL,
+  `member_number` int(11) NOT NULL,
+  `payment_date` datetime NOT NULL,
+  `payment_amount` decimal(10,2) NOT NULL,
+  `statement_number` int(11) NOT NULL,
+  `payment_code` varchar(50) NOT NULL,
+  PRIMARY KEY (`payment_number`),
+  CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`member_number`) REFERENCES `member` (`member_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `payment_ibfk_2` FOREIGN KEY (`statement_number`) REFERENCES `statement` (`statement_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `provider` (
+  `provider_number` int(11) NOT NULL,
+  `provider_name` varchar(255) NOT NULL,
+  `street_address` varchar(255) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `state_province` varchar(100) NOT NULL,
+  `country` varchar(100) NOT NULL,
+  `postal_code` varchar(20) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `issue_date` datetime NOT NULL,
+  `expiration_date` datetime NOT NULL,
+  `region_number` int(11) NOT NULL,
+  `provider_code` varchar(50) NOT NULL,
+  PRIMARY KEY (`provider_number`),
+  CONSTRAINT `provider_ibfk_1` FOREIGN KEY (`region_number`) REFERENCES `region` (`region_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `region` (
+  `region_number` int(11) NOT NULL,
+  `region_name` varchar(100) NOT NULL,
+  `street_address` varchar(255) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `state_province` varchar(100) NOT NULL,
+  `country` varchar(100) NOT NULL,
+  `postal_code` varchar(20) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `region_code` varchar(50) NOT NULL,
+  PRIMARY KEY (`region_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `statement` (
+  `statement_number` int(11) NOT NULL,
+  `member_number` int(11) NOT NULL,
+  `statement_date` datetime NOT NULL,
+  `due_date` datetime NOT NULL,
+  `statement_amount` decimal(10,2) NOT NULL,
+  `statement_code` varchar(50) NOT NULL,
+  PRIMARY KEY (`statement_number`),
+  CONSTRAINT `statement_ibfk_1` FOREIGN KEY (`member_number`) REFERENCES `member` (`member_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,26 @@
+{
+  "text_number": 301,
+  "id": "67552f0a13602ec03b41a877",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "rschema_0301",
+  "question": "Business Requirements Description:\nThis database can be used for an online seat reservation system, such as for cinemas, theaters, or conference halls. The system can record and manage seat information for different areas, including seat locations (X-coordinate, Y-coordinate, row, column), type, price, creation time, update time, etc. The system can mark the validity of seats using a flag field, such as whether a seat has been reserved or purchased. The system supports multiple seat layout templates, including template name and description, which are suitable for different occasions or time periods. Users have a unique ID, name, contact number, and email address. Users can query available seats based on seat location, type, price, etc. Users can select seats online for reservation or purchase, and the system will update the seat status accordingly.",
+  "ddl": "-- Schema for database: `rschema_0301`\n\n-- Table: `seat`\n\nCREATE TABLE `seat` (\n    `seat_id` int(11) NOT NULL AUTO_INCREMENT,\n    `x_coordinate` int(11) NOT NULL,\n    `y_coordinate` int(11) NOT NULL,\n    `row` int(11) NOT NULL,\n    `column` int(11) NOT NULL,\n    `type` varchar(255) NOT NULL,\n    `price` decimal(10,2) NOT NULL,\n    `creation_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n    `is_reserved` tinyint(1) NOT NULL DEFAULT 0,\n    `is_purchased` tinyint(1) NOT NULL DEFAULT 0,\n    PRIMARY KEY (`seat_id`),\n    UNIQUE KEY `unique_seat_location` (`x_coordinate`,`y_coordinate`,`row`,`column`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `user`\n\nCREATE TABLE `user` (\n    `user_id` int(11) NOT NULL AUTO_INCREMENT,\n    `name` varchar(255) NOT NULL,\n    `contact_number` varchar(255) NOT NULL,\n    `email_address` varchar(255) NOT NULL,\n    PRIMARY KEY (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `reservation`\n\nCREATE TABLE `reservation` (\n    `reservation_id` int(11) NOT NULL AUTO_INCREMENT,\n    `user_id` int(11) NOT NULL,\n    `seat_id` int(11) NOT NULL,\n    `reservation_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    PRIMARY KEY (`reservation_id`),\n    KEY `user_id` (`user_id`),\n    KEY `seat_id` (`seat_id`),\n    CONSTRAINT `reservation_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n    CONSTRAINT `reservation_ibfk_2` FOREIGN KEY (`seat_id`) REFERENCES `seat` (`seat_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `seat_layout_template`\n\nCREATE TABLE `seat_layout_template` (\n    `template_id` int(11) NOT NULL AUTO_INCREMENT,\n    `template_name` varchar(255) NOT NULL,\n    `description` text NOT NULL,\n    PRIMARY KEY (`template_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `seat_layout`\n\nCREATE TABLE `seat_layout` (\n    `layout_id` int(11) NOT NULL AUTO_INCREMENT,\n    `template_id` int(11) NOT NULL,\n    `seat_id` int(11) NOT NULL,\n    PRIMARY KEY (`layout_id`),\n    KEY `template_id` (`template_id`),\n    KEY `seat_id` (`seat_id`),\n    CONSTRAINT `seat_layout_ibfk_1` FOREIGN KEY (`template_id`) REFERENCES `seat_layout_template` (`template_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n    CONSTRAINT `seat_layout_ibfk_2` FOREIGN KEY (`seat_id`) REFERENCES `seat` (`seat_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "seat",
+      "user",
+      "reservation",
+      "seat_layout_template",
+      "seat_layout"
+    ],
+    "columns_by_table": {
+      "seat": [],
+      "user": [],
+      "reservation": [],
+      "seat_layout_template": [],
+      "seat_layout": []
+    }
+  }
+}

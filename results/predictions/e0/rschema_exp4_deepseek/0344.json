@@ -1,0 +1,34 @@
+{
+  "text_number": 344,
+  "id": "67552f0a13602ec03b41a900",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "rschema_0344",
+  "question": "Business Requirements Description:\nThis system is designed for managing and monitoring web services in various applications. Key requirements include:\nEach user has a unique username, email, and role. User roles are associated with specific permissions. Users can be assigned different roles and permissions that are linked to particular applications.\nEach application has a unique ID, code, name, and type.\nEach web service has a unique ID, name, description, and creation date. It records error information, including error codes, descriptions, timestamps, and return status.\nMonitors the invocation of web services, recording details like invocation time, return status, delay time, and other performance metrics.\nTracks statistics such as success rate and call count over a specific time period.\nTracks which users are authorized to access which applications.\nLinks error data with monitoring data to enable detailed analysis and reporting.",
+  "ddl": "--Schemafordatabase:rschema_0344\n--Foreachtable:\n\nCREATE TABLE `users` (\n    `id` int(11) NOT NULL AUTO_INCREMENT,\n    `username` varchar(255) NOT NULL,\n    `email` varchar(255) NOT NULL,\n    `role` varchar(255) NOT NULL,\n    PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `applications` (\n    `id` int(11) NOT NULL AUTO_INCREMENT,\n    `code` varchar(255) NOT NULL,\n    `name` varchar(255) NOT NULL,\n    `type` varchar(255) NOT NULL,\n    PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `webservices` (\n    `id` int(11) NOT NULL AUTO_INCREMENT,\n    `name` varchar(255) NOT NULL,\n    `description` text NOT NULL,\n    `creation_date` datetime NOT NULL,\n    PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `errors` (\n    `id` int(11) NOT NULL AUTO_INCREMENT,\n    `code` int(11) NOT NULL,\n    `description` text NOT NULL,\n    `timestamp` datetime NOT NULL,\n    `return_status` varchar(255) NOT NULL,\n    PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `monitoring` (\n    `id` int(11) NOT NULL AUTO_INCREMENT,\n    `webservice_id` int(11) NOT NULL,\n    `user_id` int(11) NOT NULL,\n    `invocation_time` datetime NOT NULL,\n    `return_status` varchar(255) NOT NULL,\n    `delay_time` int(11) NOT NULL,\n    `other_metrics` text NOT NULL,\n    PRIMARY KEY (`id`),\n    FOREIGN KEY (`webservice_id`) REFERENCES `webservices` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `statistics` (\n    `id` int(11) NOT NULL AUTO_INCREMENT,\n    `success_rate` float NOT NULL,\n    `call_count` int(11) NOT NULL,\n    `time_period` datetime NOT NULL,\n    `webservice_id` int(11) NOT NULL,\n    PRIMARY KEY (`id`),\n    FOREIGN KEY (`webservice_id`) REFERENCES `webservices` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `permissions` (\n    `id` int(11) NOT NULL AUTO_INCREMENT,\n    `name` varchar(255) NOT NULL,\n    `application_id` int(11) NOT NULL,\n    PRIMARY KEY (`id`),\n    FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_roles` (\n    `id` int(11) NOT NULL AUTO_INCREMENT,\n    `user_id` int(11) NOT NULL,\n    `role_id` int(11) NOT NULL,\n    PRIMARY KEY (`id`),\n    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n    FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `role_permissions` (\n    `id` int(11) NOT NULL AUTO_INCREMENT,\n    `role_id` int(11) NOT NULL,\n    `permission_id` int(11) NOT NULL,\n    PRIMARY KEY (`id`),\n    FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n    FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "applications",
+      "webservices",
+      "errors",
+      "monitoring",
+      "statistics",
+      "permissions",
+      "user_roles",
+      "role_permissions"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "applications": [],
+      "webservices": [],
+      "errors": [],
+      "monitoring": [],
+      "statistics": [],
+      "permissions": [],
+      "user_roles": [],
+      "role_permissions": []
+    }
+  }
+}

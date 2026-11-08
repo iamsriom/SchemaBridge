@@ -1,0 +1,29 @@
+-- Schema for database: rschema_0089
+CREATE TABLE `Block` (
+  `Block_Hash` varchar(64) NOT NULL,
+  `Height` int(11) NOT NULL,
+  `Merkle_Root` varchar(64) NOT NULL,
+  `Previous_Block_Hash` varchar(64) DEFAULT NULL,
+  `Timestamp` datetime NOT NULL,
+  PRIMARY KEY (`Block_Hash`),
+  CONSTRAINT `Block_ibfk_1` FOREIGN KEY (`Previous_Block_Hash`) REFERENCES `Block` (`Block_Hash`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Account` (
+  `Address` varchar(42) NOT NULL,
+  `Balance` decimal(20,8) NOT NULL,
+  PRIMARY KEY (`Address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Transaction` (
+  `Transaction_Hash` varchar(64) NOT NULL,
+  `Block_Hash` varchar(64) NOT NULL,
+  `Fee` decimal(20,8) NOT NULL,
+  `Input_Address` varchar(42) NOT NULL,
+  `Output_Address` varchar(42) NOT NULL,
+  `Timestamp` datetime NOT NULL,
+  PRIMARY KEY (`Transaction_Hash`),
+  CONSTRAINT `Transaction_ibfk_1` FOREIGN KEY (`Block_Hash`) REFERENCES `Block` (`Block_Hash`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Transaction_ibfk_2` FOREIGN KEY (`Input_Address`) REFERENCES `Account` (`Address`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Transaction_ibfk_3` FOREIGN KEY (`Output_Address`) REFERENCES `Account` (`Address`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

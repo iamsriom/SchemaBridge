@@ -1,0 +1,54 @@
+-- Schema for database: `weather_forecast_system`
+
+-- Table: `cities`
+
+CREATE TABLE `cities` (
+  `city_id` int(11) NOT NULL AUTO_INCREMENT,
+  `city_name` varchar(255) NOT NULL,
+  `longitude` decimal(10, 7) NOT NULL,
+  `latitude` decimal(10, 7) NOT NULL,
+  `country` varchar(255) NOT NULL,
+  `population` int(11) NOT NULL,
+  `timezone` varchar(255) NOT NULL,
+  PRIMARY KEY (`city_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `weather_forecasts`
+
+CREATE TABLE `weather_forecasts` (
+  `forecast_id` int(11) NOT NULL AUTO_INCREMENT,
+  `city_id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `sunrise` time NOT NULL,
+  `sunset` time NOT NULL,
+  `temperature` decimal(5, 2) NOT NULL,
+  `feels_like_temperature` decimal(5, 2) NOT NULL,
+  `atmospheric_pressure` int(11) NOT NULL,
+  `humidity` int(11) NOT NULL,
+  `wind_speed` decimal(5, 2) NOT NULL,
+  `wind_direction` varchar(255) NOT NULL,
+  `cloud_cover` int(11) NOT NULL,
+  `precipitation_probability` int(11) NOT NULL,
+  PRIMARY KEY (`forecast_id`),
+  FOREIGN KEY (`city_id`) REFERENCES `cities` (`city_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `weather_types`
+
+CREATE TABLE `weather_types` (
+  `weather_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `main_description` varchar(255) NOT NULL,
+  `detailed_description` varchar(255) NOT NULL,
+  `icon` varchar(255) NOT NULL,
+  PRIMARY KEY (`weather_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `forecast_weather_types`
+
+CREATE TABLE `forecast_weather_types` (
+  `forecast_id` int(11) NOT NULL,
+  `weather_type_id` int(11) NOT NULL,
+  PRIMARY KEY (`forecast_id`, `weather_type_id`),
+  FOREIGN KEY (`forecast_id`) REFERENCES `weather_forecasts` (`forecast_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`weather_type_id`) REFERENCES `weather_types` (`weather_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

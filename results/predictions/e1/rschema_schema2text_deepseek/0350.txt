@@ -1,0 +1,91 @@
+The database schema named 'rschema_0350' contains 8 tables. The 'Ticket_Type' table represents the type of ticket, including its description, whether it includes a workshop, its name, and price. The 'Discount_Code' table represents a discount code, including its amount, name, and type. The 'Meeting' table represents a meeting, including its date, description, end time, name, room, and start time. The 'Workshop' table represents a workshop, including its capacity, date, description, end time, location, name, requirements, and start time. The 'Speaker' table represents a speaker, including their bio, company, and name. The 'Participant' table represents a participant, including their company, discount code ID, email, name, and ticket ID. The 'Meeting_Speaker' table represents the many-to-many relationship between meetings and speakers, with each row representing a meeting-speaker pair. The 'Workshop_Speaker' table represents the many-to-many relationship between workshops and speakers, with each row representing a workshop-speaker pair. All columns allow null values, and primary keys are used to enforce entity integrity. Foreign keys are used to enforce referential integrity, with CASCADE on delete and update rules.
+```python
+# This is a sample Python code to create the schema
+import sqlite3
+# Connect to SQLite database
+conn = sqlite3.connect('rschema_0350.db')
+c = conn.cursor()
+# Create tables
+c.execute('''
+CREATE TABLE Ticket_Type(
+Description VARCHAR(255),
+Includes_Workshop VARCHAR(255),
+Name VARCHAR(255),
+Price FLOAT,
+Ticket_ID INTEGER PRIMARY KEY
+)
+''')
+c.execute('''
+CREATE TABLE Discount_Code(
+Amount FLOAT,
+Discount_Code_ID INTEGER PRIMARY KEY,
+Name VARCHAR(255),
+Type VARCHAR(255)
+)
+''')
+c.execute('''
+CREATE TABLE Meeting(
+Date DATETIME,
+Description VARCHAR(255),
+End_Time DATETIME,
+Meeting_ID INTEGER PRIMARY KEY,
+Name VARCHAR(255),
+Room VARCHAR(255),
+Start_Time DATETIME
+)
+''')
+c.execute('''
+CREATE TABLE Workshop(
+Capacity INTEGER,
+Date DATETIME,
+Description VARCHAR(255),
+End_Time DATETIME,
+Location VARCHAR(255),
+Name VARCHAR(255),
+Requirements VARCHAR(255),
+Start_Time DATETIME,
+Workshop_ID INTEGER PRIMARY KEY
+)
+''')
+c.execute('''
+CREATE TABLE Speaker(
+Bio VARCHAR(255),
+Company VARCHAR(255),
+Name VARCHAR(255),
+Speaker_ID INTEGER PRIMARY KEY
+)
+''')
+c.execute('''
+CREATE TABLE Participant(
+Company VARCHAR(255),
+Discount_Code_ID INTEGER NOT NULL,
+Email VARCHAR(255),
+Name VARCHAR(255),
+Participant_ID INTEGER PRIMARY KEY,
+Ticket_ID INTEGER NOT NULL,
+FOREIGN KEY(Discount_Code_ID) REFERENCES Discount_Code(Discount_Code_ID),
+FOREIGN KEY(Ticket_ID) REFERENCES Ticket_Type(Ticket_ID)
+)
+''')
+c.execute('''
+CREATE TABLE Meeting_Speaker(
+Meeting_ID INTEGER NOT NULL,
+Speaker_ID INTEGER NOT NULL,
+PRIMARY KEY(Meeting_ID, Speaker_ID),
+FOREIGN KEY(Meeting_ID) REFERENCES Meeting(Meeting_ID),
+FOREIGN KEY(Speaker_ID) REFERENCES Speaker(Speaker_ID)
+)
+''')
+c.execute('''
+CREATE TABLE Workshop_Speaker(
+Speaker_ID INTEGER NOT NULL,
+Workshop_ID INTEGER NOT NULL,
+PRIMARY KEY(Workshop_ID, Speaker_ID),
+FOREIGN KEY(Speaker_ID) REFERENCES Speaker(Speaker_ID),
+FOREIGN KEY(Workshop_ID) REFERENCES Workshop(Workshop_ID)
+)
+''')
+# Commit the changes and close the connection
+conn.commit()
+conn.close()
+```

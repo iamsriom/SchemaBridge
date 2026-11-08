@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0114
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `is_email_public` tinyint(1) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `article` (
+  `article_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `body` text NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `timestamp` datetime NOT NULL,
+  `publisher_id` int(11) NOT NULL,
+  `is_public` tinyint(1) NOT NULL,
+  PRIMARY KEY (`article_id`),
+  CONSTRAINT `article_ibfk_1` FOREIGN KEY (`publisher_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comment` (
+  `comment_id` int(11) NOT NULL,
+  `article_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `timestamp` datetime NOT NULL,
+  PRIMARY KEY (`user_id`, `article_id`),
+  CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `article` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comment_like` (
+  `user_id` int(11) NOT NULL,
+  `comment_id` int(11) NOT NULL,
+  `like_time` datetime NOT NULL,
+  PRIMARY KEY (`user_id`, `comment_id`),
+  CONSTRAINT `comment_like_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comment_like_ibfk_2` FOREIGN KEY (`comment_id`) REFERENCES `comment` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `log` (
+  `operation_id` int(11) NOT NULL,
+  `operation_type` varchar(50) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `operation_object_id` int(11) NOT NULL,
+  `operation_content` text NOT NULL,
+  PRIMARY KEY (`operation_id`),
+  CONSTRAINT `log_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

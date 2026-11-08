@@ -1,0 +1,36 @@
+{
+  "text_number": 224,
+  "id": "67552f0a13602ec03b41a896",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "rschema_0224",
+  "question": "The online task publishing and management system shall allow users to register and maintain personal information, including avatars and contact details. Users shall be able to publish tasks in the system, specifying the task title, description, budget, and deadline, and assigning the task to a specific category, city, or location. Other users shall be able to respond to published tasks, providing quotes and additional comments. After the task publisher selects an executor, both parties shall be able to communicate through messages within the system, exchange relevant files, and track task progress. Upon task completion, the publisher shall be able to evaluate the executor and provide ratings. The system shall also support managing basic user statistics, such as the number of completed tasks and failed tasks, to help other users better understand the reliability of executors. By associating cities, locations, categories, and tasks, the system shall effectively help users match suitable tasks with executors, improving task completion efficiency.",
+  "ddl": "-- Schema for database: `rschema_0224`\n\n-- Table: `users`\nCREATE TABLE `users` (\n  `user_id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `avatar` varchar(255) DEFAULT NULL,\n  `contact_details` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`user_id`),\n  UNIQUE KEY `username` (`username`),\n  UNIQUE KEY `email` (`email`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `categories`\nCREATE TABLE `categories` (\n  `category_id` int(11) NOT NULL AUTO_INCREMENT,\n  `category_name` varchar(255) NOT NULL,\n  PRIMARY KEY (`category_id`),\n  UNIQUE KEY `category_name` (`category_name`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `cities`\nCREATE TABLE `cities` (\n  `city_id` int(11) NOT NULL AUTO_INCREMENT,\n  `city_name` varchar(255) NOT NULL,\n  PRIMARY KEY (`city_id`),\n  UNIQUE KEY `city_name` (`city_name`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `locations`\nCREATE TABLE `locations` (\n  `location_id` int(11) NOT NULL AUTO_INCREMENT,\n  `location_name` varchar(255) NOT NULL,\n  PRIMARY KEY (`location_id`),\n  UNIQUE KEY `location_name` (`location_name`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `tasks`\nCREATE TABLE `tasks` (\n  `task_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `category_id` int(11) NOT NULL,\n  `city_id` int(11) NOT NULL,\n  `location_id` int(11) NOT NULL,\n  `task_title` varchar(255) NOT NULL,\n  `task_description` text NOT NULL,\n  `budget` decimal(10,2) NOT NULL,\n  `deadline` datetime NOT NULL,\n  PRIMARY KEY (`task_id`),\n  KEY `user_id` (`user_id`),\n  KEY `category_id` (`category_id`),\n  KEY `city_id` (`city_id`),\n  KEY `location_id` (`location_id`),\n  CONSTRAINT `tasks_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `tasks_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `tasks_ibfk_3` FOREIGN KEY (`city_id`) REFERENCES `cities` (`city_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `tasks_ibfk_4` FOREIGN KEY (`location_id`) REFERENCES `locations` (`location_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `responses`\nCREATE TABLE `responses` (\n  `response_id` int(11) NOT NULL AUTO_INCREMENT,\n  `task_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `quote` decimal(10,2) NOT NULL,\n  `comment` text NOT NULL,\n  PRIMARY KEY (`response_id`),\n  KEY `task_id` (`task_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `responses_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `responses_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `messages`\nCREATE TABLE `messages` (\n  `message_id` int(11) NOT NULL AUTO_INCREMENT,\n  `sender_id` int(11) NOT NULL,\n  `receiver_id` int(11) NOT NULL,\n  `message` text NOT NULL,\n  PRIMARY KEY (`message_id`),\n  KEY `sender_id` (`sender_id`),\n  KEY `receiver_id` (`receiver_id`),\n  CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `messages_ibfk_2` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `files`\nCREATE TABLE `files` (\n  `file_id` int(11) NOT NULL AUTO_INCREMENT,\n  `task_id` int(11) NOT NULL,\n  `file_name` varchar(255) NOT NULL,\n  `file_path` varchar(255) NOT NULL,\n  PRIMARY KEY (`file_id`),\n  KEY `task_id` (`task_id`),\n  CONSTRAINT `files_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `task_progress`\nCREATE TABLE `task_progress` (\n  `progress_id` int(11) NOT NULL AUTO_INCREMENT,\n  `task_id` int(11) NOT NULL,\n  `progress_status` varchar(255) NOT NULL,\n  PRIMARY KEY (`progress_id`),\n  KEY `task_id` (`task_id`),\n  CONSTRAINT `task_progress_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `user_statistics`\nCREATE TABLE `user_statistics` (\n  `statistic_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `completed_tasks` int(11) NOT NULL,\n  `failed_tasks` int(11) NOT NULL,\n  PRIMARY KEY (`statistic_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `user_statistics_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "categories",
+      "cities",
+      "locations",
+      "tasks",
+      "responses",
+      "messages",
+      "files",
+      "task_progress",
+      "user_statistics"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "categories": [],
+      "cities": [],
+      "locations": [],
+      "tasks": [],
+      "responses": [],
+      "messages": [],
+      "files": [],
+      "task_progress": [],
+      "user_statistics": []
+    }
+  }
+}

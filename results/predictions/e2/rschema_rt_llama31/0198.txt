@@ -1,0 +1,38 @@
+-- Schema for database: rschema_0198
+CREATE TABLE `community_information` (
+  `community_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `property_manager` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`community_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `property_information` (
+  `property_id` int(11) NOT NULL AUTO_INCREMENT,
+  `community_id` int(11) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `area` float NOT NULL,
+  `maintenance_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`property_id`),
+  CONSTRAINT `property_information_ibfk_1` FOREIGN KEY (`community_id`) REFERENCES `community_information` (`community_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_staff_information` (
+  `maintenance_staff_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_details` varchar(255) DEFAULT NULL,
+  `position` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`maintenance_staff_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_task` (
+  `property_id` int(11) NOT NULL,
+  `maintenance_staff_id` int(11) NOT NULL,
+  `maintenance_time` datetime NOT NULL,
+  `task_content` text NOT NULL,
+  `cost` decimal(10,2) NOT NULL,
+  `time` time NOT NULL,
+  PRIMARY KEY (`property_id`, `maintenance_staff_id`, `maintenance_time`),
+  CONSTRAINT `maintenance_task_ibfk_1` FOREIGN KEY (`maintenance_staff_id`) REFERENCES `maintenance_staff_information` (`maintenance_staff_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_task_ibfk_2` FOREIGN KEY (`property_id`) REFERENCES `property_information` (`property_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

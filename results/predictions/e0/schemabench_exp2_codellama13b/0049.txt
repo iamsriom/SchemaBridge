@@ -1,0 +1,133 @@
+-- Schema for database: schemabench_0049
+CREATE TABLE `users` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`username` varchar(255) NOT NULL,
+`email` varchar(255) NOT NULL,
+`password` varchar(255) NOT NULL,
+`role` varchar(255) NOT NULL,
+PRIMARY KEY (`id`),
+UNIQUE KEY `username` (`username`),
+UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `businesses` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`address` varchar(255) NOT NULL,
+`phone` varchar(255) NOT NULL,
+`email` varchar(255) NOT NULL,
+`website` varchar(255) NOT NULL,
+`description` varchar(255) NOT NULL,
+`logo` varchar(255) NOT NULL,
+`owner_id` int(11) NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `services` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`description` varchar(255) NOT NULL,
+`price` decimal(10,2) NOT NULL,
+`duration` int(11) NOT NULL,
+`business_id` int(11) NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `appointments` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`date` datetime NOT NULL,
+`time` datetime NOT NULL,
+`service_id` int(11) NOT NULL,
+`customer_id` int(11) NOT NULL,
+`business_id` int(11) NOT NULL,
+`status` varchar(255) NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`customer_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staff` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`email` varchar(255) NOT NULL,
+`phone` varchar(255) NOT NULL,
+`business_id` int(11) NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `availability` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`date` datetime NOT NULL,
+`time` datetime NOT NULL,
+`staff_id` int(11) NOT NULL,
+`business_id` int(11) NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notifications` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`type` varchar(255) NOT NULL,
+`message` varchar(255) NOT NULL,
+`appointment_id` int(11) NOT NULL,
+`user_id` int(11) NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `i18n` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`language` varchar(255) NOT NULL,
+`translation` varchar(255) NOT NULL,
+`appointment_id` int(11) NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `timezones` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`offset` varchar(255) NOT NULL,
+`dst` varchar(255) NOT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users_timezones` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`user_id` int(11) NOT NULL,
+`timezone_id` int(11) NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`timezone_id`) REFERENCES `timezones` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `businesses_timezones` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`business_id` int(11) NOT NULL,
+`timezone_id` int(11) NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`timezone_id`) REFERENCES `timezones` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `appointments_timezones` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`appointment_id` int(11) NOT NULL,
+`timezone_id` int(11) NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`timezone_id`) REFERENCES `timezones` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staff_timezones` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`staff_id` int(11) NOT NULL,
+`timezone_id` int(11) NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE ON UPDATE

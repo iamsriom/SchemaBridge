@@ -1,0 +1,46 @@
+{
+  "text_number": 33,
+  "id": "SB-033",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0033",
+  "question": "Background / Context\n\nThe project involves creating a plugin bundle for Django CMS that integrates Bootstrap 4 components. Django CMS Bootstrap 4 Plugin Bundle enables developers to incorporate a variety of Bootstrap 4 components into their Django CMS projects. Bootstrap is a popular front-end framework that provides pre-designed UI components for building responsive web pages.\n\nObjectives\n\nThe primary objective is to provide a set of reusable Bootstrap 4 components that can be easily integrated into Django CMS installations without directly modifying frontend styles or JavaScript.\n\nStakeholders & Users\n\n- Developers: Implement and customize the plugin in their Django CMS projects.\n- CMS Administrators: Utilize the components for creating content without requiring deep technical knowledge.\n\nFunctional Descriptions\n\n1. Component Integration:\n   - Integrate standard Bootstrap 4 components such as Alerts, Badge, Card, Carousel, Collapse, Grid, Jumbotron, Link, List Group, Media, Picture, Tabs, and Utilities.\n\n2. Database Tables:\n   - Maintain component-specific tables each with attributes and foreign keys to manage relations and content efficiently.\n\n3. Alerts:\n   - Configure alerts with context, dismissibility, and tag types.\n\n4. Badge and Card:\n   - Customize badge appearances and card layouts with different contexts and attributes.\n\n5. Carousel:\n   - Manage images and slides within a carousel setup, including controls for interval, indicators, and transitions.\n\n6. Collapse Content:\n   - Manage collapsible content for blockquotes, codes, and figures.\n\n7. Grid Systems:\n   - Utilize Bootstrap’s grid system to define responsive container, row, and column arrangements.\n\n8. Jumbotron:\n   - Configure jumbotron settings with fluid options and attributes.\n\n9. Media and Utilities:\n   - Facilitate media embedding and spacing utilities for layout adjustments.\n\nNon-Functional Descriptions\n\n- Scalability:\n  - Ensure compatibility with existing Django CMS installations and scalability for large content sets.\n  \n- Flexibility:\n  - Allow for the addition of new components without frontend dependencies. Styles and JavaScript must be added manually by the developers as per the project's requirements.\n\n- Usability:\n  - Ensure that CMS administrators can easily use the components through an intuitive interface.\n\n- Performance:\n  - The plugin should not negatively impact the performance of the Django CMS setup.\n\n- Maintainability:\n  - The plugin's codebase should be well-documented and maintainable for adapting to future updates of Django CMS or Bootstrap.",
+  "ddl": "-- Schema for database: schemabench_0033\nCREATE TABLE `alerts` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `context` varchar(255) NOT NULL,\n  `dismissible` tinyint(1) NOT NULL,\n  `tag_type` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `badges` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `context` varchar(255) NOT NULL,\n  `appearance` varchar(255) NOT NULL,\n  `card_layout` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `cards` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `context` varchar(255) NOT NULL,\n  `card_layout` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `carousels` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `image_id` int(11) NOT NULL,\n  `slide_id` int(11) NOT NULL,\n  `interval` int(11) NOT NULL,\n  `indicators` tinyint(1) NOT NULL,\n  `transitions` tinyint(1) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`image_id`) REFERENCES `images` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`slide_id`) REFERENCES `slides` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `collapses` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `content_id` int(11) NOT NULL,\n  `context` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`content_id`) REFERENCES `contents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `grids` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `container_id` int(11) NOT NULL,\n  `row_id` int(11) NOT NULL,\n  `column_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`container_id`) REFERENCES `containers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`row_id`) REFERENCES `rows` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`column_id`) REFERENCES `columns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `jumbotrons` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `context` varchar(255) NOT NULL,\n  `fluid` tinyint(1) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `media` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `embed_id` int(11) NOT NULL,\n  `spacing_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`embed_id`) REFERENCES `embeds` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`spacing_id`) REFERENCES `spacings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `utilities` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `utility_id` int(11) NOT NULL,\n  `spacing_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`utility_id`) REFERENCES `utilities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`spacing_id`) REFERENCES `spacings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `contents` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `content_type` varchar(255) NOT NULL,\n  `content_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`content_type`) REFERENCES `content_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`content_id`) REFERENCES `contents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `embeds` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `embed_type` varchar(255) NOT NULL,\n  `embed_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`embed_type`) REFERENCES `embed_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`embed_id`) REFERENCES `embeds` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `spacings` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `spacing_type` varchar(255) NOT NULL,\n  `spacing_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`spacing_type`) REFERENCES `spacing_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`spacing_id`) REFERENCES `spacings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `utilities` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `utility_type` varchar(255) NOT NULL,\n  `utility_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`utility_type`) REFERENCES `utility_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`utility_id`) REFERENCES `utilities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `content_types` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `content_type` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `embed_types` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `embed_type` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `spacing_types` (\n  `id` int(11",
+  "metadata": {
+    "database": "schemabench_0033",
+    "tables": [
+      "alerts",
+      "badges",
+      "cards",
+      "carousels",
+      "collapses",
+      "grids",
+      "jumbotrons",
+      "media",
+      "utilities",
+      "contents",
+      "embeds",
+      "spacings",
+      "content_types",
+      "embed_types",
+      "spacing_types"
+    ],
+    "columns_by_table": {
+      "alerts": [],
+      "badges": [],
+      "cards": [],
+      "carousels": [],
+      "collapses": [],
+      "grids": [],
+      "jumbotrons": [],
+      "media": [],
+      "utilities": [],
+      "contents": [],
+      "embeds": [],
+      "spacings": [],
+      "content_types": [],
+      "embed_types": [],
+      "spacing_types": []
+    }
+  }
+}

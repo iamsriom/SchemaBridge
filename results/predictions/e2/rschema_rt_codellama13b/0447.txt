@@ -1,0 +1,56 @@
+-- Schema for database: rschema_0447
+CREATE TABLE `User` (
+  `User_ID` int(11) NOT NULL,
+  `Username` varchar(255) NOT NULL,
+  `Password` varchar(255) NOT NULL,
+  `Phone_Number` varchar(15) DEFAULT NULL,
+  `Role` varchar(50) DEFAULT NULL,
+  `Associated_Unit` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`User_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Financial_Document` (
+  `Document_ID` int(11) NOT NULL,
+  `Document_Title` varchar(255) NOT NULL,
+  `Document_Content` text NOT NULL,
+  `Document_Category` varchar(100) DEFAULT NULL,
+  `Document_Number` varchar(50) DEFAULT NULL,
+  `Document_Level` varchar(50) DEFAULT NULL,
+  `Issue_Date` datetime DEFAULT NULL,
+  `Issuing_Unit` varchar(255) DEFAULT NULL,
+  `Remarks` text DEFAULT NULL,
+  `Validity_Status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`Document_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Notification` (
+  `Notification_ID` int(11) NOT NULL,
+  `Notification_Title` varchar(255) NOT NULL,
+  `Notification_Content` text NOT NULL,
+  `Issue_Date` datetime DEFAULT NULL,
+  `Notification_Status` varchar(50) DEFAULT NULL,
+  `User_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Notification_ID`),
+  CONSTRAINT `Notification_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `System_Configuration` (
+  `Configuration_ID` int(11) NOT NULL,
+  `Admin_ID` int(11) NOT NULL,
+  `System_Name` varchar(255) NOT NULL,
+  `Data_Type` varchar(100) DEFAULT NULL,
+  `Database_Directory` varchar(255) DEFAULT NULL,
+  `File_Upload_Directory` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Configuration_ID`),
+  CONSTRAINT `System_Configuration_ibfk_1` FOREIGN KEY (`Admin_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Document_Management` (
+  `Admin_ID` int(11) NOT NULL,
+  `Document_ID` int(11) NOT NULL,
+  `Operation_Time` datetime DEFAULT NULL,
+  `Operation_Type` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`Admin_ID`, `Document_ID`),
+  CONSTRAINT `Document_Management_ibfk_1` FOREIGN KEY (`Admin_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Document_Management_ibfk_2` FOREIGN KEY (`Document_ID`) REFERENCES `Financial_Document` (`Document_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

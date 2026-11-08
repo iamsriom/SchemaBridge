@@ -1,0 +1,100 @@
+-- Schema for database: `schemabench_0064`
+
+-- Table: `user_sessions`
+
+CREATE TABLE `user_sessions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `user_sessions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `page_views`
+
+CREATE TABLE `page_views` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_session_id` int(11) NOT NULL,
+  `page_url` varchar(255) NOT NULL,
+  `view_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_session_id` (`user_session_id`),
+  CONSTRAINT `page_views_ibfk_1` FOREIGN KEY (`user_session_id`) REFERENCES `user_sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `browser_stats`
+
+CREATE TABLE `browser_stats` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_session_id` int(11) NOT NULL,
+  `browser` varchar(255) NOT NULL,
+  `version` varchar(255) NOT NULL,
+  `os` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_session_id` (`user_session_id`),
+  CONSTRAINT `browser_stats_ibfk_1` FOREIGN KEY (`user_session_id`) REFERENCES `user_sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `geo_locations`
+
+CREATE TABLE `geo_locations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_session_id` int(11) NOT NULL,
+  `latitude` decimal(9,6) NOT NULL,
+  `longitude` decimal(9,6) NOT NULL,
+  `country` varchar(255) NOT NULL,
+  `city` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_session_id` (`user_session_id`),
+  CONSTRAINT `geo_locations_ibfk_1` FOREIGN KEY (`user_session_id`) REFERENCES `user_sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `events`
+
+CREATE TABLE `events` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_session_id` int(11) NOT NULL,
+  `event_type` varchar(255) NOT NULL,
+  `event_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_session_id` (`user_session_id`),
+  CONSTRAINT `events_ibfk_1` FOREIGN KEY (`user_session_id`) REFERENCES `user_sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `database_queries`
+
+CREATE TABLE `database_queries` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_session_id` int(11) NOT NULL,
+  `query` text NOT NULL,
+  `execution_time` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_session_id` (`user_session_id`),
+  CONSTRAINT `database_queries_ibfk_1` FOREIGN KEY (`user_session_id`) REFERENCES `user_sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `referer_urls`
+
+CREATE TABLE `referer_urls` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_session_id` int(11) NOT NULL,
+  `url` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_session_id` (`user_session_id`),
+  CONSTRAINT `referer_urls_ibfk_1` FOREIGN KEY (`user_session_id`) REFERENCES `user_sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `route_details`
+
+CREATE TABLE `route_details` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_session_id` int(11) NOT NULL,
+  `route` varchar(255) NOT NULL,
+  `parameters` text,
+  `queries` text,
+  PRIMARY KEY (`id`),
+  KEY `user_session_id` (`user_session_id`),
+  CONSTRAINT `route_details_ibfk_1` FOREIGN KEY (`user_session_id`) REFERENCES `user_sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

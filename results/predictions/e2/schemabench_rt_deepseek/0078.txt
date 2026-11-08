@@ -1,0 +1,48 @@
+-- Schema for database: schemabench_0078
+CREATE TABLE `billable` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `processor` varchar(255) DEFAULT NULL,
+  `processor_id` varchar(255) DEFAULT NULL,
+  `trial_ends_at` datetime DEFAULT NULL,
+  `card_type` varchar(50) DEFAULT NULL,
+  `card_last4` char(4) DEFAULT NULL,
+  `card_exp_month` int(2) DEFAULT NULL,
+  `card_exp_year` int(4) DEFAULT NULL,
+  `extra_billing_info` text DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pay_charges` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_type` varchar(50) NOT NULL,
+  `owner_id` int(11) NOT NULL,
+  `processor` varchar(255) DEFAULT NULL,
+  `processor_id` varchar(255) DEFAULT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `amount_refunded` decimal(10,2) DEFAULT NULL,
+  `card_type` varchar(50) DEFAULT NULL,
+  `card_last4` char(4) DEFAULT NULL,
+  `card_exp_month` int(2) DEFAULT NULL,
+  `card_exp_year` int(4) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `pay_charges_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `billable` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pay_subscriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `processor` varchar(255) DEFAULT NULL,
+  `processor_id` varchar(255) DEFAULT NULL,
+  `processor_plan` varchar(255) DEFAULT NULL,
+  `quantity` int(11) NOT NULL,
+  `trial_ends_at` datetime DEFAULT NULL,
+  `ends_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `status` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `pay_subscriptions_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `billable` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

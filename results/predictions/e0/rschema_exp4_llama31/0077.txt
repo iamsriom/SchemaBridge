@@ -1,0 +1,65 @@
+-- Schema for database: rschema_0077
+CREATE TABLE `users` (
+  `membership_number` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `password` char(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_number` char(20) NOT NULL,
+  `postal_code` char(10) NOT NULL,
+  `address` text NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `manufacturer` varchar(255) NOT NULL,
+  `image_url` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `id` int(11) NOT NULL,
+  `purchase_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `membership_number` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `purchase_date` datetime NOT NULL,
+  `delivery_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `announcements` (
+  `id` int(11) NOT NULL,
+  `number` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `registration_date` datetime NOT NULL,
+  `publisher_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `access_control` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `announcement_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `access_control_ibfk_1` (`user_id`),
+  KEY `access_control_ibfk_2` (`announcement_id`),
+  CONSTRAINT `access_control_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `access_control_ibfk_2` FOREIGN KEY (`announcement_id`) REFERENCES `announcements` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_products` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `order_products_ibfk_1` (`order_id`),
+  KEY `order_products_ibfk_2` (`product_id`),
+  CONSTRAINT `order_products_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_products_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

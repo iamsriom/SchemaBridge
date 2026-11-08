@@ -1,0 +1,125 @@
+-- Schema for database: schemabench_0145
+CREATE TABLE `type_efficacy` (
+  `damage_type_id` int(11) NOT NULL,
+  `target_type_id` int(11) NOT NULL,
+  `damage_factor` float DEFAULT NULL,
+  PRIMARY KEY (`damage_type_id`, `target_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `moves` (
+  `move_id` int(11) NOT NULL,
+  `move_name` varchar(255) DEFAULT NULL,
+  `type_id` int(11) DEFAULT NULL,
+  `move_power` int(11) DEFAULT NULL,
+  `move_pp` int(11) DEFAULT NULL,
+  `move_accuracy` int(11) DEFAULT NULL,
+  PRIMARY KEY (`move_id`),
+  CONSTRAINT `moves_ibfk_1` FOREIGN KEY (`type_id`) REFERENCES `types` (`type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon` (
+  `pok_id` int(11) NOT NULL,
+  `pok_name` varchar(255) DEFAULT NULL,
+  `pok_height` float DEFAULT NULL,
+  `pok_weight` float DEFAULT NULL,
+  `pok_base_experience` int(11) DEFAULT NULL,
+  PRIMARY KEY (`pok_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_moves` (
+  `pok_id` int(11) NOT NULL,
+  `version_group_id` int(11) DEFAULT NULL,
+  `move_id` int(11) NOT NULL,
+  `method_id` int(11) DEFAULT NULL,
+  `level` int(11) DEFAULT NULL,
+  PRIMARY KEY (`pok_id`, `move_id`),
+  CONSTRAINT `pokemon_moves_ibfk_1` FOREIGN KEY (`pok_id`) REFERENCES `pokemon` (`pok_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pokemon_moves_ibfk_2` FOREIGN KEY (`move_id`) REFERENCES `moves` (`move_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pokemon_moves_ibfk_3` FOREIGN KEY (`version_group_id`) REFERENCES `version_groups` (`version_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pokemon_moves_ibfk_4` FOREIGN KEY (`method_id`) REFERENCES `pokemon_move_methods` (`method_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_evolution` (
+  `evol_id` int(11) NOT NULL,
+  `evolved_species_id` int(11) NOT NULL,
+  `evol_minimum_level` int(11) DEFAULT NULL,
+  PRIMARY KEY (`evol_id`),
+  CONSTRAINT `pokemon_evolution_ibfk_1` FOREIGN KEY (`evolved_species_id`) REFERENCES `pokemon` (`pok_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_abilities` (
+  `pok_id` int(11) NOT NULL,
+  `abil_id` int(11) NOT NULL,
+  `is_hidden` tinyint(1) DEFAULT NULL,
+  `slot` int(11) DEFAULT NULL,
+  PRIMARY KEY (`pok_id`, `abil_id`),
+  CONSTRAINT `pokemon_abilities_ibfk_1` FOREIGN KEY (`pok_id`) REFERENCES `pokemon` (`pok_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pokemon_abilities_ibfk_2` FOREIGN KEY (`abil_id`) REFERENCES `abilities` (`abil_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `abilities` (
+  `abil_id` int(11) NOT NULL,
+  `abil_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`abil_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_types` (
+  `pok_id` int(11) NOT NULL,
+  `type_id` int(11) NOT NULL,
+  `slot` int(11) DEFAULT NULL,
+  PRIMARY KEY (`pok_id`, `type_id`),
+  CONSTRAINT `pokemon_types_ibfk_1` FOREIGN KEY (`pok_id`) REFERENCES `pokemon` (`pok_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pokemon_types_ibfk_2` FOREIGN KEY (`type_id`) REFERENCES `types` (`type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `base_stats` (
+  `pok_id` int(11) NOT NULL,
+  `b_hp` int(11) DEFAULT NULL,
+  `b_atk` int(11) DEFAULT NULL,
+  `b_def` int(11) DEFAULT NULL,
+  `b_sp_atk` int(11) DEFAULT NULL,
+  `b_sp_def` int(11) DEFAULT NULL,
+  `b_speed` int(11) DEFAULT NULL,
+  PRIMARY KEY (`pok_id`),
+  CONSTRAINT `base_stats_ibfk_1` FOREIGN KEY (`pok_id`) REFERENCES `pokemon` (`pok_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `version_groups` (
+  `version_id` int(11) NOT NULL,
+  `version_name` varchar(255) DEFAULT NULL,
+  `order` int(11) DEFAULT NULL,
+  PRIMARY KEY (`version_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_habitats` (
+  `hab_id` int(11) NOT NULL,
+  `hab_name` varchar(255) DEFAULT NULL,
+  `hab_description` text DEFAULT NULL,
+  PRIMARY KEY (`hab_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_evolution_matchup` (
+  `pok_id` int(11) NOT NULL,
+  `evolves_from_species_id` int(11) DEFAULT NULL,
+  `hab_id` int(11) DEFAULT NULL,
+  `gender_rate` int(11) DEFAULT NULL,
+  `capture_rate` int(11) DEFAULT NULL,
+  `base_happiness` int(11) DEFAULT NULL,
+  PRIMARY KEY (`pok_id`),
+  CONSTRAINT `pokemon_evolution_matchup_ibfk_1` FOREIGN KEY (`pok_id`) REFERENCES `pokemon` (`pok_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pokemon_evolution_matchup_ibfk_2` FOREIGN KEY (`evolves_from_species_id`) REFERENCES `pokemon` (`pok_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pokemon_evolution_matchup_ibfk_3` FOREIGN KEY (`hab_id`) REFERENCES `pokemon_habitats` (`hab_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `types` (
+  `type_id` int(11) NOT NULL,
+  `type_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`type_id`),
+  CONSTRAINT `types_ibfk_1` FOREIGN KEY (`type_id`) REFERENCES `type_efficacy` (`damage_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_move_methods` (
+  `method_id` int(11) NOT NULL,
+  `method_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`method_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

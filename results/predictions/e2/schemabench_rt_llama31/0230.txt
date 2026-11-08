@@ -1,0 +1,44 @@
+-- Schema for database: schemabench_0230
+CREATE TABLE `player` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `age` int(11) NOT NULL,
+  `team_affiliation` int(11) DEFAULT NULL,
+  `team_number` int(11) DEFAULT NULL,
+  `injury_status` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `player_ibfk_1` FOREIGN KEY (`team_affiliation`) REFERENCES `team` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `team` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `number_of_players` int(11) NOT NULL,
+  `manager` varchar(255) NOT NULL,
+  `captain` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `team_ibfk_1` FOREIGN KEY (`captain`) REFERENCES `player` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stadium` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `capacity` int(11) NOT NULL,
+  `condition` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `match` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `team1ID` int(11) NOT NULL,
+  `team2ID` int(11) NOT NULL,
+  `stadiumID` int(11) NOT NULL,
+  `captainHome` int(11) NOT NULL,
+  `captainAway` int(11) NOT NULL,
+  `score` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `match_ibfk_1` FOREIGN KEY (`team1ID`) REFERENCES `team` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `match_ibfk_2` FOREIGN KEY (`team2ID`) REFERENCES `team` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `match_ibfk_3` FOREIGN KEY (`stadiumID`) REFERENCES `stadium` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `match_ibfk_4` FOREIGN KEY (`captainHome`) REFERENCES `player` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `match_ibfk_5` FOREIGN KEY (`captainAway`) REFERENCES `player` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,24 @@
+\subsection{E5: Scalability and Cost}
+\label{sec:e5}
+
+\paragraph{Setup.}
+We evaluate a deterministic stratified sample of 120 schemata (40 per dataset; seed 42) spanning size tiers (Small/Medium/Large) and constraint-complexity tiers (Easy/Medium/Hard) using the paper score $s=2\min(f,10)+3c+\min(u,5)+0.2\max(0,n_{\mathrm{col}}/n_{\mathrm{tab}}-10)$. Describers are DeepSeek-Coder-6.7B-Instruct, GPT-5.4-mini, and Claude Sonnet~4.6 under the E1 basic and detailed prompts; the E5-A constructor is fixed to GPT-4o-mini (E2 protocol). E5-B holds GPT-5.4-mini detailed descriptions fixed and varies constructors. Metrics are micro-averaged F1 over element counts and mean nGED; failed/unparseable reconstructions are zero-scored with nGED~$=1$. Latency is wall-clock at concurrency~1. Prices are frozen in \texttt{experiments/e5/pricing.json} (verified 2026-11-06).
+ Consequently, GPT-5.4-mini and Claude conditions are reported as N/A (OpenAI API authentication failed on this host; Anthropic credentials were unavailable), while DeepSeek-basic round-trips reuse validated E1/E2 archives with tokenizer-estimated GPT-4o-mini costs labeled separately from live billed usage.
+
+\paragraph{Scalability.}
+Fig.~\ref{fig:e5_scalability} and Table~\ref{tab:e5_scalability} summarize size effects. For DeepSeek-basic$\rightarrow$GPT-4o-mini, referential F1 moves from 0.812 (Small) to 0.307 (Large) on the pooled sample (absolute drop 0.505), while mean nGED changes from 0.683 to 0.801. Provider/API latency is not interpreted as intrinsic model FLOPs; DeepSeek monetary cost is N/A under local GPU execution.
+
+\paragraph{Cost--fidelity trade-offs.}
+Table~\ref{tab:e5_cost_fidelity} and Fig.~\ref{fig:e5_pareto} compare constructors under fixed GPT-5.4-mini detailed descriptions. 
+Pareto-optimal configurations among comparable costed points: gpt\_5\_4\_mini/basic, deepseek/basic. 
+
+\paragraph{Cost of detailed prompting.}
+Table~\ref{tab:e5_prompt_efficiency} reports paired basic vs.\ detailed differences. Marginal USD per referential F1 percentage point is defined only when both $\Delta$Ref~F1$>0$ and $\Delta$cost$>0$. Where detailed reconstructions are unavailable (constructor blocked), deltas are marked N/A rather than imputed.
+
+\paragraph{Answer to RQ1 and RQ3.}
+RQ1: under the executable DeepSeek-basic round-trip setting, larger schemata exhibit lower referential fidelity and higher nGED than small schemata in the stratified sample; token demand grows with schema size, while monetary cost for open-weight local inference remains unmetered (N/A). RQ3: detailed prompting cannot yet be declared cost-justified for closed models on this host; for DeepSeek, detailed reconstructions require GPT-4o-mini calls that were blocked by API authentication, so we do not claim a positive marginal return without those paired measurements.
+
+% Figures (paths relative to reproducibility package):
+% experiments/e5/figures/e5_scalability.pdf
+% experiments/e5/figures/e5_pareto.pdf
+% experiments/e5/figures/e5_prompt_efficiency.pdf

@@ -1,0 +1,36 @@
+{
+  "text_number": 122,
+  "id": "67552f0a13602ec03b41a93c",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "rschema_0122",
+  "question": "The Customer Relationship Management (CRM) or Customer Service system is used to manage customer inquiries, conversation records, and organization information. Its main features include:\n1.Conversation Management: Records basic information about each conversation, including Conversation ID, Customer ID, Organization ID, Creation Time, Last Update Time, and baseId.\n2.Inquiry Management: Records customer inquiry information, including the status (open, closed, draft), category, content, creation time, and end time of the inquiry.\n3.Organization Information Management: Records the basic information of organizations, such as phone number, avatar, location, email, description, homepage link, and image link. Supports detailed management and updating of organization information, ensuring each organization has a unique phone number and avatar. Customers belong to specific organizations.\n4.Data Security: Ensures each conversation is linked to a secure base record, including baseId, encrypted information, creation time, and update time to enhance system security.\nEach customer has a unique Customer ID, name, and contact information.\nEach inquiry may involve multiple customers.\nEach conversation may involve multiple customers and multiple organizations.",
+  "ddl": "-- Schema for database: rschema_0122\n\nCREATE TABLE `conversation` (\n`conversation_id` int(11) NOT NULL,\n`customer_id` int(11) NOT NULL,\n`organization_id` int(11) NOT NULL,\n`creation_time` datetime NOT NULL,\n`last_update_time` datetime NOT NULL,\n`base_id` int(11) NOT NULL,\nPRIMARY KEY (`conversation_id`),\nFOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`organization_id`) REFERENCES `organization` (`organization_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `inquiry` (\n`inquiry_id` int(11) NOT NULL,\n`customer_id` int(11) NOT NULL,\n`status` varchar(255) NOT NULL,\n`category` varchar(255) NOT NULL,\n`content` varchar(255) NOT NULL,\n`creation_time` datetime NOT NULL,\n`end_time` datetime NOT NULL,\nPRIMARY KEY (`inquiry_id`),\nFOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `organization` (\n`organization_id` int(11) NOT NULL,\n`phone_number` varchar(255) NOT NULL,\n`avatar` varchar(255) NOT NULL,\n`location` varchar(255) NOT NULL,\n`email` varchar(255) NOT NULL,\n`description` varchar(255) NOT NULL,\n`homepage_link` varchar(255) NOT NULL,\n`image_link` varchar(255) NOT NULL,\nPRIMARY KEY (`organization_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `customer` (\n`customer_id` int(11) NOT NULL,\n`name` varchar(255) NOT NULL,\n`contact_information` varchar(255) NOT NULL,\nPRIMARY KEY (`customer_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `conversation_customer` (\n`conversation_id` int(11) NOT NULL,\n`customer_id` int(11) NOT NULL,\nPRIMARY KEY (`conversation_id`, `customer_id`),\nFOREIGN KEY (`conversation_id`) REFERENCES `conversation` (`conversation_id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `inquiry_customer` (\n`inquiry_id` int(11) NOT NULL,\n`customer_id` int(11) NOT NULL,\nPRIMARY KEY (`inquiry_id`, `customer_id`),\nFOREIGN KEY (`inquiry_id`) REFERENCES `inquiry` (`inquiry_id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `conversation_organization` (\n`conversation_id` int(11) NOT NULL,\n`organization_id` int(11) NOT NULL,\nPRIMARY KEY (`conversation_id`, `organization_id`),\nFOREIGN KEY (`conversation_id`) REFERENCES `conversation` (`conversation_id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`organization_id`) REFERENCES `organization` (`organization_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `inquiry_organization` (\n`inquiry_id` int(11) NOT NULL,\n`organization_id` int(11) NOT NULL,\nPRIMARY KEY (`inquiry_id`, `organization_id`),\nFOREIGN KEY (`inquiry_id`) REFERENCES `inquiry` (`inquiry_id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`organization_id`) REFERENCES `organization` (`organization_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `base_record` (\n`base_id` int(11) NOT NULL,\n`encrypted_information` varchar(255) NOT NULL,\n`creation_time` datetime NOT NULL,\n`update_time` datetime NOT NULL,\nPRIMARY KEY (`base_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `conversation_base_record` (\n`conversation_id` int(11) NOT NULL,\n`base_id` int(11) NOT NULL,\nPRIMARY KEY (`conversation_id`, `base_id`),\nFOREIGN KEY (`conversation_id`) REFERENCES `conversation` (`conversation_id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`base_id`) REFERENCES `base_record` (`base_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "conversation",
+      "inquiry",
+      "organization",
+      "customer",
+      "conversation_customer",
+      "inquiry_customer",
+      "conversation_organization",
+      "inquiry_organization",
+      "base_record",
+      "conversation_base_record"
+    ],
+    "columns_by_table": {
+      "conversation": [],
+      "inquiry": [],
+      "organization": [],
+      "customer": [],
+      "conversation_customer": [],
+      "inquiry_customer": [],
+      "conversation_organization": [],
+      "inquiry_organization": [],
+      "base_record": [],
+      "conversation_base_record": []
+    }
+  }
+}

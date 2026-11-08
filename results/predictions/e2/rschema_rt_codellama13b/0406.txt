@@ -1,0 +1,158 @@
+-- Schema for database: rschema_0406
+CREATE TABLE `general_ledger` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_name` varchar(255) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `transaction_date` datetime NOT NULL,
+  PRIMARY KEY (`transaction_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `accounts_receivable` (
+  `invoice_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `due_date` datetime NOT NULL,
+  PRIMARY KEY (`invoice_id`),
+  CONSTRAINT `accounts_receivable_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer_information` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_information` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `purchase_order` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_id` int(11) NOT NULL,
+  `order_date` datetime NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `purchase_order_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `supplier_information` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supplier_information` (
+  `supplier_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  PRIMARY KEY (`supplier_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `material` (
+  `material_id` int(11) NOT NULL AUTO_INCREMENT,
+  `material_name` varchar(255) NOT NULL,
+  `material_description` text DEFAULT NULL,
+  `material_type` varchar(255) NOT NULL,
+  PRIMARY KEY (`material_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `warehouse_information` (
+  `warehouse_id` int(11) NOT NULL AUTO_INCREMENT,
+  `warehouse_name` varchar(255) NOT NULL,
+  `warehouse_address` varchar(255) NOT NULL,
+  PRIMARY KEY (`warehouse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_plan` (
+  `project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_name` varchar(255) NOT NULL,
+  `planned_start_date` datetime NOT NULL,
+  `planned_end_date` datetime NOT NULL,
+  `execution_status` varchar(255) NOT NULL,
+  `project_progress` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supplier_material_supply` (
+  `supply_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_id` int(11) NOT NULL,
+  `material_id` int(11) NOT NULL,
+  PRIMARY KEY (`supply_id`),
+  CONSTRAINT `supplier_material_supply_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `supplier_information` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `supplier_material_supply_ibfk_2` FOREIGN KEY (`material_id`) REFERENCES `material` (`material_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `material_inventory` (
+  `inventory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `material_id` int(11) NOT NULL,
+  `warehouse_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `date` datetime NOT NULL,
+  PRIMARY KEY (`inventory_id`),
+  CONSTRAINT `material_inventory_ibfk_1` FOREIGN KEY (`material_id`) REFERENCES `material` (`material_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `material_inventory_ibfk_2` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse_information` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `accounts_payable` (
+  `payable_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `due_date` datetime NOT NULL,
+  PRIMARY KEY (`payable_id`),
+  CONSTRAINT `accounts_payable_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `supplier_information` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cost_accounting` (
+  `cost_accounting_id` int(11) NOT NULL AUTO_INCREMENT,
+  `cost_center` varchar(255) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `date` datetime NOT NULL,
+  PRIMARY KEY (`cost_accounting_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_information` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `hire_date` datetime NOT NULL,
+  `salary` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `performance` (
+  `evaluation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `evaluation_date` datetime NOT NULL,
+  `performance_score` int(11) NOT NULL,
+  PRIMARY KEY (`evaluation_id`),
+  CONSTRAINT `performance_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee_information` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `production_plan` (
+  `plan_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(255) NOT NULL,
+  `production_quantity` int(11) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  PRIMARY KEY (`plan_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `material_requirement_plan` (
+  `requirement_plan_id` int(11) NOT NULL AUTO_INCREMENT,
+  `material_id` int(11) NOT NULL,
+  `required_quantity` int(11) NOT NULL,
+  `date` datetime NOT NULL,
+  PRIMARY KEY (`requirement_plan_id`),
+  CONSTRAINT `material_requirement_plan_ibfk_1` FOREIGN KEY (`material_id`) REFERENCES `material` (`material_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `production_scheduling` (
+  `scheduling_id` int(11) NOT NULL AUTO_INCREMENT,
+  `production_plan_id` int(11) NOT NULL,
+  `production_date` datetime NOT NULL,
+  `scheduling_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`scheduling_id`),
+  CONSTRAINT `production_scheduling_ibfk_1` FOREIGN KEY (`production_plan_id`) REFERENCES `production_plan` (`plan_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_order` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `order_date` datetime NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `sales_order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer_information` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

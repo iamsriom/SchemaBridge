@@ -1,0 +1,96 @@
+-- Schema for database: schemabench_0008
+CREATE TABLE `comfy_cms_sites` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `hostname` varchar(255) NOT NULL,
+  `locale` varchar(10) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comfy_cms_layouts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `label` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `site_id` int(11) NOT NULL,
+  `parent_layout_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `comfy_cms_layouts_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `comfy_cms_sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comfy_cms_layouts_ibfk_2` FOREIGN KEY (`parent_layout_id`) REFERENCES `comfy_cms_layouts` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comfy_cms_pages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `label` varchar(255) NOT NULL,
+  `full_path` varchar(255) NOT NULL,
+  `content_cache` text NOT NULL,
+  `site_id` int(11) NOT NULL,
+  `layout_id` int(11) NOT NULL,
+  `parent_page_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `comfy_cms_pages_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `comfy_cms_sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comfy_cms_pages_ibfk_2` FOREIGN KEY (`layout_id`) REFERENCES `comfy_cms_layouts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comfy_cms_pages_ibfk_3` FOREIGN KEY (`parent_page_id`) REFERENCES `comfy_cms_pages` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comfy_cms_translations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `locale` varchar(10) NOT NULL,
+  `content` text NOT NULL,
+  `page_id` int(11) DEFAULT NULL,
+  `layout_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `comfy_cms_translations_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `comfy_cms_pages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comfy_cms_translations_ibfk_2` FOREIGN KEY (`layout_id`) REFERENCES `comfy_cms_layouts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comfy_cms_fragments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comfy_cms_snippets` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content` text NOT NULL,
+  `site_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `comfy_cms_snippets_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `comfy_cms_sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comfy_cms_files` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `file_path` varchar(255) NOT NULL,
+  `site_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `comfy_cms_files_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `comfy_cms_sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comfy_cms_revisions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `snippet_id` int(11) DEFAULT NULL,
+  `page_id` int(11) DEFAULT NULL,
+  `layout_id` int(11) DEFAULT NULL,
+  `revision_content` text NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `comfy_cms_revisions_ibfk_1` FOREIGN KEY (`snippet_id`) REFERENCES `comfy_cms_snippets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comfy_cms_revisions_ibfk_2` FOREIGN KEY (`page_id`) REFERENCES `comfy_cms_pages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comfy_cms_revisions_ibfk_3` FOREIGN KEY (`layout_id`) REFERENCES `comfy_cms_layouts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comfy_cms_categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `site_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `comfy_cms_categories_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `comfy_cms_sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comfy_cms_categorizations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `item_type` enum('snippet','page','file') NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `comfy_cms_categorizations_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `comfy_cms_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

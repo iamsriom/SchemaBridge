@@ -1,0 +1,99 @@
+-- Schema for database: schemabench_0219
+CREATE TABLE `fuel_pumps` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `fuel_type` varchar(255) NOT NULL,
+  `fuel_tank_id` int(11) NOT NULL,
+  `pump_location` varchar(255) NOT NULL,
+  `pump_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`fuel_tank_id`) REFERENCES `fuel_tanks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fuel_tanks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `fuel_type` varchar(255) NOT NULL,
+  `tank_location` varchar(255) NOT NULL,
+  `tank_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transactions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `fuel_pump_id` int(11) NOT NULL,
+  `transaction_date` datetime NOT NULL,
+  `transaction_amount` decimal(10,2) NOT NULL,
+  `transaction_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`fuel_pump_id`) REFERENCES `fuel_pumps` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employees` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_id` int(11) NOT NULL,
+  `payment_date` datetime NOT NULL,
+  `payment_amount` decimal(10,2) NOT NULL,
+  `payment_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fuel_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `fuel_type` varchar(255) NOT NULL,
+  `fuel_type_description` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `suppliers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_name` varchar(255) NOT NULL,
+  `supplier_email` varchar(255) NOT NULL,
+  `supplier_phone` varchar(255) NOT NULL,
+  `supplier_address` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tank_refills` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `fuel_tank_id` int(11) NOT NULL,
+  `supplier_id` int(11) NOT NULL,
+  `fuel_type_id` int(11) NOT NULL,
+  `refill_date` datetime NOT NULL,
+  `refill_amount` decimal(10,2) NOT NULL,
+  `refill_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`fuel_tank_id`) REFERENCES `fuel_tanks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`fuel_type_id`) REFERENCES `fuel_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_activities` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `fuel_pump_id` int(11) NOT NULL,
+  `maintenance_date` datetime NOT NULL,
+  `maintenance_description` varchar(255) NOT NULL,
+  `maintenance_cost` decimal(10,2) NOT NULL,
+  `maintenance_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`fuel_pump_id`) REFERENCES `fuel_pumps` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

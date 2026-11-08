@@ -1,0 +1,26 @@
+{
+  "text_number": 337,
+  "id": "67552f0a13602ec03b41a8f1",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0337",
+  "question": "An online learning platform's exam system is designed as follows:\nThe platform has multiple exams. Exam information includes Exam ID, Name, Time, etc.\nEach exam contains multiple practice questions. Practice question information includes Question ID, Exam ID it belongs to, Question Content, Score, etc.\nWhen a student takes an exam, the student submits answers. The submission record contains Submission ID, Exam ID, Student ID, Submission Status.    \nA student has information such as Student ID, Name, etc.\nEach submission has answers to multiple practice questions. The answer record contains Practice Question ID it belongs to, Submission ID it belongs to, Answer Content.",
+  "ddl": "-- Schema for database: rschema_0337\nCREATE TABLE `exams` (\n  `exam_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `time` datetime NOT NULL,\n  PRIMARY KEY (`exam_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `practice_questions` (\n  `question_id` int(11) NOT NULL,\n  `exam_id` int(11) NOT NULL,\n  `content` varchar(255) NOT NULL,\n  `score` int(11) NOT NULL,\n  PRIMARY KEY (`question_id`),\n  KEY `practice_questions_ibfk_1` (`exam_id`),\n  CONSTRAINT `practice_questions_ibfk_1` FOREIGN KEY (`exam_id`) REFERENCES `exams` (`exam_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `students` (\n  `student_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`student_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `submissions` (\n  `submission_id` int(11) NOT NULL,\n  `exam_id` int(11) NOT NULL,\n  `student_id` int(11) NOT NULL,\n  `status` varchar(255) NOT NULL,\n  PRIMARY KEY (`submission_id`),\n  KEY `submissions_ibfk_1` (`exam_id`),\n  KEY `submissions_ibfk_2` (`student_id`),\n  CONSTRAINT `submissions_ibfk_1` FOREIGN KEY (`exam_id`) REFERENCES `exams` (`exam_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `submissions_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `answers` (\n  `practice_question_id` int(11) NOT NULL,\n  `submission_id` int(11) NOT NULL,\n  `content` varchar(255) NOT NULL,\n  PRIMARY KEY (`practice_question_id`, `submission_id`),\n  KEY `answers_ibfk_1` (`practice_question_id`),\n  KEY `answers_ibfk_2` (`submission_id`),\n  CONSTRAINT `answers_ibfk_1` FOREIGN KEY (`practice_question_id`) REFERENCES `practice_questions` (`question_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `answers_ibfk_2` FOREIGN KEY (`submission_id`) REFERENCES `submissions` (`submission_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "exams",
+      "practice_questions",
+      "students",
+      "submissions",
+      "answers"
+    ],
+    "columns_by_table": {
+      "exams": [],
+      "practice_questions": [],
+      "students": [],
+      "submissions": [],
+      "answers": []
+    }
+  }
+}

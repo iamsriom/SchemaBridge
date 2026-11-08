@@ -1,0 +1,60 @@
+-- Schema for database: `rschema_0450`
+
+-- Table: `department`
+
+CREATE TABLE `department` (
+    `DepartmentID` int(11) NOT NULL,
+    `name` varchar(255) NOT NULL,
+    `description` text,
+    PRIMARY KEY (`DepartmentID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `user`
+
+CREATE TABLE `user` (
+    `UserID` int(11) NOT NULL,
+    `name` varchar(255) NOT NULL,
+    `affiliated_department` int(11) NOT NULL,
+    PRIMARY KEY (`UserID`),
+    FOREIGN KEY (`affiliated_department`) REFERENCES `department` (`DepartmentID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `asset_category`
+
+CREATE TABLE `asset_category` (
+    `TypeID` int(11) NOT NULL,
+    `category_name` varchar(255) NOT NULL,
+    `description` text,
+    PRIMARY KEY (`TypeID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `asset`
+
+CREATE TABLE `asset` (
+    `AssetID` int(11) NOT NULL,
+    `name` varchar(255) NOT NULL,
+    `type` int(11) NOT NULL,
+    `affiliated_department` int(11) NOT NULL,
+    `status` varchar(255) NOT NULL,
+    `scrapping_indicator` tinyint(1) NOT NULL DEFAULT 0,
+    `creator` int(11) NOT NULL,
+    `creation_time` datetime NOT NULL,
+    `updater` int(11) NOT NULL,
+    `update_time` datetime NOT NULL,
+    PRIMARY KEY (`AssetID`),
+    FOREIGN KEY (`type`) REFERENCES `asset_category` (`TypeID`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`affiliated_department`) REFERENCES `department` (`DepartmentID`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`creator`) REFERENCES `user` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`updater`) REFERENCES `user` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `asset_circulation_record`
+
+CREATE TABLE `asset_circulation_record` (
+    `AssetID` int(11) NOT NULL,
+    `circulating_user` int(11) NOT NULL,
+    `circulation_status` varchar(255) NOT NULL,
+    PRIMARY KEY (`AssetID`, `circulating_user`),
+    FOREIGN KEY (`AssetID`) REFERENCES `asset` (`AssetID`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`circulating_user`) REFERENCES `user` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

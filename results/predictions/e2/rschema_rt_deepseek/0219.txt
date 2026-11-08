@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0219
+CREATE TABLE `Card` (
+  `ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Artist` varchar(255) NOT NULL,
+  `Effect` varchar(255) DEFAULT NULL,
+  `Endurance` int(11) DEFAULT NULL,
+  `Intelligence` int(11) DEFAULT NULL,
+  `Power` int(11) DEFAULT NULL,
+  `Type` varchar(255) NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Card_Collection` (
+  `ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User` (
+  `ID` int(11) NOT NULL,
+  `Username` varchar(255) NOT NULL,
+  `Email` varchar(255) NOT NULL,
+  `Password` varchar(255) NOT NULL,
+  `Phone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Card_Collection_Association` (
+  `Card_ID` int(11) NOT NULL,
+  `Collection_ID` int(11) NOT NULL,
+  `Rarity` varchar(255) DEFAULT NULL,
+  `Collection_Number` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Card_ID`, `Collection_ID`),
+  CONSTRAINT `card_collection_association_ibfk_1` FOREIGN KEY (`Card_ID`) REFERENCES `Card` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `card_collection_association_ibfk_2` FOREIGN KEY (`Collection_ID`) REFERENCES `Card_Collection` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Card_Exchange` (
+  `User_1_ID` int(11) NOT NULL,
+  `User_2_ID` int(11) NOT NULL,
+  `Exchanged_Card_ID` int(11) NOT NULL,
+  `Exchange_Time` datetime NOT NULL,
+  PRIMARY KEY (`User_1_ID`, `User_2_ID`, `Exchange_Time`),
+  CONSTRAINT `user_card_exchange_ibfk_1` FOREIGN KEY (`Exchanged_Card_ID`) REFERENCES `Card` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_card_exchange_ibfk_2` FOREIGN KEY (`User_1_ID`) REFERENCES `User` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_card_exchange_ibfk_3` FOREIGN KEY (`User_2_ID`) REFERENCES `User` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

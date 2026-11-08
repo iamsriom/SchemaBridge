@@ -1,0 +1,26 @@
+{
+  "text_number": 231,
+  "id": "67552f0a13602ec03b41a8f9",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "rschema_0231",
+  "question": "Experience Management System Functional Requirements Description:\n\nUser Management: \nEach user of the Experience Management System is identified uniquely by a User ID. Additionally, each user possesses a username, a login password, a contact email, a phone number, and a registration time for efficient user management.\n\nExperience Record Management:\nThe system is capable of documenting detailed information about various experiences, including descriptions and code content. Each experience record also features a unique Experience ID (Primary key) for identification purposes.\n\nUser Activity Logging:\nEach experience record logs its creator's information, including the creator's User ID, as well as creation and modification times. This information aids in tracking the operation history of experience records and supports auditing functions.\n\nStatus Management:\nThe active status of each experience record is indicated by a status field, where a status value of 'F' signifies that the record is valid. This field allows the system to determine whether an experience record is in a valid status, and thus decide whether to display or use the record.\n\nMultilingual Support:\nThe character set and sorting rules of the table support Spanish, ensuring that the system can accurately store, retrieve, and display information of experience records in a multilingual environment.",
+  "ddl": "-- Schema for database: rschema_0231\n\nCREATE TABLE users (\n  user_id INT(11) NOT NULL AUTO_INCREMENT,\n  username VARCHAR(255) NOT NULL,\n  password VARCHAR(255) NOT NULL,\n  contact_email VARCHAR(255) NOT NULL,\n  phone_number VARCHAR(255) NOT NULL,\n  registration_time DATETIME NOT NULL,\n  PRIMARY KEY (user_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE experiences (\n  experience_id INT(11) NOT NULL AUTO_INCREMENT,\n  description TEXT NOT NULL,\n  code_content TEXT NOT NULL,\n  creator_user_id INT(11) NOT NULL,\n  creation_time DATETIME NOT NULL,\n  modification_time DATETIME NOT NULL,\n  status CHAR(1) NOT NULL DEFAULT 'F',\n  PRIMARY KEY (experience_id),\n  FOREIGN KEY (creator_user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE user_activity_log (\n  user_id INT(11) NOT NULL,\n  experience_id INT(11) NOT NULL,\n  creation_time DATETIME NOT NULL,\n  modification_time DATETIME NOT NULL,\n  PRIMARY KEY (user_id, experience_id),\n  FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (experience_id) REFERENCES experiences (experience_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE status (\n  status_id INT(11) NOT NULL AUTO_INCREMENT,\n  status_value CHAR(1) NOT NULL,\n  PRIMARY KEY (status_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE experience_status (\n  experience_id INT(11) NOT NULL,\n  status_id INT(11) NOT NULL,\n  PRIMARY KEY (experience_id, status_id),\n  FOREIGN KEY (experience_id) REFERENCES experiences (experience_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (status_id) REFERENCES status (status_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "experiences",
+      "user_activity_log",
+      "status",
+      "experience_status"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "experiences": [],
+      "user_activity_log": [],
+      "status": [],
+      "experience_status": []
+    }
+  }
+}

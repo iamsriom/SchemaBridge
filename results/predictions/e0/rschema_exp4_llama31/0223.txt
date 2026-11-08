@@ -1,0 +1,45 @@
+-- Schema for database: rschema_0223
+CREATE TABLE `role_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `positioning` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `role_types_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role_capabilities` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_type_id` int(11) NOT NULL,
+  `capability` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `role_capabilities_role_type_id_foreign` (`role_type_id`),
+  CONSTRAINT `role_capabilities_role_type_id_foreign` FOREIGN KEY (`role_type_id`) REFERENCES `role_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `creatures` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `role_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `creatures_role_id_foreign` (`role_id`),
+  CONSTRAINT `creatures_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `role_types` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `permissions_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role_permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_type_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `role_permissions_role_type_id_foreign` (`role_type_id`),
+  KEY `role_permissions_permission_id_foreign` (`permission_id`),
+  CONSTRAINT `role_permissions_role_type_id_foreign` FOREIGN KEY (`role_type_id`) REFERENCES `role_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `role_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

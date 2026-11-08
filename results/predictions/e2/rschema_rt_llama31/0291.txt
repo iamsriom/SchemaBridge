@@ -1,0 +1,37 @@
+-- Schema for database: rschema_0291
+CREATE TABLE `reagent` (
+  `reagent_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `specifications` varchar(255) DEFAULT NULL,
+  `inventory_quantity` int(11) NOT NULL,
+  `expiration_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`reagent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `laboratory` (
+  `laboratory_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`laboratory_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `personnel` (
+  `personnel_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `age` int(11) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `affiliated_laboratory_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`personnel_id`),
+  CONSTRAINT `personnel_ibfk_1` FOREIGN KEY (`affiliated_laboratory_id`) REFERENCES `laboratory` (`laboratory_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reagent_usage_record` (
+  `reagent_id` int(11) NOT NULL,
+  `usage_personnel_id` int(11) NOT NULL,
+  `usage_start_time` datetime NOT NULL,
+  `duration_of_usage` int(11) NOT NULL,
+  `quantity_used` int(11) NOT NULL,
+  PRIMARY KEY (`reagent_id`, `usage_personnel_id`, `usage_start_time`),
+  CONSTRAINT `reagent_usage_record_ibfk_1` FOREIGN KEY (`reagent_id`) REFERENCES `reagent` (`reagent_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reagent_usage_record_ibfk_2` FOREIGN KEY (`usage_personnel_id`) REFERENCES `personnel` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

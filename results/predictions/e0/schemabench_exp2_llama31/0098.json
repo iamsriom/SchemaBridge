@@ -1,0 +1,28 @@
+{
+  "text_number": 98,
+  "id": "SB-098",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0098",
+  "question": "Background / Context\n\nThis project aims to develop a system for predicting the outcomes of chess matches. The system will utilize historical game data and chess openings to provide predictions based on various factors such as player ratings and move sequences.\n\n Objectives\n\n- Develop a predictive model to determine the likely outcome of a chess match.\n- Utilize historical game data and chess openings to enhance prediction accuracy.\n- Provide insights and statistics to support prediction results.\n\n Stakeholders & Users\n\n- Stakeholders: Chess tournament organizers, analytics organizations, and chess clubs.\n- Users: Chess players, coaches, and analysts seeking to enhance strategic decision-making through outcome predictions.\n\n Functional Descriptions\n\n1. Game Data Management:\n   - Store and manage historical chess game data, including player information, event details, and game results.\n  \n2. Prediction Model Development:\n   - Develop and integrate a model to predict match outcomes based on inputs such as player Elo ratings, historical games, and opening sequences.\n\n3. Opening Analysis:\n   - Analyze and categorize openings and their variations to incorporate into the prediction model.\n\n4. User Interface:\n   - Provide an interface for users to input match details and retrieve outcome predictions.\n\n5. Data Integration:\n   - Integrate game and opening data with real-time updates and handling of related dependencies.\n\n Non-Functional Descriptions\n\n- Performance: The system should process predictions swiftly and handle large datasets efficiently.\n- Scalability: Design the system to accommodate a growing database of chess games and increased user interactions without degradation in performance.\n- Security: Ensure secure handling of all user data and predictions, particularly in a competitive context.\n- Usability: Ensure the system is intuitive and easy to use for individuals with varied levels of technical expertise.",
+  "ddl": "-- Schema for database: schemabench_0098\nCREATE TABLE `chess_players` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `elo_rating` int(11) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `chess_games` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `player1_id` int(11) NOT NULL,\n  `player2_id` int(11) NOT NULL,\n  `event_name` varchar(255) NOT NULL,\n  `event_date` datetime NOT NULL,\n  `result` enum('win','loss','draw') NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `player1_id` (`player1_id`),\n  KEY `player2_id` (`player2_id`),\n  CONSTRAINT `chess_games_ibfk_1` FOREIGN KEY (`player1_id`) REFERENCES `chess_players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `chess_games_ibfk_2` FOREIGN KEY (`player2_id`) REFERENCES `chess_players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `chess_openings` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `chess_opening_variations` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `opening_id` int(11) NOT NULL,\n  `variation` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `opening_id` (`opening_id`),\n  CONSTRAINT `chess_opening_variations_ibfk_1` FOREIGN KEY (`opening_id`) REFERENCES `chess_openings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `chess_game_openings` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `game_id` int(11) NOT NULL,\n  `opening_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `game_id` (`game_id`),\n  KEY `opening_id` (`opening_id`),\n  CONSTRAINT `chess_game_openings_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `chess_games` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `chess_game_openings_ibfk_2` FOREIGN KEY (`opening_id`) REFERENCES `chess_openings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `predictions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `game_id` int(11) NOT NULL,\n  `prediction` enum('win','loss','draw') NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `game_id` (`game_id`),\n  CONSTRAINT `predictions_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `chess_games` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "chess_players",
+      "chess_games",
+      "chess_openings",
+      "chess_opening_variations",
+      "chess_game_openings",
+      "predictions"
+    ],
+    "columns_by_table": {
+      "chess_players": [],
+      "chess_games": [],
+      "chess_openings": [],
+      "chess_opening_variations": [],
+      "chess_game_openings": [],
+      "predictions": []
+    }
+  }
+}

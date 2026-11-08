@@ -1,0 +1,44 @@
+{
+  "text_number": 59,
+  "id": "SB-059",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0059",
+  "question": "1) Background / Context:\n\nThis project involves developing a multi-tenancy toolkit for the Laravel framework. The toolkit aims to facilitate the creation of multi-tenant Software as a Service (SaaS) platforms. Multi-tenancy allows a single instance of an application to serve multiple tenants, with each tenant's data and assets kept separate.\n\n2) Objectives:\n\nThe primary objective is to provide a modular solution that allows developers to implement multi-tenancy in Laravel applications flexibly. The toolkit should enable developers to choose which components to integrate, thus tailoring the solution to their specific application needs without unnecessary overhead.\n\n3) Stakeholders & Users:\n\n- Developers: The primary users are Laravel developers who wish to create multi-tenant applications. \n- SaaS Providers: Businesses looking to deploy scalable SaaS solutions.\n- Tenants (End-users): Organizations or individuals that will utilize the SaaS application, each as a separate tenant.\n\n4) Functional Descriptions:\n\n- Tenant Management: Support for creating, updating, and deleting tenants, where a tenant can be any Eloquent Model.\n- Data Isolation: Enable strict separation of data and assets per tenant, configurable by hostname, user, or team.\n- Modular Components: Developers can select specific modules needed for tenancy, such as database connections or asset management.\n- Host Management: Manage hostnames linking to specific tenants, with options like redirecting, enforcing HTTPS, and maintenance mode.\n\n5) Non-Functional Descriptions:\n\n- Modularity: The toolkit should allow selective integration of components.\n- Scalability: Support the deployment of projects from small to large scale.\n- Flexibility: Allow configurations based on various criteria such as hostname or user.\n- Maintenance: Provide features to manage host maintenance effectively.",
+  "ddl": "-- Schema for database: schemabench_0059\nCREATE TABLE `tenants` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`name` varchar(255) NOT NULL,\n`email` varchar(255) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tenant_data` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`tenant_id` int(11) NOT NULL,\n`data` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `hostnames` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`hostname` varchar(255) NOT NULL,\n`tenant_id` int(11) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `assets` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`tenant_id` int(11) NOT NULL,\n`asset_type` varchar(255) NOT NULL,\n`asset_data` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `host_maintenance` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`hostname` varchar(255) NOT NULL,\n`tenant_id` int(11) NOT NULL,\n`maintenance_mode` tinyint(1) NOT NULL,\n`maintenance_start` datetime NOT NULL,\n`maintenance_end` datetime NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tenant_modules` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`tenant_id` int(11) NOT NULL,\n`module_name` varchar(255) NOT NULL,\n`module_data` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tenant_configs` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`tenant_id` int(11) NOT NULL,\n`config_name` varchar(255) NOT NULL,\n`config_value` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tenant_logs` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`tenant_id` int(11) NOT NULL,\n`log_type` varchar(255) NOT NULL,\n`log_data` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tenant_notifications` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`tenant_id` int(11) NOT NULL,\n`notification_type` varchar(255) NOT NULL,\n`notification_data` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tenant_settings` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`tenant_id` int(11) NOT NULL,\n`setting_name` varchar(255) NOT NULL,\n`setting_value` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tenant_users` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`tenant_id` int(11) NOT NULL,\n`user_name` varchar(255) NOT NULL,\n`user_email` varchar(255) NOT NULL,\n`user_password` varchar(255) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tenant_roles` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`tenant_id` int(11) NOT NULL,\n`role_name` varchar(255) NOT NULL,\n`role_description` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tenant_permissions` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`tenant_id` int(11) NOT NULL,\n`permission_name` varchar(255) NOT NULL,\n`permission_description` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tenant_user_roles` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`tenant_id` int(11) NOT NULL,\n`user_id` int(11) NOT NULL,\n`role_id` int(11) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,",
+  "metadata": {
+    "database": "schemabench_0059",
+    "tables": [
+      "tenants",
+      "tenant_data",
+      "hostnames",
+      "assets",
+      "host_maintenance",
+      "tenant_modules",
+      "tenant_configs",
+      "tenant_logs",
+      "tenant_notifications",
+      "tenant_settings",
+      "tenant_users",
+      "tenant_roles",
+      "tenant_permissions",
+      "tenant_user_roles"
+    ],
+    "columns_by_table": {
+      "tenants": [],
+      "tenant_data": [],
+      "hostnames": [],
+      "assets": [],
+      "host_maintenance": [],
+      "tenant_modules": [],
+      "tenant_configs": [],
+      "tenant_logs": [],
+      "tenant_notifications": [],
+      "tenant_settings": [],
+      "tenant_users": [],
+      "tenant_roles": [],
+      "tenant_permissions": [],
+      "tenant_user_roles": []
+    }
+  }
+}

@@ -1,0 +1,37 @@
+-- Schema for database: rschema_0441
+CREATE TABLE `projects` (
+  `project_id` int(11) NOT NULL,
+  `project_name` varchar(255) NOT NULL,
+  `budget` decimal(10,2) NOT NULL,
+  `remaining_funds` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `role` enum('administrator','general_user') NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_users` (
+  `project_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`project_id`, `user_id`),
+  KEY `project_id` (`project_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `project_users_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_users_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transactions` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `record_time` datetime NOT NULL,
+  `transaction_amount` decimal(10,2) NOT NULL,
+  `purpose_description` varchar(255) NOT NULL,
+  `transaction_operator` varchar(255) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  PRIMARY KEY (`record_id`),
+  KEY `project_id` (`project_id`),
+  CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

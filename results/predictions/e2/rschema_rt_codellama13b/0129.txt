@@ -1,0 +1,44 @@
+-- Schema for database: rschema_0129
+CREATE TABLE `room` (
+  `room_id` int(11) NOT NULL,
+  `room_name` varchar(255) NOT NULL,
+  `room_description` text DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  `creator` int(11) NOT NULL,
+  PRIMARY KEY (`room_id`),
+  CONSTRAINT `room_ibfk_1` FOREIGN KEY (`creator`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `registration_time` datetime NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `message` (
+  `creation_time` datetime NOT NULL,
+  `room_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `message_content` text NOT NULL,
+  `message_type` varchar(50) NOT NULL,
+  `update_record` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `deletion_status` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`creation_time`, `room_id`, `user_id`),
+  CONSTRAINT `message_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `room` (`room_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `message_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_join_room` (
+  `join_time` datetime NOT NULL,
+  `room_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `exit_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`join_time`, `room_id`, `user_id`, `exit_time`),
+  CONSTRAINT `user_join_room_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `room` (`room_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_join_room_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

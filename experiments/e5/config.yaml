@@ -1,0 +1,65 @@
+experiment: e5
+title: "E5: Scalability and Cost"
+seed: 42
+max_spend_usd_env: E5_MAX_SPEND_USD
+max_spend_usd_default: 25.0
+sample:
+  per_dataset: 40
+  datasets: [enterprise145, rschema, schemabench]
+  total: 120
+concurrency: 1
+bootstrap:
+  n_resamples: 1000
+  seed: 42
+models:
+  deepseek:
+    display_name: DeepSeek-Coder-6.7B-Instruct
+    provider: huggingface_local
+    model_id: deepseek-ai/deepseek-coder-6.7b-instruct
+    local_snapshot: /data/LLM4DBdesign-main/agent/models--deepseek-ai--deepseek-coder-6.7b-instruct/snapshots/e5d64addd26a6a1db0f9b863abf6ee3141936807
+    role: describer
+  gpt_5_4_mini:
+    display_name: GPT-5.4-mini
+    provider: openai
+    model_id: gpt-5.4-mini
+    snapshot: gpt-5.4-mini-2026-03-17
+    role: describer_and_constructor
+  claude_sonnet_4_6:
+    display_name: Claude Sonnet 4.6
+    provider: anthropic
+    model_id: claude-sonnet-4-6
+    role: describer_and_constructor
+  gpt_4o_mini:
+    display_name: GPT-4o-mini
+    provider: openai
+    model_id: gpt-4o-mini
+    role: e2_constructor
+decoding:
+  schema2text:
+    temperature: 0.2
+    max_new_tokens: 3072
+    top_p: 1.0
+  constructor:
+    temperature: 0.2
+    max_tokens: 4096
+prompts:
+  basic: prompts/describer_basic.txt
+  detailed: prompts/describer_detailed.txt
+  constructor: prompts/constructor.txt
+paths:
+  root: /data/SchemaBridge
+  outputs: experiments/e5/outputs
+  tables: experiments/e5/tables
+  figures: experiments/e5/figures
+  cache: experiments/e5/cache
+  pricing: experiments/e5/pricing.json
+reuse:
+  deepseek_basic_descriptions:
+    rschema: results/predictions/e1/rschema_schema2text_deepseek
+    schemabench: results/predictions/e1/schemabench_schema2text_deepseek
+  deepseek_basic_roundtrip:
+    rschema: results/predictions/e2/rschema_rt_deepseek
+    schemabench: results/predictions/e2/schemabench_rt_deepseek
+execution:
+  python: /data/Text2ER/.venv/bin/python
+  environment_note: "Wall-clock latency at concurrency=1; provider latency ≠ intrinsic compute."

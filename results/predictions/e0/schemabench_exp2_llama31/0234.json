@@ -1,0 +1,30 @@
+{
+  "text_number": 234,
+  "id": "SB-234",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0234",
+  "question": "1) Background / Context\n\nThe project involves developing a blogging platform with a structured database to manage and retrieve blog-related information efficiently. The system supports typical blogging functionalities and is aimed at enhancing content management and user interaction within the platform.\n\n2) Objectives\n\n- To provide users with the ability to create, edit, and publish blog posts.\n- To facilitate user interaction through comments on posts.\n- To enable categorization of posts using tags for better discoverability.\n\n3) Stakeholders & Users\n\n- Blog Authors: Users who create and manage blog content.\n- Readers: Users who read blog posts and participate in discussions through comments.\n- Administrators: Users who manage platform operations, including user accounts and content moderation.\n\n4) Functional Descriptions\n\n- User Management: Users can register, log in, and manage their account details, including email and password. The system tracks the last login time.\n- Blog Post Management: Users can create, edit, and delete blog posts. Each post can have a title, content, and an optional cover image. Posts are associated with the user who created them.\n- Commenting System: Registered users can comment on blog posts. Each comment is linked to both the post and the commenting user.\n- Tag Management: Posts can be tagged with various keywords to enhance organization and searchability. Tags are managed separately and can be associated with multiple posts.\n\n5) Non-Functional Descriptions\n\n- Scalability: The system should efficiently handle an increasing number of users and posts.\n- Security: User credentials must be securely stored, and password protection mechanisms should be in place.\n- Reliability: The system should provide a reliable experience with minimal downtime and data integrity for all user interactions.",
+  "ddl": "-- Schema for database: schemabench_0234\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `email` varchar(255) NOT NULL,\n  `password` char(60) NOT NULL,\n  `last_login` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `email` (`email`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_roles` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_user_roles` (\n  `user_id` int(11) NOT NULL,\n  `role_id` int(11) NOT NULL,\n  PRIMARY KEY (`user_id`, `role_id`),\n  KEY `user_id` (`user_id`),\n  KEY `role_id` (`role_id`),\n  CONSTRAINT `user_user_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `user_user_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `user_roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `posts` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `content` text NOT NULL,\n  `cover_image` varchar(255) DEFAULT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime DEFAULT NULL,\n  `author_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `author_id` (`author_id`),\n  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `comments` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `content` text NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `post_id` int(11) NOT NULL,\n  `author_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `post_id` (`post_id`),\n  KEY `author_id` (`author_id`),\n  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tags` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `post_tags` (\n  `post_id` int(11) NOT NULL,\n  `tag_id` int(11) NOT NULL,\n  PRIMARY KEY (`post_id`, `tag_id`),\n  KEY `post_id` (`post_id`),\n  KEY `tag_id` (`tag_id`),\n  CONSTRAINT `post_tags_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `post_tags_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "user_roles",
+      "user_user_roles",
+      "posts",
+      "comments",
+      "tags",
+      "post_tags"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "user_roles": [],
+      "user_user_roles": [],
+      "posts": [],
+      "comments": [],
+      "tags": [],
+      "post_tags": []
+    }
+  }
+}

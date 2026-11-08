@@ -1,0 +1,57 @@
+-- Schema for database: rschema_0372
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `gender` char(1) NOT NULL,
+  `registration_time` datetime NOT NULL,
+  `last_login_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `region` (
+  `region_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`region_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `league` (
+  `league_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `responsible_person_id` int(11) NOT NULL,
+  PRIMARY KEY (`league_id`),
+  CONSTRAINT `league_ibfk_1` FOREIGN KEY (`responsible_person_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `league_region_association` (
+  `league_id` int(11) NOT NULL,
+  `region_id` int(11) NOT NULL,
+  PRIMARY KEY (`league_id`, `region_id`),
+  CONSTRAINT `league_region_association_ibfk_1` FOREIGN KEY (`league_id`) REFERENCES `league` (`league_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `league_region_association_ibfk_2` FOREIGN KEY (`region_id`) REFERENCES `region` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `league_hierarchy` (
+  `lower_league_id` int(11) NOT NULL,
+  `upper_league_id` int(11) NOT NULL,
+  PRIMARY KEY (`lower_league_id`, `upper_league_id`),
+  CONSTRAINT `league_hierarchy_ibfk_1` FOREIGN KEY (`lower_league_id`) REFERENCES `league` (`league_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `league_hierarchy_ibfk_2` FOREIGN KEY (`upper_league_id`) REFERENCES `league` (`league_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `league_creator` (
+  `league_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`league_id`, `user_id`),
+  CONSTRAINT `league_creator_ibfk_1` FOREIGN KEY (`league_id`) REFERENCES `league` (`league_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `league_creator_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `league_modifier` (
+  `league_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`league_id`, `user_id`),
+  CONSTRAINT `league_modifier_ibfk_1` FOREIGN KEY (`league_id`) REFERENCES `league` (`league_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `league_modifier_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

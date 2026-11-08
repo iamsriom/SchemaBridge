@@ -1,0 +1,49 @@
+-- Schema for database: rschema_0133
+CREATE TABLE `Book_Category` (
+  `Book_Type_ID` int(11) NOT NULL,
+  `Description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Book_Type_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Reader_Category` (
+  `Reader_Type_ID` int(11) NOT NULL,
+  `Description` varchar(255) DEFAULT NULL,
+  `Type_Name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Reader_Type_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Book` (
+  `Book_ID` int(11) NOT NULL,
+  `Title` varchar(255) DEFAULT NULL,
+  `Author` varchar(255) DEFAULT NULL,
+  `Publisher` varchar(255) DEFAULT NULL,
+  `Publication_Date` datetime DEFAULT NULL,
+  `Price` float DEFAULT NULL,
+  `Content_Description` varchar(255) DEFAULT NULL,
+  `Book_Type_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Book_ID`),
+  CONSTRAINT `book_ibfk_1` FOREIGN KEY (`Book_Type_ID`) REFERENCES `Book_Category` (`Book_Type_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Reader` (
+  `Reader_ID` int(11) NOT NULL,
+  `Description` varchar(255) DEFAULT NULL,
+  `Contact_Number` int(11) DEFAULT NULL,
+  `Credit_Score` float DEFAULT NULL,
+  `Reader_Type_ID` int(11) NOT NULL,
+  `Type_Name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Reader_ID`),
+  CONSTRAINT `reader_ibfk_1` FOREIGN KEY (`Reader_Type_ID`) REFERENCES `Reader_Category` (`Reader_Type_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Borrowing_Information` (
+  `Book_ID` int(11) NOT NULL,
+  `Reader_ID` int(11) NOT NULL,
+  `Borrow_Date` datetime NOT NULL,
+  `Return_Date` datetime DEFAULT NULL,
+  `Fine` float DEFAULT NULL,
+  `Renewal_Count` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Book_ID`, `Reader_ID`, `Borrow_Date`),
+  CONSTRAINT `borrowing_ibfk_1` FOREIGN KEY (`Book_ID`) REFERENCES `Book` (`Book_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `borrowing_ibfk_2` FOREIGN KEY (`Reader_ID`) REFERENCES `Reader` (`Reader_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,55 @@
+-- Schema for database: rschema_0130
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `customer_type` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project` (
+  `project_id` int(11) NOT NULL,
+  `project_status` varchar(255) DEFAULT NULL,
+  `service_type` varchar(255) DEFAULT NULL,
+  `start_date` datetime DEFAULT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `project_value` varchar(255) DEFAULT NULL,
+  `is_digital_project` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `member` (
+  `member_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  `date_of_hire` datetime DEFAULT NULL,
+  `date_of_departure` datetime DEFAULT NULL,
+  PRIMARY KEY (`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `corporate_customer` (
+  `corporate_tax_id` int(11) NOT NULL,
+  `corporate_name` varchar(255) DEFAULT NULL,
+  `corporate_size` varchar(255) DEFAULT NULL,
+  `corporate_type` varchar(255) DEFAULT NULL,
+  `customer_id` int(11) DEFAULT NULL,
+  `postal_code` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`corporate_tax_id`),
+  CONSTRAINT `corporate_customer_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `individual_customer` (
+  `personal_tax_id` int(11) NOT NULL,
+  `customer_id` int(11) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `date_of_birth` datetime DEFAULT NULL,
+  `postal_code` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`personal_tax_id`),
+  CONSTRAINT `individual_customer_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_member_relationship` (
+  `project_id` int(11) NOT NULL,
+  `member_id` int(11) NOT NULL,
+  PRIMARY KEY (`project_id`, `member_id`),
+  CONSTRAINT `project_member_relationship_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_member_relationship_ibfk_2` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,90 @@
+-- Schema for database: schemabench_0193
+CREATE TABLE `titles` (
+  `isbn` bigint(13) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`isbn`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `authors` (
+  `author_name` varchar(255) NOT NULL,
+  `isbn` bigint(13) NOT NULL,
+  `author_rank` int(11) DEFAULT 1,
+  PRIMARY KEY (`author_name`, `isbn`),
+  CONSTRAINT `authors_ibfk_1` FOREIGN KEY (`isbn`) REFERENCES `titles` (`isbn`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `themes` (
+  `theme_name` varchar(255) NOT NULL,
+  `isbn` bigint(13) NOT NULL,
+  `theme_rank` int(11) DEFAULT 1,
+  PRIMARY KEY (`theme_name`, `isbn`),
+  CONSTRAINT `themes_ibfk_1` FOREIGN KEY (`isbn`) REFERENCES `titles` (`isbn`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `qualities` (
+  `quality_name` varchar(255) NOT NULL,
+  `isbn` bigint(13) NOT NULL,
+  `quality_rank` int(11) DEFAULT 1,
+  PRIMARY KEY (`quality_name`, `isbn`),
+  CONSTRAINT `qualities_ibfk_1` FOREIGN KEY (`isbn`) REFERENCES `titles` (`isbn`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cities` (
+  `city_id` int(11) NOT NULL AUTO_INCREMENT,
+  `city_name` varchar(255) DEFAULT NULL,
+  `country` varchar(255) DEFAULT 'USA',
+  PRIMARY KEY (`city_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) DEFAULT NULL,
+  `surname` varchar(255) DEFAULT NULL,
+  `dob` date DEFAULT NULL,
+  `sex` char(1) DEFAULT NULL,
+  `date_joined` datetime DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `city_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`),
+  CONSTRAINT `customers_ibfk_1` FOREIGN KEY (`city_id`) REFERENCES `cities` (`city_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prices` (
+  `isbn` bigint(13) NOT NULL,
+  `price` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`isbn`),
+  CONSTRAINT `prices_ibfk_1` FOREIGN KEY (`isbn`) REFERENCES `titles` (`isbn`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `isbn` bigint(13) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `purchase_date` datetime DEFAULT NULL,
+  `cost` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`order_id`, `isbn`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`isbn`) REFERENCES `titles` (`isbn`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ratings` (
+  `isbn` bigint(13) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `rating_date` datetime DEFAULT NULL,
+  `rating` int(11) DEFAULT NULL,
+  PRIMARY KEY (`isbn`, `customer_id`),
+  CONSTRAINT `ratings_ibfk_1` FOREIGN KEY (`isbn`) REFERENCES `titles` (`isbn`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ratings_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `viewings` (
+  `isbn` bigint(13) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `viewing_date` datetime DEFAULT NULL,
+  `view_time` time DEFAULT NULL,
+  PRIMARY KEY (`isbn`, `customer_id`),
+  CONSTRAINT `viewings_ibfk_1` FOREIGN KEY (`isbn`) REFERENCES `titles` (`isbn`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `viewings_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

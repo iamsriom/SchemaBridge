@@ -1,0 +1,100 @@
+-- Schema for database: rschema_0402
+
+CREATE TABLE `doctors` (
+`doctor_id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`gender` varchar(255) NOT NULL,
+`title` varchar(255) NOT NULL,
+`date_of_birth` datetime NOT NULL,
+`years_of_employment` int(11) NOT NULL,
+`work_permit` varchar(255) NOT NULL,
+PRIMARY KEY (`doctor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `departments` (
+`department_id` int(11) NOT NULL AUTO_INCREMENT,
+`department_name` varchar(255) NOT NULL,
+`personnel` int(11) NOT NULL,
+`department_number` varchar(255) NOT NULL,
+`department_phone_number` varchar(255) NOT NULL,
+`department_address` varchar(255) NOT NULL,
+PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patients` (
+`patient_id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`gender` varchar(255) NOT NULL,
+`age` int(11) NOT NULL,
+`contact_information` varchar(255) NOT NULL,
+`diagnosis_description` varchar(255) NOT NULL,
+`date_of_consultation` datetime NOT NULL,
+PRIMARY KEY (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `diagnosis_and_treatments` (
+`case_number` int(11) NOT NULL AUTO_INCREMENT,
+`diagnosis_and_treatment_content` varchar(255) NOT NULL,
+PRIMARY KEY (`case_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wards` (
+`ward_id` int(11) NOT NULL AUTO_INCREMENT,
+`ward_number` varchar(255) NOT NULL,
+`number_of_beds` int(11) NOT NULL,
+`ward_level` varchar(255) NOT NULL,
+PRIMARY KEY (`ward_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `registration_categories` (
+`category_id` int(11) NOT NULL AUTO_INCREMENT,
+`category_name` varchar(255) NOT NULL,
+PRIMARY KEY (`category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `drugs` (
+`drug_id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`quantity` int(11) NOT NULL,
+`price` int(11) NOT NULL,
+`barcode` varchar(255) NOT NULL,
+PRIMARY KEY (`drug_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `drug_lists` (
+`drug_list_id` int(11) NOT NULL AUTO_INCREMENT,
+`drug_information` varchar(255) NOT NULL,
+PRIMARY KEY (`drug_list_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctor_department` (
+`doctor_id` int(11) NOT NULL,
+`department_id` int(11) NOT NULL,
+PRIMARY KEY (`doctor_id`, `department_id`),
+CONSTRAINT `doctor_department_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT `doctor_department_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patient_ward` (
+`patient_id` int(11) NOT NULL,
+`ward_id` int(11) NOT NULL,
+PRIMARY KEY (`patient_id`, `ward_id`),
+CONSTRAINT `patient_ward_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT `patient_ward_ibfk_2` FOREIGN KEY (`ward_id`) REFERENCES `wards` (`ward_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `diagnosis_and_treatment_patient` (
+`case_number` int(11) NOT NULL,
+`patient_id` int(11) NOT NULL,
+PRIMARY KEY (`case_number`, `patient_id`),
+CONSTRAINT `diagnosis_and_treatment_patient_ibfk_1` FOREIGN KEY (`case_number`) REFERENCES `diagnosis_and_treatments` (`case_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT `diagnosis_and_treatment_patient_ibfk_2` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `drug_list_drug` (
+`drug_list_id` int(11) NOT NULL,
+`drug_id` int(11) NOT NULL,
+PRIMARY KEY (`drug_list_id`, `drug_id`),
+CONSTRAINT `drug_list_drug_ibfk_1` FOREIGN KEY (`drug_list_id`) REFERENCES `drug_lists` (`drug_list_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT `drug_list_drug_ibfk_2` FOREIGN KEY (`drug_id`) REFERENCES `drugs` (`drug_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

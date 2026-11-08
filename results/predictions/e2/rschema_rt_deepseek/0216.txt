@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0216
+CREATE TABLE `Credit_Card_Type` (
+  `Card_Type_Code` varchar(10) NOT NULL,
+  `Card_Type_Name` varchar(255) NOT NULL,
+  `Annual_Fee` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`Card_Type_Code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Customer` (
+  `Customer_ID` int(11) NOT NULL AUTO_INCREMENT,
+  `Name` varchar(255) NOT NULL,
+  `ID_Number` varchar(20) NOT NULL,
+  `Contact_Number` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`Customer_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Credit_Card` (
+  `Card_Number` varchar(16) NOT NULL,
+  `Account_Opening_Date` datetime DEFAULT NULL,
+  `Credit_Limit` decimal(10,2) DEFAULT NULL,
+  `Card_Type_Code` varchar(10) NOT NULL,
+  `Customer_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Card_Number`),
+  CONSTRAINT `credit_card_ibfk_1` FOREIGN KEY (`Card_Type_Code`) REFERENCES `Credit_Card_Type` (`Card_Type_Code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `credit_card_ibfk_2` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Transaction` (
+  `Customer_ID` int(11) NOT NULL,
+  `Card_Number` varchar(16) NOT NULL,
+  `Transaction_Time` datetime NOT NULL,
+  `Transaction_Amount` decimal(10,2) DEFAULT NULL,
+  `Transaction_Location` varchar(255) DEFAULT NULL,
+  `Transaction_Type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`Customer_ID`, `Card_Number`, `Transaction_Time`),
+  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`Card_Number`) REFERENCES `Credit_Card` (`Card_Number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_ibfk_2` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Repayment` (
+  `Customer_ID` int(11) NOT NULL,
+  `Card_Number` varchar(16) NOT NULL,
+  `Repayment_Time` datetime NOT NULL,
+  `Repayment_Amount` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`Customer_ID`, `Card_Number`, `Repayment_Time`),
+  CONSTRAINT `repayment_ibfk_1` FOREIGN KEY (`Card_Number`) REFERENCES `Credit_Card` (`Card_Number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `repayment_ibfk_2` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,66 @@
+-- Schema for database: rschema_0479
+CREATE TABLE `subsidiaries` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `manager_id` int(11) NOT NULL,
+  `contact_address` varchar(255) DEFAULT NULL,
+  `phone_number` char(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `subsidiaries_ibfk_1` (`manager_id`),
+  CONSTRAINT `subsidiaries_ibfk_1` FOREIGN KEY (`manager_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `business_departments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone_number` char(20) DEFAULT NULL,
+  `subsidiary_id` int(11) NOT NULL,
+  `supervisor_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `business_departments_ibfk_1` (`subsidiary_id`),
+  KEY `business_departments_ibfk_2` (`supervisor_id`),
+  CONSTRAINT `business_departments_ibfk_1` FOREIGN KEY (`subsidiary_id`) REFERENCES `subsidiaries` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `business_departments_ibfk_2` FOREIGN KEY (`supervisor_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employees` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  `department_id` int(11) NOT NULL,
+  `phone_number` char(20) DEFAULT NULL,
+  `family_member_names` varchar(255) DEFAULT NULL,
+  `relationships` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `employees_ibfk_1` (`department_id`),
+  CONSTRAINT `employees_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `business_departments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `identity_verifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `verified` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `identity_verifications_ibfk_1` (`employee_id`),
+  CONSTRAINT `identity_verifications_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `real_estate_properties` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `address` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `agent_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `real_estate_properties_ibfk_1` (`agent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `real_estate_exports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `property_id` int(11) NOT NULL,
+  `export_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `real_estate_exports_ibfk_1` (`property_id`),
+  CONSTRAINT `real_estate_exports_ibfk_1` FOREIGN KEY (`property_id`) REFERENCES `real_estate_properties` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,42 @@
+-- Schema for database: rschema_0036
+CREATE TABLE `contracts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `signing_date` datetime NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `status` enum('pending','signed','terminated') NOT NULL DEFAULT 'pending',
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `projects` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `expected_completion_date` datetime NOT NULL,
+  `actual_completion_date` datetime DEFAULT NULL,
+  `budget` decimal(10,2) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_contracts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `contract_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `project_id` (`project_id`),
+  KEY `contract_id` (`contract_id`),
+  CONSTRAINT `project_contracts_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_contracts_ibfk_2` FOREIGN KEY (`contract_id`) REFERENCES `contracts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `contract_changes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `contract_id` int(11) NOT NULL,
+  `change_date` datetime NOT NULL,
+  `change_content` text NOT NULL,
+  `changed_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `contract_id` (`contract_id`),
+  CONSTRAINT `contract_changes_ibfk_1` FOREIGN KEY (`contract_id`) REFERENCES `contracts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

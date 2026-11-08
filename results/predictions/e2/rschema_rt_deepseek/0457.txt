@@ -1,0 +1,56 @@
+-- Schema for database: rschema_0457
+CREATE TABLE `chain_supermarket` (
+  `supermarket_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`supermarket_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `inventory_quantity` int(11) DEFAULT NULL,
+  `last_update_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supplier` (
+  `supplier_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`supplier_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supply_request` (
+  `request_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `supermarket_id` int(11) NOT NULL,
+  PRIMARY KEY (`request_id`),
+  CONSTRAINT `supply_request_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `supply_request_ibfk_2` FOREIGN KEY (`supermarket_id`) REFERENCES `chain_supermarket` (`supermarket_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `procurement_list` (
+  `list_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `supplier_id` int(11) NOT NULL,
+  PRIMARY KEY (`list_id`),
+  CONSTRAINT `procurement_list_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `procurement_list_ibfk_2` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `delivery_notification` (
+  `notification_id` int(11) NOT NULL,
+  `supply_request_id` int(11) NOT NULL,
+  PRIMARY KEY (`notification_id`),
+  CONSTRAINT `delivery_notification_ibfk_1` FOREIGN KEY (`supply_request_id`) REFERENCES `supply_request` (`request_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stock_out_notification` (
+  `notification_id` int(11) NOT NULL,
+  `supply_request_id` int(11) NOT NULL,
+  PRIMARY KEY (`notification_id`),
+  CONSTRAINT `stock_out_notification_ibfk_1` FOREIGN KEY (`supply_request_id`) REFERENCES `supply_request` (`request_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

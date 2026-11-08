@@ -1,0 +1,145 @@
+-- Schema for database: schemabench_0004
+CREATE TABLE `site_owners` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`email` varchar(255) NOT NULL,
+`password` varchar(255) NOT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sites` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`site_owner_id` int(11) NOT NULL,
+`name` varchar(255) NOT NULL,
+`url` varchar(255) NOT NULL,
+`theme` varchar(255) NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`site_owner_id`) REFERENCES `site_owners` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site_plugins` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`site_id` int(11) NOT NULL,
+`name` varchar(255) NOT NULL,
+`description` varchar(255) NOT NULL,
+`version` varchar(255) NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site_themes` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`site_id` int(11) NOT NULL,
+`name` varchar(255) NOT NULL,
+`description` varchar(255) NOT NULL,
+`version` varchar(255) NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site_content` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`site_id` int(11) NOT NULL,
+`title` varchar(255) NOT NULL,
+`content` text NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site_comments` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`site_id` int(11) NOT NULL,
+`content` text NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site_analytics` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`site_id` int(11) NOT NULL,
+`analytics_data` text NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site_social_media` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`site_id` int(11) NOT NULL,
+`social_media_platform` varchar(255) NOT NULL,
+`social_media_handle` varchar(255) NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site_ecommerce` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`site_id` int(11) NOT NULL,
+`ecommerce_platform` varchar(255) NOT NULL,
+`ecommerce_store_url` varchar(255) NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site_users` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`site_id` int(11) NOT NULL,
+`name` varchar(255) NOT NULL,
+`email` varchar(255) NOT NULL,
+`password` varchar(255) NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site_user_roles` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`site_id` int(11) NOT NULL,
+`user_id` int(11) NOT NULL,
+`role` varchar(255) NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`user_id`) REFERENCES `site_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site_user_permissions` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`site_id` int(11) NOT NULL,
+`user_id` int(11) NOT NULL,
+`permission` varchar(255) NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`user_id`) REFERENCES `site_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site_user_sessions` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`site_id` int(11) NOT NULL,
+`user_id` int(11) NOT NULL,
+`session_id` varchar(255) NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`user_id`) REFERENCES `site_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=

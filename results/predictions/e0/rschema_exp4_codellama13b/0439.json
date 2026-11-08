@@ -1,0 +1,26 @@
+{
+  "text_number": 439,
+  "id": "67552f0b13602ec03b41aa45",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "rschema_0439",
+  "question": "\"The system is designed for a waste collection platform, requiring management of both user and merchant accounts, and allowing users to register and log in via mobile phone number or WeChat. Users can post recycling requests, including details of the waste items such as type, quantity, location, and time. Merchants can then accept and fulfill these orders. The system must record the status and payment information of each order and provide a rating function for users to grade and comment on the service after order completion. Administrators can access all user and merchant information and perform necessary maintenance operations.\"",
+  "ddl": "-- Schema for database: rschema_0439\n\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `phone_number` varchar(255) NOT NULL,\n  `wechat_id` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `role` enum('user', 'merchant', 'admin') NOT NULL DEFAULT 'user',\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `phone_number` (`phone_number`),\n  UNIQUE KEY `wechat_id` (`wechat_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `merchants` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `phone_number` varchar(255) NOT NULL,\n  `wechat_id` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `address` varchar(255) NOT NULL,\n  `description` varchar(255) NOT NULL,\n  `rating` int(11) NOT NULL DEFAULT 0,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `phone_number` (`phone_number`),\n  UNIQUE KEY `wechat_id` (`wechat_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `orders` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `merchant_id` int(11) NOT NULL,\n  `type` varchar(255) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `location` varchar(255) NOT NULL,\n  `time` datetime NOT NULL,\n  `status` enum('pending', 'accepted', 'rejected', 'completed') NOT NULL DEFAULT 'pending',\n  `payment_status` enum('paid', 'unpaid') NOT NULL DEFAULT 'unpaid',\n  `payment_method` enum('cash', 'wechat', 'alipay') NOT NULL DEFAULT 'cash',\n  `rating` int(11) NOT NULL DEFAULT 0,\n  `comment` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`merchant_id`) REFERENCES `merchants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `payments` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `order_id` int(11) NOT NULL,\n  `amount` int(11) NOT NULL,\n  `payment_method` enum('cash', 'wechat', 'alipay') NOT NULL DEFAULT 'cash',\n  `payment_status` enum('paid', 'unpaid') NOT NULL DEFAULT 'unpaid',\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `administrators` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `phone_number` varchar(255) NOT NULL,\n  `wechat_id` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `phone_number` (`phone_number`),\n  UNIQUE KEY `wechat_id` (`wechat_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "merchants",
+      "orders",
+      "payments",
+      "administrators"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "merchants": [],
+      "orders": [],
+      "payments": [],
+      "administrators": []
+    }
+  }
+}

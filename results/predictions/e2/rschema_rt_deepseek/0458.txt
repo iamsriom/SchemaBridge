@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0458
+CREATE TABLE `Address` (
+  `Address_ID` int(11) NOT NULL,
+  `Address` varchar(255) NOT NULL,
+  `Postal_Code` varchar(20) NOT NULL,
+  PRIMARY KEY (`Address_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Book` (
+  `Book_ID` int(11) NOT NULL,
+  `Book_Title` varchar(255) NOT NULL,
+  `Author` varchar(255) NOT NULL,
+  `ISBN` varchar(20) NOT NULL,
+  `Price` decimal(10,2) NOT NULL,
+  `Publication_Date` datetime NOT NULL,
+  `Publisher` varchar(255) NOT NULL,
+  `Type_Name` varchar(100) NOT NULL,
+  PRIMARY KEY (`Book_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Member` (
+  `Member_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Username` varchar(100) NOT NULL,
+  `Password` varchar(255) NOT NULL,
+  `Telephone` varchar(15) NOT NULL,
+  `Expenditure` decimal(10,2) NOT NULL,
+  `Points` int(11) NOT NULL,
+  `Address_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Member_ID`),
+  CONSTRAINT `member_ibfk_1` FOREIGN KEY (`Address_ID`) REFERENCES `Address` (`Address_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Order` (
+  `Order_ID` int(11) NOT NULL,
+  `Member_ID` int(11) NOT NULL,
+  `Order_Date` datetime NOT NULL,
+  `Shipping_Date` datetime DEFAULT NULL,
+  PRIMARY KEY (`Order_ID`),
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`Member_ID`) REFERENCES `Member` (`Member_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Order_Detail` (
+  `Order_ID` int(11) NOT NULL,
+  `Book_ID` int(11) NOT NULL,
+  `Quantity` int(11) NOT NULL,
+  PRIMARY KEY (`Order_ID`, `Book_ID`),
+  CONSTRAINT `order_detail_ibfk_1` FOREIGN KEY (`Order_ID`) REFERENCES `Order` (`Order_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_detail_ibfk_2` FOREIGN KEY (`Book_ID`) REFERENCES `Book` (`Book_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

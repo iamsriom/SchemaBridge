@@ -1,0 +1,580 @@
+{
+  "text_number": 155,
+  "id": "SB-155",
+  "llm": "gpt4omini",
+  "model_id": "gpt-4o-mini",
+  "source_schema2text_llm": "deepseek",
+  "database": "schemabench_0155",
+  "nl_text": "The database schema named \"schemabench_0155\" consists of 19 tables. The primary key is used to uniquely identify each record in the table. The schema is designed to manage various aspects of a crime scene investigation.\nThe \"Residents\" table represents the residents of a house. Each resident has a unique bracelet id that references the \"Bracelet\" table. The gender, birth date, and role of the resident are also stored.\nThe \"Employee\" table contains information about the employees of the investigation team. Each employee has a unique bracelet id that references the \"Bracelet\" table. The gender, birth date, hire date, and function of the employee are stored.\nThe \"Robots\" table contains information about the robots used in the investigation. Each robot has a unique bracelet id that references the \"Bracelet\" table. The function of the robot, hire date, and price are stored.\nThe \"House\" table contains information about the houses in the investigation. Each house has a unique id and a unique cctv id that references the \"Cctv\" table. The crime scene of the house is also stored.\nThe \"Location\" table contains information about the locations of the houses. Each location has a house id that references the \"House\" table and a bracelet id that references the \"Bracelet\" table.\nThe \"Bracelet\" table contains information about the bracelets used in the investigation. Each bracelet has a unique id.\nThe \"Cctv\" table contains information about the cctv cameras used in the investigation. Each cctv has a unique id. The switch on, switch off, breakdown, and modification status of the cctv are stored.\nThe \"Modification_type\" table contains information about the types of modifications made to the cctv cameras. Each modification has a cctv id that references the \"Cctv\" table.\nThe \"Evidence_One\", \"Evidence_Two\", \"Evidence_Three\", \"Ransack_One\", \"Ransack_Two\", and \"Ransack_Three\" tables contain information about the different types of evidence and ransacks used in the investigation.\nThe \"Crime_scene\" table contains information about the crime scene. Each crime scene has a unique id and a house id that references the \"House\" table. It also has references to the evidence and ransacks used in the investigation.\nThe \"Suspect_Analyse_Post_Crime\", \"Innocent\", \"Real_Suspect\", and \"Culprit\" tables contain information about the suspects and their status after the crime. Each suspect has a bracelet id that references the \"Bracelet\" table.\nThis schema is designed to ensure referential integrity by using foreign keys to link the tables together. It also ensures entity integrity by having primary keys that uniquely identify each record in the table. The schema is exhaustive and covers all aspects of the crime scene investigation.",
+  "gold_question": "Background / Context\n\nIn a suburban home, the sudden death of a young girl named Sarah has left her family engulfed in grief and mystery. In a world where androids have become as common as household appliances, Sarah's family owns five, each designed for specific functions such as protection and domestic assistance. Recent incidents involving androids nationwide have raised public fear and suspicion about their autonomy and obedience.\n\n Objectives\n\nThe project's primary goal is to uncover the truth behind Sarah's death. This involves analyzing advanced data systems in the house and each android's memory and code to detect any anomalies or evidence of breached programming. The investigation aims to identify the responsible human or android.\n\n Stakeholders & Users\n\n- Federal Investigators: Tasked with the investigation, utilizing the data analysis system.\n- Family Members: Residents of the house and direct stakeholders affected by the incident.\n- Law Enforcement Agencies: Interested in understanding potential threats related to androids.\n- Technologists/Engineers: Responsible for interpreting technical data from androids and the monitoring system.\n\n Functional Descriptions\n\n- Data Collection: Utilize bracelets worn by residents, employees, and robots to track movements within the house.\n- Monitoring System: Deploy CCTV cameras and an integrated database to record and analyze movement and activities.\n- Evidence Management: Compile and cross-reference evidence, disturbances, and modifications to the environment.\n- Crime Analysis: Identify suspects through post-crime analysis, using tables (Innocent, Real_Suspect, Culprit) which link bracelets to individuals.\n- Android Examination: Access and probe androids' memory banks and code for any signs of anomaly or intent.\n\n Non-Functional Descriptions\n\n- Security: Ensure all data, especially evidence and surveillance data, is stored securely and free from unauthorized access.\n- Scalability: System should efficiently handle data from multiple devices and users simultaneously.\n- Reliability: Monitoring and tracking must produce consistent, accurate results to support the investigation.\n- User Interface: Provide a clear, intuitive interface for investigators to interact with the system and analyze data.",
+  "input_json": "/data/SchemaBench/Experiment/schema2text_deepseek/0155.json",
+  "ddl": "-- Schema for database: schemabench_0155\nCREATE TABLE `Bracelet` (\n  `id` int(11) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Cctv` (\n  `id` int(11) NOT NULL,\n  `switch_on` datetime DEFAULT NULL,\n  `switch_off` datetime DEFAULT NULL,\n  `breakdown` varchar(255) DEFAULT NULL,\n  `modification_status` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `House` (\n  `id` int(11) NOT NULL,\n  `cctv_id` int(11) NOT NULL,\n  `crime_scene` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `house_ibfk_1` FOREIGN KEY (`cctv_id`) REFERENCES `Cctv` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Residents` (\n  `bracelet_id` int(11) NOT NULL,\n  `gender` varchar(10) DEFAULT NULL,\n  `birth_date` date DEFAULT NULL,\n  `role` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`bracelet_id`),\n  CONSTRAINT `residents_ibfk_1` FOREIGN KEY (`bracelet_id`) REFERENCES `Bracelet` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Employee` (\n  `bracelet_id` int(11) NOT NULL,\n  `gender` varchar(10) DEFAULT NULL,\n  `birth_date` date DEFAULT NULL,\n  `hire_date` date DEFAULT NULL,\n  `function` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`bracelet_id`),\n  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`bracelet_id`) REFERENCES `Bracelet` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Robots` (\n  `bracelet_id` int(11) NOT NULL,\n  `function` varchar(255) DEFAULT NULL,\n  `hire_date` date DEFAULT NULL,\n  `price` decimal(10,2) DEFAULT NULL,\n  PRIMARY KEY (`bracelet_id`),\n  CONSTRAINT `robots_ibfk_1` FOREIGN KEY (`bracelet_id`) REFERENCES `Bracelet` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Location` (\n  `house_id` int(11) NOT NULL,\n  `bracelet_id` int(11) NOT NULL,\n  PRIMARY KEY (`house_id`, `bracelet_id`),\n  CONSTRAINT `location_ibfk_1` FOREIGN KEY (`house_id`) REFERENCES `House` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `location_ibfk_2` FOREIGN KEY (`bracelet_id`) REFERENCES `Bracelet` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Modification_type` (\n  `cctv_id` int(11) NOT NULL,\n  PRIMARY KEY (`cctv_id`),\n  CONSTRAINT `modification_type_ibfk_1` FOREIGN KEY (`cctv_id`) REFERENCES `Cctv` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Crime_scene` (\n  `id` int(11) NOT NULL,\n  `house_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `crime_scene_ibfk_1` FOREIGN KEY (`house_id`) REFERENCES `House` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Evidence_One` (\n  `id` int(11) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Evidence_Two` (\n  `id` int(11) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Evidence_Three` (\n  `id` int(11) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Ransack_One` (\n  `id` int(11) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Ransack_Two` (\n  `id` int(11) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Ransack_Three` (\n  `id` int(11) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Suspect_Analyse_Post_Crime` (\n  `bracelet_id` int(11) NOT NULL,\n  PRIMARY KEY (`bracelet_id`),\n  CONSTRAINT `suspect_analyse_post_crime_ibfk_1` FOREIGN KEY (`bracelet_id`) REFERENCES `Bracelet` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Innocent` (\n  `bracelet_id` int(11) NOT NULL,\n  PRIMARY KEY (`bracelet_id`),\n  CONSTRAINT `innocent_ibfk_1` FOREIGN KEY (`bracelet_id`) REFERENCES `Bracelet` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Real_Suspect` (\n  `bracelet_id` int(11) NOT NULL,\n  PRIMARY KEY (`bracelet_id`),\n  CONSTRAINT `real_suspect_ibfk_1` FOREIGN KEY (`bracelet_id`) REFERENCES `Bracelet` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Culprit` (\n  `bracelet_id` int(11) NOT NULL,\n  PRIMARY KEY (`bracelet_id`),\n  CONSTRAINT `culprit_ibfk_1` FOREIGN KEY (`bracelet_id`) REFERENCES `Bracelet` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "schemabench_0155",
+    "tables": [
+      "Bracelet",
+      "Cctv",
+      "House",
+      "Residents",
+      "Employee",
+      "Robots",
+      "Location",
+      "Modification_type",
+      "Crime_scene",
+      "Evidence_One",
+      "Evidence_Two",
+      "Evidence_Three",
+      "Ransack_One",
+      "Ransack_Two",
+      "Ransack_Three",
+      "Suspect_Analyse_Post_Crime",
+      "Innocent",
+      "Real_Suspect",
+      "Culprit"
+    ],
+    "columns_by_table": {
+      "Bracelet": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Cctv": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "switch_on",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "datetime",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "datetime",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "switch_off",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "datetime",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "datetime",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "breakdown",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "modification_status",
+          "ORDINAL_POSITION": 5,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "House": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "cctv_id",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Residents": [
+        {
+          "COLUMN_NAME": "bracelet_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "gender",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 10,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(10)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "birth_date",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "date",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "date",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "role",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Employee": [
+        {
+          "COLUMN_NAME": "bracelet_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "gender",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 10,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(10)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "birth_date",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "date",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "date",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "hire_date",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "date",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "date",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "function",
+          "ORDINAL_POSITION": 5,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Robots": [
+        {
+          "COLUMN_NAME": "bracelet_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "function",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "hire_date",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "date",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "date",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "price",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "decimal",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 2,
+          "COLUMN_TYPE": "decimal(10,2)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Location": [
+        {
+          "COLUMN_NAME": "house_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "bracelet_id",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Modification_type": [
+        {
+          "COLUMN_NAME": "cctv_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Crime_scene": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "house_id",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Evidence_One": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Evidence_Two": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Evidence_Three": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Ransack_One": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Ransack_Two": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Ransack_Three": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Suspect_Analyse_Post_Crime": [
+        {
+          "COLUMN_NAME": "bracelet_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Innocent": [
+        {
+          "COLUMN_NAME": "bracelet_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Real_Suspect": [
+        {
+          "COLUMN_NAME": "bracelet_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Culprit": [
+        {
+          "COLUMN_NAME": "bracelet_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ]
+    }
+  }
+}

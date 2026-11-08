@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0081
+
+CREATE TABLE user_groups (
+  user_group_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  PRIMARY KEY (user_group_id)
+);
+
+CREATE TABLE users (
+  user_id INT(11) NOT NULL AUTO_INCREMENT,
+  username VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  one_time_password VARCHAR(255) NOT NULL,
+  password_reset_key VARCHAR(255) NOT NULL,
+  associated_user_group INT(11) NOT NULL,
+  activation_status VARCHAR(255) NOT NULL,
+  user_creation_time DATETIME NOT NULL,
+  creator VARCHAR(255) NOT NULL,
+  last_updated_time DATETIME NOT NULL,
+  updater VARCHAR(255) NOT NULL,
+  PRIMARY KEY (user_id),
+  FOREIGN KEY (associated_user_group) REFERENCES user_groups(user_group_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE api_keys (
+  key_id INT(11) NOT NULL AUTO_INCREMENT,
+  associated_user_id INT(11) NOT NULL,
+  key_content VARCHAR(255) NOT NULL,
+  permission_level VARCHAR(255) NOT NULL,
+  ignore_call_limits BOOLEAN NOT NULL,
+  is_private_key BOOLEAN NOT NULL,
+  allowed_ip_address_list VARCHAR(255) NOT NULL,
+  key_creation_time DATETIME NOT NULL,
+  PRIMARY KEY (key_id),
+  FOREIGN KEY (associated_user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE api_call_logs (
+  log_id INT(11) NOT NULL AUTO_INCREMENT,
+  called_api_resource_path VARCHAR(255) NOT NULL,
+  http_request_method VARCHAR(255) NOT NULL,
+  request_parameters VARCHAR(255) NOT NULL,
+  used_api_key INT(11) NOT NULL,
+  client_ip_address VARCHAR(255) NOT NULL,
+  call_time DATETIME NOT NULL,
+  response_time DATETIME NOT NULL,
+  authorization_status VARCHAR(255) NOT NULL,
+  api_response_status_code VARCHAR(255) NOT NULL,
+  PRIMARY KEY (log_id),
+  FOREIGN KEY (used_api_key) REFERENCES api_keys(key_id) ON DELETE CASCADE ON UPDATE CASCADE
+);

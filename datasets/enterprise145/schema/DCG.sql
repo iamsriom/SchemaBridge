@@ -1,0 +1,19 @@
+-- Schema for database: DCG
+
+CREATE TABLE `sentences` (
+  `id` int(11) NOT NULL,
+  `class` char(3) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci
+;
+
+
+CREATE TABLE `terms` (
+  `id_sentence` int(11) NOT NULL,
+  `id_term` int(11) NOT NULL,
+  `term` varchar(7) DEFAULT NULL,
+  PRIMARY KEY (`id_sentence`,`id_term`),
+  CONSTRAINT `terms_ibfk_1` FOREIGN KEY (`id_sentence`) REFERENCES `sentences` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci
+;
+

@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0074
+CREATE TABLE `Insurance_Agent` (
+  `Agent_ID` int(11) NOT NULL,
+  `Contact_Phone` varchar(255) DEFAULT NULL,
+  `Hire_Date` datetime DEFAULT NULL,
+  `Name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Agent_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Customer` (
+  `Customer_ID` int(11) NOT NULL,
+  `Contact_Phone` varchar(255) DEFAULT NULL,
+  `ID_Card_Number` varchar(255) DEFAULT NULL,
+  `Name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Customer_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Insurance_Policy` (
+  `Policy_ID` int(11) NOT NULL,
+  `Agent_ID` int(11) NOT NULL,
+  `Customer_ID` int(11) NOT NULL,
+  `Insurance_Term` datetime DEFAULT NULL,
+  `Insurance_Type` varchar(255) DEFAULT NULL,
+  `Insured_Amount` float DEFAULT NULL,
+  `Premium` float DEFAULT NULL,
+  PRIMARY KEY (`Policy_ID`),
+  CONSTRAINT `Insurance_Policy_ibfk_1` FOREIGN KEY (`Agent_ID`) REFERENCES `Insurance_Agent` (`Agent_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Insurance_Policy_ibfk_2` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Medical_Record` (
+  `Customer_ID` int(11) NOT NULL,
+  `Visit_Cost` float DEFAULT NULL,
+  `Visit_Time` datetime NOT NULL,
+  PRIMARY KEY (`Visit_Time`),
+  CONSTRAINT `Medical_Record_ibfk_1` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Payment_Record` (
+  `Policy_ID` int(11) NOT NULL,
+  `Payment_Amount` float DEFAULT NULL,
+  `Payment_Date` datetime DEFAULT NULL,
+  `Payment_Method` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Policy_ID`),
+  CONSTRAINT `Payment_Record_ibfk_1` FOREIGN KEY (`Policy_ID`) REFERENCES `Insurance_Policy` (`Policy_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Claim_Record` (
+  `Policy_ID` int(11) NOT NULL,
+  `Claim_Amount` float DEFAULT NULL,
+  `Claim_Date` datetime DEFAULT NULL,
+  PRIMARY KEY (`Policy_ID`),
+  CONSTRAINT `Claim_Record_ibfk_1` FOREIGN KEY (`Policy_ID`) REFERENCES `Payment_Record` (`Policy_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

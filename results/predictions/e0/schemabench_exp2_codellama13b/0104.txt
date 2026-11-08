@@ -1,0 +1,89 @@
+-- Schema for database: schemabench_0104
+
+CREATE TABLE `incidents` (
+`incident_id` int(11) NOT NULL AUTO_INCREMENT,
+`date` datetime NOT NULL,
+`location` varchar(255) NOT NULL,
+`subject_status` varchar(255) NOT NULL,
+`weapon_info` varchar(255) NOT NULL,
+PRIMARY KEY (`incident_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `officers` (
+`officer_id` int(11) NOT NULL AUTO_INCREMENT,
+`incident_id` int(11) NOT NULL,
+`name` varchar(255) NOT NULL,
+`rank` varchar(255) NOT NULL,
+`department` varchar(255) NOT NULL,
+`badge_number` varchar(255) NOT NULL,
+PRIMARY KEY (`officer_id`),
+FOREIGN KEY (`incident_id`) REFERENCES `incidents` (`incident_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subjects` (
+`subject_id` int(11) NOT NULL AUTO_INCREMENT,
+`incident_id` int(11) NOT NULL,
+`name` varchar(255) NOT NULL,
+`age` int(11) NOT NULL,
+`gender` varchar(255) NOT NULL,
+`race` varchar(255) NOT NULL,
+`weapon_used` varchar(255) NOT NULL,
+PRIMARY KEY (`subject_id`),
+FOREIGN KEY (`incident_id`) REFERENCES `incidents` (`incident_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reports` (
+`report_id` int(11) NOT NULL AUTO_INCREMENT,
+`incident_id` int(11) NOT NULL,
+`report_type` varchar(255) NOT NULL,
+`report_date` datetime NOT NULL,
+`report_link` varchar(255) NOT NULL,
+PRIMARY KEY (`report_id`),
+FOREIGN KEY (`incident_id`) REFERENCES `incidents` (`incident_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+`user_id` int(11) NOT NULL AUTO_INCREMENT,
+`username` varchar(255) NOT NULL,
+`password` varchar(255) NOT NULL,
+`role` varchar(255) NOT NULL,
+PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_roles` (
+`user_id` int(11) NOT NULL,
+`role_id` int(11) NOT NULL,
+PRIMARY KEY (`user_id`, `role_id`),
+FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `roles` (
+`role_id` int(11) NOT NULL AUTO_INCREMENT,
+`role_name` varchar(255) NOT NULL,
+PRIMARY KEY (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permissions` (
+`permission_id` int(11) NOT NULL AUTO_INCREMENT,
+`role_id` int(11) NOT NULL,
+`permission_name` varchar(255) NOT NULL,
+PRIMARY KEY (`permission_id`),
+FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role_permissions` (
+`role_id` int(11) NOT NULL,
+`permission_id` int(11) NOT NULL,
+PRIMARY KEY (`role_id`, `permission_id`),
+FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`permission_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_permissions` (
+`user_id` int(11) NOT NULL,
+`permission_id` int(11) NOT NULL,
+PRIMARY KEY (`user_id`, `permission_id`),
+FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`permission_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

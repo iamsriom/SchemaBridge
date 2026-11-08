@@ -1,0 +1,60 @@
+-- Schema for database: rschema_0461
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL,
+  `category` varchar(255) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `stock_quantity` int(11) DEFAULT NULL,
+  `unit_price` float DEFAULT NULL,
+  `unit_of_measurement` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `delivery_personnel` (
+  `delivery_personnel_id` int(11) NOT NULL,
+  `gender` boolean DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`delivery_personnel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `gender` boolean DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order` (
+  `order_number` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `delivery_address` varchar(255) DEFAULT NULL,
+  `order_creation_time` datetime DEFAULT NULL,
+  `order_status` varchar(255) DEFAULT NULL,
+  `total_order_price` float DEFAULT NULL,
+  PRIMARY KEY (`order_number`),
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_product` (
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `product_quantity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`order_id`, `product_id`),
+  CONSTRAINT `order_product_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_product_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_delivery` (
+  `delivery_personnel_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `estimated_delivery_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`delivery_personnel_id`, `order_id`),
+  CONSTRAINT `order_delivery_ibfk_1` FOREIGN KEY (`delivery_personnel_id`) REFERENCES `delivery_personnel` (`delivery_personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_delivery_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

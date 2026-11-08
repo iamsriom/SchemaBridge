@@ -1,0 +1,74 @@
+-- Schema for database: rschema_0073
+
+CREATE TABLE agents (
+  agent_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  hire_date DATE NOT NULL,
+  contact_phone_number VARCHAR(255) NOT NULL,
+  PRIMARY KEY (agent_id)
+);
+
+CREATE TABLE customers (
+  customer_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  id_card_number VARCHAR(255) NOT NULL,
+  contact_phone_number VARCHAR(255) NOT NULL,
+  PRIMARY KEY (customer_id)
+);
+
+CREATE TABLE policies (
+  policy_number INT(11) NOT NULL AUTO_INCREMENT,
+  insurance_type VARCHAR(255) NOT NULL,
+  insured_amount DECIMAL(10,2) NOT NULL,
+  insurance_term VARCHAR(255) NOT NULL,
+  premium DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (policy_number)
+);
+
+CREATE TABLE premium_payments (
+  payment_id INT(11) NOT NULL AUTO_INCREMENT,
+  payment_amount DECIMAL(10,2) NOT NULL,
+  payment_time DATETIME NOT NULL,
+  payment_method VARCHAR(255) NOT NULL,
+  PRIMARY KEY (payment_id)
+);
+
+CREATE TABLE claim_records (
+  claim_id INT(11) NOT NULL AUTO_INCREMENT,
+  claim_description VARCHAR(255) NOT NULL,
+  claim_date DATE NOT NULL,
+  claim_status VARCHAR(255) NOT NULL,
+  PRIMARY KEY (claim_id)
+);
+
+CREATE TABLE agent_customer (
+  agent_id INT(11) NOT NULL,
+  customer_id INT(11) NOT NULL,
+  PRIMARY KEY (agent_id, customer_id),
+  CONSTRAINT agent_customer_ibfk_1 FOREIGN KEY (agent_id) REFERENCES agents (agent_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT agent_customer_ibfk_2 FOREIGN KEY (customer_id) REFERENCES customers (customer_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE policy_customer (
+  policy_number INT(11) NOT NULL,
+  customer_id INT(11) NOT NULL,
+  PRIMARY KEY (policy_number, customer_id),
+  CONSTRAINT policy_customer_ibfk_1 FOREIGN KEY (policy_number) REFERENCES policies (policy_number) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT policy_customer_ibfk_2 FOREIGN KEY (customer_id) REFERENCES customers (customer_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE premium_payment_policy (
+  payment_id INT(11) NOT NULL,
+  policy_number INT(11) NOT NULL,
+  PRIMARY KEY (payment_id, policy_number),
+  CONSTRAINT premium_payment_policy_ibfk_1 FOREIGN KEY (payment_id) REFERENCES premium_payments (payment_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT premium_payment_policy_ibfk_2 FOREIGN KEY (policy_number) REFERENCES policies (policy_number) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE claim_record_policy (
+  claim_id INT(11) NOT NULL,
+  policy_number INT(11) NOT NULL,
+  PRIMARY KEY (claim_id, policy_number),
+  CONSTRAINT claim_record_policy_ibfk_1 FOREIGN KEY (claim_id) REFERENCES claim_records (claim_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT claim_record_policy_ibfk_2 FOREIGN KEY (policy_number) REFERENCES policies (policy_number) ON DELETE CASCADE ON UPDATE CASCADE
+);

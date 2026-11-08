@@ -1,0 +1,39 @@
+-- Schema for database: rschema_0349
+CREATE TABLE `File_Collection` (
+  `File_Collection_ID` int(11) NOT NULL,
+  `File_Collection_Description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`File_Collection_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `File` (
+  `File_ID` int(11) NOT NULL,
+  `File_Collection_ID` int(11) NOT NULL,
+  `File_Creation_Time` datetime DEFAULT NULL,
+  `File_Description` varchar(255) DEFAULT NULL,
+  `File_Last_Update_Time` datetime DEFAULT NULL,
+  `File_Name` varchar(255) DEFAULT NULL,
+  `File_Record_Count` int(11) DEFAULT NULL,
+  `File_Size` int(11) DEFAULT NULL,
+  `File_Status` varchar(50) DEFAULT 'Active',
+  `File_Storage_Location` varchar(255) DEFAULT NULL,
+  `File_Type` varchar(50) DEFAULT NULL,
+  `File_Version_Number` int(11) DEFAULT NULL,
+  PRIMARY KEY (`File_ID`),
+  UNIQUE KEY `unique_file_collection` (`File_Collection_ID`, `File_Name`, `File_Type`, `File_Version_Number`),
+  CONSTRAINT `file_ibfk_1` FOREIGN KEY (`File_Collection_ID`) REFERENCES `File_Collection` (`File_Collection_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Replica` (
+  `Replica_ID` int(11) NOT NULL,
+  `File_ID` int(11) NOT NULL,
+  `Replica_Device_Name` varchar(255) DEFAULT NULL,
+  `Replica_Index` int(11) DEFAULT NULL,
+  `Replica_Last_Update_Time` datetime DEFAULT NULL,
+  `Replica_Node_Name` varchar(255) DEFAULT NULL,
+  `Replica_Status` varchar(50) DEFAULT 'Available',
+  `Replica_Storage_Location` varchar(255) DEFAULT NULL,
+  `Replica_Version_Number` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Replica_ID`),
+  UNIQUE KEY `unique_replica` (`File_ID`, `Replica_Device_Name`, `Replica_Index`, `Replica_Node_Name`, `Replica_Version_Number`),
+  CONSTRAINT `replica_ibfk_1` FOREIGN KEY (`File_ID`) REFERENCES `File` (`File_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0469
+CREATE TABLE `property_owner` (
+  `owner_id` int(11) NOT NULL,
+  `contact_number` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `workplace` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `housing` (
+  `house_number` varchar(255) NOT NULL,
+  `floor_area` float DEFAULT NULL,
+  `owner_id` int(11) NOT NULL,
+  PRIMARY KEY (`house_number`),
+  CONSTRAINT `housing_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `property_owner` (`owner_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL,
+  `department_name` varchar(255) DEFAULT NULL,
+  `department_phone` varchar(255) DEFAULT NULL,
+  `supervisor_employee_id` int(11) NOT NULL,
+  PRIMARY KEY (`department_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`supervisor_employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `gender` bool DEFAULT NULL,
+  `date_of_birth` datetime DEFAULT NULL,
+  `contact_number` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `department_id` int(11) NOT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fee_collection` (
+  `collection_date` datetime NOT NULL,
+  `collection_employee_id` int(11) NOT NULL,
+  `fee_amount` float DEFAULT NULL,
+  `fee_type` varchar(255) DEFAULT NULL,
+  `house_number` varchar(255) NOT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`house_number`, `collection_employee_id`, `collection_date`),
+  CONSTRAINT `fee_collection_ibfk_1` FOREIGN KEY (`collection_employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fee_collection_ibfk_2` FOREIGN KEY (`house_number`) REFERENCES `housing` (`house_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

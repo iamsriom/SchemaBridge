@@ -1,0 +1,46 @@
+-- Schema for database: rschema_0189
+CREATE TABLE `station` (
+  `station_id` int(11) NOT NULL,
+  `station_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`station_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact_number` varchar(15) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `repair_technician` (
+  `technician_id` int(11) NOT NULL,
+  `technician_name` varchar(255) NOT NULL,
+  `contact_number` varchar(15) NOT NULL,
+  `skill_level` varchar(50) NOT NULL,
+  `station_id` int(11) NOT NULL,
+  PRIMARY KEY (`technician_id`),
+  CONSTRAINT `repair_technician_ibfk_1` FOREIGN KEY (`station_id`) REFERENCES `station` (`station_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vehicle` (
+  `license_plate_number` varchar(15) NOT NULL,
+  `owner_id` int(11) NOT NULL,
+  `vehicle_model` varchar(255) NOT NULL,
+  PRIMARY KEY (`license_plate_number`),
+  CONSTRAINT `vehicle_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `repair_record` (
+  `task_id` int(11) NOT NULL,
+  `license_plate_number` varchar(15) NOT NULL,
+  `owner_evaluation` text DEFAULT NULL,
+  `repair_cost` decimal(10,2) NOT NULL,
+  `repair_date` datetime NOT NULL,
+  `repair_duration` int(11) NOT NULL,
+  `repair_effect` text DEFAULT NULL,
+  `repair_type` varchar(50) NOT NULL,
+  `technician_id` int(11) NOT NULL,
+  PRIMARY KEY (`task_id`),
+  CONSTRAINT `repair_record_ibfk_1` FOREIGN KEY (`license_plate_number`) REFERENCES `vehicle` (`license_plate_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `repair_record_ibfk_2` FOREIGN KEY (`technician_id`) REFERENCES `repair_technician` (`technician_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

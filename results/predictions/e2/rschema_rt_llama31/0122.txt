@@ -1,0 +1,59 @@
+-- Schema for database: rschema_0122
+CREATE TABLE `conversation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `security_base_record_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `conversation_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `conversation_ibfk_2` FOREIGN KEY (`security_base_record_id`) REFERENCES `security_base_record` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `message` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `conversation_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `message_ibfk_1` FOREIGN KEY (`conversation_id`) REFERENCES `conversation` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inquiry` (
+  `customer_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `category` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `end_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`customer_id`, `created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organization` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `homepage` varchar(255) DEFAULT NULL,
+  `image_link` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `security_base_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `encrypted_data` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_details` varchar(255) DEFAULT NULL,
+  `organization_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organization` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

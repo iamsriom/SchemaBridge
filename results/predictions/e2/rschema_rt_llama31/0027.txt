@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0027
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `person_in_charge` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `clothing` (
+  `product_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `style` varchar(255) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `inventory_level` int(11) NOT NULL,
+  `production_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  `department_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `production_record` (
+  `product_id` int(11) NOT NULL,
+  `producer_employee_id` int(11) NOT NULL,
+  `production_time` datetime NOT NULL,
+  PRIMARY KEY (`product_id`, `producer_employee_id`, `production_time`),
+  CONSTRAINT `production_record_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `clothing` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `production_record_ibfk_2` FOREIGN KEY (`producer_employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_record` (
+  `product_id` int(11) NOT NULL,
+  `salesperson_employee_id` int(11) NOT NULL,
+  `sales_time` datetime NOT NULL,
+  `sales_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`product_id`, `salesperson_employee_id`, `sales_time`),
+  CONSTRAINT `sales_record_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `clothing` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_record_ibfk_2` FOREIGN KEY (`salesperson_employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

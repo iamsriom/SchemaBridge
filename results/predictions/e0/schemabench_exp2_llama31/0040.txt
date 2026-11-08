@@ -1,0 +1,149 @@
+-- Schema for database: schemabench_0040
+CREATE TABLE `administrators` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `username` varchar(255) NOT NULL,\n
+  `email` varchar(255) NOT NULL,\n
+  `password` char(60) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `attendance_types` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `attendance` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `session_id` int(11) NOT NULL,\n
+  `class_id` int(11) NOT NULL,\n
+  `student_id` int(11) NOT NULL,\n
+  `attendance_type_id` int(11) NOT NULL,\n
+  `date` datetime NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `attendance_ibfk_1` (`session_id`),\n
+  KEY `attendance_ibfk_2` (`class_id`),\n
+  KEY `attendance_ibfk_3` (`student_id`),\n
+  KEY `attendance_ibfk_4` (`attendance_type_id`),\n
+  CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `attendance_ibfk_3` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `attendance_ibfk_4` FOREIGN KEY (`attendance_type_id`) REFERENCES `attendance_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `classes` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  `section` varchar(255) NOT NULL,\n
+  `room_number` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `courses` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  `semester_id` int(11) NOT NULL,\n
+  `class_id` int(11) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `courses_ibfk_1` (`semester_id`),\n
+  KEY `courses_ibfk_2` (`class_id`),\n
+  CONSTRAINT `courses_ibfk_1` FOREIGN KEY (`semester_id`) REFERENCES `semesters` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `courses_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `events` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `title` varchar(255) NOT NULL,\n
+  `description` text NOT NULL,\n
+  `date` datetime NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `grades` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `student_id` int(11) NOT NULL,\n
+  `course_id` int(11) NOT NULL,\n
+  `grade` decimal(3,2) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `grades_ibfk_1` (`student_id`),\n
+  KEY `grades_ibfk_2` (`course_id`),\n
+  CONSTRAINT `grades_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `grades_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `marks` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `student_id` int(11) NOT NULL,\n
+  `course_id` int(11) NOT NULL,\n
+  `assignment_id` int(11) NOT NULL,\n
+  `mark` decimal(3,2) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `marks_ibfk_1` (`student_id`),\n
+  KEY `marks_ibfk_2` (`course_id`),\n
+  KEY `marks_ibfk_3` (`assignment_id`),\n
+  CONSTRAINT `marks_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `marks_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `marks_ibfk_3` FOREIGN KEY (`assignment_id`) REFERENCES `assignments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `parents` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `student_id` int(11) NOT NULL,\n
+  `name` varchar(255) NOT NULL,\n
+  `email` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `parents_ibfk_1` (`student_id`),\n
+  CONSTRAINT `parents_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `payments` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `student_id` int(11) NOT NULL,\n
+  `amount` decimal(10,2) NOT NULL,\n
+  `transaction_id` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `payments_ibfk_1` (`student_id`),\n
+  CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `semesters` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `sessions` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `students` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  `email` varchar(255) NOT NULL,\n
+  `password` char(60) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `stripe_transactions` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `student_id` int(11) NOT NULL,\n
+  `amount` decimal(10,2) NOT NULL,\n
+  `transaction_id` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `stripe_transactions_ibfk_1` (`student_id`),\n
+  CONSTRAINT `stripe_transactions_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `submissions` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `student_id` int(11) NOT NULL,\n
+  `course_id` int(11) NOT NULL,\n
+  `assignment_id` int(11) NOT NULL,\n
+  `submission_date` datetime NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `submissions_ibfk_1` (`student_id`),\n
+  KEY `submissions_ibfk_2` (`course_id`),\n
+  KEY `submissions_ibfk_3` (`assignment_id`),\n
+  CONSTRAINT `submissions_ibfk_1` FOREIGN

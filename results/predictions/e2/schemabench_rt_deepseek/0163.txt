@@ -1,0 +1,87 @@
+-- Schema for database: schemabench_0163
+CREATE TABLE `customer` (
+  `custno` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `internal_status` varchar(255) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `zip_code` varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`custno`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `facility` (
+  `facno` int(11) NOT NULL,
+  `facname` varchar(255) NOT NULL,
+  PRIMARY KEY (`facno`),
+  UNIQUE KEY `facname_UNIQUE` (`facname`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `location` (
+  `locno` int(11) NOT NULL,
+  `facno` int(11) NOT NULL,
+  `location_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`locno`),
+  CONSTRAINT `location_ibfk_1` FOREIGN KEY (`facno`) REFERENCES `facility` (`facno`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `eventrequest` (
+  `eventno` int(11) NOT NULL,
+  `date_held` datetime NOT NULL,
+  `date_required` datetime NOT NULL,
+  `facno` int(11) NOT NULL,
+  `custno` int(11) NOT NULL,
+  `date_authorized` datetime DEFAULT NULL,
+  `status` enum('Pending', 'Denied', 'Approved') NOT NULL,
+  `estimated_cost` decimal(10,2) DEFAULT NULL,
+  `estaudience` int(11) CHECK (`estaudience` > 0),
+  `budget_number` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`eventno`),
+  CONSTRAINT `eventrequest_ibfk_1` FOREIGN KEY (`custno`) REFERENCES `customer` (`custno`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `eventrequest_ibfk_2` FOREIGN KEY (`facno`) REFERENCES `facility` (`facno`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `empno` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `department` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`empno`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `eventplan` (
+  `planno` int(11) NOT NULL,
+  `eventno` int(11) NOT NULL,
+  `work_date` datetime NOT NULL,
+  `notes` text DEFAULT NULL,
+  `activity` varchar(255) DEFAULT NULL,
+  `empno` int(11) NOT NULL,
+  PRIMARY KEY (`planno`),
+  CONSTRAINT `eventplan_ibfk_1` FOREIGN KEY (`eventno`) REFERENCES `eventrequest` (`eventno`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `eventplan_ibfk_2` FOREIGN KEY (`empno`) REFERENCES `employee` (`empno`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resourcetbl` (
+  `resno` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `rate` decimal(10,2) CHECK (`rate` > 0) NOT NULL,
+  PRIMARY KEY (`resno`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `eventplanline` (
+  `planno` int(11) NOT NULL,
+  `lineno` int(11) NOT NULL,
+  `time_start` datetime NOT NULL,
+  `time_end` datetime NOT NULL,
+  `number_of_people` int(11) NOT NULL,
+  `locno` int(11) NOT NULL,
+  `resno` int(11) NOT NULL,
+  PRIMARY KEY (`planno`, `lineno`),
+  CONSTRAINT `eventplanline_ibfk_1` FOREIGN KEY (`planno`) REFERENCES `eventplan` (`planno`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `eventplanline_ibfk_2` FOREIGN KEY (`locno`) REFERENCES `location` (`locno`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `eventplanline_ibfk_3` FOREIGN KEY (`resno`) REFERENCES `resourcetbl` (`resno`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CHECK (`time_start` < `time_end`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

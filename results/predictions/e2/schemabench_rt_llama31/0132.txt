@@ -1,0 +1,99 @@
+-- Schema for database: schemabench_0132
+CREATE TABLE `dss_customer` (
+  `customer_key` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `account_balance` decimal(10,2) NOT NULL,
+  `market_segment` varchar(50) NOT NULL,
+  `comments` text DEFAULT NULL,
+  PRIMARY KEY (`customer_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dss_order` (
+  `order_key` int(11) NOT NULL,
+  `customer_key` int(11) NOT NULL,
+  `order_status` varchar(50) NOT NULL,
+  `total_price` decimal(10,2) NOT NULL,
+  `order_date` datetime NOT NULL,
+  `priority` varchar(50) NOT NULL,
+  `clerk` varchar(255) NOT NULL,
+  `shipping_priority` varchar(50) NOT NULL,
+  `comments` text DEFAULT NULL,
+  PRIMARY KEY (`order_key`),
+  CONSTRAINT `dss_order_ibfk_1` FOREIGN KEY (`customer_key`) REFERENCES `dss_customer` (`customer_key`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dss_lineitem` (
+  `order_key` int(11) NOT NULL,
+  `product_key` int(11) NOT NULL,
+  `supplier_key` int(11) NOT NULL,
+  `line_number` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `extended_price` decimal(10,2) NOT NULL,
+  `discount` decimal(5,2) NOT NULL,
+  `tax` decimal(5,2) NOT NULL,
+  `return_flag` char(1) NOT NULL,
+  `line_status` varchar(50) NOT NULL,
+  `shipping_date` datetime DEFAULT NULL,
+  `commitment_date` datetime DEFAULT NULL,
+  `receipt_date` datetime DEFAULT NULL,
+  `shipping_instructions` text DEFAULT NULL,
+  `shipping_mode` varchar(50) DEFAULT NULL,
+  `comments` text DEFAULT NULL,
+  PRIMARY KEY (`order_key`, `line_number`),
+  CONSTRAINT `dss_lineitem_ibfk_1` FOREIGN KEY (`order_key`) REFERENCES `dss_order` (`order_key`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `dss_lineitem_ibfk_2` FOREIGN KEY (`product_key`) REFERENCES `dss_part` (`product_key`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `dss_lineitem_ibfk_3` FOREIGN KEY (`supplier_key`) REFERENCES `dss_supplier` (`supplier_key`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dss_part` (
+  `product_key` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `manufacturer` varchar(255) NOT NULL,
+  `brand` varchar(255) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `size` varchar(50) NOT NULL,
+  `container` varchar(50) NOT NULL,
+  `retail_price` decimal(10,2) NOT NULL,
+  `comments` text DEFAULT NULL,
+  PRIMARY KEY (`product_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dss_partsupp` (
+  `product_key` int(11) NOT NULL,
+  `supplier_key` int(11) NOT NULL,
+  `available_quantity` int(11) NOT NULL,
+  `supply_cost` decimal(10,2) NOT NULL,
+  `comments` text DEFAULT NULL,
+  PRIMARY KEY (`product_key`, `supplier_key`),
+  CONSTRAINT `dss_partsupp_ibfk_1` FOREIGN KEY (`product_key`) REFERENCES `dss_part` (`product_key`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `dss_partsupp_ibfk_2` FOREIGN KEY (`supplier_key`) REFERENCES `dss_supplier` (`supplier_key`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dss_nation` (
+  `nation_key` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `region_key` int(11) NOT NULL,
+  `comments` text DEFAULT NULL,
+  PRIMARY KEY (`nation_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dss_region` (
+  `region_key` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `comments` text DEFAULT NULL,
+  PRIMARY KEY (`region_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dss_supplier` (
+  `supplier_key` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `nation_key` int(11) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `account_balance` decimal(10,2) NOT NULL,
+  `comments` text DEFAULT NULL,
+  PRIMARY KEY (`supplier_key`),
+  CONSTRAINT `dss_supplier_ibfk_1` FOREIGN KEY (`nation_key`) REFERENCES `dss_nation` (`nation_key`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

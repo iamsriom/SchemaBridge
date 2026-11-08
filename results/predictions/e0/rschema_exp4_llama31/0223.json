@@ -1,0 +1,26 @@
+{
+  "text_number": 223,
+  "id": "67552f0a13602ec03b41a890",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0223",
+  "question": "This is a role management system in a role-playing game. In the game world, each creature can play different roles, such as warrior, mage, merchant, etc. Each role has its unique abilities and permissions that determine what actions they can perform. The system supports setting up multiple different role types in the game, each with its unique positioning and characteristics, and can add or adjust role types according to game needs. Each role has its specific range of behavioral capabilities, for example, warriors can fight and defend, mages can cast spells and heal, merchants can trade and craft items. By clearly defining what each role can do, the game's balance is maintained. Creatures in the game (including player characters and NPCs) can obtain different role identities. The system manages various permissions in the game through the role system, ensuring that creatures can only perform actions allowed by their roles, preventing unauthorized actions in the game.",
+  "ddl": "-- Schema for database: rschema_0223\nCREATE TABLE `role_types` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  `positioning` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `role_types_name_unique` (`name`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `role_capabilities` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `role_type_id` int(11) NOT NULL,\n  `capability` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `role_capabilities_role_type_id_foreign` (`role_type_id`),\n  CONSTRAINT `role_capabilities_role_type_id_foreign` FOREIGN KEY (`role_type_id`) REFERENCES `role_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `creatures` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `role_id` int(11) DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  KEY `creatures_role_id_foreign` (`role_id`),\n  CONSTRAINT `creatures_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `role_types` (`id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `permissions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `permissions_name_unique` (`name`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `role_permissions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `role_type_id` int(11) NOT NULL,\n  `permission_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `role_permissions_role_type_id_foreign` (`role_type_id`),\n  KEY `role_permissions_permission_id_foreign` (`permission_id`),\n  CONSTRAINT `role_permissions_role_type_id_foreign` FOREIGN KEY (`role_type_id`) REFERENCES `role_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `role_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "role_types",
+      "role_capabilities",
+      "creatures",
+      "permissions",
+      "role_permissions"
+    ],
+    "columns_by_table": {
+      "role_types": [],
+      "role_capabilities": [],
+      "creatures": [],
+      "permissions": [],
+      "role_permissions": []
+    }
+  }
+}

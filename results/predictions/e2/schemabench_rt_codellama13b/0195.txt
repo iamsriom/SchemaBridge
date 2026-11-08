@@ -1,0 +1,53 @@
+-- Schema for database: schemabench_0195
+CREATE TABLE `runners` (
+  `runner_id` int(11) NOT NULL,
+  `registration_date` datetime NOT NULL,
+  PRIMARY KEY (`runner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pizza_names` (
+  `pizza_id` int(11) NOT NULL,
+  `pizza_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`pizza_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pizza_toppings` (
+  `topping_id` int(11) NOT NULL,
+  `topping_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`topping_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pizza_recipes` (
+  `pizza_id` int(11) NOT NULL,
+  `toppings` varchar(255) NOT NULL,
+  PRIMARY KEY (`pizza_id`),
+  UNIQUE KEY `unique_pizza_id` (`pizza_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_orders` (
+  `order_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `pizza_id` int(11) NOT NULL,
+  `exclusions` varchar(255) DEFAULT NULL,
+  `extras` varchar(255) DEFAULT NULL,
+  `order_time` datetime NOT NULL,
+  PRIMARY KEY (`order_id`, `customer_id`),
+  CONSTRAINT `fk_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_pizza` FOREIGN KEY (`pizza_id`) REFERENCES `pizza_names` (`pizza_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `runner_orders` (
+  `order_id` int(11) NOT NULL,
+  `runner_id` int(11) NOT NULL,
+  `pickup_time` datetime NOT NULL,
+  `distance` float NOT NULL,
+  `duration` int(11) NOT NULL,
+  `cancellation_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `fk_runner` FOREIGN KEY (`runner_id`) REFERENCES `runners` (`runner_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

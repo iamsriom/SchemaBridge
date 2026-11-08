@@ -1,0 +1,47 @@
+-- Schema for database: rschema_0073
+CREATE TABLE `insurance_agents` (
+  `agent_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact_phone` varchar(15) NOT NULL,
+  `hire_date` datetime NOT NULL,
+  PRIMARY KEY (`agent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact_phone` varchar(15) NOT NULL,
+  `id_card_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `insurance_policies` (
+  `policy_id` int(11) NOT NULL,
+  `agent_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `insurance_term` int(11) NOT NULL,
+  `insurance_type` varchar(255) NOT NULL,
+  `premium` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`policy_id`),
+  CONSTRAINT `insurance_policies_ibfk_1` FOREIGN KEY (`agent_id`) REFERENCES `insurance_agents` (`agent_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `insurance_policies_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment_records` (
+  `payment_id` int(11) NOT NULL,
+  `policy_id` int(11) NOT NULL,
+  `payment_method` varchar(255) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `payment_time` datetime NOT NULL,
+  PRIMARY KEY (`payment_id`),
+  CONSTRAINT `payment_records_ibfk_1` FOREIGN KEY (`policy_id`) REFERENCES `insurance_policies` (`policy_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `claim_records` (
+  `claim_id` int(11) NOT NULL,
+  `policy_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `claim_time` datetime NOT NULL,
+  PRIMARY KEY (`claim_id`),
+  CONSTRAINT `claim_records_ibfk_1` FOREIGN KEY (`policy_id`) REFERENCES `insurance_policies` (`policy_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

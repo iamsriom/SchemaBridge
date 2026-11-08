@@ -1,0 +1,74 @@
+-- Schema for database: rschema_0425
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` varchar(50) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `building` (
+  `building_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `supervisor_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`building_id`),
+  CONSTRAINT `building_ibfk_1` FOREIGN KEY (`supervisor_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `announcement` (
+  `announcement_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `release_time` datetime NOT NULL,
+  `admin_id` int(11) NOT NULL,
+  PRIMARY KEY (`announcement_id`),
+  CONSTRAINT `announcement_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dormitory` (
+  `dormitory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `facilities` text NOT NULL,
+  `number_of_beds` int(11) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `building_id` int(11) NOT NULL,
+  PRIMARY KEY (`dormitory_id`),
+  CONSTRAINT `dormitory_ibfk_1` FOREIGN KEY (`building_id`) REFERENCES `building` (`building_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `class` varchar(50) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `dormitory_id` int(11) NOT NULL,
+  PRIMARY KEY (`student_id`),
+  CONSTRAINT `student_ibfk_1` FOREIGN KEY (`dormitory_id`) REFERENCES `dormitory` (`dormitory_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_record` (
+  `maintenance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `completion_time` datetime NOT NULL,
+  `fault_description` text NOT NULL,
+  `maintenance_status` varchar(50) NOT NULL,
+  `report_time` datetime NOT NULL,
+  `dormitory_id` int(11) NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  PRIMARY KEY (`maintenance_id`),
+  CONSTRAINT `maintenance_record_ibfk_1` FOREIGN KEY (`dormitory_id`) REFERENCES `dormitory` (`dormitory_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_record_ibfk_2` FOREIGN KEY (`staff_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `application` (
+  `application_id` int(11) NOT NULL AUTO_INCREMENT,
+  `content` text NOT NULL,
+  `application_time` datetime NOT NULL,
+  `application_type` varchar(50) NOT NULL,
+  `processing_opinion` text DEFAULT NULL,
+  `processing_status` varchar(50) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  PRIMARY KEY (`application_id`),
+  CONSTRAINT `application_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,50 @@
+-- Schema for database: schemabench_0086
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `stripe_id` varchar(255) NOT NULL,
+  `payment_method_type` varchar(255) NOT NULL,
+  `billing_address` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscriptions` (
+  `subscription_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `subscription_name` varchar(255) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `end_date` datetime NOT NULL,
+  `last_updated` datetime NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`subscription_id`),
+  CONSTRAINT `subscriptions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscription_items` (
+  `item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `subscription_id` int(11) NOT NULL,
+  `stripe_id` varchar(255) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`item_id`),
+  CONSTRAINT `subscription_items_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`subscription_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `receipts` (
+  `receipt_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `amount_paid` decimal(10,2) NOT NULL,
+  `tax` decimal(10,2) NOT NULL,
+  `payment_date` datetime NOT NULL,
+  PRIMARY KEY (`receipt_id`),
+  CONSTRAINT `receipts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tax_rates` (
+  `tax_rate_id` int(11) NOT NULL AUTO_INCREMENT,
+  `stripe_id` varchar(255) NOT NULL,
+  `percentage` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`tax_rate_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

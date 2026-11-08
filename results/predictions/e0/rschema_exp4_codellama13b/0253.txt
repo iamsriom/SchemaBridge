@@ -1,0 +1,52 @@
+-- Schema for database: rschema_0253
+
+CREATE TABLE `users` (
+`user_id` int(11) NOT NULL AUTO_INCREMENT,
+`username` varchar(255) NOT NULL,
+`password` varchar(255) NOT NULL,
+`contact_info` varchar(255) NOT NULL,
+`registration_time` datetime NOT NULL,
+PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `group_chats` (
+`group_chat_id` int(11) NOT NULL AUTO_INCREMENT,
+`group_chat_name` varchar(255) NOT NULL,
+`creator_id` int(11) NOT NULL,
+`creation_time` datetime NOT NULL,
+`number_of_members` int(11) NOT NULL,
+PRIMARY KEY (`group_chat_id`),
+FOREIGN KEY (`creator_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `chat_records` (
+`record_id` int(11) NOT NULL AUTO_INCREMENT,
+`sender_id` int(11) NOT NULL,
+`receiver_id` int(11) NOT NULL,
+`message_time` datetime NOT NULL,
+`message_type` varchar(255) NOT NULL,
+`message_content` varchar(255) NOT NULL,
+`read_time` datetime NOT NULL,
+PRIMARY KEY (`record_id`),
+FOREIGN KEY (`sender_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`receiver_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_joining_group_chat` (
+`user_id` int(11) NOT NULL,
+`group_chat_id` int(11) NOT NULL,
+`join_time` datetime NOT NULL,
+`notes` varchar(255) NOT NULL,
+PRIMARY KEY (`user_id`, `group_chat_id`),
+FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`group_chat_id`) REFERENCES `group_chats` (`group_chat_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_leaving_group_chat` (
+`user_id` int(11) NOT NULL,
+`group_chat_id` int(11) NOT NULL,
+`leave_time` datetime NOT NULL,
+PRIMARY KEY (`user_id`, `group_chat_id`),
+FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`group_chat_id`) REFERENCES `group_chats` (`group_chat_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

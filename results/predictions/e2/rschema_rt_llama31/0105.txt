@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0105
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_name` varchar(255) NOT NULL,
+  `birthday` datetime DEFAULT NULL,
+  `email` varchar(255) NOT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `nickname` varchar(255) DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `registration_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_dynamic_information` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content` text NOT NULL,
+  `comments_count` int(11) DEFAULT 0,
+  `favorites_count` int(11) DEFAULT 0,
+  `likes_count` int(11) DEFAULT 0,
+  `published_time` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `user_dynamic_information_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `add_contact` (
+  `user_id` int(11) NOT NULL,
+  `added_user_id` int(11) NOT NULL,
+  `added_time` datetime NOT NULL,
+  `relationship_type` varchar(50) DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  PRIMARY KEY (`user_id`, `added_user_id`, `added_time`),
+  CONSTRAINT `add_contact_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `add_contact_ibfk_2` FOREIGN KEY (`added_user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `social_activity` (
+  `user_id` int(11) NOT NULL,
+  `dynamic_content_id` int(11) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `is_collected` tinyint(1) DEFAULT 0,
+  `comments` text DEFAULT NULL,
+  `is_liked` tinyint(1) DEFAULT 0,
+  PRIMARY KEY (`user_id`, `dynamic_content_id`, `creation_time`),
+  CONSTRAINT `social_activity_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `social_activity_ibfk_2` FOREIGN KEY (`dynamic_content_id`) REFERENCES `user_dynamic_information` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

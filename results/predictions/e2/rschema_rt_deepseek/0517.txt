@@ -1,0 +1,84 @@
+-- Schema for database: rschema_0517
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL,
+  `model` varchar(255) DEFAULT NULL,
+  `product_name` varchar(255) DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `unit_price` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supermarket` (
+  `supermarket_id` int(11) NOT NULL,
+  `supermarket_name` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone` varchar(15) DEFAULT NULL,
+  `manager_employee_id` int(11) NOT NULL,
+  PRIMARY KEY (`supermarket_id`),
+  CONSTRAINT `supermarket_ibfk_1` FOREIGN KEY (`manager_employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL,
+  `department_name` varchar(255) DEFAULT NULL,
+  `department_responsibility` varchar(255) DEFAULT NULL,
+  `employee_count` int(11) DEFAULT NULL,
+  `establishment_time` datetime DEFAULT NULL,
+  `manager_employee_id` int(11) NOT NULL,
+  PRIMARY KEY (`department_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`manager_employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `department_ibfk_2` FOREIGN KEY (`supermarket_id`) REFERENCES `supermarket` (`supermarket_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  `salary` decimal(10,2) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `department_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `allocation` (
+  `allocation_quantity` int(11) DEFAULT NULL,
+  `allocation_time` datetime DEFAULT NULL,
+  `product_id` int(11) NOT NULL,
+  `sales_employee_id` int(11) NOT NULL,
+  PRIMARY KEY (`product_id`, `sales_employee_id`),
+  CONSTRAINT `allocation_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `allocation_ibfk_2` FOREIGN KEY (`sales_employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `establish` (
+  `department_id` int(11) NOT NULL,
+  `supermarket_id` int(11) NOT NULL,
+  PRIMARY KEY (`department_id`, `supermarket_id`),
+  CONSTRAINT `establish_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `establish_ibfk_2` FOREIGN KEY (`supermarket_id`) REFERENCES `supermarket` (`supermarket_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `manage_supermarket` (
+  `manager_employee_id` int(11) NOT NULL,
+  `supermarket_id` int(11) NOT NULL,
+  PRIMARY KEY (`manager_employee_id`, `supermarket_id`),
+  CONSTRAINT `manage_supermarket_ibfk_1` FOREIGN KEY (`manager_employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `manage_supermarket_ibfk_2` FOREIGN KEY (`supermarket_id`) REFERENCES `supermarket` (`supermarket_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `manage_department` (
+  `department_id` int(11) NOT NULL,
+  `manager_employee_id` int(11) NOT NULL,
+  PRIMARY KEY (`department_id`, `manager_employee_id`),
+  CONSTRAINT `manage_department_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `manage_department_ibfk_2` FOREIGN KEY (`manager_employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `work` (
+  `department_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  PRIMARY KEY (`department_id`, `employee_id`),
+  CONSTRAINT `work_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `work_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

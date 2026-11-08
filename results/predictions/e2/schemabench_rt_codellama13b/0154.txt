@@ -1,0 +1,89 @@
+-- Schema for database: schemabench_0154
+CREATE TABLE `customers` (
+  `customer_id` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL UNIQUE,
+  `password` varchar(255) NOT NULL,
+  `full_name` varchar(255) NOT NULL,
+  `gender` ENUM('Male', 'Female') NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `product_id` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `price` float NOT NULL CHECK (price > 0),
+  `description` text,
+  `items_in_stock` int(11) NOT NULL CHECK (items_in_stock >= 0),
+  `image_1` varchar(255) DEFAULT NULL,
+  `image_2` varchar(255) DEFAULT NULL,
+  `image_3` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shelves` (
+  `shelf_id` varchar(255) NOT NULL UNIQUE,
+  `location_x` int(11) NOT NULL CHECK (location_x BETWEEN 0 AND 20),
+  `location_y` int(11) NOT NULL CHECK (location_y BETWEEN 0 AND 20),
+  `product_id` varchar(255) NOT NULL,
+  `number_of_orders` int(11) NOT NULL CHECK (number_of_orders >= 0),
+  PRIMARY KEY (`shelf_id`),
+  CONSTRAINT `shelves_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `robots` (
+  `robot_id` varchar(255) NOT NULL,
+  `speed` decimal(10,2) NOT NULL CHECK (speed > 0),
+  `battery_percentage` decimal(5,2) NOT NULL CHECK (battery_percentage BETWEEN 0 AND 100),
+  `current_location_x` int(11) NOT NULL CHECK (current_location_x BETWEEN 0 AND 20),
+  `current_location_y` int(11) NOT NULL CHECK (current_location_y BETWEEN 0 AND 20),
+  `is_charging` bool NOT NULL,
+  `shelf_id` varchar(255) NOT NULL,
+  PRIMARY KEY (`robot_id`),
+  CONSTRAINT `robots_ibfk_1` FOREIGN KEY (`shelf_id`) REFERENCES `shelves` (`shelf_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` varchar(255) NOT NULL,
+  `product_id` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL CHECK (quantity > 0),
+  PRIMARY KEY (`order_id`, `product_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders_details` (
+  `order_id` varchar(255) NOT NULL,
+  `customer_id` varchar(255) NOT NULL,
+  `total_cost` float NOT NULL CHECK (total_cost > 0),
+  `order_date` timestamp NOT NULL,
+  `phone_number` char(13) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `payment_method` ENUM('Cash On-Delivery', 'Credit Card', 'Paypal') NOT NULL,
+  `order_status` ENUM('New', 'In Progress', 'Completed') NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `orders_details_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_details_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wishlist` (
+  `customer_id` varchar(255) NOT NULL,
+  `product_id` varchar(255) NOT NULL,
+  PRIMARY KEY (`customer_id`, `product_id`),
+  CONSTRAINT `wishlist_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `wishlist_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_services` (
+  `message_id` varchar(255) NOT NULL UNIQUE,
+  `customer_id` varchar(255) NOT NULL,
+  `phone_number` char(13) NOT NULL,
+  `message` text NOT NULL,
+  PRIMARY KEY (`message_id`),
+  CONSTRAINT `customer_services_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notifications` (
+  `notification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `notification` tinytext,
+  `notification_date_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`notification_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

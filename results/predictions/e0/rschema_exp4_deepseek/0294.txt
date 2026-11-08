@@ -1,0 +1,41 @@
+--Schemafordatabase:rschema_0294
+--Foreachtable:
+
+CREATE TABLE `branch_offices` (
+  `branch_id` int(11) NOT NULL,
+  `branch_name` varchar(255) NOT NULL,
+  `branch_address` varchar(255) NOT NULL,
+  PRIMARY KEY (`branch_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `ID_number` char(13) NOT NULL,
+  `contact_number` varchar(15) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `branch_id` int(11) NOT NULL,
+  PRIMARY KEY (`customer_id`),
+  FOREIGN KEY (`branch_id`) REFERENCES `branch_offices` (`branch_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `accounts` (
+  `account_number` int(11) NOT NULL,
+  `account_type` enum('Savings','Checking') NOT NULL,
+  `balance` decimal(10,2) NOT NULL,
+  `open_date` datetime NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  PRIMARY KEY (`account_number`),
+  FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transactions` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_type` enum('Deposit','Withdrawal') NOT NULL,
+  `transaction_amount` decimal(10,2) NOT NULL,
+  `transaction_time` datetime NOT NULL,
+  `transaction_location` varchar(255) NOT NULL,
+  `account_number` int(11) NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  FOREIGN KEY (`account_number`) REFERENCES `accounts` (`account_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

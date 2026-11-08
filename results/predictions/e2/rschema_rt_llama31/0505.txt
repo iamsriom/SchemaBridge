@@ -1,0 +1,52 @@
+-- Schema for database: rschema_0505
+CREATE TABLE `User` (
+  `account_name` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` varchar(50) NOT NULL,
+  PRIMARY KEY (`account_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Student` (
+  `student_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `major` varchar(100) NOT NULL,
+  `average_grade` decimal(3,2) DEFAULT NULL,
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Teacher` (
+  `teacher_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `age` int(3) DEFAULT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `contact_details` varchar(255) DEFAULT NULL,
+  `job_title` varchar(100) DEFAULT NULL,
+  `work_history` text DEFAULT NULL,
+  PRIMARY KEY (`teacher_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Log_Information` (
+  `user_account` varchar(255) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `operation_type` varchar(100) NOT NULL,
+  PRIMARY KEY (`user_account`, `operation_time`),
+  CONSTRAINT `log_information_ibfk_1` FOREIGN KEY (`user_account`) REFERENCES `User` (`account_name`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Research_Project` (
+  `project_id` int(11) NOT NULL,
+  `project_name` varchar(255) NOT NULL,
+  `funding` decimal(15,2) DEFAULT NULL,
+  `outcome` text DEFAULT NULL,
+  `responsible_teacher` int(11) NOT NULL,
+  PRIMARY KEY (`project_id`),
+  CONSTRAINT `research_project_ibfk_1` FOREIGN KEY (`responsible_teacher`) REFERENCES `Teacher` (`teacher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Teacher_Responsible_for_Research_Project` (
+  `project_id` int(11) NOT NULL,
+  `teacher_id` int(11) NOT NULL,
+  PRIMARY KEY (`project_id`, `teacher_id`),
+  CONSTRAINT `teacher_responsible_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `Research_Project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `teacher_responsible_ibfk_2` FOREIGN KEY (`teacher_id`) REFERENCES `Teacher` (`teacher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

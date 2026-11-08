@@ -1,0 +1,85 @@
+-- Schema for database: schemabench_0223
+CREATE TABLE `candidates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `designation` varchar(255) NOT NULL,
+  `workplace` varchar(255) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `photo` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `elections` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `election_candidates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `election_id` int(11) NOT NULL,
+  `candidate_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `election_id` (`election_id`),
+  KEY `candidate_id` (`candidate_id`),
+  CONSTRAINT `election_candidates_ibfk_1` FOREIGN KEY (`election_id`) REFERENCES `elections` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `election_candidates_ibfk_2` FOREIGN KEY (`candidate_id`) REFERENCES `candidates` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `positions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `election_positions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `election_id` int(11) NOT NULL,
+  `position_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `election_id` (`election_id`),
+  KEY `position_id` (`position_id`),
+  CONSTRAINT `election_positions_ibfk_1` FOREIGN KEY (`election_id`) REFERENCES `elections` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `election_positions_ibfk_2` FOREIGN KEY (`position_id`) REFERENCES `positions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `voters` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `voting_results` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `election_id` int(11) NOT NULL,
+  `position_id` int(11) NOT NULL,
+  `candidate_id` int(11) NOT NULL,
+  `votes` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `election_id` (`election_id`),
+  KEY `position_id` (`position_id`),
+  KEY `candidate_id` (`candidate_id`),
+  CONSTRAINT `voting_results_ibfk_1` FOREIGN KEY (`election_id`) REFERENCES `elections` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `voting_results_ibfk_2` FOREIGN KEY (`position_id`) REFERENCES `election_positions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `voting_results_ibfk_3` FOREIGN KEY (`candidate_id`) REFERENCES `election_candidates` (`candidate_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `voter_votes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `voter_id` int(11) NOT NULL,
+  `election_id` int(11) NOT NULL,
+  `position_id` int(11) NOT NULL,
+  `candidate_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `voter_id` (`voter_id`),
+  KEY `election_id` (`election_id`),
+  KEY `position_id` (`position_id`),
+  KEY `candidate_id` (`candidate_id`),
+  CONSTRAINT `voter_votes_ibfk_1` FOREIGN KEY (`voter_id`) REFERENCES `voters` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `voter_votes_ibfk_2` FOREIGN KEY (`election_id`) REFERENCES `elections` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `voter_votes_ibfk_3` FOREIGN KEY (`position_id`) REFERENCES `election_positions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `voter_votes_ibfk_4` FOREIGN KEY (`candidate_id`) REFERENCES `election_candidates` (`candidate_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,58 @@
+-- Schema for database: rschema_0507
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `user_name` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `role` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `token` (
+  `public_key` int(11) NOT NULL,
+  `private_key` varchar(255) DEFAULT NULL,
+  `generation_time` datetime DEFAULT NULL,
+  `bound_user` int(11) DEFAULT NULL,
+  PRIMARY KEY (`public_key`),
+  CONSTRAINT `token_ibfk_1` FOREIGN KEY (`bound_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `content` (
+  `content_id` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `type` varchar(50) DEFAULT NULL,
+  `creation_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `created_by_user` int(11) DEFAULT NULL,
+  PRIMARY KEY (`content_id`),
+  CONSTRAINT `content_ibfk_1` FOREIGN KEY (`created_by_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `image_text_content` (
+  `content_id` int(11) NOT NULL,
+  `image_text_link` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`content_id`),
+  CONSTRAINT `image_text_content_ibfk_1` FOREIGN KEY (`content_id`) REFERENCES `content` (`content_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `video_content` (
+  `content_id` int(11) NOT NULL,
+  `video_link` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`content_id`),
+  CONSTRAINT `video_content_ibfk_1` FOREIGN KEY (`content_id`) REFERENCES `content` (`content_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `video_content_ibfk_2` FOREIGN KEY (`video_link`) REFERENCES `video_information` (`video_link`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `video_information` (
+  `video_link` varchar(255) NOT NULL,
+  `thumbnail_url` varchar(255) DEFAULT NULL,
+  `video_duration` int(11) DEFAULT NULL,
+  PRIMARY KEY (`video_link`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `video_play_count_record` (
+  `video_link` varchar(255) NOT NULL,
+  `record_time` datetime NOT NULL,
+  `play_count` int(11) DEFAULT NULL,
+  PRIMARY KEY (`video_link`, `record_time`),
+  CONSTRAINT `video_play_count_record_ibfk_1` FOREIGN KEY (`video_link`) REFERENCES `video_information` (`video_link`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

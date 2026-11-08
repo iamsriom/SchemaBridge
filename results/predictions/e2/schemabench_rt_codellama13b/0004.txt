@@ -1,0 +1,198 @@
+-- Schema for database: schemabench_0004
+CREATE TABLE `wp_users` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `user_login` varchar(60) NOT NULL,
+  `user_pass` varchar(255) NOT NULL,
+  `user_nicename` varchar(50) NOT NULL,
+  `user_email` varchar(100) NOT NULL,
+  `user_url` varchar(100) DEFAULT NULL,
+  `user_registered` datetime NOT NULL,
+  `user_activation_key` varchar(255) DEFAULT NULL,
+  `user_status` int(11) NOT NULL DEFAULT '0',
+  `display_name` varchar(250) NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wp_usermeta` (
+  `umeta_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `meta_key` varchar(255) DEFAULT NULL,
+  `meta_value` longtext DEFAULT NULL,
+  PRIMARY KEY (`umeta_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `wp_usermeta_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `wp_users` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wp_posts` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `post_author` int(11) NOT NULL,
+  `post_date` datetime NOT NULL,
+  `post_date_gmt` datetime NOT NULL,
+  `post_content` longtext NOT NULL,
+  `post_title` text NOT NULL,
+  `post_excerpt` text NOT NULL,
+  `post_status` varchar(20) NOT NULL,
+  `comment_status` varchar(20) NOT NULL,
+  `ping_status` varchar(20) NOT NULL,
+  `post_password` varchar(255) NOT NULL,
+  `post_name` varchar(200) NOT NULL,
+  `to_ping` text NOT NULL,
+  `pinged` text NOT NULL,
+  `post_modified` datetime NOT NULL,
+  `post_modified_gmt` datetime NOT NULL,
+  `post_content_filtered` longtext NOT NULL,
+  `post_parent` int(11) NOT NULL DEFAULT '0',
+  `guid` varchar(255) NOT NULL,
+  `menu_order` int(11) NOT NULL DEFAULT '0',
+  `post_type` varchar(20) NOT NULL,
+  `post_mime_type` varchar(100) NOT NULL,
+  `comment_count` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`ID`),
+  KEY `post_author` (`post_author`),
+  CONSTRAINT `wp_posts_ibfk_1` FOREIGN KEY (`post_author`) REFERENCES `wp_users` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wp_postmeta` (
+  `meta_id` int(11) NOT NULL AUTO_INCREMENT,
+  `post_id` int(11) NOT NULL,
+  `meta_key` varchar(255) DEFAULT NULL,
+  `meta_value` longtext DEFAULT NULL,
+  PRIMARY KEY (`meta_id`),
+  KEY `post_id` (`post_id`),
+  CONSTRAINT `wp_postmeta_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `wp_posts` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wp_terms` (
+  `term_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(200) NOT NULL,
+  `slug` varchar(200) NOT NULL,
+  `term_group` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`term_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wp_termmeta` (
+  `meta_id` int(11) NOT NULL AUTO_INCREMENT,
+  `term_id` int(11) NOT NULL,
+  `meta_key` varchar(255) DEFAULT NULL,
+  `meta_value` longtext DEFAULT NULL,
+  PRIMARY KEY (`meta_id`),
+  KEY `term_id` (`term_id`),
+  CONSTRAINT `wp_termmeta_ibfk_1` FOREIGN KEY (`term_id`) REFERENCES `wp_terms` (`term_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wp_term_taxonomy` (
+  `term_taxonomy_id` int(11) NOT NULL AUTO_INCREMENT,
+  `term_id` int(11) NOT NULL,
+  `taxonomy` varchar(32) NOT NULL,
+  `description` longtext DEFAULT NULL,
+  `parent` int(11) NOT NULL DEFAULT '0',
+  `count` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`term_taxonomy_id`),
+  KEY `term_id` (`term_id`),
+  CONSTRAINT `wp_term_taxonomy_ibfk_1` FOREIGN KEY (`term_id`) REFERENCES `wp_terms` (`term_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wp_term_relationships` (
+  `object_id` int(11) NOT NULL,
+  `term_taxonomy_id` int(11) NOT NULL,
+  PRIMARY KEY (`object_id`, `term_taxonomy_id`),
+  KEY `term_taxonomy_id` (`term_taxonomy_id`),
+  CONSTRAINT `wp_term_relationships_ibfk_1` FOREIGN KEY (`object_id`) REFERENCES `wp_posts` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `wp_term_relationships_ibfk_2` FOREIGN KEY (`term_taxonomy_id`) REFERENCES `wp_term_taxonomy` (`term_taxonomy_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wp_comments` (
+  `comment_ID` int(11) NOT NULL AUTO_INCREMENT,
+  `comment_post_ID` int(11) NOT NULL,
+  `comment_author` varchar(255) NOT NULL,
+  `comment_author_email` varchar(100) NOT NULL,
+  `comment_author_url` varchar(200) NOT NULL,
+  `comment_date` datetime NOT NULL,
+  `comment_date_gmt` datetime NOT NULL,
+  `comment_content` text NOT NULL,
+  `comment_karma` int(11) NOT NULL DEFAULT '0',
+  `comment_approved` varchar(20) NOT NULL,
+  `comment_agent` varchar(255) NOT NULL,
+  `comment_type` varchar(20) NOT NULL,
+  `comment_parent` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`comment_ID`),
+  KEY `comment_post_ID` (`comment_post_ID`),
+  CONSTRAINT `wp_comments_ibfk_1` FOREIGN KEY (`comment_post_ID`) REFERENCES `wp_posts` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wp_commentmeta` (
+  `meta_id` int(11) NOT NULL AUTO_INCREMENT,
+  `comment_id` int(11) NOT NULL,
+  `meta_key` varchar(255) DEFAULT NULL,
+  `meta_value` longtext DEFAULT NULL,
+  PRIMARY KEY (`meta_id`),
+  KEY `comment_id` (`comment_id`),
+  CONSTRAINT `wp_commentmeta_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `wp_comments` (`comment_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wp_links` (
+  `link_id` int(11) NOT NULL AUTO_INCREMENT,
+  `link_url` varchar(255) NOT NULL,
+  `link_name` varchar(255) NOT NULL,
+  `link_image` varchar(255) DEFAULT NULL,
+  `link_target` varchar(25) DEFAULT NULL,
+  `link_description` varchar(255) DEFAULT NULL,
+  `link_visible` varchar(20) NOT NULL,
+  `link_owner` int(11) NOT NULL DEFAULT '0',
+  `link_rating` int(11) NOT NULL DEFAULT '0',
+  `link_updated` datetime NOT NULL,
+  `link_rel` varchar(255) DEFAULT NULL,
+  `link_notes` longtext DEFAULT NULL,
+  `link_rss` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`link_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wp_options` (
+  `option_id` int(11) NOT NULL AUTO_INCREMENT,
+  `option_name` varchar(191) NOT NULL,
+  `option_value` longtext NOT NULL,
+  `autoload` varchar(20) NOT NULL,
+  PRIMARY KEY (`option_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wp_registration_log` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `registration_date` datetime NOT NULL,
+  `ip_address` varchar(100) NOT NULL,
+  `status` varchar(20) NOT NULL,
+  PRIMARY KEY (`ID`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `wp_registration_log_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `wp_users` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wp_site` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `domain` varchar(200) NOT NULL,
+  `path` varchar(200) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wp_sitemeta` (
+  `meta_id` int(11) NOT NULL AUTO_INCREMENT,
+  `site_id` int(11) NOT NULL,
+  `meta_key` varchar(255) DEFAULT NULL,
+  `meta_value` longtext DEFAULT NULL,
+  PRIMARY KEY (`meta_id`),
+  KEY `site_id` (`site_id`),
+  CONSTRAINT `wp_sitemeta_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `wp_site` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wp_signups` (
+  `signup_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `signup_date` datetime NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `ip_address` varchar(100) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `meta` longtext DEFAULT NULL,
+  PRIMARY KEY (`signup_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `wp_signups_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `wp_users` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

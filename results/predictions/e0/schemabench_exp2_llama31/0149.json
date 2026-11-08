@@ -1,0 +1,30 @@
+{
+  "text_number": 149,
+  "id": "SB-149",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0149",
+  "question": "1) Background / Context\n\nGravity is a Software as a Service (SaaS) boilerplate designed to expedite the development of SaaS applications. It leverages Node.js for the backend and React for the frontend. The boilerplate offers a comprehensive framework that includes user authentication, subscription management, and AI integrations with ChatGPT and DALL-E, all supported by a REST API compatible with multiple databases. \n\n2) Objectives\n\nThe primary objective of Gravity is to provide a robust and flexible starting point for developers to build custom SaaS solutions quickly. By incorporating essential SaaS features, the platform aims to reduce development time and effort, allowing developers to focus on their application's unique aspects.\n\n3) Stakeholders & Users\n\n- Developers: Utilize the boilerplate for developing custom SaaS applications.\n- End Users: Benefit indirectly through the applications built using Gravity, involving user authentication and personalized services.\n- Administrators: Manage user roles, access controls, and oversee the application's functionalities.\n\n4) Functional Descriptions\n\n- User Authentication: Supports user registration, login, and session management.\n- Subscription Management: Integrates with Stripe for handling subscription plans and payments.\n- Role-based Access Control: Provides granular access permissions based on user roles.\n- AI Integrations: Integrates ChatGPT and DALL-E for AI-enhanced functionalities within applications.\n- REST API: Offers a fast, efficient API for database interactions and system operations.\n\n5) Non-Functional Descriptions\n\n- Code Quality: Emphasizes a well-documented, high-quality codebase for ease of use and maintenance.\n- Performance: Designed to efficiently support multiple databases and ensure quick response times.\n- Security: Ensures secure payment processing and data integrity across the system.",
+  "ddl": "-- Schema for database: schemabench_0149\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `email` varchar(255) NOT NULL,\n  `password` char(60) NOT NULL,\n  `role` enum('admin','developer','end_user') NOT NULL DEFAULT 'end_user',\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `email` (`email`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `subscriptions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `plan` varchar(255) NOT NULL,\n  `status` enum('active','inactive') NOT NULL DEFAULT 'inactive',\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `subscriptions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `roles` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `name` (`name`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `role_users` (\n  `user_id` int(11) NOT NULL,\n  `role_id` int(11) NOT NULL,\n  PRIMARY KEY (`user_id`, `role_id`),\n  KEY `user_id` (`user_id`),\n  KEY `role_id` (`role_id`),\n  CONSTRAINT `role_users_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `role_users_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `stripe_payments` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `subscription_id` int(11) NOT NULL,\n  `amount` decimal(10,2) NOT NULL,\n  `currency` char(3) NOT NULL,\n  `status` enum('paid','unpaid') NOT NULL DEFAULT 'unpaid',\n  PRIMARY KEY (`id`),\n  KEY `subscription_id` (`subscription_id`),\n  CONSTRAINT `stripe_payments_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `chatgpt_logs` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `message` text,\n  `timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `chatgpt_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `dalle_requests` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `prompt` text,\n  `image_url` varchar(255),\n  `status` enum('pending','completed') NOT NULL DEFAULT 'pending',\n  `timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `dalle_requests_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "subscriptions",
+      "roles",
+      "role_users",
+      "stripe_payments",
+      "chatgpt_logs",
+      "dalle_requests"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "subscriptions": [],
+      "roles": [],
+      "role_users": [],
+      "stripe_payments": [],
+      "chatgpt_logs": [],
+      "dalle_requests": []
+    }
+  }
+}

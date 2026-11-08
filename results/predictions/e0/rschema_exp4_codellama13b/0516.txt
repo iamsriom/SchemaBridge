@@ -1,0 +1,59 @@
+-- Schema for database: rschema_0516
+
+CREATE TABLE customers (
+  customer_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  phone VARCHAR(255) NOT NULL,
+  address VARCHAR(255) NOT NULL,
+  PRIMARY KEY (customer_id)
+);
+
+CREATE TABLE sales_orders (
+  order_id INT(11) NOT NULL AUTO_INCREMENT,
+  customer_id INT(11) NOT NULL,
+  pizza_id INT(11) NOT NULL,
+  quantity INT(11) NOT NULL,
+  expected_delivery_date DATETIME NOT NULL,
+  order_status VARCHAR(255) NOT NULL,
+  PRIMARY KEY (order_id),
+  FOREIGN KEY (customer_id) REFERENCES customers (customer_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (pizza_id) REFERENCES pizzas (pizza_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE pizzas (
+  pizza_id INT(11) NOT NULL AUTO_INCREMENT,
+  flavor VARCHAR(255) NOT NULL,
+  ingredients VARCHAR(255) NOT NULL,
+  stock INT(11) NOT NULL,
+  PRIMARY KEY (pizza_id)
+);
+
+CREATE TABLE production_plans (
+  order_id INT(11) NOT NULL,
+  pizza_id INT(11) NOT NULL,
+  production_sequence INT(11) NOT NULL,
+  production_quantity INT(11) NOT NULL,
+  PRIMARY KEY (order_id, pizza_id),
+  FOREIGN KEY (order_id) REFERENCES sales_orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (pizza_id) REFERENCES pizzas (pizza_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE income_expenditure (
+  record_id INT(11) NOT NULL AUTO_INCREMENT,
+  type VARCHAR(255) NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  time DATETIME NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  pizza_id INT(11) NOT NULL,
+  PRIMARY KEY (record_id),
+  FOREIGN KEY (pizza_id) REFERENCES pizzas (pizza_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE delivery_content (
+  record_id INT(11) NOT NULL AUTO_INCREMENT,
+  order_id INT(11) NOT NULL,
+  delivery_time DATETIME NOT NULL,
+  delivery_status VARCHAR(255) NOT NULL,
+  PRIMARY KEY (record_id),
+  FOREIGN KEY (order_id) REFERENCES sales_orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE
+);

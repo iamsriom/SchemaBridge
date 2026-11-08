@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0207
+CREATE TABLE `facilities` (
+  `facility_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `responsible_person` varchar(255) NOT NULL,
+  `creation_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`facility_id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_details` (
+  `maintenance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `facility_id` int(11) NOT NULL,
+  `maintenance_time` datetime NOT NULL,
+  `maintenance_content` varchar(255) NOT NULL,
+  `maintenance_personnel` varchar(255) NOT NULL,
+  `maintenance_costs` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`maintenance_id`),
+  KEY `facility_id` (`facility_id`),
+  CONSTRAINT `maintenance_details_ibfk_1` FOREIGN KEY (`facility_id`) REFERENCES `facilities` (`facility_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `usage_data` (
+  `usage_id` int(11) NOT NULL AUTO_INCREMENT,
+  `facility_id` int(11) NOT NULL,
+  `usage_time` datetime NOT NULL,
+  `usage_frequency` int(11) NOT NULL,
+  `user_feedback` varchar(255) NOT NULL,
+  PRIMARY KEY (`usage_id`),
+  KEY `facility_id` (`facility_id`),
+  CONSTRAINT `usage_data_ibfk_1` FOREIGN KEY (`facility_id`) REFERENCES `facilities` (`facility_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `interactions` (
+  `interaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `facility_id` int(11) NOT NULL,
+  `interaction_time` datetime NOT NULL,
+  PRIMARY KEY (`interaction_id`),
+  KEY `user_id` (`user_id`),
+  KEY `facility_id` (`facility_id`),
+  CONSTRAINT `interactions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `interactions_ibfk_2` FOREIGN KEY (`facility_id`) REFERENCES `facilities` (`facility_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

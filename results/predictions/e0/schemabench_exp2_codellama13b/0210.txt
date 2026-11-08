@@ -1,0 +1,79 @@
+-- Schema for database: schemabench_0210
+
+CREATE TABLE `books` (
+`book_id` int(11) NOT NULL AUTO_INCREMENT,
+`title` varchar(255) NOT NULL,
+`author` varchar(255) NOT NULL,
+`genre` varchar(255) NOT NULL,
+`publication_date` datetime NOT NULL,
+`availability` tinyint(1) NOT NULL DEFAULT 1,
+PRIMARY KEY (`book_id`),
+UNIQUE KEY `book_id_UNIQUE` (`book_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `authors` (
+`author_id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+PRIMARY KEY (`author_id`),
+UNIQUE KEY `author_id_UNIQUE` (`author_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `genres` (
+`genre_id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+PRIMARY KEY (`genre_id`),
+UNIQUE KEY `genre_id_UNIQUE` (`genre_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patrons` (
+`patron_id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`email` varchar(255) NOT NULL,
+`phone` varchar(255) NOT NULL,
+`member_since` datetime NOT NULL,
+PRIMARY KEY (`patron_id`),
+UNIQUE KEY `patron_id_UNIQUE` (`patron_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `loans` (
+`loan_id` int(11) NOT NULL AUTO_INCREMENT,
+`book_id` int(11) NOT NULL,
+`patron_id` int(11) NOT NULL,
+`borrow_date` datetime NOT NULL,
+`due_date` datetime NOT NULL,
+`return_date` datetime NOT NULL,
+PRIMARY KEY (`loan_id`),
+UNIQUE KEY `loan_id_UNIQUE` (`loan_id`),
+KEY `fk_loans_books_idx` (`book_id`),
+KEY `fk_loans_patrons_idx` (`patron_id`),
+CONSTRAINT `fk_loans_books` FOREIGN KEY (`book_id`) REFERENCES `books` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT `fk_loans_patrons` FOREIGN KEY (`patron_id`) REFERENCES `patrons` (`patron_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reviews` (
+`review_id` int(11) NOT NULL AUTO_INCREMENT,
+`book_id` int(11) NOT NULL,
+`patron_id` int(11) NOT NULL,
+`rating` tinyint(1) NOT NULL,
+`comment` varchar(255) NOT NULL,
+PRIMARY KEY (`review_id`),
+UNIQUE KEY `review_id_UNIQUE` (`review_id`),
+KEY `fk_reviews_books_idx` (`book_id`),
+KEY `fk_reviews_patrons_idx` (`patron_id`),
+CONSTRAINT `fk_reviews_books` FOREIGN KEY (`book_id`) REFERENCES `books` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT `fk_reviews_patrons` FOREIGN KEY (`patron_id`) REFERENCES `patrons` (`patron_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transactions` (
+`transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+`book_id` int(11) NOT NULL,
+`patron_id` int(11) NOT NULL,
+`transaction_type` varchar(255) NOT NULL,
+`transaction_date` datetime NOT NULL,
+PRIMARY KEY (`transaction_id`),
+UNIQUE KEY `transaction_id_UNIQUE` (`transaction_id`),
+KEY `fk_transactions_books_idx` (`book_id`),
+KEY `fk_transactions_patrons_idx` (`patron_id`),
+CONSTRAINT `fk_transactions_books` FOREIGN KEY (`book_id`) REFERENCES `books` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT `fk_transactions_patrons` FOREIGN KEY (`patron_id`) REFERENCES `patrons` (`patron_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

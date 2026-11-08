@@ -1,0 +1,47 @@
+-- Schema for database: rschema_0040
+CREATE TABLE `property_information` (
+  `property_id` int(11) NOT NULL,
+  `property_address` varchar(255) DEFAULT NULL,
+  `property_area` float DEFAULT NULL,
+  `sales_price` decimal(10,2) DEFAULT NULL,
+  `sales_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`property_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `salesperson` (
+  `salesperson_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`salesperson_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_information` (
+  `customer_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_contract` (
+  `sales_contract_id` int(11) NOT NULL,
+  `contract_date` date DEFAULT NULL,
+  `contract_signing_time` datetime DEFAULT NULL,
+  `contract_price` decimal(10,2) DEFAULT NULL,
+  `contract_specific_content` text DEFAULT NULL,
+  `customer_id` int(11) NOT NULL,
+  `property_id` int(11) NOT NULL,
+  PRIMARY KEY (`sales_contract_id`),
+  CONSTRAINT `sales_contract_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer_information` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_contract_ibfk_2` FOREIGN KEY (`property_id`) REFERENCES `property_information` (`property_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `salesperson_sold_property` (
+  `sales_contract_id` int(11) NOT NULL,
+  `salesperson_id` int(11) NOT NULL,
+  PRIMARY KEY (`salesperson_id`, `sales_contract_id`),
+  CONSTRAINT `salesperson_sold_property_ibfk_1` FOREIGN KEY (`sales_contract_id`) REFERENCES `sales_contract` (`sales_contract_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `salesperson_sold_property_ibfk_2` FOREIGN KEY (`salesperson_id`) REFERENCES `salesperson` (`salesperson_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

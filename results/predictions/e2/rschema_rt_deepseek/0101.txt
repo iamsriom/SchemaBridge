@@ -1,0 +1,58 @@
+-- Schema for database: rschema_0101
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `phone` varchar(15) DEFAULT NULL,
+  `id_number` varchar(50) NOT NULL,
+  `place_of_origin` varchar(255) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  `level` varchar(50) DEFAULT NULL,
+  `contract_type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
+  `department_responsibilities` text DEFAULT NULL,
+  `department_head_id` int(11) DEFAULT NULL,
+  `total_number_of_people_in_the_department` int(11) DEFAULT NULL,
+  `department_location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`department_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`department_head_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_department_transfer` (
+  `employee_id` int(11) NOT NULL,
+  `transfer_in_department_id` int(11) NOT NULL,
+  `transfer_out_department_id` int(11) NOT NULL,
+  `transfer_time` datetime NOT NULL,
+  `post_transfer_position` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`transfer_time`, `employee_id`),
+  CONSTRAINT `employee_department_transfer_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_department_transfer_ibfk_2` FOREIGN KEY (`transfer_in_department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_department_transfer_ibfk_3` FOREIGN KEY (`transfer_out_department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_attendance` (
+  `employee_id` int(11) NOT NULL,
+  `punch_in_time` datetime NOT NULL,
+  `punch_in_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`employee_id`, `punch_in_time`),
+  CONSTRAINT `employee_attendance_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `performance_evaluation` (
+  `employee_id` int(11) NOT NULL,
+  `evaluation_time` datetime NOT NULL,
+  `evaluation_content` text DEFAULT NULL,
+  `evaluation_result` varchar(50) DEFAULT NULL,
+  `evaluator_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`, `evaluation_time`),
+  CONSTRAINT `performance_evaluation_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `performance_evaluation_ibfk_2` FOREIGN KEY (`evaluator_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,59 @@
+-- Schema for database: rschema_0123
+CREATE TABLE `customer` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact` varchar(255) DEFAULT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supplier` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `inventory_quantity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staff` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `position` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `purchase_from_supplier` (
+  `supplier_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `purchase_time` datetime NOT NULL,
+  `purchase_quantity` int(11) DEFAULT NULL,
+  `purchase_product_unit_price` decimal(10,2) DEFAULT NULL,
+  `operator_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`supplier_id`, `product_id`, `purchase_time`),
+  CONSTRAINT `purchase_from_supplier_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchase_from_supplier_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchase_from_supplier_ibfk_3` FOREIGN KEY (`operator_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_product` (
+  `product_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `sales_time` datetime NOT NULL,
+  `quantity_of_sales_product` int(11) DEFAULT NULL,
+  `unit_price_of_sales_product` decimal(10,2) DEFAULT NULL,
+  `operator_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`product_id`, `customer_id`, `sales_time`),
+  CONSTRAINT `sales_product_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_product_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_product_ibfk_3` FOREIGN KEY (`operator_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

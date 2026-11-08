@@ -1,0 +1,36 @@
+-- Schema for database: rschema_0032
+CREATE TABLE `rental_location` (
+  `location_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  PRIMARY KEY (`location_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone_number` varchar(15) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vehicle` (
+  `vehicle_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model` varchar(255) NOT NULL,
+  `location_id` int(11) NOT NULL,
+  PRIMARY KEY (`vehicle_id`),
+  CONSTRAINT `vehicle_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `rental_location` (`location_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `rental_task` (
+  `vehicle_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `rental_date` datetime NOT NULL,
+  `feedback` text DEFAULT NULL,
+  `rental_cost` decimal(10,2) NOT NULL,
+  `duration` int(11) NOT NULL,
+  `condition_after_rental` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`vehicle_id`, `customer_id`, `rental_date`),
+  UNIQUE KEY `vehicle_customer_unique` (`vehicle_id`, `customer_id`),
+  CONSTRAINT `rental_task_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `rental_task_ibfk_2` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicle` (`vehicle_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

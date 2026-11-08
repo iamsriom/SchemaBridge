@@ -1,0 +1,112 @@
+-- Schema for database: schemabench_0164
+CREATE TABLE `customer` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `home_store` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `loyalty_card_number` varchar(50) DEFAULT NULL,
+  `birth_year` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `generation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `start_year` int(11) NOT NULL,
+  `end_year` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group` varchar(50) NOT NULL,
+  `category` varchar(50) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL,
+  `unit_of_measure` varchar(50) NOT NULL,
+  `wholesale_price` decimal(10,2) NOT NULL,
+  `retail_price` decimal(10,2) NOT NULL,
+  `tax_exempt` tinyint(1) NOT NULL DEFAULT 0,
+  `on_promotion` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `date` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date` date NOT NULL,
+  `week` int(11) NOT NULL,
+  `month` int(11) NOT NULL,
+  `quarter` int(11) NOT NULL,
+  `year` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pastry_inventory` (
+  `sales_outlet` int(11) NOT NULL,
+  `transaction_date` date NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity_sold` int(11) NOT NULL,
+  `waste` int(11) NOT NULL,
+  FOREIGN KEY (`product_id`) REFERENCES `product`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_target` (
+  `sales_outlet` int(11) NOT NULL,
+  `year` int(11) NOT NULL,
+  `month` int(11) NOT NULL,
+  `goal_beans` decimal(10,2) NOT NULL,
+  `goal_beverages` decimal(10,2) NOT NULL,
+  `goal_food` decimal(10,2) NOT NULL,
+  `goal_merchandise` decimal(10,2) NOT NULL,
+  `goal_total_sales` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`sales_outlet`, `year`, `month`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_outlet` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(50) NOT NULL,
+  `square_footage` int(11) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `state` varchar(50) NOT NULL,
+  `telephone_number` varchar(15) NOT NULL,
+  `postal_code` varchar(10) NOT NULL,
+  `longitude` decimal(10,8) NOT NULL,
+  `latitude` decimal(10,8) NOT NULL,
+  `manager` varchar(255) NOT NULL,
+  `neighborhood` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staff` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `position` varchar(100) NOT NULL,
+  `start_date` date NOT NULL,
+  `location` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_receipt` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `date` date NOT NULL,
+  `time` time NOT NULL,
+  `sales_outlet_id` int(11) NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `in_store` tinyint(1) NOT NULL DEFAULT 1,
+  `order_number` varchar(50) NOT NULL,
+  `line_item_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity_sold` int(11) NOT NULL,
+  `line_item_amount` decimal(10,2) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `on_promotion` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`transaction_id`),
+  FOREIGN KEY (`sales_outlet_id`) REFERENCES `sales_outlet`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`staff_id`) REFERENCES `staff`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`customer_id`) REFERENCES `customer`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`product_id`) REFERENCES `product`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

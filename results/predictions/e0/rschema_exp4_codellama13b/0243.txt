@@ -1,0 +1,65 @@
+-- Schema for database: rschema_0243
+
+CREATE TABLE readers (
+  reader_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(255) NOT NULL,
+  registration_date DATETIME NOT NULL,
+  last_update_time DATETIME NOT NULL,
+  PRIMARY KEY (reader_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE books (
+  book_id INT(11) NOT NULL AUTO_INCREMENT,
+  title VARCHAR(255) NOT NULL,
+  author VARCHAR(255) NOT NULL,
+  isbn_number VARCHAR(255) NOT NULL,
+  publication_date DATETIME NOT NULL,
+  current_inventory INT(11) NOT NULL,
+  book_classification VARCHAR(255) NOT NULL,
+  latest_update_time DATETIME NOT NULL,
+  PRIMARY KEY (book_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE borrowings (
+  borrowing_id INT(11) NOT NULL AUTO_INCREMENT,
+  reader_id INT(11) NOT NULL,
+  book_id INT(11) NOT NULL,
+  borrowing_date DATETIME NOT NULL,
+  return_date DATETIME NULL,
+  overdue_fine DECIMAL(10,2) NULL,
+  renewal_number INT(11) NOT NULL,
+  PRIMARY KEY (borrowing_id),
+  FOREIGN KEY (reader_id) REFERENCES readers(reader_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TRIGGER update_book_inventory
+AFTER INSERT ON borrowings
+FOR EACH ROW
+BEGIN
+  UPDATE books
+  SET current_inventory = current_inventory - 1
+  WHERE book_id = NEW.book_id;
+END;
+
+CREATE TRIGGER update_book_inventory
+AFTER UPDATE ON borrowings
+FOR EACH ROW
+BEGIN
+  IF NEW.return_date IS NOT NULL THEN
+    UPDATE books
+    SET current_inventory = current_inventory + 1
+    WHERE book_id = NEW.book_id;
+  END IF;
+END;
+
+CREATE TRIGGER update_book_inventory
+AFTER DELETE ON borrowings
+FOR EACH ROW
+BEGIN
+  UPDATE books
+  SET current_inventory = current_inventory + 1
+  WHERE book_id = OLD.book_id;
+END;

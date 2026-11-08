@@ -1,0 +1,37 @@
+-- Schema for database: rschema_0305
+CREATE TABLE `user` (
+  `account_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `verification_status` tinyint(1) NOT NULL DEFAULT 0,
+  `account_status` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`account_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `post` (
+  `post_id` int(11) NOT NULL,
+  `publisher` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `publish_time` datetime NOT NULL,
+  `attachment_link` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`post_id`),
+  CONSTRAINT `post_ibfk_1` FOREIGN KEY (`publisher`) REFERENCES `user` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notification` (
+  `notification_id` int(11) NOT NULL,
+  `recipient_user` int(11) NOT NULL,
+  `notification_type` varchar(255) NOT NULL,
+  `notification_time` datetime NOT NULL,
+  PRIMARY KEY (`notification_id`),
+  CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`recipient_user`) REFERENCES `user` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `follow` (
+  `user_account_1` int(11) NOT NULL,
+  `user_account_2` int(11) NOT NULL,
+  PRIMARY KEY (`user_account_2`, `user_account_1`),
+  CONSTRAINT `follow_ibfk_1` FOREIGN KEY (`user_account_1`) REFERENCES `user` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `follow_ibfk_2` FOREIGN KEY (`user_account_2`) REFERENCES `user` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,176 @@
+-- Schema for database: schemabench_0079
+CREATE TABLE `wp_users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_notifications` (
+  `notification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `date_sent` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`notification_id`),
+  CONSTRAINT `bp_notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `wp_users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_notifications_meta` (
+  `meta_id` int(11) NOT NULL AUTO_INCREMENT,
+  `notification_id` int(11) NOT NULL,
+  `meta_key` varchar(255) NOT NULL,
+  `meta_value` text DEFAULT NULL,
+  PRIMARY KEY (`meta_id`),
+  CONSTRAINT `bp_notifications_meta_ibfk_1` FOREIGN KEY (`notification_id`) REFERENCES `bp_notifications` (`notification_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_activity` (
+  `activity_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `action_type` varchar(255) NOT NULL,
+  `date_recorded` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`activity_id`),
+  CONSTRAINT `bp_activity_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `wp_users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_activity_meta` (
+  `meta_id` int(11) NOT NULL AUTO_INCREMENT,
+  `activity_id` int(11) NOT NULL,
+  `meta_key` varchar(255) NOT NULL,
+  `meta_value` text DEFAULT NULL,
+  PRIMARY KEY (`meta_id`),
+  CONSTRAINT `bp_activity_meta_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `bp_activity` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_friends` (
+  `friendship_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id_1` int(11) NOT NULL,
+  `user_id_2` int(11) NOT NULL,
+  PRIMARY KEY (`friendship_id`),
+  CONSTRAINT `bp_friends_ibfk_1` FOREIGN KEY (`user_id_1`) REFERENCES `wp_users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bp_friends_ibfk_2` FOREIGN KEY (`user_id_2`) REFERENCES `wp_users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_groups` (
+  `group_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `creator_id` int(11) NOT NULL,
+  PRIMARY KEY (`group_id`),
+  CONSTRAINT `bp_groups_ibfk_1` FOREIGN KEY (`creator_id`) REFERENCES `wp_users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_groups_members` (
+  `membership_id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`membership_id`),
+  CONSTRAINT `bp_groups_members_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `bp_groups` (`group_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bp_groups_members_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `wp_users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_groups_groupmeta` (
+  `meta_id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL,
+  `meta_key` varchar(255) NOT NULL,
+  `meta_value` text DEFAULT NULL,
+  PRIMARY KEY (`meta_id`),
+  CONSTRAINT `bp_groups_groupmeta_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `bp_groups` (`group_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_messages_messages` (
+  `message_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sender_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `date_sent` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`message_id`),
+  CONSTRAINT `bp_messages_messages_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `wp_users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_messages_recipients` (
+  `recipient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `message_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`recipient_id`),
+  CONSTRAINT `bp_messages_recipients_ibfk_1` FOREIGN KEY (`message_id`) REFERENCES `bp_messages_messages` (`message_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bp_messages_recipients_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `wp_users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_messages_notices` (
+  `notice_id` int(11) NOT NULL AUTO_INCREMENT,
+  `content` text NOT NULL,
+  `date_posted` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`notice_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_messages_meta` (
+  `meta_id` int(11) NOT NULL AUTO_INCREMENT,
+  `message_id` int(11) NOT NULL,
+  `meta_key` varchar(255) NOT NULL,
+  `meta_value` text DEFAULT NULL,
+  PRIMARY KEY (`meta_id`),
+  CONSTRAINT `bp_messages_meta_ibfk_1` FOREIGN KEY (`message_id`) REFERENCES `bp_messages_messages` (`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_xprofile_groups` (
+  `group_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_xprofile_fields` (
+  `field_id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL,
+  `field_type` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`field_id`),
+  CONSTRAINT `bp_xprofile_fields_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `bp_xprofile_groups` (`group_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_xprofile_data` (
+  `data_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `field_id` int(11) NOT NULL,
+  `value` text DEFAULT NULL,
+  PRIMARY KEY (`data_id`),
+  CONSTRAINT `bp_xprofile_data_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `wp_users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bp_xprofile_data_ibfk_2` FOREIGN KEY (`field_id`) REFERENCES `bp_xprofile_fields` (`field_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_xprofile_meta` (
+  `meta_id` int(11) NOT NULL AUTO_INCREMENT,
+  `field_id` int(11) NOT NULL,
+  `meta_key` varchar(255) NOT NULL,
+  `meta_value` text DEFAULT NULL,
+  PRIMARY KEY (`meta_id`),
+  CONSTRAINT `bp_xprofile_meta_ibfk_1` FOREIGN KEY (`field_id`) REFERENCES `bp_xprofile_fields` (`field_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_user_blogs` (
+  `blog_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `blog_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`blog_id`),
+  CONSTRAINT `bp_user_blogs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `wp_users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_user_blogs_blogmeta` (
+  `meta_id` int(11) NOT NULL AUTO_INCREMENT,
+  `blog_id` int(11) NOT NULL,
+  `meta_key` varchar(255) NOT NULL,
+  `meta_value` text DEFAULT NULL,
+  PRIMARY KEY (`meta_id`),
+  CONSTRAINT `bp_user_blogs_blogmeta_ibfk_1` FOREIGN KEY (`blog_id`) REFERENCES `bp_user_blogs` (`blog_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bp_invitations` (
+  `invitation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `inviter_id` int(11) NOT NULL,
+  `invitee_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  PRIMARY KEY (`invitation_id`),
+  CONSTRAINT `bp_invitations_ibfk_1` FOREIGN KEY (`inviter_id`) REFERENCES `wp_users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bp_invitations_ibfk_2` FOREIGN KEY (`invitee_id`) REFERENCES `wp_users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

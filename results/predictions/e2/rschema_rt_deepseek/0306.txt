@@ -1,0 +1,93 @@
+-- Schema for database: rschema_0306
+CREATE TABLE `task` (
+  `task_id` int(11) NOT NULL,
+  `class_name` varchar(255) NOT NULL,
+  `concurrent_execution_flag` boolean NOT NULL,
+  `persistence_flag` boolean NOT NULL,
+  `task_description` text DEFAULT NULL,
+  `task_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`task_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trigger_summary` (
+  `trigger_id` int(11) NOT NULL,
+  `trigger_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`trigger_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `scheduler` (
+  `scheduler_id` int(11) NOT NULL,
+  `scheduler_name` varchar(255) NOT NULL,
+  `scheduler_status` varchar(50) NOT NULL,
+  `scheduler_configuration` text DEFAULT NULL,
+  `scheduler_log` text DEFAULT NULL,
+  PRIMARY KEY (`scheduler_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `simple_trigger` (
+  `trigger_id` int(11) NOT NULL,
+  PRIMARY KEY (`trigger_id`),
+  CONSTRAINT `simple_trigger_ibfk_1` FOREIGN KEY (`trigger_id`) REFERENCES `trigger_summary` (`trigger_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cron_trigger` (
+  `trigger_id` int(11) NOT NULL,
+  PRIMARY KEY (`trigger_id`),
+  CONSTRAINT `cron_trigger_ibfk_1` FOREIGN KEY (`trigger_id`) REFERENCES `trigger_summary` (`trigger_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `complex_trigger` (
+  `trigger_id` int(11) NOT NULL,
+  PRIMARY KEY (`trigger_id`),
+  CONSTRAINT `complex_trigger_ibfk_1` FOREIGN KEY (`trigger_id`) REFERENCES `trigger_summary` (`trigger_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `blob_trigger` (
+  `trigger_id` int(11) NOT NULL,
+  PRIMARY KEY (`trigger_id`),
+  CONSTRAINT `blob_trigger_ibfk_1` FOREIGN KEY (`trigger_id`) REFERENCES `trigger_summary` (`trigger_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `lock` (
+  `lock_id` int(11) NOT NULL,
+  `lock_name` varchar(255) NOT NULL,
+  `lock_description` text DEFAULT NULL,
+  `lock_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`lock_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_uses_trigger` (
+  `task_id` int(11) NOT NULL,
+  `trigger_id` int(11) NOT NULL,
+  `calendar_name` varchar(255) DEFAULT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `last_execution_time` datetime DEFAULT NULL,
+  `next_execution_time` datetime DEFAULT NULL,
+  `priority` int(11) DEFAULT NULL,
+  `fault_instruction` text DEFAULT NULL,
+  `trigger_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`task_id`, `trigger_id`),
+  CONSTRAINT `task_uses_trigger_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_uses_trigger_ibfk_2` FOREIGN KEY (`trigger_id`) REFERENCES `trigger_summary` (`trigger_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `scheduler_schedules_task` (
+  `scheduler_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `trigger_id` int(11) NOT NULL,
+  PRIMARY KEY (`scheduler_id`, `task_id`, `trigger_id`),
+  CONSTRAINT `scheduler_schedules_task_ibfk_1` FOREIGN KEY (`scheduler_id`) REFERENCES `scheduler` (`scheduler_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `scheduler_schedules_task_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `scheduler_schedules_task_ibfk_3` FOREIGN KEY (`trigger_id`) REFERENCES `trigger_summary` (`trigger_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `scheduler_acquires_lock` (
+  `scheduler_id` int(11) NOT NULL,
+  `lock_id` int(11) NOT NULL,
+  `acquisition_time` datetime DEFAULT NULL,
+  `release_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`scheduler_id`, `lock_id`),
+  CONSTRAINT `scheduler_acquires_lock_ibfk_1` FOREIGN KEY (`scheduler_id`) REFERENCES `scheduler` (`scheduler_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `scheduler_acquires_lock_ibfk_2` FOREIGN KEY (`lock_id`) REFERENCES `lock` (`lock_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

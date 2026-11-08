@@ -1,0 +1,75 @@
+-- Schema for database: rschema_0344
+CREATE TABLE `User` (
+  `user_id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Application` (
+  `application_id` int(11) NOT NULL,
+  `code` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  PRIMARY KEY (`application_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Web_Service` (
+  `service_id` int(11) NOT NULL,
+  `creation_date` datetime NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `application_id` int(11) NOT NULL,
+  PRIMARY KEY (`service_id`),
+  CONSTRAINT `web_service_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `Application` (`application_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Permissions` (
+  `permission_id` int(11) NOT NULL,
+  `application_id` int(11) NOT NULL,
+  `role` varchar(255) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`permission_id`),
+  CONSTRAINT `permissions_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `Application` (`application_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `permissions_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `User` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Error_Information` (
+  `error_id` int(11) NOT NULL,
+  `error_code` varchar(255) NOT NULL,
+  `error_description` varchar(255) NOT NULL,
+  `occurrence_time` datetime NOT NULL,
+  `return_status` varchar(255) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  PRIMARY KEY (`error_id`),
+  CONSTRAINT `error_information_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `Web_Service` (`service_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Service_Monitoring` (
+  `monitoring_id` int(11) NOT NULL,
+  `call_time` datetime NOT NULL,
+  `delay_time` int(11) NOT NULL,
+  `return_status` varchar(255) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  PRIMARY KEY (`monitoring_id`),
+  CONSTRAINT `service_monitoring_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `Web_Service` (`service_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Statistics` (
+  `statistic_id` int(11) NOT NULL,
+  `call_count` int(11) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  `success_rate` float NOT NULL,
+  `time_period` varchar(255) NOT NULL,
+  PRIMARY KEY (`statistic_id`),
+  CONSTRAINT `statistics_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `Web_Service` (`service_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Error_and_Monitoring_Association` (
+  `error_id` int(11) NOT NULL,
+  `monitoring_id` int(11) NOT NULL,
+  PRIMARY KEY (`error_id`, `monitoring_id`),
+  CONSTRAINT `error_and_monitoring_association_ibfk_1` FOREIGN KEY (`error_id`) REFERENCES `Error_Information` (`error_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `error_and_monitoring_association_ibfk_2` FOREIGN KEY (`monitoring_id`) REFERENCES `Service_Monitoring` (`monitoring_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

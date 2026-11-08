@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0022
+CREATE TABLE `document` (
+  `document_id` int(11) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `category` varchar(255) DEFAULT NULL,
+  `creation_time` datetime DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`document_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `document_management_personnel` (
+  `employee_id` int(11) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `position` varchar(100) DEFAULT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `approval_record` (
+  `document_id` int(11) DEFAULT NULL,
+  `approver` int(11) DEFAULT NULL,
+  `approval_time` datetime DEFAULT NULL,
+  `approval_comments` text DEFAULT NULL,
+  PRIMARY KEY (`approval_time`, `approver`, `document_id`),
+  CONSTRAINT `approval_record_ibfk_1` FOREIGN KEY (`document_id`) REFERENCES `document` (`document_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `approval_record_ibfk_2` FOREIGN KEY (`approver`) REFERENCES `document_management_personnel` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `archiving_record` (
+  `document_id` int(11) DEFAULT NULL,
+  `archivist` int(11) DEFAULT NULL,
+  `archiving_time` datetime DEFAULT NULL,
+  `archiving_location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`archivist`, `document_id`),
+  CONSTRAINT `archiving_record_ibfk_1` FOREIGN KEY (`document_id`) REFERENCES `document` (`document_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `archiving_record_ibfk_2` FOREIGN KEY (`archivist`) REFERENCES `document_management_personnel` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `query_record` (
+  `document_id` int(11) DEFAULT NULL,
+  `query_personnel` int(11) DEFAULT NULL,
+  `query_time` datetime DEFAULT NULL,
+  `query_result` text DEFAULT NULL,
+  PRIMARY KEY (`query_personnel`, `query_time`, `document_id`),
+  CONSTRAINT `query_record_ibfk_1` FOREIGN KEY (`document_id`) REFERENCES `document` (`document_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `query_record_ibfk_2` FOREIGN KEY (`query_personnel`) REFERENCES `document_management_personnel` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,79 @@
+-- Schema for database: schemabench_0011
+CREATE TABLE `ticketit_statuses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `color` varchar(7) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticketit_priorities` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticketit_categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticketit_categories_users` (
+  `user_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`, `category_id`),
+  CONSTRAINT `ticketit_categories_users_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticketit_categories_users_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `ticketit_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticketit` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `subject` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `status_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `agent_id` int(11) DEFAULT NULL,
+  `category_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `ticketit_ibfk_1` FOREIGN KEY (`status_id`) REFERENCES `ticketit_statuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticketit_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticketit_ibfk_3` FOREIGN KEY (`agent_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `ticketit_ibfk_4` FOREIGN KEY (`category_id`) REFERENCES `ticketit_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticketit_comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `ticket_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `ticketit_comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticketit_comments_ibfk_2` FOREIGN KEY (`ticket_id`) REFERENCES `ticketit` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticketit_audits` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `operation` varchar(255) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `ticket_id` int(11) NOT NULL,
+  `timestamp` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `ticketit_audits_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticketit_audits_ibfk_2` FOREIGN KEY (`ticket_id`) REFERENCES `ticketit` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `is_admin` tinyint(1) NOT NULL DEFAULT 0,
+  `is_agent` tinyint(1) NOT NULL DEFAULT 0,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticketit_settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `slug` varchar(255) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  `default_value` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

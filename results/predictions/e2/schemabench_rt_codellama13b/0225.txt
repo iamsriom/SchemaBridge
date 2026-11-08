@@ -1,0 +1,133 @@
+-- Schema for database: schemabench_0225
+CREATE TABLE `employees` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `employment_history` text DEFAULT NULL,
+  `qualifications` text DEFAULT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `clients` (
+  `client_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `enrollment_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`client_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `courses` (
+  `course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_length` int(11) NOT NULL,
+  `fee` decimal(10,2) NOT NULL,
+  `level` varchar(50) NOT NULL,
+  PRIMARY KEY (`course_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_materials` (
+  `material_id` int(11) NOT NULL AUTO_INCREMENT,
+  `book_title` varchar(255) NOT NULL,
+  `publisher` varchar(255) DEFAULT NULL,
+  `list_price` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`material_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `authors` (
+  `author_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `bio` text DEFAULT NULL,
+  PRIMARY KEY (`author_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_prerequisites` (
+  `prerequisite_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_id` int(11) NOT NULL,
+  `prerequisite_course_id` int(11) NOT NULL,
+  PRIMARY KEY (`prerequisite_id`),
+  CONSTRAINT `course_prerequisites_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_prerequisites_ibfk_2` FOREIGN KEY (`prerequisite_course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_software` (
+  `software_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_id` int(11) NOT NULL,
+  `software_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`software_id`),
+  CONSTRAINT `course_software_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `classes` (
+  `class_id` int(11) NOT NULL AUTO_INCREMENT,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  `trainer_id` int(11) NOT NULL,
+  `classroom` varchar(255) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  PRIMARY KEY (`class_id`),
+  CONSTRAINT `classes_ibfk_1` FOREIGN KEY (`trainer_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `classes_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `enrollment_requests` (
+  `request_id` int(11) NOT NULL AUTO_INCREMENT,
+  `request_date` datetime NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `payment` decimal(10,2) DEFAULT NULL,
+  `client_id` int(11) NOT NULL,
+  PRIMARY KEY (`request_id`),
+  CONSTRAINT `enrollment_requests_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vendors` (
+  `vendor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`vendor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_date` datetime NOT NULL,
+  `order_status` varchar(50) NOT NULL,
+  `vendor_id` int(11) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`vendor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shipments` (
+  `shipment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `shipment_date` datetime NOT NULL,
+  `vendor_id` int(11) NOT NULL,
+  PRIMARY KEY (`shipment_id`),
+  CONSTRAINT `shipments_ibfk_1` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`vendor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_lines` (
+  `order_line_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `material_id` int(11) NOT NULL,
+  `quantity_ordered` int(11) NOT NULL,
+  `price_charged` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`order_line_id`),
+  CONSTRAINT `order_lines_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_lines_ibfk_2` FOREIGN KEY (`material_id`) REFERENCES `course_materials` (`material_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shipment_lines` (
+  `shipment_line_id` int(11) NOT NULL AUTO_INCREMENT,
+  `shipment_id` int(11) NOT NULL,
+  `material_id` int(11) NOT NULL,
+  `quantity_received` int(11) NOT NULL,
+  PRIMARY KEY (`shipment_line_id`),
+  CONSTRAINT `shipment_lines_ibfk_1` FOREIGN KEY (`shipment_id`) REFERENCES `shipments` (`shipment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `shipment_lines_ibfk_2` FOREIGN KEY (`material_id`) REFERENCES `course_materials` (`material_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_book_vendors` (
+  `course_book_vendor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `material_id` int(11) NOT NULL,
+  `vendor_id` int(11) NOT NULL,
+  PRIMARY KEY (`course_book_vendor_id`),
+  CONSTRAINT `course_book_vendors_ibfk_1` FOREIGN KEY (`material_id`) REFERENCES `course_materials` (`material_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_book_vendors_ibfk_2` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`vendor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

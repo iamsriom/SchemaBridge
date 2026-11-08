@@ -1,0 +1,28 @@
+{
+  "text_number": 224,
+  "id": "SB-224",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0224",
+  "question": "1) Background / Context\n\nThe project aims to assist company management in effectively preparing for the \"silver tsunami,\" which refers to the significant wave of impending employee retirements. The challenge is to identify employees nearing retirement and manage their transition, as well as to leverage this situation by engaging eligible employees in a mentorship program to pass on valuable knowledge.\n\n2) Objectives\n\n- Identify employees who are approaching retirement.\n- Provide management with detailed information on these employees.\n- Identify employees eligible for participation in a mentorship program.\n  \n3) Stakeholders & Users\n\n- Stakeholders: Company Management, HR Department\n- Users: Managers, HR Personnel\n\n4) Functional Descriptions\n\n- Query the database to identify employees who are close to retirement based on age and other criteria.\n- Retrieve detailed information (e.g., personal details, employment history, salary, titles) of retiring employees.\n- Identify employees eligible for the mentorship program based on specific eligibility criteria.\n- Generate reports for managers containing the required employee information.\n\n5) Non-Functional Descriptions\n\n- Ensure data accuracy and consistency across retrieved reports.\n- Maintain data security and privacy, especially concerning personal employee information.\n- The system should be scalable to accommodate growing data as more employees are added.",
+  "ddl": "-- Schema for database: schemabench_0224\n\nCREATE TABLE employees (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  email VARCHAR(255) NOT NULL,\n  age INT(11) NOT NULL,\n  department VARCHAR(255) NOT NULL,\n  title VARCHAR(255) NOT NULL,\n  salary INT(11) NOT NULL,\n  start_date DATE NOT NULL,\n  end_date DATE NOT NULL,\n  PRIMARY KEY (id),\n  UNIQUE KEY (email)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE mentorship_program (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  employee_id INT(11) NOT NULL,\n  mentor_id INT(11) NOT NULL,\n  start_date DATE NOT NULL,\n  end_date DATE NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (employee_id) REFERENCES employees (id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (mentor_id) REFERENCES employees (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE reports (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  manager_id INT(11) NOT NULL,\n  employee_id INT(11) NOT NULL,\n  report_date DATE NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (manager_id) REFERENCES employees (id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (employee_id) REFERENCES employees (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE mentorship_program_reports (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  mentorship_program_id INT(11) NOT NULL,\n  report_date DATE NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (mentorship_program_id) REFERENCES mentorship_program (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE mentorship_program_reports_details (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  mentorship_program_report_id INT(11) NOT NULL,\n  employee_id INT(11) NOT NULL,\n  mentor_id INT(11) NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (mentorship_program_report_id) REFERENCES mentorship_program_reports (id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (employee_id) REFERENCES employees (id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (mentor_id) REFERENCES employees (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE mentorship_program_reports_comments (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  mentorship_program_report_id INT(11) NOT NULL,\n  comment TEXT NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (mentorship_program_report_id) REFERENCES mentorship_program_reports (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "employees",
+      "mentorship_program",
+      "reports",
+      "mentorship_program_reports",
+      "mentorship_program_reports_details",
+      "mentorship_program_reports_comments"
+    ],
+    "columns_by_table": {
+      "employees": [],
+      "mentorship_program": [],
+      "reports": [],
+      "mentorship_program_reports": [],
+      "mentorship_program_reports_details": [],
+      "mentorship_program_reports_comments": []
+    }
+  }
+}

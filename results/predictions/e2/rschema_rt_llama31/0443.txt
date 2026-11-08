@@ -1,0 +1,70 @@
+-- Schema for database: rschema_0443
+CREATE TABLE `user_information` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `login_password` varchar(255) NOT NULL,
+  `registered_phone_number` varchar(15) DEFAULT NULL,
+  `role_permissions` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `asset_information` (
+  `device_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `number` varchar(50) NOT NULL,
+  `model` varchar(255) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `calibration_date` datetime DEFAULT NULL,
+  `responsible_person` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`device_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `status_log_information` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_number` int(11) NOT NULL,
+  `borrower` int(11) NOT NULL,
+  `borrowing_time` datetime NOT NULL,
+  `return_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`log_id`),
+  FOREIGN KEY (`device_number`) REFERENCES `asset_information` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`borrower`) REFERENCES `user_information` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `account_dynamic_log_information` (
+  `dynamic_log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_number` int(11) NOT NULL,
+  `borrowing_account` int(11) NOT NULL,
+  `returning_account` int(11) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`dynamic_log_id`),
+  FOREIGN KEY (`device_number`) REFERENCES `asset_information` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`borrowing_account`) REFERENCES `user_information` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`returning_account`) REFERENCES `user_information` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_asset_relationship` (
+  `relationship_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `device_number` int(11) NOT NULL,
+  PRIMARY KEY (`relationship_id`),
+  FOREIGN KEY (`user_id`) REFERENCES `user_information` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`device_number`) REFERENCES `asset_information` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device_number_log_id` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_number` int(11) NOT NULL,
+  `log_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`device_number`) REFERENCES `asset_information` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`log_id`) REFERENCES `status_log_information` (`log_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `asset_account_dynamic_log_relationship` (
+  `relationship_id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_number` int(11) NOT NULL,
+  `dynamic_log_id` int(11) NOT NULL,
+  PRIMARY KEY (`relationship_id`),
+  FOREIGN KEY (`device_number`) REFERENCES `asset_information` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`dynamic_log_id`) REFERENCES `account_dynamic_log_information` (`dynamic_log_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

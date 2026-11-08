@@ -1,0 +1,45 @@
+-- Schema for database: rschema_0218
+CREATE TABLE `manufacturer` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `person_in_charge` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `model` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `manufacturer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `model_ibfk_1` (`manufacturer_id`),
+  CONSTRAINT `model_ibfk_1` FOREIGN KEY (`manufacturer_id`) REFERENCES `manufacturer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `printer` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_id` int(11) NOT NULL,
+  `installation_location` varchar(255) NOT NULL,
+  `hostname` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `printer_ibfk_1` (`model_id`),
+  CONSTRAINT `printer_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `model` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `driver_config` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_id` int(11) NOT NULL,
+  `standard_config` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `driver_config_ibfk_1` (`model_id`),
+  CONSTRAINT `driver_config_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `model` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `custom_driver_setting` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `printer_id` int(11) NOT NULL,
+  `setting_name` varchar(255) NOT NULL,
+  `setting_value` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `custom_driver_setting_ibfk_1` (`printer_id`),
+  CONSTRAINT `custom_driver_setting_ibfk_1` FOREIGN KEY (`printer_id`) REFERENCES `printer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,28 @@
+{
+  "text_number": 185,
+  "id": "SB-185",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0185",
+  "question": "Background / Context\n\nThe project involves developing a tool for Pokémon GO players to efficiently manage their Pokémon inventory. Players often have large collections after events such as Community Days or GO Fest, and need a way to quickly decide which Pokémon to keep, discard, or trade. The tool will assist in analyzing Pokémon based on their Individual Values (IVs), stat product rankings, and potential trade outcomes.\n\nObjectives\n\n- Enable batch analysis of Pokémon inventory for more efficient management.\n- Provide detailed information on IVs, stat products, and upgrade costs.\n- Display potential outcomes and benefits from trading Pokémon.\n- Simplify decision-making for players focused on different aspects of the game, such as PvP battles or resource management.\n\nStakeholders & Users\n\n- Primary Users: Pokémon GO players, particularly those interested in PvP battles or maximizing their Pokémon inventory.\n- Stakeholders: Game communities, third-party developers, and data analysts.\n\nFunctional Descriptions\n\n1. Batch Analysis Tool:\n   - Analyze multiple Pokémon simultaneously for their IVs, stat products, and potential in various battle leagues (e.g., Great, Ultra).\n   - Provide rankings and SP (stat product) metrics for each Pokémon.\n\n2. Upgrade Cost Analysis:\n   - Display dust and candy costs for powering up Pokémon.\n   - Offer upgrade cost options for different levels (e.g., 30, 40, 50).\n\n3. Trade Outcome Simulation:\n   - Simulate potential IV outcomes based on different friendship levels.\n   - Analyze trade benefits and viability, considering player and partner levels.\n\n4. Rank vs. Cost Evaluation:\n   - Present cost-effective Pokémon options for battle leagues.\n   - Identify candidates for trading vs. powering up based on resource availability.\n\n5. User-Configurable Filters:\n   - Allow users to set criteria for SP, rank, CP limits, and resource costs.\n\nNon-Functional Descriptions\n\n- Performance: The system should process batch analyses swiftly to support real-time decision-making during events.\n- Scalability: Capable of handling large Pokémon inventories and multiple analyses.\n- Usability: Intuitive interface to accommodate players of all skill levels.\n- Security: Ensure data privacy and secure handling of user-uploaded information.",
+  "ddl": "-- Schema for database: schemabench_0185\nCREATE TABLE `pokemon` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `cp` int(11) NOT NULL,\n  `iv_attack` int(11) NOT NULL,\n  `iv_defense` int(11) NOT NULL,\n  `iv_stamina` int(11) NOT NULL,\n  `level` int(11) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `battle_leagues` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `pokemon_battle_leagues` (\n  `pokemon_id` int(11) NOT NULL,\n  `battle_league_id` int(11) NOT NULL,\n  PRIMARY KEY (`pokemon_id`, `battle_league_id`),\n  KEY `pokemon_battle_leagues_ibfk_1` (`pokemon_id`),\n  KEY `pokemon_battle_leagues_ibfk_2` (`battle_league_id`),\n  CONSTRAINT `pokemon_battle_leagues_ibfk_1` FOREIGN KEY (`pokemon_id`) REFERENCES `pokemon` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `pokemon_battle_leagues_ibfk_2` FOREIGN KEY (`battle_league_id`) REFERENCES `battle_leagues` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `trade_outcomes` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `pokemon_id` int(11) NOT NULL,\n  `friendship_level` int(11) NOT NULL,\n  `outcome_iv_attack` int(11) NOT NULL,\n  `outcome_iv_defense` int(11) NOT NULL,\n  `outcome_iv_stamina` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `trade_outcomes_ibfk_1` (`pokemon_id`),\n  CONSTRAINT `trade_outcomes_ibfk_1` FOREIGN KEY (`pokemon_id`) REFERENCES `pokemon` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `upgrade_costs` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `pokemon_id` int(11) NOT NULL,\n  `level` int(11) NOT NULL,\n  `dust_cost` int(11) NOT NULL,\n  `candy_cost` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `upgrade_costs_ibfk_1` (`pokemon_id`),\n  CONSTRAINT `upgrade_costs_ibfk_1` FOREIGN KEY (`pokemon_id`) REFERENCES `pokemon` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_filters` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `sp_min` int(11) DEFAULT NULL,\n  `sp_max` int(11) DEFAULT NULL,\n  `rank_min` int(11) DEFAULT NULL,\n  `rank_max` int(11) DEFAULT NULL,\n  `cp_min` int(11) DEFAULT NULL,\n  `cp_max` int(11) DEFAULT NULL,\n  `dust_min` int(11) DEFAULT NULL,\n  `dust_max` int(11) DEFAULT NULL,\n  `candy_min` int(11) DEFAULT NULL,\n  `candy_max` int(11) DEFAULT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "pokemon",
+      "battle_leagues",
+      "pokemon_battle_leagues",
+      "trade_outcomes",
+      "upgrade_costs",
+      "user_filters"
+    ],
+    "columns_by_table": {
+      "pokemon": [],
+      "battle_leagues": [],
+      "pokemon_battle_leagues": [],
+      "trade_outcomes": [],
+      "upgrade_costs": [],
+      "user_filters": []
+    }
+  }
+}

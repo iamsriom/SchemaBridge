@@ -1,0 +1,26 @@
+{
+  "text_number": 228,
+  "id": "67552f0a13602ec03b41a8bf",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "rschema_0228",
+  "question": "The system manages customer subscriptions to magazines, including magazine pricing, and the relationship between customers and magazine subscriptions.\nThe Customer entity (Customer ID, Customer Name, Customer Address) records detailed customer information. Customer ID serves as the Primary key to ensure complete records and effective retrieval of customer information.\nThe Magazine entity (Magazine Name, Publisher, Theme, Publication Frequency, Website) records basic information about the magazine. Magazine Name and Publisher serve as composite Primary key to guarantee the uniqueness of each magazine and its publisher. This table also includes additional information such as the magazine’s theme, publication frequency, and website.\nThe Pricing entity (Pricing ID, Magazine Name, Publisher, Subscription Package, Subscription Period, Price) records the pricing for each magazine. Pricing ID serves as the Primary key and is associated with Magazine Name and Publisher to ensure each pricing entry is unique and related to the corresponding magazine. The pricing table also includes different subscription packages, periods, and pricing information, supporting multiple pricing strategies.\nCustomer Subscribes to Magazine (Customer ID, Pricing ID, Creation Time, Subscription Start Date) relationship table represents a many-to-many relationship between customers and magazine pricing. A customer can subscribe to multiple magazines and can subscribe according to different pricing strategies, recording the start date of the subscription.\nFurthermore, the Magazine to Pricing (Pricing ID, Magazine Name, Publisher, Subscription Package, Subscription Period, Price) relationship table represents a one-to-many relationship between magazines and pricing. A magazine can have multiple pricing entries, adapting to different subscription packages and periods.\nThis design ensures that the system can manage the subscription relationship between customers and magazines, pricing strategies, and supports various pricing and subscription modes.",
+  "ddl": "-- Schema for database: rschema_0228\n\nCREATE TABLE customers (\n  customer_id INT(11) NOT NULL AUTO_INCREMENT,\n  customer_name VARCHAR(255) NOT NULL,\n  customer_address VARCHAR(255) NOT NULL,\n  PRIMARY KEY (customer_id)\n);\n\nCREATE TABLE magazines (\n  magazine_name VARCHAR(255) NOT NULL,\n  publisher VARCHAR(255) NOT NULL,\n  theme VARCHAR(255) NOT NULL,\n  publication_frequency VARCHAR(255) NOT NULL,\n  website VARCHAR(255) NOT NULL,\n  PRIMARY KEY (magazine_name, publisher)\n);\n\nCREATE TABLE pricing (\n  pricing_id INT(11) NOT NULL AUTO_INCREMENT,\n  magazine_name VARCHAR(255) NOT NULL,\n  publisher VARCHAR(255) NOT NULL,\n  subscription_package VARCHAR(255) NOT NULL,\n  subscription_period VARCHAR(255) NOT NULL,\n  price DECIMAL(10,2) NOT NULL,\n  PRIMARY KEY (pricing_id),\n  FOREIGN KEY (magazine_name, publisher) REFERENCES magazines (magazine_name, publisher) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE customer_subscribes_to_magazine (\n  customer_id INT(11) NOT NULL,\n  pricing_id INT(11) NOT NULL,\n  creation_time DATETIME NOT NULL,\n  subscription_start_date DATETIME NOT NULL,\n  PRIMARY KEY (customer_id, pricing_id),\n  FOREIGN KEY (customer_id) REFERENCES customers (customer_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (pricing_id) REFERENCES pricing (pricing_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE magazine_to_pricing (\n  pricing_id INT(11) NOT NULL,\n  magazine_name VARCHAR(255) NOT NULL,\n  publisher VARCHAR(255) NOT NULL,\n  subscription_package VARCHAR(255) NOT NULL,\n  subscription_period VARCHAR(255) NOT NULL,\n  price DECIMAL(10,2) NOT NULL,\n  PRIMARY KEY (pricing_id),\n  FOREIGN KEY (magazine_name, publisher) REFERENCES magazines (magazine_name, publisher) ON DELETE CASCADE ON UPDATE CASCADE\n);",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "customers",
+      "magazines",
+      "pricing",
+      "customer_subscribes_to_magazine",
+      "magazine_to_pricing"
+    ],
+    "columns_by_table": {
+      "customers": [],
+      "magazines": [],
+      "pricing": [],
+      "customer_subscribes_to_magazine": [],
+      "magazine_to_pricing": []
+    }
+  }
+}

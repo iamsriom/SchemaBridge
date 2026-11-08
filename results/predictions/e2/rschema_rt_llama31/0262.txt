@@ -1,0 +1,72 @@
+-- Schema for database: rschema_0262
+CREATE TABLE `company` (
+  `company_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `telephone` varchar(15) NOT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `salesperson` (
+  `salesperson_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`salesperson_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supermarket` (
+  `supermarket_id` int(11) NOT NULL AUTO_INCREMENT,
+  `address` varchar(255) NOT NULL,
+  `manager` varchar(255) NOT NULL,
+  `telephone` varchar(15) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  PRIMARY KEY (`supermarket_id`),
+  CONSTRAINT `supermarket_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `company` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `allocation_record` (
+  `allocation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `quantity_allocated` int(11) NOT NULL,
+  `time_of_allocation` datetime NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `salesperson_id` int(11) NOT NULL,
+  PRIMARY KEY (`allocation_id`),
+  CONSTRAINT `allocation_record_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `allocation_record_ibfk_2` FOREIGN KEY (`salesperson_id`) REFERENCES `salesperson` (`salesperson_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `manager` varchar(255) NOT NULL,
+  `telephone` varchar(15) NOT NULL,
+  `supermarket_id` int(11) NOT NULL,
+  PRIMARY KEY (`department_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`supermarket_id`) REFERENCES `supermarket` (`supermarket_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_inventory` (
+  `inventory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `supermarket_id` int(11) NOT NULL,
+  PRIMARY KEY (`inventory_id`),
+  CONSTRAINT `product_inventory_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `product_inventory_ibfk_2` FOREIGN KEY (`supermarket_id`) REFERENCES `supermarket` (`supermarket_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `salary` decimal(10,2) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

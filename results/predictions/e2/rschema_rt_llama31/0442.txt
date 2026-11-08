@@ -1,0 +1,86 @@
+-- Schema for database: rschema_0442
+CREATE TABLE `medical_institution` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `medical_institution_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`medical_institution_id`) REFERENCES `medical_institution` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medical_waste` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `medical_institution_id` int(11) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `weight` decimal(10,2) NOT NULL,
+  `generation_time` datetime NOT NULL,
+  `collector_id` int(11) NOT NULL,
+  `collection_time` datetime NOT NULL,
+  `traceability_code_id` int(11) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `medical_waste_ibfk_1` FOREIGN KEY (`medical_institution_id`) REFERENCES `medical_institution` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `medical_waste_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `medical_waste_ibfk_3` FOREIGN KEY (`traceability_code_id`) REFERENCES `traceability_code` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `traceability_code` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `number` varchar(255) NOT NULL,
+  `generation_time` datetime NOT NULL,
+  `medical_waste_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `traceability_code_ibfk_1` FOREIGN KEY (`medical_waste_id`) REFERENCES `medical_waste` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medical_waste_inbound` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `medical_institution_id` int(11) NOT NULL,
+  `medical_waste_id` int(11) NOT NULL,
+  `batch_number` varchar(255) NOT NULL,
+  `expected_quantity` int(11) NOT NULL,
+  `actual_quantity` int(11) NOT NULL,
+  `expected_weight` decimal(10,2) NOT NULL,
+  `actual_weight` decimal(10,2) NOT NULL,
+  `inbound_time` datetime NOT NULL,
+  `collector_id` int(11) NOT NULL,
+  `confirmer_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `medical_waste_inbound_ibfk_1` FOREIGN KEY (`medical_institution_id`) REFERENCES `medical_institution` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `medical_waste_inbound_ibfk_2` FOREIGN KEY (`medical_waste_id`) REFERENCES `medical_waste` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medical_waste_temporary_storage_outbound` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `medical_institution_id` int(11) NOT NULL,
+  `medical_waste_id` int(11) NOT NULL,
+  `batch_number` varchar(255) NOT NULL,
+  `outbound_quantity` int(11) NOT NULL,
+  `outbound_weight` decimal(10,2) NOT NULL,
+  `outbound_time` datetime NOT NULL,
+  `transporter_id` int(11) NOT NULL,
+  `confirmer_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `medical_waste_temporary_storage_outbound_ibfk_1` FOREIGN KEY (`medical_institution_id`) REFERENCES `medical_institution` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `medical_waste_temporary_storage_outbound_ibfk_2` FOREIGN KEY (`medical_waste_id`) REFERENCES `medical_waste` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transport_vehicle` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `medical_waste_id` int(11) NOT NULL,
+  `vehicle_id` int(11) NOT NULL,
+  `transport_start_time` datetime NOT NULL,
+  `transport_end_time` datetime NOT NULL,
+  `receiver` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `transport_vehicle_ibfk_1` FOREIGN KEY (`medical_waste_id`) REFERENCES `medical_waste` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,34 @@
+{
+  "text_number": 4,
+  "id": "SB-004",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0004",
+  "question": "1) Background / Context\n\nThe project involves developing an open-source PHP-based Content Management System (CMS) that serves as a flexible platform for creating websites, blogs, or applications. This CMS is widely adopted by millions of users globally, ranging from individual creators and small businesses to large enterprises. It provides a customizable and intuitive user experience tailored for both beginners and advanced users.\n\n2) Objectives\n\n- Create a platform to build and customize websites seamlessly.\n- Enable real-time, code-free design and content editing.\n- Offer extensibility through a robust library of plugins and themes.\n- Facilitate integration with social media, analytics, and e-commerce features.\n- Support community interaction via comment tools and discussion forums.\n\n3) Stakeholders & Users\n\n- Site Owners: Individuals and organizations who build and manage websites.\n- Developers: Those extending or customizing the CMS functionality.\n- End Users: Visitors engaging with websites built on the platform.\n- Plugin/Theme Developers: Creators expanding the CMS's features and design options.\n\n4) Functional Descriptions\n\n- Theme Management: Select from thousands of themes; upload custom themes easily.\n- Content Editing: Intuitive block-based editor for real-time content updates.\n- Plugin System: Access thousands of plugins to add functionalities like galleries, forums, SEO, and spam protection.\n- E-Commerce Support: Add online store capabilities with third-party integrations.\n- Comment System: Manage discussions with comment moderation tools.\n- Analytics & SEO: Integrate with analytics tools and optimize for search engines.\n- Social Media Integration: Link and share across various social media platforms.\n\n5) Non-Functional Descriptions\n\n- Scalability: Sustain a diverse range of website sizes and types.\n- Usability: Provide a user-friendly interface requiring no coding skills.\n- Performance: Ensure smooth operation under high traffic conditions.\n- Security: Incorporate measures to protect against vulnerabilities.\n- Extensibility: Facilitate easy integration of new features via an extensive directory of themes and plugins.",
+  "ddl": "-- Schema for database: schemabench_0004\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `password` char(60) NOT NULL,\n  `role` enum('site_owner','developer','end_user','plugin_theme_developer') NOT NULL DEFAULT 'end_user',\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `username` (`username`),\n  UNIQUE KEY `email` (`email`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sites` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `owner_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `url` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `owner_id` (`owner_id`),\n  CONSTRAINT `sites_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `themes` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` text,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `theme_uploads` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `theme_id` int(11) NOT NULL,\n  `file_name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `theme_id` (`theme_id`),\n  CONSTRAINT `theme_uploads_ibfk_1` FOREIGN KEY (`theme_id`) REFERENCES `themes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `plugins` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` text,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `plugin_uploads` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `plugin_id` int(11) NOT NULL,\n  `file_name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `plugin_id` (`plugin_id`),\n  CONSTRAINT `plugin_uploads_ibfk_1` FOREIGN KEY (`plugin_id`) REFERENCES `plugins` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `comments` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `site_id` int(11) NOT NULL,\n  `author_id` int(11) NOT NULL,\n  `content` text NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `site_id` (`site_id`),\n  KEY `author_id` (`author_id`),\n  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `analytics` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `site_id` int(11) NOT NULL,\n  `views` int(11) NOT NULL DEFAULT 0,\n  `visitors` int(11) NOT NULL DEFAULT 0,\n  PRIMARY KEY (`id`),\n  KEY `site_id` (`site_id`),\n  CONSTRAINT `analytics_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `social_media` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `site_id` int(11) NOT NULL,\n  `platform` enum('facebook','twitter','instagram','linkedin') NOT NULL,\n  `link` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `site_id` (`site_id`),\n  CONSTRAINT `social_media_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "sites",
+      "themes",
+      "theme_uploads",
+      "plugins",
+      "plugin_uploads",
+      "comments",
+      "analytics",
+      "social_media"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "sites": [],
+      "themes": [],
+      "theme_uploads": [],
+      "plugins": [],
+      "plugin_uploads": [],
+      "comments": [],
+      "analytics": [],
+      "social_media": []
+    }
+  }
+}

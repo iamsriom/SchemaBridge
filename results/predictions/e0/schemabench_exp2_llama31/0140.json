@@ -1,0 +1,28 @@
+{
+  "text_number": 140,
+  "id": "SB-140",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0140",
+  "question": "1) Background / Context\n\nThe system is a database that provides a detailed view into the administrative records of the Vereenigde geoctrooieerde Oostindische Compagnie (VOC), also known as the Dutch East India Company, established on March 20, 1602. This database captures the historical maritime operations and personnel details for voyages undertaken by VOC.\n\n2) Objectives\n\nThe primary objective is to maintain a comprehensive record of VOC's maritime activities, including personnel and voyage information. This data aims to facilitate historical analysis and research into the logistical and human resources aspects of VOC's extensive operations.\n\n3) Stakeholders & Users\n\n- Historians and researchers studying maritime history, specifically the operations of the VOC.\n- Archivists and librarians responsible for preserving historical data.\n- Educational institutions and scholars interested in historical data analysis.\n\n4) Functional Descriptions\n\n- Voyage Management: Capture detailed information about each voyage, including vessel name, master, tonnage, type, construction details, and voyage dates.\n- Personnel Tracking: Maintain records of various personnel categories (craftsmen, impotenten, passengers, seafarers, soldiers) including status at departure, arrival, during the Cape stop, and any casualties.\n- Invoice Handling: Manage invoices related to voyages, including chamber details.\n- Data Integrity: Ensure data consistency through referential integrity between voyages and personnel records.\n\n5) Non-Functional Descriptions\n\n- Scalability: The system should effectively manage extensive historical data without performance degradation.\n- Data Integrity: Enforce foreign key constraints to maintain relationships and ensure accurate data.\n- Usability: The database should be structured clearly to facilitate ease of access and analysis by users.\n- Security: Protect data from unauthorized access or modifications, considering the historical value of the data.",
+  "ddl": "-- Schema for database: schemabench_0140\nCREATE TABLE `chambers` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `construction_details` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `vessel_id` int(11) NOT NULL,\n  `year` int(11) NOT NULL,\n  `length` decimal(10,2) NOT NULL,\n  `beam` decimal(10,2) NOT NULL,\n  `tonnage` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `construction_details_ibfk_1` (`vessel_id`),\n  CONSTRAINT `construction_details_ibfk_1` FOREIGN KEY (`vessel_id`) REFERENCES `vessels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `invoices` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `voyage_id` int(11) NOT NULL,\n  `chamber_id` int(11) NOT NULL,\n  `date` date NOT NULL,\n  `amount` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `invoices_ibfk_1` (`voyage_id`),\n  KEY `invoices_ibfk_2` (`chamber_id`),\n  CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`voyage_id`) REFERENCES `voyages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `invoices_ibfk_2` FOREIGN KEY (`chamber_id`) REFERENCES `chambers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `personnel` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `voyage_id` int(11) NOT NULL,\n  `category` enum('craftsman','impotenten','passenger','seafarer','soldier') NOT NULL,\n  `status_at_departure` enum('present','absent') NOT NULL,\n  `status_at_arrival` enum('present','absent') NOT NULL,\n  `status_at_cape_stop` enum('present','absent') NOT NULL,\n  `casualty` enum('yes','no') NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `personnel_ibfk_1` (`voyage_id`),\n  CONSTRAINT `personnel_ibfk_1` FOREIGN KEY (`voyage_id`) REFERENCES `voyages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `vessels` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `master` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `voyages` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `vessel_id` int(11) NOT NULL,\n  `departure_date` date NOT NULL,\n  `arrival_date` date NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `voyages_ibfk_1` (`vessel_id`),\n  CONSTRAINT `voyages_ibfk_1` FOREIGN KEY (`vessel_id`) REFERENCES `vessels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "chambers",
+      "construction_details",
+      "invoices",
+      "personnel",
+      "vessels",
+      "voyages"
+    ],
+    "columns_by_table": {
+      "chambers": [],
+      "construction_details": [],
+      "invoices": [],
+      "personnel": [],
+      "vessels": [],
+      "voyages": []
+    }
+  }
+}

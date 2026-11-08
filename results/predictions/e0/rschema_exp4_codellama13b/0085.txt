@@ -1,0 +1,78 @@
+-- Schema for database: rschema_0085
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `profile` varchar(255) NOT NULL,
+  `avatar` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `recipes` (
+  `recipe_id` int(11) NOT NULL AUTO_INCREMENT,
+  `recipe_name` varchar(255) NOT NULL,
+  `ingredients` varchar(255) NOT NULL,
+  `steps` varchar(255) NOT NULL,
+  `total_time` int(11) NOT NULL,
+  `portion` int(11) NOT NULL,
+  `spicy_level` int(11) NOT NULL,
+  `bitter_level` int(11) NOT NULL,
+  `sweet_level` int(11) NOT NULL,
+  `meaty_level` int(11) NOT NULL,
+  `salty_level` int(11) NOT NULL,
+  `sour_level` int(11) NOT NULL,
+  `rating` int(11) NOT NULL,
+  `number_of_ratings` int(11) NOT NULL,
+  `large_image_filename` varchar(255) NOT NULL,
+  `calories` int(11) NOT NULL,
+  `creator_id` int(11) NOT NULL,
+  `small_image_filename` varchar(255) NOT NULL,
+  PRIMARY KEY (`recipe_id`),
+  FOREIGN KEY (`creator_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `blogs` (
+  `blog_id` int(11) NOT NULL AUTO_INCREMENT,
+  `author_user_id` int(11) NOT NULL,
+  `blog_title` varchar(255) NOT NULL,
+  `publication_time` datetime NOT NULL,
+  `blog_summary` varchar(255) NOT NULL,
+  PRIMARY KEY (`blog_id`),
+  FOREIGN KEY (`author_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `recipe_collections` (
+  `user_id` int(11) NOT NULL,
+  `recipe_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`, `recipe_id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`recipe_id`) REFERENCES `recipes` (`recipe_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `blog_publications` (
+  `user_id` int(11) NOT NULL,
+  `blog_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`, `blog_id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`blog_id`) REFERENCES `blogs` (`blog_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `recipe_ratings` (
+  `user_id` int(11) NOT NULL,
+  `recipe_id` int(11) NOT NULL,
+  `rating` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`, `recipe_id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`recipe_id`) REFERENCES `recipes` (`recipe_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `blog_comments` (
+  `blog_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `comment` varchar(255) NOT NULL,
+  PRIMARY KEY (`blog_id`, `user_id`),
+  FOREIGN KEY (`blog_id`) REFERENCES `blogs` (`blog_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

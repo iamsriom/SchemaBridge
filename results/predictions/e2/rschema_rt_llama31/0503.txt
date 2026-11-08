@@ -1,0 +1,77 @@
+-- Schema for database: rschema_0503
+CREATE TABLE `Material` (
+  `material_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `source_location` varchar(255) NOT NULL,
+  `specification` varchar(255) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `volume` float NOT NULL,
+  `weight` float NOT NULL,
+  PRIMARY KEY (`material_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Warehouse` (
+  `warehouse_id` int(11) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `current_inventory_level` int(11) NOT NULL,
+  `maximum_capacity` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `remaining_capacity` int(11) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  PRIMARY KEY (`warehouse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Driver` (
+  `driver_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `age` int(11) NOT NULL,
+  `gender` varchar(10) NOT NULL,
+  `drivers_license_number` varchar(50) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`driver_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Material_Storage` (
+  `material_id` int(11) NOT NULL,
+  `warehouse_id` int(11) NOT NULL,
+  `storage_time` datetime NOT NULL,
+  `storage_quantity` int(11) NOT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`material_id`, `warehouse_id`, `storage_time`),
+  CONSTRAINT `material_storage_ibfk_1` FOREIGN KEY (`material_id`) REFERENCES `Material` (`material_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `material_storage_ibfk_2` FOREIGN KEY (`warehouse_id`) REFERENCES `Warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Material_Dispatch` (
+  `material_id` int(11) NOT NULL,
+  `warehouse_id` int(11) NOT NULL,
+  `dispatch_time` datetime NOT NULL,
+  `dispatch_quantity` int(11) NOT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`material_id`, `warehouse_id`, `dispatch_time`),
+  CONSTRAINT `material_dispatch_ibfk_1` FOREIGN KEY (`material_id`) REFERENCES `Material` (`material_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `material_dispatch_ibfk_2` FOREIGN KEY (`warehouse_id`) REFERENCES `Warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Vehicle` (
+  `vehicle_id` int(11) NOT NULL,
+  `license_plate_number` varchar(50) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `maximum_load` float NOT NULL,
+  `current_load` float NOT NULL,
+  `assigned_driver_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`vehicle_id`),
+  CONSTRAINT `vehicle_ibfk_1` FOREIGN KEY (`assigned_driver_id`) REFERENCES `Driver` (`driver_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Material_Transportation` (
+  `vehicle_id` int(11) NOT NULL,
+  `material_id` int(11) NOT NULL,
+  `transportation_start_time` datetime NOT NULL,
+  `destination` varchar(255) NOT NULL,
+  `driver_id` int(11) NOT NULL,
+  PRIMARY KEY (`vehicle_id`, `material_id`, `transportation_start_time`),
+  CONSTRAINT `material_transportation_ibfk_1` FOREIGN KEY (`vehicle_id`) REFERENCES `Vehicle` (`vehicle_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `material_transportation_ibfk_2` FOREIGN KEY (`material_id`) REFERENCES `Material` (`material_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `material_transportation_ibfk_3` FOREIGN KEY (`driver_id`) REFERENCES `Driver` (`driver_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,121 @@
+-- Schema for database: schemabench_0122
+CREATE TABLE `authors` (
+  `author_id` int(11) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `zip_code` char(10) DEFAULT NULL,
+  `contract_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`author_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `discounts` (
+  `discount_id` int(11) NOT NULL,
+  `store_id` int(11) NOT NULL,
+  `discount_type` varchar(50) NOT NULL,
+  `low_quantity` int(11) NOT NULL,
+  `high_quantity` int(11) NOT NULL,
+  `discount_percentage` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`discount_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `middle_initial` char(1) DEFAULT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `job_id` int(11) NOT NULL,
+  `job_level` int(11) NOT NULL,
+  `publisher_id` int(11) NOT NULL,
+  `hire_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`job_id`) REFERENCES `jobs` (`job_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_ibfk_2` FOREIGN KEY (`publisher_id`) REFERENCES `publishers` (`publisher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `jobs` (
+  `job_id` int(11) NOT NULL,
+  `job_description` varchar(255) NOT NULL,
+  `min_job_level` int(11) NOT NULL,
+  `max_job_level` int(11) NOT NULL,
+  PRIMARY KEY (`job_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pub_info` (
+  `pub_info_id` int(11) NOT NULL,
+  `publisher_id` int(11) NOT NULL,
+  `logo` varchar(255) DEFAULT NULL,
+  `press_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`pub_info_id`),
+  CONSTRAINT `pub_info_ibfk_1` FOREIGN KEY (`publisher_id`) REFERENCES `publishers` (`publisher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `publishers` (
+  `publisher_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`publisher_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `roysched` (
+  `royalty_id` int(11) NOT NULL,
+  `title_id` int(11) NOT NULL,
+  `royalty_range` varchar(255) NOT NULL,
+  `royalty_rate` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`royalty_id`),
+  CONSTRAINT `roysched_ibfk_1` FOREIGN KEY (`title_id`) REFERENCES `titles` (`title_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales` (
+  `sale_id` int(11) NOT NULL,
+  `store_id` int(11) NOT NULL,
+  `order_number` varchar(50) NOT NULL,
+  `order_date` datetime DEFAULT NULL,
+  `quantity_sold` int(11) NOT NULL,
+  `payment_terms` varchar(100) DEFAULT NULL,
+  `title_id` int(11) NOT NULL,
+  PRIMARY KEY (`sale_id`),
+  CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`store_id`) REFERENCES `stores` (`store_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_ibfk_2` FOREIGN KEY (`title_id`) REFERENCES `titles` (`title_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stores` (
+  `store_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `zip_code` char(10) DEFAULT NULL,
+  PRIMARY KEY (`store_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `titleauthor` (
+  `titleauthor_id` int(11) NOT NULL,
+  `author_id` int(11) NOT NULL,
+  `title_id` int(11) NOT NULL,
+  `author_order` int(11) NOT NULL,
+  `royalty_percentage` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`titleauthor_id`),
+  CONSTRAINT `titleauthor_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `authors` (`author_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `titleauthor_ibfk_2` FOREIGN KEY (`title_id`) REFERENCES `titles` (`title_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `titles` (
+  `title_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `type` varchar(50) DEFAULT NULL,
+  `publisher_id` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `advance` decimal(10,2) DEFAULT NULL,
+  `royalty_rate` decimal(5,2) NOT NULL,
+  `sales` int(11) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `publication_date` date DEFAULT NULL,
+  PRIMARY KEY (`title_id`),
+  CONSTRAINT `titles_ibfk_1` FOREIGN KEY (`publisher_id`) REFERENCES `publishers` (`publisher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,65 @@
+-- Schema for database: rschema_0470
+CREATE TABLE `enterprise_employee` (
+  `employee_id` int(11) NOT NULL,
+  `employee_name` varchar(255) NOT NULL,
+  `employee_address` varchar(255) NOT NULL,
+  `employee_phone` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `menu` (
+  `dish_id` int(11) NOT NULL,
+  `dish_name` varchar(255) NOT NULL,
+  `dish_price` decimal(10,2) NOT NULL,
+  `dish_special_offer_indicator` tinyint(1) NOT NULL,
+  PRIMARY KEY (`dish_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `delivery_person` (
+  `delivery_person_id` int(11) NOT NULL,
+  `delivery_person_name` varchar(255) NOT NULL,
+  `delivery_person_address` varchar(255) NOT NULL,
+  `delivery_person_phone` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`delivery_person_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order` (
+  `order_id` int(11) NOT NULL,
+  `delivery_address` varchar(255) NOT NULL,
+  `delivery_time` datetime NOT NULL,
+  `order_payment_method` varchar(50) NOT NULL,
+  `order_total_price` decimal(10,2) NOT NULL,
+  `ordering_employee` int(11) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`ordering_employee`) REFERENCES `enterprise_employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_dish` (
+  `dish_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `dish_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`dish_id`, `order_id`),
+  CONSTRAINT `order_dish_ibfk_1` FOREIGN KEY (`dish_id`) REFERENCES `menu` (`dish_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_dish_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `delivery_record` (
+  `delivery_record_id` int(11) NOT NULL,
+  `delivery_time` datetime NOT NULL,
+  `responsible_delivery_person_id` int(11) NOT NULL,
+  `delivery_order_id` int(11) NOT NULL,
+  PRIMARY KEY (`delivery_record_id`),
+  CONSTRAINT `delivery_record_ibfk_1` FOREIGN KEY (`delivery_order_id`) REFERENCES `order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `delivery_record_ibfk_2` FOREIGN KEY (`responsible_delivery_person_id`) REFERENCES `delivery_person` (`delivery_person_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment_request` (
+  `payment_request_id` int(11) NOT NULL,
+  `paying_employee_id` int(11) NOT NULL,
+  `paying_order_id` int(11) NOT NULL,
+  `request_payment_amount` decimal(10,2) NOT NULL,
+  `request_payment_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`payment_request_id`),
+  CONSTRAINT `payment_request_ibfk_1` FOREIGN KEY (`paying_employee_id`) REFERENCES `enterprise_employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `payment_request_ibfk_2` FOREIGN KEY (`paying_order_id`) REFERENCES `order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

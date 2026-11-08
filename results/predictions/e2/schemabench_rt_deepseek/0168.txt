@@ -1,0 +1,54 @@
+-- Schema for database: schemabench_0168
+CREATE TABLE `patients` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medical_histories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `admission_time` datetime NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `status` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `medical_histories_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `invoices` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `total_amount` decimal(10,2) NOT NULL,
+  `generation_time` datetime NOT NULL,
+  `payment_time` datetime DEFAULT NULL,
+  `medical_history_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`medical_history_id`) REFERENCES `medical_histories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `treatments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `invoice_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `unit_price` decimal(10,2) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `total_price` decimal(10,2) NOT NULL,
+  `invoice_id` int(11) NOT NULL,
+  `treatment_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `invoice_items_ibfk_1` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `invoice_items_ibfk_2` FOREIGN KEY (`treatment_id`) REFERENCES `treatments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medical_treatments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `medical_history_id` int(11) NOT NULL,
+  `treatment_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `medical_treatments_ibfk_1` FOREIGN KEY (`medical_history_id`) REFERENCES `medical_histories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `medical_treatments_ibfk_2` FOREIGN KEY (`treatment_id`) REFERENCES `treatments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

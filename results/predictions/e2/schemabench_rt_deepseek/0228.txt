@@ -1,0 +1,65 @@
+-- Schema for database: schemabench_0228
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `first_name` varchar(255) DEFAULT NULL,
+  `last_name` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `userauthentication` (
+  `user_id` int(11) NOT NULL,
+  `email_address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `userauthentication_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vendor` (
+  `vendor_id` int(11) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `first_name` varchar(255) DEFAULT NULL,
+  `last_name` varchar(255) DEFAULT NULL,
+  `vendor_name` varchar(255) DEFAULT NULL,
+  `type` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`vendor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `menuitem` (
+  `vendor_id` int(11) NOT NULL,
+  `item_name` varchar(255) NOT NULL,
+  `price` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`vendor_id`, `item_name`),
+  CONSTRAINT `menuitem_ibfk_1` FOREIGN KEY (`vendor_id`) REFERENCES `vendor` (`vendor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `coupon` (
+  `coupon_id` int(11) NOT NULL,
+  `discount_percentage` decimal(5,2) DEFAULT NULL,
+  `active` tinyint(1) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `vendor_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`coupon_id`),
+  CONSTRAINT `coupon_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `coupon_ibfk_2` FOREIGN KEY (`vendor_id`) REFERENCES `vendor` (`vendor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `FinalTable` (
+  `avg_price` decimal(10,2) DEFAULT NULL,
+  `cust_status` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL,
+  `vendor_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `item` varchar(255) DEFAULT NULL,
+  `order_date` datetime DEFAULT NULL,
+  `ratings` int(11) DEFAULT NULL,
+  `total` decimal(10,2) DEFAULT NULL,
+  `transaction_id` int(11) NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`vendor_id`) REFERENCES `vendor` (`vendor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

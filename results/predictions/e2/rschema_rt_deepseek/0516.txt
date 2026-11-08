@@ -1,0 +1,55 @@
+-- Schema for database: rschema_0516
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pizza` (
+  `pizza_id` int(11) NOT NULL,
+  `flavor` varchar(255) NOT NULL,
+  `ingredients` text DEFAULT NULL,
+  `stock` int(11) DEFAULT NULL,
+  PRIMARY KEY (`pizza_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_order` (
+  `order_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `expected_delivery_date` datetime DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `sales_order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `income_expenditure` (
+  `record_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `pizza_id` int(11) NOT NULL,
+  `time` datetime DEFAULT NULL,
+  `type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `income_expenditure_ibfk_1` FOREIGN KEY (`pizza_id`) REFERENCES `pizza` (`pizza_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `production_plan` (
+  `order_id` int(11) NOT NULL,
+  `pizza_id` int(11) NOT NULL,
+  `production_quantity` int(11) DEFAULT NULL,
+  `production_sequence` int(11) DEFAULT NULL,
+  PRIMARY KEY (`order_id`, `pizza_id`),
+  CONSTRAINT `production_plan_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `sales_order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `production_plan_ibfk_2` FOREIGN KEY (`pizza_id`) REFERENCES `pizza` (`pizza_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `delivery_content` (
+  `record_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `delivery_time` datetime DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `delivery_content_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `sales_order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

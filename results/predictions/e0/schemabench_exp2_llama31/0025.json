@@ -1,0 +1,26 @@
+{
+  "text_number": 25,
+  "id": "SB-025",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0025",
+  "question": "Background / Context:\n\nSilk is a live profiling and inspection tool specifically designed for the Django framework. It serves as a performance analysis system by intercepting and storing HTTP requests and database queries. This allows developers to inspect and visualize runtime operations through a user interface, facilitating debugging and optimization.\n\nObjectives:\n\nThe primary objective of Silk is to provide real-time insights into the performance of Django applications. This includes profiling HTTP requests, responses, SQL queries, and code blocks, helping developers identify and resolve bottlenecks.\n\nStakeholders & Users:\n\n- Primary Users: Django developers needing real-time profiling and diagnostics.\n- Stakeholders: Development teams, Quality Assurance teams, Project Managers, and any entity involved in Django application performance optimization.\n\nFunctional Descriptions:\n\n1. Middleware Integration: Integrates as middleware to intercept and log HTTP requests and responses for profiling purposes.\n   \n2. SQL Query Profiling: Wraps around SQL execution to capture and profile database queries, allowing analysis of query performance.\n\n3. Code Profiling: Utilizes a context manager and decorator to enable profiling of specific code blocks or functions, giving developers flexibility in what to profile.\n\n4. User Interface: Provides a graphical user interface for inspecting and visualizing the captured data, including HTTP transactions and SQL queries.\n\n5. Data Relationships: Maintains data relationships, such as linking requests to their corresponding SQL queries, to provide comprehensive profiling context.\n\nNon-Functional Descriptions:\n\n- Performance: The system should minimally impact the performance of the application being profiled to ensure accurate representations of typical operation scenarios.\n\n- Usability: The user interface should be intuitive, enabling quick access and understanding of the profiling data without requiring extensive training.\n\n- Scalability: Must efficiently handle large volumes of requests and queries, ensuring it remains effective in high-traffic environments.\n\n- Security: Ensures that sensitive data captured during profiling is securely handled, adhering to data protection standards.",
+  "ddl": "-- Schema for database: schemabench_0025\nCREATE TABLE `django_app` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `http_request` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `django_app_id` int(11) NOT NULL,\n  `method` varchar(255) NOT NULL,\n  `url` varchar(255) NOT NULL,\n  `timestamp` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `django_app_id` (`django_app_id`),\n  CONSTRAINT `http_request_ibfk_1` FOREIGN KEY (`django_app_id`) REFERENCES `django_app` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `http_response` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `http_request_id` int(11) NOT NULL,\n  `status_code` int(11) NOT NULL,\n  `response_time` float NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `http_request_id` (`http_request_id`),\n  CONSTRAINT `http_response_ibfk_1` FOREIGN KEY (`http_request_id`) REFERENCES `http_request` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sql_query` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `http_request_id` int(11) NOT NULL,\n  `query` text NOT NULL,\n  `execution_time` float NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `http_request_id` (`http_request_id`),\n  CONSTRAINT `sql_query_ibfk_1` FOREIGN KEY (`http_request_id`) REFERENCES `http_request` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `code_block` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `http_request_id` int(11) NOT NULL,\n  `start_line` int(11) NOT NULL,\n  `end_line` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `http_request_id` (`http_request_id`),\n  CONSTRAINT `code_block_ibfk_1` FOREIGN KEY (`http_request_id`) REFERENCES `http_request` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "django_app",
+      "http_request",
+      "http_response",
+      "sql_query",
+      "code_block"
+    ],
+    "columns_by_table": {
+      "django_app": [],
+      "http_request": [],
+      "http_response": [],
+      "sql_query": [],
+      "code_block": []
+    }
+  }
+}

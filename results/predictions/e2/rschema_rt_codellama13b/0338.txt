@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0338
+CREATE TABLE `College` (
+  `College_ID` int(11) NOT NULL,
+  `Location` varchar(255) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Total_Staff` int(11) NOT NULL,
+  `Total_Students` int(11) NOT NULL,
+  PRIMARY KEY (`College_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Student` (
+  `Student_ID` int(11) NOT NULL,
+  `Age` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Gender` char(1) NOT NULL,
+  `Registration_Time` datetime NOT NULL,
+  `Telephone_Number` varchar(15) DEFAULT NULL,
+  `Associated_College_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Student_ID`),
+  CONSTRAINT `student_ibfk_1` FOREIGN KEY (`Associated_College_ID`) REFERENCES `College` (`College_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Teacher` (
+  `Teacher_ID` int(11) NOT NULL,
+  `Age` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Gender` char(1) NOT NULL,
+  `Title` varchar(255) NOT NULL,
+  `Contact_Information` varchar(255) DEFAULT NULL,
+  `Associated_College_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Teacher_ID`),
+  CONSTRAINT `teacher_ibfk_1` FOREIGN KEY (`Associated_College_ID`) REFERENCES `College` (`College_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Course` (
+  `Course_ID` int(11) NOT NULL,
+  `Course_Name` varchar(255) NOT NULL,
+  `Classroom` varchar(255) NOT NULL,
+  `Class_Hours` varchar(50) NOT NULL,
+  `Course_Summary` text DEFAULT NULL,
+  `Teaching_Teacher_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Course_ID`),
+  CONSTRAINT `course_ibfk_1` FOREIGN KEY (`Teaching_Teacher_ID`) REFERENCES `Teacher` (`Teacher_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Course_Enrollment_and_Grade` (
+  `Student_ID` int(11) NOT NULL,
+  `Course_ID` int(11) NOT NULL,
+  `Enrollment_Time` datetime NOT NULL,
+  `Course_Grade` varchar(2) DEFAULT NULL,
+  PRIMARY KEY (`Student_ID`, `Course_ID`, `Enrollment_Time`),
+  CONSTRAINT `course_enrollment_ibfk_1` FOREIGN KEY (`Student_ID`) REFERENCES `Student` (`Student_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_enrollment_ibfk_2` FOREIGN KEY (`Course_ID`) REFERENCES `Course` (`Course_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

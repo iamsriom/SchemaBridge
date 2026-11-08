@@ -1,0 +1,44 @@
+-- Schema for database: rschema_0488
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL,
+  `allow_customer_work_orders` varchar(255) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `disable_auto_reply` boolean DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `hide_department` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `reply_by_email_only` boolean DEFAULT NULL,
+  `request_feedback` varchar(255) DEFAULT NULL,
+  `sorting_order` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_table` (
+  `employee_id` int(11) NOT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `gender` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_table_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `email_configuration` (
+  `configuration_id` int(11) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `host_address` varchar(255) DEFAULT NULL,
+  `login_password` varchar(255) DEFAULT NULL,
+  `login_username` varchar(255) DEFAULT NULL,
+  `port_number` int(11) DEFAULT NULL,
+  PRIMARY KEY (`configuration_id`),
+  CONSTRAINT `email_configuration_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_maintenance_email_server` (
+  `employee_id` int(11) NOT NULL,
+  `server_id` int(11) NOT NULL,
+  `maintenance_time` datetime NOT NULL,
+  PRIMARY KEY (`employee_id`, `server_id`, `maintenance_time`),
+  CONSTRAINT `employee_maintenance_email_server_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee_table` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_maintenance_email_server_ibfk_2` FOREIGN KEY (`server_id`) REFERENCES `email_configuration` (`configuration_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

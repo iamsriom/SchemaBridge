@@ -1,0 +1,64 @@
+-- Schema for database: `rschema_0165`
+
+-- For table: `meteorological_station_information`
+
+CREATE TABLE `meteorological_station_information` (
+  `StationID` int(11) NOT NULL,
+  `StationType` varchar(255) NOT NULL,
+  `StationName` varchar(255) NOT NULL,
+  `Latitude` decimal(10,8) NOT NULL,
+  `Longitude` decimal(11,8) NOT NULL,
+  `Elevation` int(11) NOT NULL,
+  `GeographicEnvironmentDescription` text NOT NULL,
+  `ObservationElementsList` text NOT NULL,
+  `ObservationInstrumentNameandModel` varchar(255) NOT NULL,
+  `ObservationTime` datetime NOT NULL,
+  `ObservationRecordMedium` varchar(255) NOT NULL,
+  `ObservationStandards` varchar(255) NOT NULL,
+  PRIMARY KEY (`StationID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `historical_evolution_information`
+
+CREATE TABLE `historical_evolution_information` (
+  `ChangeID` int(11) NOT NULL AUTO_INCREMENT,
+  `StationID` int(11) NOT NULL,
+  `ChangeType` varchar(255) NOT NULL,
+  `OldValue` text NOT NULL,
+  `NewValue` text NOT NULL,
+  `StartTime` datetime NOT NULL,
+  `EndTime` datetime NOT NULL,
+  `ReasonforChange` text NOT NULL,
+  `OperatorID` int(11) NOT NULL,
+  `OperationTime` datetime NOT NULL,
+  `OperationStatus` varchar(255) NOT NULL,
+  PRIMARY KEY (`ChangeID`),
+  KEY `StationID` (`StationID`),
+  CONSTRAINT `historical_evolution_information_ibfk_1` FOREIGN KEY (`StationID`) REFERENCES `meteorological_station_information` (`StationID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `operator_information`
+
+CREATE TABLE `operator_information` (
+  `OperatorID` int(11) NOT NULL,
+  `OperatorName` varchar(255) NOT NULL,
+  `OperatorLevel` varchar(255) NOT NULL,
+  `OperatorRole` varchar(255) NOT NULL,
+  `OperatorEmail` varchar(255) NOT NULL,
+  `OperatorPhone` varchar(255) NOT NULL,
+  PRIMARY KEY (`OperatorID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `audit_records`
+
+CREATE TABLE `audit_records` (
+  `ChangeID` int(11) NOT NULL,
+  `OperatorID` int(11) NOT NULL,
+  `AuditTime` datetime NOT NULL,
+  `AuditStatus` varchar(255) NOT NULL,
+  `AuditComments` text NOT NULL,
+  PRIMARY KEY (`ChangeID`,`OperatorID`),
+  KEY `OperatorID` (`OperatorID`),
+  CONSTRAINT `audit_records_ibfk_1` FOREIGN KEY (`ChangeID`) REFERENCES `historical_evolution_information` (`ChangeID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `audit_records_ibfk_2` FOREIGN KEY (`OperatorID`) REFERENCES `operator_information` (`OperatorID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

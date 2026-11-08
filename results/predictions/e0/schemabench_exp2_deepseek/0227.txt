@@ -1,0 +1,96 @@
+-- Schema for database: `airline_management`
+
+-- For table: `airlines`
+
+CREATE TABLE `airlines` (
+  `airline_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `hq_location` varchar(255) NOT NULL,
+  `website` varchar(255),
+  PRIMARY KEY (`airline_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `airports`
+
+CREATE TABLE `airports` (
+  `airport_id` int(11) NOT NULL AUTO_INCREMENT,
+  `iata_code` char(3) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  PRIMARY KEY (`airport_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `flights`
+
+CREATE TABLE `flights` (
+  `flight_id` int(11) NOT NULL AUTO_INCREMENT,
+  `airline_id` int(11) NOT NULL,
+  `origin_id` int(11) NOT NULL,
+  `destination_id` int(11) NOT NULL,
+  `departure_time` datetime NOT NULL,
+  `arrival_time` datetime NOT NULL,
+  `airplane_id` int(11) NOT NULL,
+  `passenger_count` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`flight_id`),
+  FOREIGN KEY (`airline_id`) REFERENCES `airlines` (`airline_id`),
+  FOREIGN KEY (`origin_id`) REFERENCES `airports` (`airport_id`),
+  FOREIGN KEY (`destination_id`) REFERENCES `airports` (`airport_id`),
+  FOREIGN KEY (`airplane_id`) REFERENCES `airplanes` (`airplane_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `airplanes`
+
+CREATE TABLE `airplanes` (
+  `airplane_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model` varchar(255) NOT NULL,
+  `manufacturer` varchar(255) NOT NULL,
+  `capacity` int(11) NOT NULL,
+  PRIMARY KEY (`airplane_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `crew_members`
+
+CREATE TABLE `crew_members` (
+  `crew_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `role` varchar(255) NOT NULL,
+  `flight_id` int(11) NOT NULL,
+  `FAA_verification` char(6) NOT NULL,
+  PRIMARY KEY (`crew_id`),
+  FOREIGN KEY (`flight_id`) REFERENCES `flights` (`flight_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `incidents`
+
+CREATE TABLE `incidents` (
+  `incident_id` int(11) NOT NULL AUTO_INCREMENT,
+  `flight_id` int(11) NOT NULL,
+  `crew_id` int(11) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  PRIMARY KEY (`incident_id`),
+  FOREIGN KEY (`flight_id`) REFERENCES `flights` (`flight_id`),
+  FOREIGN KEY (`crew_id`) REFERENCES `crew_members` (`crew_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `amenities`
+
+CREATE TABLE `amenities` (
+  `amenity_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `flight_id` int(11) NOT NULL,
+  PRIMARY KEY (`amenity_id`),
+  FOREIGN KEY (`flight_id`) REFERENCES `flights` (`flight_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `charges`
+
+CREATE TABLE `charges` (
+  `charge_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `flight_id` int(11) NOT NULL,
+  PRIMARY KEY (`charge_id`),
+  FOREIGN KEY (`flight_id`) REFERENCES `flights` (`flight_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

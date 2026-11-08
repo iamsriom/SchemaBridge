@@ -1,0 +1,47 @@
+-- Schema for database: rschema_0355
+CREATE TABLE `races` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `result` varchar(255) DEFAULT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `horses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bettors` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `identity_info` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `horse_participation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `horse_id` int(11) NOT NULL,
+  `race_id` int(11) NOT NULL,
+  `ranking` int(11) NOT NULL,
+  `participation_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `horse_participation_ibfk_1` FOREIGN KEY (`horse_id`) REFERENCES `horses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `horse_participation_ibfk_2` FOREIGN KEY (`race_id`) REFERENCES `races` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bettor_betting_race` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `bettor_id` int(11) NOT NULL,
+  `horse_id` int(11) NOT NULL,
+  `race_id` int(11) NOT NULL,
+  `actual_ranking` int(11) DEFAULT NULL,
+  `expected_ranking` int(11) DEFAULT NULL,
+  `wagered_amount` decimal(10,2) NOT NULL,
+  `won` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `bettor_betting_race_ibfk_1` FOREIGN KEY (`bettor_id`) REFERENCES `bettors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bettor_betting_race_ibfk_2` FOREIGN KEY (`horse_id`) REFERENCES `horses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bettor_betting_race_ibfk_3` FOREIGN KEY (`race_id`) REFERENCES `races` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

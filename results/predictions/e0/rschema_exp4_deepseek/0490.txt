@@ -1,0 +1,76 @@
+-- Schema for database: `rschema_0490`
+
+-- For parts management
+CREATE TABLE `parts` (
+  `part_id` int(11) NOT NULL AUTO_INCREMENT,
+  `part_number` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `specifications` varchar(255),
+  `unit_price` decimal(10,2) NOT NULL,
+  `inventory_level` int(11) NOT NULL,
+  PRIMARY KEY (`part_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For supplier management
+CREATE TABLE `suppliers` (
+  `supplier_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_person` varchar(255),
+  `phone` varchar(255),
+  `email` varchar(255),
+  `credit_rating` varchar(255),
+  `country` varchar(255),
+  `region` varchar(255),
+  PRIMARY KEY (`supplier_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For customer management
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_information` varchar(255),
+  `payment_method` varchar(255),
+  `country` varchar(255),
+  `region` varchar(255),
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For order management
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_time` datetime NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `delivery_date` date,
+  `order_status` varchar(255),
+  PRIMARY KEY (`order_id`),
+  FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For order details
+CREATE TABLE `order_details` (
+  `order_id` int(11) NOT NULL,
+  `part_id` int(11) NOT NULL,
+  `supplier_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`order_id`, `part_id`, `supplier_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For geographic location management
+CREATE TABLE `countries` (
+  `country_id` int(11) NOT NULL AUTO_INCREMENT,
+  `country_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`country_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `regions` (
+  `region_id` int(11) NOT NULL AUTO_INCREMENT,
+  `region_name` varchar(255) NOT NULL,
+  `country_id` int(11) NOT NULL,
+  PRIMARY KEY (`region_id`),
+  FOREIGN KEY (`country_id`) REFERENCES `countries` (`country_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,85 @@
+-- Schema for database: schemabench_0176
+CREATE TABLE `unit_measures` (
+  `id_um` int(11) NOT NULL AUTO_INCREMENT,
+  `title_um` varchar(255) NOT NULL,
+  PRIMARY KEY (`id_um`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `water_types` (
+  `id_type` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`id_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `waters` (
+  `registration_number` int(11) NOT NULL,
+  `mark` varchar(50) NOT NULL,
+  `note` text DEFAULT NULL,
+  `id_type` int(11) NOT NULL,
+  PRIMARY KEY (`registration_number`),
+  CONSTRAINT `waters_ibfk_1` FOREIGN KEY (`id_type`) REFERENCES `water_types` (`id_type`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `suppliers` (
+  `code_supplier` int(11) NOT NULL AUTO_INCREMENT,
+  `name_supplier` varchar(255) NOT NULL,
+  `address_supplier` varchar(255) NOT NULL,
+  `phone_supplier` varchar(50) NOT NULL,
+  `email_supplier` varchar(255) NOT NULL,
+  PRIMARY KEY (`code_supplier`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `deliveries` (
+  `deliver_date` datetime NOT NULL,
+  `supplier_code` int(11) NOT NULL,
+  `registration_number` int(11) NOT NULL,
+  `ammount` decimal(10,2) NOT NULL,
+  `note` text DEFAULT NULL,
+  `id_um` int(11) NOT NULL,
+  CONSTRAINT `deliveries_ibfk_1` FOREIGN KEY (`supplier_code`) REFERENCES `suppliers` (`code_supplier`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `deliveries_ibfk_2` FOREIGN KEY (`registration_number`) REFERENCES `waters` (`registration_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `deliveries_ibfk_3` FOREIGN KEY (`id_um`) REFERENCES `unit_measures` (`id_um`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `jobs` (
+  `serial_number` int(11) NOT NULL AUTO_INCREMENT,
+  `job_title` varchar(255) NOT NULL,
+  `expected_number_of_workers` int(11) NOT NULL,
+  PRIMARY KEY (`serial_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `departments` (
+  `code` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `expected_number_of_workers` int(11) NOT NULL,
+  PRIMARY KEY (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `workers` (
+  `security_number` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `lastname` varchar(255) NOT NULL,
+  `shift` varchar(50) NOT NULL,
+  `birth` date NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `phone` varchar(50) NOT NULL,
+  `suspended` tinyint(1) NOT NULL DEFAULT '0',
+  `injury` tinyint(1) NOT NULL DEFAULT '0',
+  `departments_code` int(11) NOT NULL,
+  `serial_number_job` int(11) NOT NULL,
+  PRIMARY KEY (`security_number`),
+  CONSTRAINT `workers_ibfk_1` FOREIGN KEY (`departments_code`) REFERENCES `departments` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `workers_ibfk_2` FOREIGN KEY (`serial_number_job`) REFERENCES `jobs` (`serial_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `records_of_water_balance` (
+  `record_date` datetime NOT NULL,
+  `registration_number` int(11) NOT NULL,
+  `security_number` int(11) NOT NULL,
+  `initial_state` decimal(10,2) NOT NULL,
+  `end_state` decimal(10,2) NOT NULL,
+  `note` text DEFAULT NULL,
+  CONSTRAINT `records_of_water_balance_ibfk_1` FOREIGN KEY (`registration_number`) REFERENCES `waters` (`registration_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `records_of_water_balance_ibfk_2` FOREIGN KEY (`security_number`) REFERENCES `workers` (`security_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

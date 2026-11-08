@@ -1,0 +1,56 @@
+-- Schema for database: `cse_uw`
+
+-- Table: `students`
+CREATE TABLE `students` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `advisor_id` int(11),
+  PRIMARY KEY (`student_id`),
+  FOREIGN KEY (`advisor_id`) REFERENCES `professors`(`professor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `professors`
+CREATE TABLE `professors` (
+  `professor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  PRIMARY KEY (`professor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `courses`
+CREATE TABLE `courses` (
+  `course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_name` varchar(255) NOT NULL,
+  `course_level` varchar(255) NOT NULL,
+  `professor_id` int(11) NOT NULL,
+  PRIMARY KEY (`course_id`),
+  FOREIGN KEY (`professor_id`) REFERENCES `professors`(`professor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `advisor_roles`
+CREATE TABLE `advisor_roles` (
+  `role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `student_roles`
+CREATE TABLE `student_roles` (
+  `role_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  PRIMARY KEY (`role_id`, `student_id`),
+  FOREIGN KEY (`role_id`) REFERENCES `advisor_roles`(`role_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`student_id`) REFERENCES `students`(`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `course_assignments`
+CREATE TABLE `course_assignments` (
+  `student_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  PRIMARY KEY (`student_id`, `course_id`),
+  FOREIGN KEY (`student_id`) REFERENCES `students`(`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`course_id`) REFERENCES `courses`(`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

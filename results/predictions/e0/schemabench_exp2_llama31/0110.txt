@@ -1,0 +1,66 @@
+-- Schema for database: schemabench_0110
+CREATE TABLE `award` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `grant_id` int(11) NOT NULL,
+  `award_amount` decimal(10,2) NOT NULL,
+  `award_date` date NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `grant_id` (`grant_id`),
+  CONSTRAINT `award_ibfk_1` FOREIGN KEY (`grant_id`) REFERENCES `grant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `applicant` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `grant` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `program_element_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `program_element_id` (`program_element_id`),
+  CONSTRAINT `grant_ibfk_1` FOREIGN KEY (`program_element_id`) REFERENCES `program_element` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `grant_applicant` (
+  `grant_id` int(11) NOT NULL,
+  `applicant_id` int(11) NOT NULL,
+  PRIMARY KEY (`grant_id`, `applicant_id`),
+  KEY `grant_id` (`grant_id`),
+  KEY `applicant_id` (`applicant_id`),
+  CONSTRAINT `grant_applicant_ibfk_1` FOREIGN KEY (`grant_id`) REFERENCES `grant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `grant_applicant_ibfk_2` FOREIGN KEY (`applicant_id`) REFERENCES `applicant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `institution` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `program_element` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `researcher` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `researcher_grant` (
+  `researcher_id` int(11) NOT NULL,
+  `grant_id` int(11) NOT NULL,
+  PRIMARY KEY (`researcher_id`, `grant_id`),
+  KEY `researcher_id` (`researcher_id`),
+  KEY `grant_id` (`grant_id`),
+  CONSTRAINT `researcher_grant_ibfk_1` FOREIGN KEY (`researcher_id`) REFERENCES `researcher` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `researcher_grant_ibfk_2` FOREIGN KEY (`grant_id`) REFERENCES `grant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

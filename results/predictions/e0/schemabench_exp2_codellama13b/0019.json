@@ -1,0 +1,28 @@
+{
+  "text_number": 19,
+  "id": "SB-019",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0019",
+  "question": "Cron Monitoring Tool \n\n 1) Background / Context\nThe project involves developing a cron monitoring tool as a Django application. This tool is designed to provide alerts when nightly backups, weekly reports, cron jobs, or scheduled tasks fail to execute on time. It aims to help users ensure the reliability of their scheduled tasks by notifying them of any discrepancies.\n\n 2) Objectives\nThe primary objective is to offer a simple and effective monitoring solution for cron jobs and scheduled tasks. The application should enable users to configure checks and receive timely notifications if tasks do not run according to schedule.\n\n 3) Stakeholders & Users\n- System Administrators: Responsible for configuring checks and monitoring scheduled tasks.\n- Developers: May use the tool for monitoring development and deployment tasks.\n- Teams: Benefit from shared alerts and monitoring insights.\n- Owners: Manage and access reports and team configurations.\n\n 4) Functional Descriptions\n- Alerts and Notifications: Sends alerts when scheduled tasks are overdue.\n- Dashboard: Provides a live-updating interface listing checks for each task.\n- Configuration: Allows naming and tagging checks, and setting Period and Grace Time.\n- Cron Expressions: Supports defining expected ping dates and times using cron expressions.\n- Event Logging: Maintains logs of received pings and sent notifications.\n- Status Badges: Offers public badges reflecting the status of tasks.\n\n Database Integration\n- Profile Management: Stores user profiles, report limits, and notification settings.\n- Project Management: Manages projects, their API keys, and related checks.\n- Channel Management: Handles notification channels and their configurations.\n- Check Management: Stores and manages the status and configuration of checks.\n- Notification & Ping Logging: Logs notifications and pings for reporting and troubleshooting.\n\n 5) Non-Functional Descriptions\n- Scalability: Supports a large number of concurrent checks and notifications.\n- Security: Ensures secure handling of API keys and notification channels.\n- Usability: Provides a user-friendly interface and simple configuration process.\n- Performance: Ensures real-time updates with minimal latency in alerting users.",
+  "ddl": "-- Schema for database: schemabench_0019\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `role` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `username` (`username`),\n  UNIQUE KEY `email` (`email`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `projects` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `api_key` varchar(255) NOT NULL,\n  `owner_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `checks` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `project_id` int(11) NOT NULL,\n  `cron_expression` varchar(255) NOT NULL,\n  `expected_ping_date` datetime NOT NULL,\n  `grace_time` int(11) NOT NULL,\n  `status` varchar(255) NOT NULL,\n  `last_ping_date` datetime NOT NULL,\n  `last_notification_date` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `notifications` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `check_id` int(11) NOT NULL,\n  `notification_type` varchar(255) NOT NULL,\n  `notification_date` datetime NOT NULL,\n  `notification_status` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`check_id`) REFERENCES `checks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `event_logs` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `check_id` int(11) NOT NULL,\n  `event_type` varchar(255) NOT NULL,\n  `event_date` datetime NOT NULL,\n  `event_status` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`check_id`) REFERENCES `checks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `status_badges` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `check_id` int(11) NOT NULL,\n  `status` varchar(255) NOT NULL,\n  `last_updated` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`check_id`) REFERENCES `checks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "schemabench_0019",
+    "tables": [
+      "users",
+      "projects",
+      "checks",
+      "notifications",
+      "event_logs",
+      "status_badges"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "projects": [],
+      "checks": [],
+      "notifications": [],
+      "event_logs": [],
+      "status_badges": []
+    }
+  }
+}

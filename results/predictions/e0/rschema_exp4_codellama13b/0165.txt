@@ -1,0 +1,63 @@
+-- Schema for database: rschema_0165
+
+CREATE TABLE `stations` (
+`station_id` int(11) NOT NULL,
+`station_type` varchar(255) NOT NULL,
+`station_name` varchar(255) NOT NULL,
+`latitude` decimal(10,6) NOT NULL,
+`longitude` decimal(10,6) NOT NULL,
+`elevation` int(11) NOT NULL,
+`geographic_environment_description` varchar(255) NOT NULL,
+`observation_elements_list` varchar(255) NOT NULL,
+`observation_instrument_name_and_model` varchar(255) NOT NULL,
+`observation_time` datetime NOT NULL,
+`observation_record_medium` varchar(255) NOT NULL,
+`observation_standards` varchar(255) NOT NULL,
+PRIMARY KEY (`station_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `historical_evolutions` (
+`change_id` int(11) NOT NULL,
+`station_id` int(11) NOT NULL,
+`change_type` varchar(255) NOT NULL,
+`old_value` varchar(255) NOT NULL,
+`new_value` varchar(255) NOT NULL,
+`start_time` datetime NOT NULL,
+`end_time` datetime NOT NULL,
+`reason_for_change` varchar(255) NOT NULL,
+`operator_id` int(11) NOT NULL,
+`operation_time` datetime NOT NULL,
+`operation_status` varchar(255) NOT NULL,
+PRIMARY KEY (`change_id`),
+FOREIGN KEY (`station_id`) REFERENCES `stations` (`station_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `operators` (
+`operator_id` int(11) NOT NULL,
+`operator_name` varchar(255) NOT NULL,
+`operator_level` varchar(255) NOT NULL,
+`operator_role` varchar(255) NOT NULL,
+`operator_email` varchar(255) NOT NULL,
+`operator_phone` varchar(255) NOT NULL,
+PRIMARY KEY (`operator_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `audit_records` (
+`change_id` int(11) NOT NULL,
+`operator_id` int(11) NOT NULL,
+`audit_time` datetime NOT NULL,
+`audit_status` varchar(255) NOT NULL,
+`audit_comments` varchar(255) NOT NULL,
+PRIMARY KEY (`change_id`),
+FOREIGN KEY (`operator_id`) REFERENCES `operators` (`operator_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `station_change_reports` (
+`station_id` int(11) NOT NULL,
+`change_id` int(11) NOT NULL,
+`report_time` datetime NOT NULL,
+`report_status` varchar(255) NOT NULL,
+PRIMARY KEY (`station_id`, `change_id`),
+FOREIGN KEY (`station_id`) REFERENCES `stations` (`station_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`change_id`) REFERENCES `historical_evolutions` (`change_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

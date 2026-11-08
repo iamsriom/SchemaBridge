@@ -1,0 +1,43 @@
+-- Schema for database: rschema_0433
+CREATE TABLE `Module` (
+  `Module_Code` varchar(50) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Created_At` datetime NOT NULL,
+  `Updated_At` datetime NOT NULL,
+  PRIMARY KEY (`Module_Code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User` (
+  `User_ID` int(11) NOT NULL AUTO_INCREMENT,
+  `Name` varchar(255) NOT NULL,
+  `Role` varchar(100) NOT NULL,
+  `Department` varchar(100) NOT NULL,
+  `Contact_Info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`User_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Business_Entity` (
+  `Entity_ID` int(11) NOT NULL AUTO_INCREMENT,
+  `Name` varchar(255) NOT NULL,
+  `Type` varchar(100) NOT NULL,
+  `Creator_User_ID` int(11) NOT NULL,
+  `Module_Code` varchar(50) NOT NULL,
+  `Created_At` datetime NOT NULL,
+  `Updated_At` datetime NOT NULL,
+  PRIMARY KEY (`Entity_ID`),
+  CONSTRAINT `business_entity_ibfk_1` FOREIGN KEY (`Creator_User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `business_entity_ibfk_2` FOREIGN KEY (`Module_Code`) REFERENCES `Module` (`Module_Code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Attachment` (
+  `Attachment_ID` int(11) NOT NULL AUTO_INCREMENT,
+  `Belonging_Entity_ID` int(11) NOT NULL,
+  `File_Name` varchar(255) NOT NULL,
+  `File_Path` varchar(255) NOT NULL,
+  `File_Size` int(11) NOT NULL,
+  `Status` varchar(50) NOT NULL,
+  `Uploader_User_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Attachment_ID`),
+  CONSTRAINT `attachment_ibfk_1` FOREIGN KEY (`Belonging_Entity_ID`) REFERENCES `Business_Entity` (`Entity_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `attachment_ibfk_2` FOREIGN KEY (`Uploader_User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

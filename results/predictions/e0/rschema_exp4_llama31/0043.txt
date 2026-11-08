@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0043
+CREATE TABLE `loan_applications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `property_number` varchar(255) NOT NULL,
+  `loan_amount` decimal(10,2) NOT NULL,
+  `loan_term` int(11) NOT NULL,
+  `approval_status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `applicant_name` varchar(255) NOT NULL,
+  `applicant_phone` varchar(20) NOT NULL,
+  `applicant_id_number` varchar(20) NOT NULL,
+  `application_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `approval_personnel` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone` varchar(20) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `loan_approvals` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `loan_application_id` int(11) NOT NULL,
+  `approval_personnel_id` int(11) NOT NULL,
+  `approval_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `approval_result` enum('approved','rejected') NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `loan_application_id` (`loan_application_id`),
+  KEY `approval_personnel_id` (`approval_personnel_id`),
+  CONSTRAINT `loan_approvals_ibfk_1` FOREIGN KEY (`loan_application_id`) REFERENCES `loan_applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `loan_approvals_ibfk_2` FOREIGN KEY (`approval_personnel_id`) REFERENCES `approval_personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `approval_steps` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `loan_approval_id` int(11) NOT NULL,
+  `approval_personnel_id` int(11) NOT NULL,
+  `approval_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `loan_approval_id` (`loan_approval_id`),
+  KEY `approval_personnel_id` (`approval_personnel_id`),
+  CONSTRAINT `approval_steps_ibfk_1` FOREIGN KEY (`loan_approval_id`) REFERENCES `loan_approvals` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `approval_steps_ibfk_2` FOREIGN KEY (`approval_personnel_id`) REFERENCES `approval_personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

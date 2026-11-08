@@ -1,0 +1,42 @@
+{
+  "text_number": 21,
+  "id": "SB-021",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0021",
+  "question": "1) Background / Context\n\nThe project involves developing an extension for the Django web framework called django-reversion. This extension adds version control capabilities to Django model instances, enabling users to roll back to any point in a model's history and recover deleted instances.\n\n2) Objectives\n\nThe primary objective is to implement robust version control for Django models, allowing seamless rollback and recovery operations. The system will also provide straightforward integration into the Django admin interface.\n\n3) Stakeholders & Users\n\n- Developers: Use the django-reversion API to incorporate version control into existing Django applications.\n- Administrators: Manage model versions and perform rollback and recovery tasks via the Django admin interface.\n- End Users: Benefit indirectly through enhanced data integrity and recovery options.\n\n4) Functional Descriptions\n\n- Enable rollback of model instances to any previous state.\n- Allow recovery of deleted model instances.\n- Provide a simple integration within the Django admin interface for managing version control operations.\n\n5) Non-Functional Descriptions\n\n- Ensure compatibility with the Django framework.\n- Offer a scalable solution that efficiently manages versioned data across various models.\n- Maintain a user-friendly API for developers to integrate version control features.",
+  "ddl": "-- Schema for database: schemabench_0021\nCREATE TABLE `django_reversion_version` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`object_id` int(11) NOT NULL,\n`object_type` varchar(255) NOT NULL,\n`object_repr` varchar(255) NOT NULL,\n`object_data` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nUNIQUE KEY `object_id_object_type_object_repr_key` (`object_id`, `object_type`, `object_repr`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `django_reversion_revision` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`version_id` int(11) NOT NULL,\n`revision_number` int(11) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nUNIQUE KEY `version_id_revision_number_key` (`version_id`, `revision_number`),\nFOREIGN KEY (`version_id`) REFERENCES `django_reversion_version` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `django_reversion_revision_data` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`revision_id` int(11) NOT NULL,\n`field_name` varchar(255) NOT NULL,\n`field_value` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`revision_id`) REFERENCES `django_reversion_revision` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `django_reversion_revision_comment` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`revision_id` int(11) NOT NULL,\n`comment` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`revision_id`) REFERENCES `django_reversion_revision` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `django_reversion_revision_user` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`revision_id` int(11) NOT NULL,\n`user_id` int(11) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`revision_id`) REFERENCES `django_reversion_revision` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`user_id`) REFERENCES `django_reversion_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `django_reversion_user` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`username` varchar(255) NOT NULL,\n`password` varchar(255) NOT NULL,\n`email` varchar(255) NOT NULL,\n`first_name` varchar(255) NOT NULL,\n`last_name` varchar(255) NOT NULL,\n`is_staff` tinyint(1) NOT NULL,\n`is_active` tinyint(1) NOT NULL,\n`date_joined` datetime NOT NULL,\n`last_login` datetime NOT NULL,\nPRIMARY KEY (`id`),\nUNIQUE KEY `username_key` (`username`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `django_reversion_group` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`name` varchar(255) NOT NULL,\n`permissions` text NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nUNIQUE KEY `name_key` (`name`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `django_reversion_group_user` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`group_id` int(11) NOT NULL,\n`user_id` int(11) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`group_id`) REFERENCES `django_reversion_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`user_id`) REFERENCES `django_reversion_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `django_reversion_group_permission` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`group_id` int(11) NOT NULL,\n`permission_id` int(11) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`group_id`) REFERENCES `django_reversion_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`permission_id`) REFERENCES `django_reversion_permission` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `django_reversion_permission` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`name` varchar(255) NOT NULL,\n`codename` varchar(255) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nUNIQUE KEY `name_key` (`name`),\nUNIQUE KEY `codename_key` (`codename`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `django_reversion_content_type` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`app_label` varchar(255) NOT NULL,\n`model` varchar(255) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nUNIQUE KEY `app_label_model_key` (`app_label`, `model`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `django_reversion_content_type_permission` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`content_type_id` int(11) NOT NULL,\n`permission_id` int(11) NOT NULL,\n`created_at` datetime NOT NULL,\n`updated_at` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`content_type_id`) REFERENCES `django_reversion_content_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`permission_id`) REFERENCES `django_reversion_permission` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `django_reversion_content_type_group` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`content_type_id` int(11) NOT NULL,\n`group_",
+  "metadata": {
+    "database": "schemabench_0021",
+    "tables": [
+      "django_reversion_version",
+      "django_reversion_revision",
+      "django_reversion_revision_data",
+      "django_reversion_revision_comment",
+      "django_reversion_revision_user",
+      "django_reversion_user",
+      "django_reversion_group",
+      "django_reversion_group_user",
+      "django_reversion_group_permission",
+      "django_reversion_permission",
+      "django_reversion_content_type",
+      "django_reversion_content_type_permission",
+      "django_reversion_content_type_group"
+    ],
+    "columns_by_table": {
+      "django_reversion_version": [],
+      "django_reversion_revision": [],
+      "django_reversion_revision_data": [],
+      "django_reversion_revision_comment": [],
+      "django_reversion_revision_user": [],
+      "django_reversion_user": [],
+      "django_reversion_group": [],
+      "django_reversion_group_user": [],
+      "django_reversion_group_permission": [],
+      "django_reversion_permission": [],
+      "django_reversion_content_type": [],
+      "django_reversion_content_type_permission": [],
+      "django_reversion_content_type_group": []
+    }
+  }
+}

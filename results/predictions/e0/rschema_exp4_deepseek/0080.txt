@@ -1,0 +1,57 @@
+-- Schema for database: rschema_0080
+
+-- Table: customers
+
+CREATE TABLE `customers` (
+    `customer_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `customer_name` VARCHAR(255) NOT NULL,
+    `customer_phone` CHAR(10) NOT NULL,
+    PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: workers
+
+CREATE TABLE `workers` (
+    `worker_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `worker_name` VARCHAR(255) NOT NULL,
+    `worker_address` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`worker_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: tasks
+
+CREATE TABLE `tasks` (
+    `task_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `vehicle_model` VARCHAR(255) NOT NULL,
+    `task_status` ENUM('pending','in progress','completed') NOT NULL,
+    `customer_id` INT(11) NOT NULL,
+    `worker_id` INT(11) NOT NULL,
+    `task_start_date` DATETIME NOT NULL,
+    `task_completion_date` DATETIME,
+    PRIMARY KEY (`task_id`),
+    FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`worker_id`) REFERENCES `workers` (`worker_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: parts
+
+CREATE TABLE `parts` (
+    `part_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `serial_number` VARCHAR(255) NOT NULL,
+    `description` VARCHAR(255) NOT NULL,
+    `price` DECIMAL(10,2) NOT NULL,
+    `supplier` VARCHAR(255) NOT NULL,
+    `quantity` INT(11) NOT NULL,
+    PRIMARY KEY (`part_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: task_parts
+
+CREATE TABLE `task_parts` (
+    `task_id` INT(11) NOT NULL,
+    `part_id` INT(11) NOT NULL,
+    `quantity` INT(11) NOT NULL,
+    PRIMARY KEY (`task_id`, `part_id`),
+    FOREIGN KEY (`task_id`) REFERENCES `tasks` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0031
+
+CREATE TABLE `moving_teams` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_name` varchar(255) NOT NULL,
+  `team_lead` varchar(255) NOT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `moving_tasks` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_id` int(11) NOT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  `customer_phone` varchar(255) NOT NULL,
+  `moving_date` datetime NOT NULL,
+  `start_address` varchar(255) NOT NULL,
+  `dest_address` varchar(255) NOT NULL,
+  `item_quantity` int(11) NOT NULL,
+  `moving_cost` decimal(10,2) NOT NULL,
+  `completed` tinyint(1) NOT NULL DEFAULT 0,
+  `feedback` text,
+  PRIMARY KEY (`task_id`),
+  FOREIGN KEY (`team_id`) REFERENCES `moving_teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `movers` (
+  `mover_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_id` int(11) NOT NULL,
+  `mover_name` varchar(255) NOT NULL,
+  `mover_phone` varchar(255) NOT NULL,
+  `mover_email` varchar(255) NOT NULL,
+  `mover_address` varchar(255) NOT NULL,
+  `mover_rating` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`mover_id`),
+  FOREIGN KEY (`team_id`) REFERENCES `moving_teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `moving_task_movers` (
+  `task_id` int(11) NOT NULL,
+  `mover_id` int(11) NOT NULL,
+  PRIMARY KEY (`task_id`, `mover_id`),
+  FOREIGN KEY (`task_id`) REFERENCES `moving_tasks` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`mover_id`) REFERENCES `movers` (`mover_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `moving_task_feedback` (
+  `task_id` int(11) NOT NULL,
+  `feedback` text NOT NULL,
+  PRIMARY KEY (`task_id`),
+  FOREIGN KEY (`task_id`) REFERENCES `moving_tasks` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

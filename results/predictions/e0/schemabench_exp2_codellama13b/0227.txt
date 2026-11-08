@@ -1,0 +1,86 @@
+-- Schema for database: schemabench_0227
+CREATE TABLE airlines (
+  airline_id INT(11) NOT NULL AUTO_INCREMENT,
+  airline_name VARCHAR(255) NOT NULL,
+  headquarters VARCHAR(255) NOT NULL,
+  PRIMARY KEY (airline_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE airplanes (
+  airplane_id INT(11) NOT NULL AUTO_INCREMENT,
+  airplane_model VARCHAR(255) NOT NULL,
+  manufacturer VARCHAR(255) NOT NULL,
+  capacity INT(11) NOT NULL,
+  PRIMARY KEY (airplane_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE airports (
+  airport_id INT(11) NOT NULL AUTO_INCREMENT,
+  airport_code VARCHAR(255) NOT NULL,
+  airport_name VARCHAR(255) NOT NULL,
+  location VARCHAR(255) NOT NULL,
+  PRIMARY KEY (airport_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE flights (
+  flight_id INT(11) NOT NULL AUTO_INCREMENT,
+  airline_id INT(11) NOT NULL,
+  airplane_id INT(11) NOT NULL,
+  origin_airport_id INT(11) NOT NULL,
+  destination_airport_id INT(11) NOT NULL,
+  departure_time DATETIME NOT NULL,
+  arrival_time DATETIME NOT NULL,
+  PRIMARY KEY (flight_id),
+  FOREIGN KEY (airline_id) REFERENCES airlines(airline_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (airplane_id) REFERENCES airplanes(airplane_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (origin_airport_id) REFERENCES airports(airport_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (destination_airport_id) REFERENCES airports(airport_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE flight_instances (
+  flight_instance_id INT(11) NOT NULL AUTO_INCREMENT,
+  flight_id INT(11) NOT NULL,
+  airplane_id INT(11) NOT NULL,
+  departure_time DATETIME NOT NULL,
+  arrival_time DATETIME NOT NULL,
+  registered_passengers INT(11) NOT NULL,
+  PRIMARY KEY (flight_instance_id),
+  FOREIGN KEY (flight_id) REFERENCES flights(flight_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (airplane_id) REFERENCES airplanes(airplane_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE crew_members (
+  crew_member_id INT(11) NOT NULL AUTO_INCREMENT,
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  role VARCHAR(255) NOT NULL,
+  faa_number VARCHAR(255) NOT NULL,
+  PRIMARY KEY (crew_member_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE crew_assignments (
+  crew_assignment_id INT(11) NOT NULL AUTO_INCREMENT,
+  flight_instance_id INT(11) NOT NULL,
+  crew_member_id INT(11) NOT NULL,
+  PRIMARY KEY (crew_assignment_id),
+  FOREIGN KEY (flight_instance_id) REFERENCES flight_instances(flight_instance_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (crew_member_id) REFERENCES crew_members(crew_member_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE incidents (
+  incident_id INT(11) NOT NULL AUTO_INCREMENT,
+  flight_instance_id INT(11) NOT NULL,
+  incident_type VARCHAR(255) NOT NULL,
+  incident_description VARCHAR(255) NOT NULL,
+  PRIMARY KEY (incident_id),
+  FOREIGN KEY (flight_instance_id) REFERENCES flight_instances(flight_instance_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE personnel_reports (
+  personnel_report_id INT(11) NOT NULL AUTO_INCREMENT,
+  incident_id INT(11) NOT NULL,
+  crew_member_id INT(11) NOT NULL,
+  PRIMARY KEY (personnel_report_id),
+  FOREIGN KEY (incident_id) REFERENCES incidents(incident_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (crew_member_id) REFERENCES crew_members(crew_member_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

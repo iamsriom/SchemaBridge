@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0352
+CREATE TABLE `Supplier` (
+  `Supplier_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Address` varchar(255) DEFAULT NULL,
+  `Phone_Number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`Supplier_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Customer` (
+  `Customer_ID` int(11) NOT NULL,
+  `First_Name` varchar(255) NOT NULL,
+  `Last_Name` varchar(255) NOT NULL,
+  `Email` varchar(255) DEFAULT NULL,
+  `Address` varchar(255) DEFAULT NULL,
+  `Phone_Number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`Customer_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Product` (
+  `Product_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Description` varchar(255) DEFAULT NULL,
+  `Purchase_Price` decimal(10,2) NOT NULL,
+  `Selling_Price` decimal(10,2) NOT NULL,
+  `Stock_Quantity` int(11) NOT NULL,
+  `Min_Stock_Quantity` int(11) NOT NULL,
+  `Supplier_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Product_ID`),
+  CONSTRAINT `Product_ibfk_1` FOREIGN KEY (`Supplier_ID`) REFERENCES `Supplier` (`Supplier_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Invoice` (
+  `Invoice_ID` int(11) NOT NULL,
+  `Customer_ID` int(11) NOT NULL,
+  `Date` datetime NOT NULL,
+  `Tax_Amount` decimal(10,2) NOT NULL,
+  `Total_Value` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`Invoice_ID`),
+  CONSTRAINT `Invoice_ibfk_1` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Invoice_Product` (
+  `Invoice_ID` int(11) NOT NULL,
+  `Product_ID` int(11) NOT NULL,
+  `Product_Quantity` int(11) NOT NULL,
+  PRIMARY KEY (`Invoice_ID`, `Product_ID`),
+  CONSTRAINT `Invoice_Product_ibfk_1` FOREIGN KEY (`Invoice_ID`) REFERENCES `Invoice` (`Invoice_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Invoice_Product_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `Product` (`Product_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

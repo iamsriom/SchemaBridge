@@ -1,0 +1,34 @@
+-- Schema for database: rschema_0117
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `account_created` datetime NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `last_modified_by` int(11) DEFAULT NULL,
+  `last_modified_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `data_record_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `data_record_ibfk_2` FOREIGN KEY (`last_modified_by`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `operation_data` (
+  `record_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `operation_type` varchar(50) NOT NULL,
+  `remarks` text DEFAULT NULL,
+  `operation_content` text NOT NULL,
+  PRIMARY KEY (`record_id`, `user_id`, `operation_time`),
+  CONSTRAINT `operation_data_ibfk_1` FOREIGN KEY (`record_id`) REFERENCES `data_record` (`record_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `operation_data_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

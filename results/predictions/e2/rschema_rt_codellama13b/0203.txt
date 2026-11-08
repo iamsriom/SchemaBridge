@@ -1,0 +1,59 @@
+-- Schema for database: rschema_0203
+CREATE TABLE `promotion_activity` (
+  `activity_id` int(11) NOT NULL,
+  `activity_name` varchar(255) NOT NULL,
+  `activity_time` datetime NOT NULL,
+  `discount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`activity_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `store` (
+  `store_id` int(11) NOT NULL,
+  `store_name` varchar(255) NOT NULL,
+  `store_address` varchar(255) NOT NULL,
+  PRIMARY KEY (`store_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `product_model` varchar(255) NOT NULL,
+  `product_barcode` varchar(255) NOT NULL,
+  `product_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `promotion_effect_record` (
+  `promotion_effect_record_id` int(11) NOT NULL,
+  `activity_id` int(11) NOT NULL,
+  `sales_amount` decimal(10,2) NOT NULL,
+  `sales_quantity` int(11) NOT NULL,
+  `participating_member_count` int(11) NOT NULL,
+  PRIMARY KEY (`promotion_effect_record_id`),
+  CONSTRAINT `promotion_effect_record_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `promotion_activity` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `promotion_effect_evaluation` (
+  `activity_id` int(11) NOT NULL,
+  `sales_growth_rate` decimal(5,2) NOT NULL,
+  `customer_engagement` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`activity_id`),
+  CONSTRAINT `promotion_effect_evaluation_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `promotion_activity` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `promotion_activity_participating_store` (
+  `store_id` int(11) NOT NULL,
+  `activity_id` int(11) NOT NULL,
+  PRIMARY KEY (`store_id`, `activity_id`),
+  CONSTRAINT `promotion_activity_participating_store_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `promotion_activity` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `promotion_activity_participating_store_ibfk_2` FOREIGN KEY (`store_id`) REFERENCES `store` (`store_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `promotion_activity_participating_product` (
+  `product_id` int(11) NOT NULL,
+  `activity_id` int(11) NOT NULL,
+  `discount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`product_id`, `activity_id`),
+  CONSTRAINT `promotion_activity_participating_product_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `promotion_activity` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `promotion_activity_participating_product_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

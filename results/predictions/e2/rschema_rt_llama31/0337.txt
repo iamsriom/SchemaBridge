@@ -1,0 +1,42 @@
+-- Schema for database: rschema_0337
+CREATE TABLE `exam` (
+  `exam_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `time` datetime NOT NULL,
+  PRIMARY KEY (`exam_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student` (
+  `student_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `practice_question` (
+  `question_id` int(11) NOT NULL,
+  `description` text NOT NULL,
+  `score` int(11) NOT NULL,
+  `exam_id_it_belongs_to` int(11) NOT NULL,
+  PRIMARY KEY (`question_id`),
+  CONSTRAINT `practice_question_ibfk_1` FOREIGN KEY (`exam_id_it_belongs_to`) REFERENCES `exam` (`exam_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `submission_record` (
+  `submission_id` int(11) NOT NULL,
+  `exam_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  PRIMARY KEY (`submission_id`),
+  CONSTRAINT `submission_record_ibfk_1` FOREIGN KEY (`exam_id`) REFERENCES `exam` (`exam_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `submission_record_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `answer_record` (
+  `answer_record_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `practice_question_id_it_belongs_to` int(11) NOT NULL,
+  `submission_id_it_belongs_to` int(11) NOT NULL,
+  PRIMARY KEY (`answer_record_id`),
+  CONSTRAINT `answer_record_ibfk_1` FOREIGN KEY (`practice_question_id_it_belongs_to`) REFERENCES `practice_question` (`question_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `answer_record_ibfk_2` FOREIGN KEY (`submission_id_it_belongs_to`) REFERENCES `submission_record` (`submission_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

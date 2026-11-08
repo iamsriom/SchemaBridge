@@ -1,0 +1,45 @@
+\subsection{E5: Scalability and Cost}
+\label{sec:e5}
+
+\paragraph{Setup.}
+We analyze computational efficiency and structural scalability using
+\emph{existing} E0--E2 artifacts rather than a new full-corpus inference pass.
+Structural size effects reuse E2 round-trips (describer $\rightarrow$ fixed
+GPT-4o-mini constructor) stratified by schema size
+(Small: ${\le}5$ tables and ${\le}50$ columns; Medium: not Small but
+${\le}15$ tables and ${\le}150$ columns; otherwise Large).
+Efficiency combines (i)~a DeepSeek-Coder basic-prompt sample of up to 40
+schemata per dataset with archived reconstructions,
+(ii)~a small DeepSeek Schema2Text latency remount ($N{=}5$ per prompt/dataset),
+and (iii)~billed API pilots on two schemata
+(GPT-5.4-mini basic/detailed; Claude Sonnet~4.6 basic; constructor GPT-4o-mini).
+Pilot rows are never pooled with sample- or full-corpus averages.
+Provider usage logs for archived E0/E2 runs are absent; open-weight inference
+is reported as monetary N/A.
+
+\paragraph{Results.}
+Table~\ref{tab:e5_scalability} shows that referential fidelity declines with
+schema size on SchemaBench under DeepSeek detailed descriptions
+(Ref.\ F1 $0.864\rightarrow0.654$ from Small to Large; nGED
+$0.324\rightarrow0.402$), while RSchema Small/Medium remain high
+(Ref.\ F1 ${\approx}0.92$) with Domain F1 persistently low (${\approx}0.15$--$0.17$).
+Table~\ref{tab:e5_cost} reports recoverable costs and latencies.
+On the DeepSeek-basic sample, referential F1 is $0.887$ (RSchema, $N{=}40$) and
+$0.674$ (SchemaBench, $N{=}38$ valid archives; two missing slots are excluded
+rather than zero-scored).
+Estimated GPT-4o-mini constructor cost is ${\approx}\$0.002$--$0.003$ per schema;
+DeepSeek dollars are N/A.
+API pilots bill ${\approx}\$0.002$--$0.003$ per schema for GPT-5.4-mini round-trips
+and ${\approx}\$0.007$--$0.008$ for Claude basic round-trips on the same two
+small schemata, with saturated fidelity (Ref.\ F1~$=1$, nGED~$=0$) that does
+\emph{not} generalize to the corpus.
+DeepSeek Schema2Text remounts show detailed prompts roughly $2$--$3\times$
+slower than basic ($54.6$\,s vs.\ $120.2$\,s mean on RSchema, $N{=}5$).
+Manuscript E0 wall-clock claims (e.g., CodeLlama $390.5$\,s/schema) could not
+be matched to packaged logs and are omitted from Table~\ref{tab:e5_cost}.
+
+\paragraph{Limitations.}
+E3 constructor isolation and Enterprise-145 round-trip archives are unavailable
+on disk; closed-model full-corpus costs remain unrecovered.
+E0 direct-construction latency/\$ and E2 round-trip fidelity must not be read
+as measurements from the same pipeline.

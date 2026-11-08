@@ -1,0 +1,81 @@
+-- Schema for database: rschema_0164
+CREATE TABLE `warehouses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `image_path` varchar(255) DEFAULT NULL,
+  `description` text,
+  `creation_time` datetime NOT NULL,
+  `creation_date` date NOT NULL,
+  `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stack_positions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `warehouse_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `image_path` varchar(255) DEFAULT NULL,
+  `description` text,
+  `creation_time` datetime NOT NULL,
+  `creation_date` date NOT NULL,
+  `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `warehouse_id` (`warehouse_id`),
+  CONSTRAINT `stack_positions_ibfk_1` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sensors` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `stack_position_id` int(11) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `data_value` float NOT NULL,
+  `collection_time` datetime NOT NULL,
+  `data_status` varchar(255) NOT NULL,
+  `data_description` text,
+  PRIMARY KEY (`id`),
+  KEY `stack_position_id` (`stack_position_id`),
+  CONSTRAINT `sensors_ibfk_1` FOREIGN KEY (`stack_position_id`) REFERENCES `stack_positions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `role` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  `creation_date` date NOT NULL,
+  `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `operations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `stack_position_id` int(11) NOT NULL,
+  `operation_type` varchar(255) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `operation_description` text,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `stack_position_id` (`stack_position_id`),
+  CONSTRAINT `operations_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `operations_ibfk_2` FOREIGN KEY (`stack_position_id`) REFERENCES `stack_positions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alerts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `stack_position_id` int(11) NOT NULL,
+  `alert_type` varchar(255) NOT NULL,
+  `alert_time` datetime NOT NULL,
+  `alert_level` varchar(255) NOT NULL,
+  `alert_description` text,
+  `alert_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `stack_position_id` (`stack_position_id`),
+  CONSTRAINT `alerts_ibfk_1` FOREIGN KEY (`stack_position_id`) REFERENCES `stack_positions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

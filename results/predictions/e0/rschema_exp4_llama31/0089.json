@@ -1,0 +1,26 @@
+{
+  "text_number": 89,
+  "id": "67552f0a13602ec03b41a881",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0089",
+  "question": "Design a database for a blockchain or cryptocurrency system to store and manage transactions, blocks, and account information.\nThe system shall record detailed information about transactions, including transaction hash, timestamp, fee, input address, and output address;     \ninformation about blocks, including block hash, height, timestamp, previous block hash, and Merkle root;\nas well as account addresses and balances.\nThe system shall support querying the block a transaction belongs to, as well as the relationship between transactions and accounts.",
+  "ddl": "-- Schema for database: rschema_0089\nCREATE TABLE `accounts` (\n  `address` varchar(255) NOT NULL,\n  `balance` decimal(65,30) NOT NULL DEFAULT 0.000000000000000000000000000000,\n  PRIMARY KEY (`address`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `blocks` (\n  `hash` char(64) NOT NULL,\n  `height` int(11) NOT NULL,\n  `timestamp` datetime NOT NULL,\n  `previous_hash` char(64) NOT NULL,\n  `merkle_root` char(64) NOT NULL,\n  PRIMARY KEY (`hash`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `transactions` (\n  `hash` char(64) NOT NULL,\n  `timestamp` datetime NOT NULL,\n  `fee` decimal(65,30) NOT NULL DEFAULT 0.000000000000000000000000000000,\n  `input_address` varchar(255) NOT NULL,\n  `output_address` varchar(255) NOT NULL,\n  PRIMARY KEY (`hash`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `transaction_blocks` (\n  `transaction_hash` char(64) NOT NULL,\n  `block_hash` char(64) NOT NULL,\n  PRIMARY KEY (`transaction_hash`),\n  KEY `transaction_blocks_ibfk_1` (`block_hash`),\n  CONSTRAINT `transaction_blocks_ibfk_1` FOREIGN KEY (`block_hash`) REFERENCES `blocks` (`hash`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `transaction_accounts` (\n  `transaction_hash` char(64) NOT NULL,\n  `account_address` varchar(255) NOT NULL,\n  PRIMARY KEY (`transaction_hash`),\n  KEY `transaction_accounts_ibfk_1` (`account_address`),\n  CONSTRAINT `transaction_accounts_ibfk_1` FOREIGN KEY (`account_address`) REFERENCES `accounts` (`address`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "accounts",
+      "blocks",
+      "transactions",
+      "transaction_blocks",
+      "transaction_accounts"
+    ],
+    "columns_by_table": {
+      "accounts": [],
+      "blocks": [],
+      "transactions": [],
+      "transaction_blocks": [],
+      "transaction_accounts": []
+    }
+  }
+}

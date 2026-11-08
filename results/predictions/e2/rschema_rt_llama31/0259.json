@@ -1,0 +1,289 @@
+{
+  "text_number": 259,
+  "id": "67552f0b13602ec03b41aae8",
+  "llm": "gpt4omini",
+  "model_id": "gpt-4o-mini",
+  "source_schema2text_llm": "llama31",
+  "database": "rschema_0259",
+  "nl_text": "The rschema_0259 database is designed to manage user information and email communication. The User table stores unique usernames, each of which serves as a primary key, and is used to identify individual users. The Email_account table links email addresses to their corresponding usernames, with the email address itself serving as the primary key, and the username being a non-nullable foreign key referencing the User table. The Contact table stores contact information, including multiple email addresses, phone numbers, and work addresses, all tied to a specific username, which is a non-nullable foreign key referencing the User table. The Email table stores email content, including the sender's email address, which is a non-nullable foreign key referencing the Email_account table, and the recipient's email address, which is a composite primary key referencing the Email_account table. The Receipt table tracks email receipts, linking the email ID to the recipient's email address, with both the email ID and recipient address being non-nullable foreign keys referencing the Email and Email_account tables, respectively. The Attachment table stores information about email attachments, including the attachment filename and size, tied to a specific email ID, which is a non-nullable foreign key referencing the Email table.",
+  "gold_question": "This is an email client system. For user management, the system records basic information of each user, including unique username and password. For email account management, the system records basic information of each email account, including email address and corresponding password. A user can have multiple email accounts. For address book management, each user can have one address book. The system records basic information of each contact, including unique contact ID, name, phone number, work address, and up to three email addresses. Each contact can only belong to one user. For email management, the system records basic information of each email, including unique email ID, sender address, recipient address, email status (received, pending, sent, and deleted), subject, content, sending time, and receiving time. One email can be sent to multiple users. For attachment management, the system records basic information of each attachment, including unique attachment ID within the email, attachment filename, and attachment size. One attachment can only belong to one email.",
+  "input_json": "/data/RSchema_ExpResults4/Experiment2/schema2text_llama31/0259.json",
+  "ddl": "-- Schema for database: rschema_0259\nCREATE TABLE `user` (\n  `username` varchar(255) NOT NULL,\n  PRIMARY KEY (`username`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `email_account` (\n  `email_address` varchar(255) NOT NULL,\n  `username` varchar(255) NOT NULL,\n  PRIMARY KEY (`email_address`),\n  CONSTRAINT `email_account_ibfk_1` FOREIGN KEY (`username`) REFERENCES `user` (`username`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `contact` (\n  `contact_id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `phone_number` varchar(20) DEFAULT NULL,\n  `work_address` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`contact_id`),\n  CONSTRAINT `contact_ibfk_1` FOREIGN KEY (`username`) REFERENCES `user` (`username`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `email` (\n  `email_id` int(11) NOT NULL AUTO_INCREMENT,\n  `sender_email` varchar(255) NOT NULL,\n  `recipient_email` varchar(255) NOT NULL,\n  `content` text DEFAULT NULL,\n  PRIMARY KEY (`email_id`, `recipient_email`),\n  CONSTRAINT `email_ibfk_1` FOREIGN KEY (`sender_email`) REFERENCES `email_account` (`email_address`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `email_ibfk_2` FOREIGN KEY (`recipient_email`) REFERENCES `email_account` (`email_address`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `receipt` (\n  `receipt_id` int(11) NOT NULL AUTO_INCREMENT,\n  `email_id` int(11) NOT NULL,\n  `recipient_email` varchar(255) NOT NULL,\n  PRIMARY KEY (`receipt_id`),\n  CONSTRAINT `receipt_ibfk_1` FOREIGN KEY (`email_id`) REFERENCES `email` (`email_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `receipt_ibfk_2` FOREIGN KEY (`recipient_email`) REFERENCES `email_account` (`email_address`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `attachment` (\n  `attachment_id` int(11) NOT NULL AUTO_INCREMENT,\n  `email_id` int(11) NOT NULL,\n  `filename` varchar(255) NOT NULL,\n  `size` int(11) NOT NULL,\n  PRIMARY KEY (`attachment_id`),\n  CONSTRAINT `attachment_ibfk_1` FOREIGN KEY (`email_id`) REFERENCES `email` (`email_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "rschema_0259",
+    "tables": [
+      "user",
+      "email_account",
+      "contact",
+      "email",
+      "receipt",
+      "attachment"
+    ],
+    "columns_by_table": {
+      "user": [
+        {
+          "COLUMN_NAME": "username",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "email_account": [
+        {
+          "COLUMN_NAME": "email_address",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "username",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "contact": [
+        {
+          "COLUMN_NAME": "contact_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "AUTO_INCREMENT",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "username",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "phone_number",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 20,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(20)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "work_address",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "email": [
+        {
+          "COLUMN_NAME": "email_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "AUTO_INCREMENT",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "sender_email",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "recipient_email",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "content",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "text",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "text",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "receipt": [
+        {
+          "COLUMN_NAME": "receipt_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "AUTO_INCREMENT",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "email_id",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "recipient_email",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "attachment": [
+        {
+          "COLUMN_NAME": "attachment_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "AUTO_INCREMENT",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "email_id",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "filename",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "size",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ]
+    }
+  }
+}

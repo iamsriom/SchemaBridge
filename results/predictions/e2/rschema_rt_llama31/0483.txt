@@ -1,0 +1,44 @@
+-- Schema for database: rschema_0483
+CREATE TABLE `payment_platform` (
+  `platform_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`platform_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `registration_method` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `operation` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `platform_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `transaction_time` datetime NOT NULL,
+  `transaction_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  CONSTRAINT `operation_ibfk_1` FOREIGN KEY (`platform_id`) REFERENCES `payment_platform` (`platform_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `intermediary` (
+  `intermediary_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `transaction_id` int(11) NOT NULL,
+  PRIMARY KEY (`intermediary_id`),
+  CONSTRAINT `intermediary_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `operation` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_payment_operation` (
+  `user_id` int(11) NOT NULL,
+  `transaction_id` int(11) NOT NULL,
+  `payment_status` varchar(50) NOT NULL,
+  `payment_time` datetime NOT NULL,
+  PRIMARY KEY (`user_id`, `transaction_id`),
+  CONSTRAINT `user_payment_operation_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_payment_operation_ibfk_2` FOREIGN KEY (`transaction_id`) REFERENCES `operation` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

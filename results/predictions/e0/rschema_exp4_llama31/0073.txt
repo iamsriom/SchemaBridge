@@ -1,0 +1,73 @@
+-- Schema for database: rschema_0073
+CREATE TABLE `agents` (
+  `agent_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `hire_date` datetime NOT NULL,
+  `contact_phone_number` char(20) NOT NULL,
+  PRIMARY KEY (`agent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `id_card_number` varchar(255) NOT NULL,
+  `contact_phone_number` char(20) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `policies` (
+  `policy_number` char(20) NOT NULL,
+  `insurance_type` enum('Life','Health','Property') NOT NULL,
+  `insured_amount` decimal(10,2) NOT NULL,
+  `insurance_term` int(11) NOT NULL,
+  `premium` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`policy_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `premium_payments` (
+  `payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `payment_amount` decimal(10,2) NOT NULL,
+  `payment_time` datetime NOT NULL,
+  `payment_method` varchar(255) NOT NULL,
+  PRIMARY KEY (`payment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `claims` (
+  `claim_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `claim_time` datetime NOT NULL,
+  `claim_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`claim_id`),
+  KEY `customer_id` (`customer_id`),
+  CONSTRAINT `claims_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `agent_customer` (
+  `agent_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  PRIMARY KEY (`agent_id`, `customer_id`),
+  KEY `agent_id` (`agent_id`),
+  KEY `customer_id` (`customer_id`),
+  CONSTRAINT `agent_customer_ibfk_1` FOREIGN KEY (`agent_id`) REFERENCES `agents` (`agent_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `agent_customer_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `policy_customer` (
+  `policy_number` char(20) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  PRIMARY KEY (`policy_number`, `customer_id`),
+  KEY `policy_number` (`policy_number`),
+  KEY `customer_id` (`customer_id`),
+  CONSTRAINT `policy_customer_ibfk_1` FOREIGN KEY (`policy_number`) REFERENCES `policies` (`policy_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `policy_customer_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `policy_premium` (
+  `policy_number` char(20) NOT NULL,
+  `payment_id` int(11) NOT NULL,
+  PRIMARY KEY (`policy_number`, `payment_id`),
+  KEY `policy_number` (`policy_number`),
+  KEY `payment_id` (`payment_id`),
+  CONSTRAINT `policy_premium_ibfk_1` FOREIGN KEY (`policy_number`) REFERENCES `policies` (`policy_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `policy_premium_ibfk_2` FOREIGN KEY (`payment_id`) REFERENCES `premium_payments` (`payment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

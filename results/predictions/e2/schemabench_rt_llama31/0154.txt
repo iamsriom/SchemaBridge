@@ -1,0 +1,86 @@
+-- Schema for database: schemabench_0154
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `full_name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `description` text DEFAULT NULL,
+  `stock_quantity` int(11) NOT NULL,
+  `image_1` varchar(255) DEFAULT NULL,
+  `image_2` varchar(255) DEFAULT NULL,
+  `image_3` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shelves` (
+  `shelf_id` int(11) NOT NULL AUTO_INCREMENT,
+  `location_coordinates` varchar(255) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `order_count` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`shelf_id`),
+  CONSTRAINT `shelves_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `robots` (
+  `robot_id` int(11) NOT NULL AUTO_INCREMENT,
+  `speed` decimal(5,2) NOT NULL,
+  `battery_percentage` int(3) NOT NULL,
+  `current_location` varchar(255) NOT NULL,
+  `is_charging` boolean NOT NULL DEFAULT FALSE,
+  `shelf_id` int(11) NOT NULL,
+  PRIMARY KEY (`robot_id`),
+  CONSTRAINT `robots_ibfk_1` FOREIGN KEY (`shelf_id`) REFERENCES `shelves` (`shelf_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`order_id`, `product_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders_details` (
+  `order_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `total_cost` decimal(10,2) NOT NULL,
+  `order_date` datetime NOT NULL,
+  `phone_number` varchar(15) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `payment_method` varchar(50) NOT NULL,
+  `order_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `orders_details_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wishlist` (
+  `customer_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  PRIMARY KEY (`customer_id`, `product_id`),
+  CONSTRAINT `wishlist_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `wishlist_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_services` (
+  `message_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `phone_number` varchar(15) NOT NULL,
+  `message` text NOT NULL,
+  PRIMARY KEY (`message_id`),
+  CONSTRAINT `customer_services_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notifications` (
+  `notification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `notification_message` text NOT NULL,
+  `sent_datetime` datetime NOT NULL,
+  PRIMARY KEY (`notification_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

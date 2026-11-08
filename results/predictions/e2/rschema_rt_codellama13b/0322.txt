@@ -1,0 +1,62 @@
+-- Schema for database: rschema_0322
+CREATE TABLE `company` (
+  `company_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `website` varchar(255) DEFAULT NULL,
+  `creation_date` datetime NOT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `salary` decimal(10,2) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `company` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device` (
+  `device_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  PRIMARY KEY (`device_id`),
+  CONSTRAINT `device_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `last_login` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site` (
+  `site_name` varchar(255) NOT NULL,
+  `hostname` varchar(255) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`site_name`),
+  CONSTRAINT `site_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_uses_device` (
+  `employee_id` int(11) NOT NULL,
+  `device_id` int(11) NOT NULL,
+  `start_usage_time` datetime NOT NULL,
+  `end_usage_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`employee_id`, `device_id`, `start_usage_time`),
+  CONSTRAINT `employee_uses_device_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_uses_device_ibfk_2` FOREIGN KEY (`device_id`) REFERENCES `device` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_creates_site` (
+  `username` varchar(255) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `site_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`username`, `creation_time`, `site_name`),
+  CONSTRAINT `user_creates_site_ibfk_1` FOREIGN KEY (`username`) REFERENCES `user` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

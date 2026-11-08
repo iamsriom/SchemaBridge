@@ -1,0 +1,53 @@
+-- Schema for database: schemabench_0158
+CREATE TABLE `installations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `labor_codes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` char(6) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `billing_codes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` char(6) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tickets` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `installation_id` int(11) NOT NULL,
+  `labor_code_id` int(11) NOT NULL,
+  `billing_code_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `hours` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `installation_id` (`installation_id`),
+  KEY `labor_code_id` (`labor_code_id`),
+  KEY `billing_code_id` (`billing_code_id`),
+  CONSTRAINT `tickets_ibfk_1` FOREIGN KEY (`installation_id`) REFERENCES `installations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tickets_ibfk_2` FOREIGN KEY (`labor_code_id`) REFERENCES `labor_codes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tickets_ibfk_3` FOREIGN KEY (`billing_code_id`) REFERENCES `billing_codes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(11) NOT NULL,
+  `reported_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ticket_id` (`ticket_id`),
+  CONSTRAINT `reports_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shell` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `theme` varchar(255) NOT NULL,
+  `menu_item` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

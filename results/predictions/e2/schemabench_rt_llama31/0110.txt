@@ -1,0 +1,93 @@
+-- Schema for database: schemabench_0110
+CREATE TABLE `awards` (
+  `award_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `effective_date` datetime NOT NULL,
+  `expiration_date` datetime NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `instrument` varchar(255) NOT NULL,
+  `abstract_narration` text DEFAULT NULL,
+  `organization_code` varchar(50) NOT NULL,
+  `program_officer` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`award_id`),
+  CONSTRAINT `awards_ibfk_1` FOREIGN KEY (`organization_code`) REFERENCES `organization` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organization` (
+  `code` varchar(50) NOT NULL,
+  `division` varchar(255) DEFAULT NULL,
+  `directorate` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `institution` (
+  `name` varchar(255) NOT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `zip_code` varchar(10) DEFAULT NULL,
+  `contact` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`name`, `zip_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `foa_info` (
+  `foa_code` varchar(50) NOT NULL,
+  `foa_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`foa_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `foa_info_awards` (
+  `foa_code` varchar(50) NOT NULL,
+  `award_id` int(11) NOT NULL,
+  PRIMARY KEY (`foa_code`, `award_id`),
+  CONSTRAINT `foa_info_awards_ibfk_1` FOREIGN KEY (`foa_code`) REFERENCES `foa_info` (`foa_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `foa_info_awards_ibfk_2` FOREIGN KEY (`award_id`) REFERENCES `awards` (`award_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `institution_awards` (
+  `institution_name` varchar(255) NOT NULL,
+  `institution_zip_code` varchar(10) NOT NULL,
+  `award_id` int(11) NOT NULL,
+  PRIMARY KEY (`institution_name`, `institution_zip_code`, `award_id`),
+  CONSTRAINT `institution_awards_ibfk_1` FOREIGN KEY (`institution_name`, `institution_zip_code`) REFERENCES `institution` (`name`, `zip_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `institution_awards_ibfk_2` FOREIGN KEY (`award_id`) REFERENCES `awards` (`award_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `investigator_awards` (
+  `award_id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  `role_code` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`award_id`, `email`),
+  CONSTRAINT `investigator_awards_ibfk_1` FOREIGN KEY (`award_id`) REFERENCES `awards` (`award_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `program_element` (
+  `program_code` varchar(50) NOT NULL,
+  `program_text` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`program_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `program_reference` (
+  `program_code` varchar(50) NOT NULL,
+  `reference_text` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`program_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `program_element_awards` (
+  `program_code` varchar(50) NOT NULL,
+  `award_id` int(11) NOT NULL,
+  PRIMARY KEY (`program_code`, `award_id`),
+  CONSTRAINT `program_element_awards_ibfk_1` FOREIGN KEY (`program_code`) REFERENCES `program_element` (`program_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `program_element_awards_ibfk_2` FOREIGN KEY (`award_id`) REFERENCES `awards` (`award_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `program_reference_awards` (
+  `program_code` varchar(50) NOT NULL,
+  `award_id` int(11) NOT NULL,
+  PRIMARY KEY (`program_code`, `award_id`),
+  CONSTRAINT `program_reference_awards_ibfk_1` FOREIGN KEY (`program_code`) REFERENCES `program_reference` (`program_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `program_reference_awards_ibfk_2` FOREIGN KEY (`award_id`) REFERENCES `awards` (`award_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

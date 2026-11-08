@@ -1,0 +1,47 @@
+-- Schema for database: `rschema_0337`
+
+-- For table: `exams`
+CREATE TABLE `exams` (
+    `ExamID` int(11) NOT NULL AUTO_INCREMENT,
+    `Name` varchar(255) NOT NULL,
+    `Time` datetime NOT NULL,
+    PRIMARY KEY (`ExamID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `practice_questions`
+CREATE TABLE `practice_questions` (
+    `QuestionID` int(11) NOT NULL AUTO_INCREMENT,
+    `ExamID` int(11) NOT NULL,
+    `QuestionContent` text NOT NULL,
+    `Score` int(11) NOT NULL,
+    PRIMARY KEY (`QuestionID`),
+    FOREIGN KEY (`ExamID`) REFERENCES `exams` (`ExamID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `students`
+CREATE TABLE `students` (
+    `StudentID` int(11) NOT NULL AUTO_INCREMENT,
+    `Name` varchar(255) NOT NULL,
+    PRIMARY KEY (`StudentID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `submissions`
+CREATE TABLE `submissions` (
+    `SubmissionID` int(11) NOT NULL AUTO_INCREMENT,
+    `ExamID` int(11) NOT NULL,
+    `StudentID` int(11) NOT NULL,
+    `SubmissionStatus` varchar(255) NOT NULL,
+    PRIMARY KEY (`SubmissionID`),
+    FOREIGN KEY (`ExamID`) REFERENCES `exams` (`ExamID`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `answers`
+CREATE TABLE `answers` (
+    `PracticeQuestionID` int(11) NOT NULL,
+    `SubmissionID` int(11) NOT NULL,
+    `AnswerContent` text NOT NULL,
+    PRIMARY KEY (`PracticeQuestionID`, `SubmissionID`),
+    FOREIGN KEY (`PracticeQuestionID`) REFERENCES `practice_questions` (`QuestionID`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`SubmissionID`) REFERENCES `submissions` (`SubmissionID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

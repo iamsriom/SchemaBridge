@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0494
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `nickname` varchar(255) DEFAULT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  `biography` text DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `article` (
+  `article_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `author_id` int(11) NOT NULL,
+  `cover_image_link` varchar(255) DEFAULT NULL,
+  `summary` text DEFAULT NULL,
+  `comment_permission` tinyint(1) NOT NULL DEFAULT '1',
+  `status` varchar(50) NOT NULL,
+  `content` text NOT NULL,
+  `likes` int(11) NOT NULL DEFAULT '0',
+  `dislikes` int(11) NOT NULL DEFAULT '0',
+  `reads` int(11) NOT NULL DEFAULT '0',
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`article_id`),
+  CONSTRAINT `article_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `category` (
+  `id` int(11) NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `level` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `icon_link` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `category_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comment_reply` (
+  `comment_id` int(11) NOT NULL,
+  `replied_comment_id` int(11) DEFAULT NULL,
+  `article_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`comment_id`),
+  CONSTRAINT `comment_reply_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `article` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comment_reply_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

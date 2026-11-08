@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0321
+CREATE TABLE `general_user_information` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_name` varchar(255) NOT NULL,
+  `age` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `member_information` (
+  `member_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `level` varchar(50) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  PRIMARY KEY (`member_id`),
+  CONSTRAINT `member_information_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `general_user_information` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `team_information` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_leader_id` int(11) NOT NULL,
+  `team_name` varchar(255) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `total_members` int(11) NOT NULL,
+  PRIMARY KEY (`team_id`),
+  CONSTRAINT `team_information_ibfk_1` FOREIGN KEY (`team_leader_id`) REFERENCES `general_user_information` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `football_player_information` (
+  `player_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `team_id` int(11) NOT NULL,
+  PRIMARY KEY (`player_id`),
+  CONSTRAINT `football_player_information_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `general_user_information` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `football_player_information_ibfk_2` FOREIGN KEY (`team_id`) REFERENCES `team_information` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `match_information` (
+  `match_id` int(11) NOT NULL AUTO_INCREMENT,
+  `home_team_id` int(11) NOT NULL,
+  `away_team_id` int(11) NOT NULL,
+  `match_location` varchar(255) NOT NULL,
+  `match_result` varchar(255) DEFAULT NULL,
+  `match_time` datetime NOT NULL,
+  PRIMARY KEY (`match_id`),
+  CONSTRAINT `match_information_ibfk_1` FOREIGN KEY (`home_team_id`) REFERENCES `team_information` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `match_information_ibfk_2` FOREIGN KEY (`away_team_id`) REFERENCES `team_information` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

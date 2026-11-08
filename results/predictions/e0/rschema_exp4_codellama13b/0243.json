@@ -1,0 +1,22 @@
+{
+  "text_number": 243,
+  "id": "67552f0a13602ec03b41a9d5",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "rschema_0243",
+  "question": "A library management system needs to record the following information:\nThe library has many readers, and the reader information includes the reader number, name, email, phone number, registration date and the last information update time.\nThe library's collection includes the book number, title, author, ISBN number, publication date, current inventory, book classification and the latest data update time.\nThe borrowing process is: after registering, readers can query the book inventory through the system, record the borrowing date for each borrowing, update the return date when returning, and automatically calculate the overdue fine amount if the return is overdue.\nThe same reader can borrow different books multiple times, and each book is allowed to be borrowed by different readers in a cycle. Each borrowing is allowed to be renewed three times and the renewal number is recorded.\nThe system needs to update the book inventory status in real time. When a book is borrowed, the inventory is deducted, and the inventory is restored after the book is returned. The latest modification time of the corresponding data must be updated for each operation.",
+  "ddl": "-- Schema for database: rschema_0243\n\nCREATE TABLE readers (\n  reader_id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  email VARCHAR(255) NOT NULL,\n  phone_number VARCHAR(255) NOT NULL,\n  registration_date DATETIME NOT NULL,\n  last_update_time DATETIME NOT NULL,\n  PRIMARY KEY (reader_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE books (\n  book_id INT(11) NOT NULL AUTO_INCREMENT,\n  title VARCHAR(255) NOT NULL,\n  author VARCHAR(255) NOT NULL,\n  isbn_number VARCHAR(255) NOT NULL,\n  publication_date DATETIME NOT NULL,\n  current_inventory INT(11) NOT NULL,\n  book_classification VARCHAR(255) NOT NULL,\n  latest_update_time DATETIME NOT NULL,\n  PRIMARY KEY (book_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE borrowings (\n  borrowing_id INT(11) NOT NULL AUTO_INCREMENT,\n  reader_id INT(11) NOT NULL,\n  book_id INT(11) NOT NULL,\n  borrowing_date DATETIME NOT NULL,\n  return_date DATETIME NULL,\n  overdue_fine DECIMAL(10,2) NULL,\n  renewal_number INT(11) NOT NULL,\n  PRIMARY KEY (borrowing_id),\n  FOREIGN KEY (reader_id) REFERENCES readers(reader_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TRIGGER update_book_inventory\nAFTER INSERT ON borrowings\nFOR EACH ROW\nBEGIN\n  UPDATE books\n  SET current_inventory = current_inventory - 1\n  WHERE book_id = NEW.book_id;\nEND;\n\nCREATE TRIGGER update_book_inventory\nAFTER UPDATE ON borrowings\nFOR EACH ROW\nBEGIN\n  IF NEW.return_date IS NOT NULL THEN\n    UPDATE books\n    SET current_inventory = current_inventory + 1\n    WHERE book_id = NEW.book_id;\n  END IF;\nEND;\n\nCREATE TRIGGER update_book_inventory\nAFTER DELETE ON borrowings\nFOR EACH ROW\nBEGIN\n  UPDATE books\n  SET current_inventory = current_inventory + 1\n  WHERE book_id = OLD.book_id;\nEND;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "readers",
+      "books",
+      "borrowings"
+    ],
+    "columns_by_table": {
+      "readers": [],
+      "books": [],
+      "borrowings": []
+    }
+  }
+}

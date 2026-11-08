@@ -1,0 +1,40 @@
+-- Schema for database: rschema_0300
+CREATE TABLE `material_supply_projects` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_number` varchar(255) NOT NULL,
+  `material_code` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit` varchar(255) NOT NULL,
+  `cost` decimal(10,2) NOT NULL,
+  `charge_amount` decimal(10,2) NOT NULL,
+  `creation_date` datetime NOT NULL,
+  `closing_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bills` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `material_supply_project_id` int(11) NOT NULL,
+  `material_quantity` int(11) NOT NULL,
+  `unit` varchar(255) NOT NULL,
+  `cost` decimal(10,2) NOT NULL,
+  `charge_amount` decimal(10,2) NOT NULL,
+  `creation_date` datetime NOT NULL,
+  `modification_date` datetime NOT NULL,
+  `verification_error` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `material_supply_project_id` (`material_supply_project_id`),
+  CONSTRAINT `bills_ibfk_1` FOREIGN KEY (`material_supply_project_id`) REFERENCES `material_supply_projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bill_errors` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `bill_id` int(11) NOT NULL,
+  `error_description` varchar(255) NOT NULL,
+  `handling_status` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `bill_id` (`bill_id`),
+  CONSTRAINT `bill_errors_ibfk_1` FOREIGN KEY (`bill_id`) REFERENCES `bills` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

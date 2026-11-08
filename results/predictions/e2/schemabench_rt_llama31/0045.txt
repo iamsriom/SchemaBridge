@@ -1,0 +1,87 @@
+-- Schema for database: schemabench_0045
+CREATE TABLE `app_installations` (
+  `id` BIGINT NOT NULL,
+  `github_id` BIGINT NOT NULL,
+  `permissions` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `app_installation_permissions` (
+  `id` INT NOT NULL,
+  `app_installation_id` BIGINT NOT NULL,
+  `user_id` BIGINT NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `app_installation_permissions_ibfk_1` FOREIGN KEY (`app_installation_id`) REFERENCES `app_installations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `app_installation_permissions_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `comments` (
+  `id` INT NOT NULL,
+  `subject_id` INT NOT NULL,
+  `author` BIGINT NOT NULL,
+  `body` TEXT NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`author`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `labels` (
+  `id` INT NOT NULL,
+  `name` VARCHAR(255) NOT NULL,
+  `color` VARCHAR(7) NOT NULL,
+  `subject_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `labels_ibfk_1` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `notifications` (
+  `id` INT NOT NULL,
+  `user_id` BIGINT NOT NULL,
+  `subject_title` VARCHAR(255) NOT NULL,
+  `url` VARCHAR(255) NOT NULL,
+  `reason` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `pinned_searches` (
+  `id` INT NOT NULL,
+  `user_id` BIGINT NOT NULL,
+  `query_name` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `pinned_searches_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `repositories` (
+  `id` INT NOT NULL,
+  `full_name` VARCHAR(255) NOT NULL,
+  `is_private` TINYINT(1) NOT NULL,
+  `owner` BIGINT NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `repositories_ibfk_1` FOREIGN KEY (`owner`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `subjects` (
+  `id` INT NOT NULL,
+  `url` VARCHAR(255) NOT NULL,
+  `state` VARCHAR(50) NOT NULL,
+  `author` BIGINT NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `subjects_ibfk_1` FOREIGN KEY (`author`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `subscription_plans` (
+  `id` INT NOT NULL,
+  `name` VARCHAR(255) NOT NULL,
+  `description` TEXT NOT NULL,
+  `price` DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `subscription_purchases` (
+  `id` INT NOT NULL,
+  `subscription_plan_id` INT NOT NULL,
+  `account_id` BIGINT NOT NULL,
+  `billing_cycle` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `subscription_purchases_ibfk_1` FOREIGN KEY (`subscription_plan_id`) REFERENCES `subscription_plans` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `subscription_purchases_ibfk_2` FOREIGN KEY (`account_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `users` (
+  `id` BIGINT NOT NULL,
+  `github_id` BIGINT NOT NULL,
+  `login` VARCHAR(255) NOT NULL,
+  `refresh_interval` INT NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

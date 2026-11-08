@@ -1,0 +1,53 @@
+-- Schema for database: schemabench_0158
+CREATE TABLE `installations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `laborcodes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `billingcodes` (
+  `code` varchar(50) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tickets` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_number` varchar(50) NOT NULL,
+  `description` text NOT NULL,
+  `labor_code_id` int(11) NOT NULL,
+  `creation_date` datetime NOT NULL,
+  `installation_id` int(11) NOT NULL,
+  `is_closed` boolean NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tickets_ibfk_1` FOREIGN KEY (`labor_code_id`) REFERENCES `laborcodes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tickets_ibfk_2` FOREIGN KEY (`installation_id`) REFERENCES `installations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `report_date` datetime NOT NULL,
+  `billing_code` varchar(50) NOT NULL,
+  `ticket_id` int(11) NOT NULL,
+  `arrival_time` datetime NOT NULL,
+  `exit_time` datetime NOT NULL,
+  `activity_code` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `reports_ibfk_1` FOREIGN KEY (`billing_code`) REFERENCES `billingcodes` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reports_ibfk_2` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shell` (
+  `component` varchar(255) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `icon` varchar(255) NOT NULL,
+  `menu_item` varchar(255) NOT NULL,
+  `theme` varchar(255) NOT NULL,
+  PRIMARY KEY (`component`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

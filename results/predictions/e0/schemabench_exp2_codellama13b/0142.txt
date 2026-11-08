@@ -1,0 +1,133 @@
+-- Schema for database: schemabench_0142
+CREATE TABLE publications (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  title VARCHAR(255) NOT NULL,
+  authors VARCHAR(255) NOT NULL,
+  publication_date DATE NOT NULL,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE publication_classifications (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  publication_id INT(11) NOT NULL,
+  classification VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (publication_id) REFERENCES publications(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE citations (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  cited_publication_id INT(11) NOT NULL,
+  citing_publication_id INT(11) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (cited_publication_id) REFERENCES publications(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (citing_publication_id) REFERENCES publications(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE word_vectors (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  publication_id INT(11) NOT NULL,
+  word VARCHAR(255) NOT NULL,
+  presence TINYINT(1) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (publication_id) REFERENCES publications(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE word_vector_occurrences (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  word_vector_id INT(11) NOT NULL,
+  occurrence INT(11) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (word_vector_id) REFERENCES word_vectors(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE word_vector_similarities (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  word_vector_id_1 INT(11) NOT NULL,
+  word_vector_id_2 INT(11) NOT NULL,
+  similarity FLOAT NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (word_vector_id_1) REFERENCES word_vectors(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (word_vector_id_2) REFERENCES word_vectors(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE word_vector_clusters (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  word_vector_id INT(11) NOT NULL,
+  cluster_id INT(11) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (word_vector_id) REFERENCES word_vectors(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (cluster_id) REFERENCES word_vector_clusters(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE word_vector_cluster_similarities (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  word_vector_cluster_id_1 INT(11) NOT NULL,
+  word_vector_cluster_id_2 INT(11) NOT NULL,
+  similarity FLOAT NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (word_vector_cluster_id_1) REFERENCES word_vector_clusters(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (word_vector_cluster_id_2) REFERENCES word_vector_clusters(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE word_vector_cluster_members (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  word_vector_cluster_id INT(11) NOT NULL,
+  word_vector_id INT(11) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (word_vector_cluster_id) REFERENCES word_vector_clusters(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (word_vector_id) REFERENCES word_vectors(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE word_vector_cluster_similarities_by_word (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  word_vector_cluster_id INT(11) NOT NULL,
+  word VARCHAR(255) NOT NULL,
+  similarity FLOAT NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (word_vector_cluster_id) REFERENCES word_vector_clusters(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE word_vector_cluster_similarities_by_cluster (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  word_vector_cluster_id_1 INT(11) NOT NULL,
+  word_vector_cluster_id_2 INT(11) NOT NULL,
+  similarity FLOAT NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (word_vector_cluster_id_1) REFERENCES word_vector_clusters(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (word_vector_cluster_id_2) REFERENCES word_vector_clusters(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE word_vector_cluster_similarities_by_word_and_cluster (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  word_vector_cluster_id INT(11) NOT NULL,
+  word VARCHAR(255) NOT NULL,
+  similarity FLOAT NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (word_vector_cluster_id) REFERENCES word_vector_clusters(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE word_vector_cluster_similarities_by_word_and_word (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  word_vector_cluster_id_1 INT(11) NOT NULL,
+  word_vector_cluster_id_2 INT(11) NOT NULL,
+  similarity FLOAT NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (word_vector_cluster_id_1) REFERENCES word_vector_clusters(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (word_vector_cluster_id_2) REFERENCES word_vector_clusters(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE word_vector_cluster_similarities_by_cluster_and_cluster (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  word_vector_cluster_id_1 INT(11) NOT NULL,
+  word_vector_cluster_id_2 INT(11) NOT NULL,
+  similarity FLOAT NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (word_vector_cluster_id_1) REFERENCES word_vector_clusters(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (word_vector_cluster_id_2) REFERENCES word_vector_clusters(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE word_vector_cluster_similarities_by_cluster_and_word (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  word_vector_cluster_id INT(11) NOT NULL,
+  word VARCHAR(255) NOT

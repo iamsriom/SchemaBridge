@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0237
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `area` (
+  `area_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`area_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `house_type` (
+  `type_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `street` (
+  `street_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `belongs_to_area_id` int(11) NOT NULL,
+  PRIMARY KEY (`street_id`),
+  CONSTRAINT `street_ibfk_1` FOREIGN KEY (`belongs_to_area_id`) REFERENCES `area` (`area_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `house` (
+  `house_id` int(11) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `belongs_to_street_id` int(11) NOT NULL,
+  `type_id` int(11) NOT NULL,
+  PRIMARY KEY (`house_id`),
+  CONSTRAINT `house_ibfk_1` FOREIGN KEY (`belongs_to_street_id`) REFERENCES `street` (`street_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `house_ibfk_2` FOREIGN KEY (`type_id`) REFERENCES `house_type` (`type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `lease` (
+  `user_id` int(11) NOT NULL,
+  `house_id` int(11) NOT NULL,
+  `lease_date` datetime NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`user_id`, `house_id`, `lease_date`),
+  CONSTRAINT `lease_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `lease_ibfk_2` FOREIGN KEY (`house_id`) REFERENCES `house` (`house_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

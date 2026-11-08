@@ -1,0 +1,60 @@
+-- Schema for database: schemabench_0096
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL,
+  `segment` varchar(255) DEFAULT NULL,
+  `currency` varchar(3) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `gasstations` (
+  `gas_station_id` int(11) NOT NULL,
+  `chain_id` int(11) DEFAULT NULL,
+  `country` varchar(255) DEFAULT NULL,
+  `segment` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`gas_station_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transactions` (
+  `transaction_date` datetime NOT NULL,
+  `transaction_time` time NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `card_id` int(11) DEFAULT NULL,
+  `gas_station_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`transaction_date`, `transaction_time`, `customer_id`, `gas_station_id`, `product_id`),
+  CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`gas_station_id`) REFERENCES `gasstations` (`gas_station_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactions_ibfk_3` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transactions_1k` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_date` datetime NOT NULL,
+  `transaction_time` time NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `card_id` int(11) DEFAULT NULL,
+  `gas_station_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  CONSTRAINT `transactions_1k_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactions_1k_ibfk_2` FOREIGN KEY (`gas_station_id`) REFERENCES `gasstations` (`gas_station_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactions_1k_ibfk_3` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `yearmonth` (
+  `customer_id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `consumption_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`customer_id`, `date`),
+  CONSTRAINT `yearmonth_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

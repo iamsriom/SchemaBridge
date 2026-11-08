@@ -1,0 +1,42 @@
+-- Schema for database: rschema_0343
+CREATE TABLE `personnel` (
+  `personnel_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `street` varchar(255) NOT NULL,
+  `city` varchar(255) NOT NULL,
+  PRIMARY KEY (`personnel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `insurance_type` (
+  `insurance_type_id` int(11) NOT NULL,
+  `insurance_company_name` varchar(255) NOT NULL,
+  `insurance_content` varchar(255) NOT NULL,
+  `insurance_cost` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`insurance_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vehicle` (
+  `vin` varchar(17) NOT NULL,
+  `manufacturer` varchar(255) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  `year` int(4) NOT NULL,
+  `driver_id` int(11) NOT NULL,
+  PRIMARY KEY (`vin`),
+  CONSTRAINT `vehicle_ibfk_1` FOREIGN KEY (`driver_id`) REFERENCES `personnel` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_phone_table` (
+  `user_id` int(11) NOT NULL,
+  `phone_number` varchar(15) NOT NULL,
+  PRIMARY KEY (`user_id`, `phone_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vehicle_purchase_insurance` (
+  `vin` varchar(17) NOT NULL,
+  `insurance_type_id` int(11) NOT NULL,
+  `purchase_time` datetime NOT NULL,
+  `validity_time` datetime NOT NULL,
+  PRIMARY KEY (`vin`, `insurance_type_id`, `purchase_time`),
+  CONSTRAINT `vehicle_purchase_insurance_ibfk_1` FOREIGN KEY (`insurance_type_id`) REFERENCES `insurance_type` (`insurance_type_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `vehicle_purchase_insurance_ibfk_2` FOREIGN KEY (`vin`) REFERENCES `vehicle` (`vin`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

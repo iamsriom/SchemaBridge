@@ -1,0 +1,65 @@
+-- Schema for database: `rschema_0301`
+
+-- Table: `seat`
+
+CREATE TABLE `seat` (
+    `seat_id` int(11) NOT NULL AUTO_INCREMENT,
+    `x_coordinate` int(11) NOT NULL,
+    `y_coordinate` int(11) NOT NULL,
+    `row` int(11) NOT NULL,
+    `column` int(11) NOT NULL,
+    `type` varchar(255) NOT NULL,
+    `price` decimal(10,2) NOT NULL,
+    `creation_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `is_reserved` tinyint(1) NOT NULL DEFAULT 0,
+    `is_purchased` tinyint(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (`seat_id`),
+    UNIQUE KEY `unique_seat_location` (`x_coordinate`,`y_coordinate`,`row`,`column`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `user`
+
+CREATE TABLE `user` (
+    `user_id` int(11) NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `contact_number` varchar(255) NOT NULL,
+    `email_address` varchar(255) NOT NULL,
+    PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `reservation`
+
+CREATE TABLE `reservation` (
+    `reservation_id` int(11) NOT NULL AUTO_INCREMENT,
+    `user_id` int(11) NOT NULL,
+    `seat_id` int(11) NOT NULL,
+    `reservation_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`reservation_id`),
+    KEY `user_id` (`user_id`),
+    KEY `seat_id` (`seat_id`),
+    CONSTRAINT `reservation_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `reservation_ibfk_2` FOREIGN KEY (`seat_id`) REFERENCES `seat` (`seat_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `seat_layout_template`
+
+CREATE TABLE `seat_layout_template` (
+    `template_id` int(11) NOT NULL AUTO_INCREMENT,
+    `template_name` varchar(255) NOT NULL,
+    `description` text NOT NULL,
+    PRIMARY KEY (`template_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `seat_layout`
+
+CREATE TABLE `seat_layout` (
+    `layout_id` int(11) NOT NULL AUTO_INCREMENT,
+    `template_id` int(11) NOT NULL,
+    `seat_id` int(11) NOT NULL,
+    PRIMARY KEY (`layout_id`),
+    KEY `template_id` (`template_id`),
+    KEY `seat_id` (`seat_id`),
+    CONSTRAINT `seat_layout_ibfk_1` FOREIGN KEY (`template_id`) REFERENCES `seat_layout_template` (`template_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `seat_layout_ibfk_2` FOREIGN KEY (`seat_id`) REFERENCES `seat` (`seat_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

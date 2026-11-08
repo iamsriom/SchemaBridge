@@ -1,0 +1,57 @@
+-- Schema for database: rschema_0400
+CREATE TABLE `Role` (
+  `role_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Book` (
+  `book_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `author` varchar(255) NOT NULL,
+  `category` varchar(255) NOT NULL,
+  `publication_date` date DEFAULT NULL,
+  `publisher` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`book_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User` (
+  `user_id` int(11) NOT NULL,
+  `college_affiliation` varchar(255) DEFAULT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `registration_time` datetime DEFAULT NULL,
+  `role_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `Role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Notification` (
+  `notification_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `release_date` datetime DEFAULT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`notification_id`),
+  CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `User` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Establishes_Friend_Relationship` (
+  `user_id_1` int(11) NOT NULL,
+  `user_id_2` int(11) NOT NULL,
+  `creation_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id_1`, `user_id_2`),
+  CONSTRAINT `friendship_ibfk_1` FOREIGN KEY (`user_id_1`) REFERENCES `User` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `friendship_ibfk_2` FOREIGN KEY (`user_id_2`) REFERENCES `User` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Borrows_Book` (
+  `user_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `borrow_time` datetime DEFAULT NULL,
+  `return_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`, `book_id`),
+  CONSTRAINT `borrows_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `User` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `borrows_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `Book` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

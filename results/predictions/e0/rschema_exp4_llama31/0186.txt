@@ -1,0 +1,68 @@
+-- Schema for database: rschema_0186
+CREATE TABLE `insured` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `social_security_id` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `date_of_birth` datetime NOT NULL,
+  `identity_card_number` varchar(255) NOT NULL,
+  `contact_information` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `social_security_type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_id` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `time` datetime NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `payer` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `receipt` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `time` datetime NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `recipient` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `insured_social_security` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `insured_id` int(11) NOT NULL,
+  `social_security_type_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `insured_ibfk_1` (`insured_id`),
+  KEY `social_security_type_ibfk_1` (`social_security_type_id`),
+  CONSTRAINT `insured_ibfk_1` FOREIGN KEY (`insured_id`) REFERENCES `insured` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `social_security_type_ibfk_1` FOREIGN KEY (`social_security_type_id`) REFERENCES `social_security_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment_insured` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `payment_id` int(11) NOT NULL,
+  `insured_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `payment_ibfk_1` (`payment_id`),
+  KEY `insured_ibfk_2` (`insured_id`),
+  CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `insured_ibfk_2` FOREIGN KEY (`insured_id`) REFERENCES `insured` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `receipt_insured` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `receipt_id` int(11) NOT NULL,
+  `insured_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `receipt_ibfk_1` (`receipt_id`),
+  KEY `insured_ibfk_3` (`insured_id`),
+  CONSTRAINT `receipt_ibfk_1` FOREIGN KEY (`receipt_id`) REFERENCES `receipt` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `insured_ibfk_3` FOREIGN KEY (`insured_id`) REFERENCES `insured` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

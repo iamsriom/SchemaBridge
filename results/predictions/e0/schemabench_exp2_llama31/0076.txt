@@ -1,0 +1,63 @@
+-- Schema for database: schemabench_0076
+CREATE TABLE `checks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `server_id` int(11) NOT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT 1,
+  `schedule` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `checks_ibfk_1` (`server_id`),
+  CONSTRAINT `checks_ibfk_1` FOREIGN KEY (`server_id`) REFERENCES `servers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `check_results` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `check_id` int(11) NOT NULL,
+  `result` tinyint(1) NOT NULL,
+  `output` text,
+  `timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `check_results_ibfk_1` (`check_id`),
+  CONSTRAINT `check_results_ibfk_1` FOREIGN KEY (`check_id`) REFERENCES `checks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `checks_schedules` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `check_id` int(11) NOT NULL,
+  `schedule` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `checks_schedules_ibfk_1` (`check_id`),
+  CONSTRAINT `checks_schedules_ibfk_1` FOREIGN KEY (`check_id`) REFERENCES `checks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `server_id` int(11) NOT NULL,
+  `check_id` int(11) NOT NULL,
+  `timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `message` text,
+  PRIMARY KEY (`id`),
+  KEY `logs_ibfk_1` (`server_id`),
+  KEY `logs_ibfk_2` (`check_id`),
+  CONSTRAINT `logs_ibfk_1` FOREIGN KEY (`server_id`) REFERENCES `servers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `logs_ibfk_2` FOREIGN KEY (`check_id`) REFERENCES `checks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `servers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `ssh_user` varchar(255) NOT NULL,
+  `ssh_port` int(11) NOT NULL,
+  `ip` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `thresholds` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `check_id` int(11) NOT NULL,
+  `threshold` float NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `thresholds_ibfk_1` (`check_id`),
+  CONSTRAINT `thresholds_ibfk_1` FOREIGN KEY (`check_id`) REFERENCES `checks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

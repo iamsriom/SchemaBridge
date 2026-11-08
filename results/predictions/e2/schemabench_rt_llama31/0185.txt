@@ -1,0 +1,198 @@
+-- Schema for database: schemabench_0185
+CREATE TABLE `evo_cost_seqs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `label` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `evo_costs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `evo_cost_seq_id` int(11) NOT NULL,
+  `cost` int(11) NOT NULL,
+  `stage` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `evo_costs_ibfk_1` FOREIGN KEY (`evo_cost_seq_id`) REFERENCES `evo_cost_seqs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `evo_criteria` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `evo_stages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `stage_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `families` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `distance` int(11) NOT NULL,
+  `evolution_cost` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `forms` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `form_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `forms_has_form_types` (
+  `form_id` int(11) NOT NULL,
+  `type_id` int(11) NOT NULL,
+  PRIMARY KEY (`form_id`, `type_id`),
+  CONSTRAINT `forms_has_form_types_ibfk_1` FOREIGN KEY (`form_id`) REFERENCES `forms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `forms_has_form_types_ibfk_2` FOREIGN KEY (`type_id`) REFERENCES `types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `friendship_levels` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `level` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ivs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `attack` int(11) NOT NULL,
+  `defense` int(11) NOT NULL,
+  `stamina` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `leagues` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `cp_limit` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `levels` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `cost` int(11) NOT NULL,
+  `multiplier` float NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `little_league_mons` (
+  `pokemon_id` int(11) NOT NULL,
+  `form_id` int(11) NOT NULL,
+  `family_id` int(11) NOT NULL,
+  PRIMARY KEY (`pokemon_id`, `form_id`),
+  CONSTRAINT `little_league_mons_ibfk_1` FOREIGN KEY (`pokemon_id`) REFERENCES `pokemon` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `little_league_mons_ibfk_2` FOREIGN KEY (`form_id`) REFERENCES `forms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `little_league_mons_ibfk_3` FOREIGN KEY (`family_id`) REFERENCES `families` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pf_prev_evos` (
+  `pokemon_id` int(11) NOT NULL,
+  `evo_criteria_id` int(11) NOT NULL,
+  `value` int(11) NOT NULL,
+  PRIMARY KEY (`pokemon_id`, `evo_criteria_id`),
+  CONSTRAINT `pf_prev_evos_ibfk_1` FOREIGN KEY (`pokemon_id`) REFERENCES `pokemon` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pf_prev_evos_ibfk_2` FOREIGN KEY (`evo_criteria_id`) REFERENCES `evo_criteria` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `family_id` int(11) NOT NULL,
+  `stage_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `pokemon_ibfk_1` FOREIGN KEY (`family_id`) REFERENCES `families` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pokemon_ibfk_2` FOREIGN KEY (`stage_id`) REFERENCES `evo_stages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_forms` (
+  `pokemon_id` int(11) NOT NULL,
+  `form_id` int(11) NOT NULL,
+  PRIMARY KEY (`pokemon_id`, `form_id`),
+  CONSTRAINT `pokemon_forms_ibfk_1` FOREIGN KEY (`pokemon_id`) REFERENCES `pokemon` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pokemon_forms_ibfk_2` FOREIGN KEY (`form_id`) REFERENCES `forms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pvp_rank_stats` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pokemon_id` int(11) NOT NULL,
+  `ivs_id` int(11) NOT NULL,
+  `rank` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `pvp_rank_stats_ibfk_1` FOREIGN KEY (`pokemon_id`) REFERENCES `pokemon` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pvp_rank_stats_ibfk_2` FOREIGN KEY (`ivs_id`) REFERENCES `ivs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pvp_rank_stats_i` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pvp_rank_stats_id` int(11) NOT NULL,
+  `additional_stat` float NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `pvp_rank_stats_i_ibfk_1` FOREIGN KEY (`pvp_rank_stats_id`) REFERENCES `pvp_rank_stats` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pvp_rank_stats_m` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pvp_rank_stats_id` int(11) NOT NULL,
+  `meta_stat` float NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `pvp_rank_stats_m_ibfk_1` FOREIGN KEY (`pvp_rank_stats_id`) REFERENCES `pvp_rank_stats` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pvp_rank_stats_tabular` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pvp_rank_stats_id` int(11) NOT NULL,
+  `league_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `pvp_rank_stats_tabular_ibfk_1` FOREIGN KEY (`pvp_rank_stats_id`) REFERENCES `pvp_rank_stats` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pvp_rank_stats_tabular_ibfk_2` FOREIGN KEY (`league_id`) REFERENCES `leagues` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pvp_ranks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pokemon_id` int(11) NOT NULL,
+  `rank` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `pvp_ranks_ibfk_1` FOREIGN KEY (`pokemon_id`) REFERENCES `pokemon` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trade_types_tabular` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `trade_type` varchar(255) NOT NULL,
+  `cost` int(11) NOT NULL,
+  `friendship_level_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `trade_types_tabular_ibfk_1` FOREIGN KEY (`friendship_level_id`) REFERENCES `friendship_levels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `upload_data` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pokemon_name` varchar(255) NOT NULL,
+  `form_id` int(11) NOT NULL,
+  `ivs_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `upload_data_ibfk_1` FOREIGN KEY (`form_id`) REFERENCES `forms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `upload_data_ibfk_2` FOREIGN KEY (`ivs_id`) REFERENCES `ivs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_uploads` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `note` text DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `user_uploads_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0313
+CREATE TABLE `ingredient` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `mexican_tortilla_design` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `activation_status` boolean NOT NULL,
+  PRIMARY KEY (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permission` (
+  `name` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `mexican_tortilla_ingredient` (
+  `ingredient_id` int(11) NOT NULL,
+  `tortilla_design_id` int(11) NOT NULL,
+  PRIMARY KEY (`ingredient_id`, `tortilla_design_id`),
+  CONSTRAINT `mexican_tortilla_ingredient_ibfk_1` FOREIGN KEY (`ingredient_id`) REFERENCES `ingredient` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `mexican_tortilla_ingredient_ibfk_2` FOREIGN KEY (`tortilla_design_id`) REFERENCES `mexican_tortilla_design` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order` (
+  `tortilla_design_id` int(11) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `recipient` varchar(255) NOT NULL,
+  `credit_card_details` varchar(255) NOT NULL,
+  PRIMARY KEY (`tortilla_design_id`, `creation_time`, `recipient`),
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`tortilla_design_id`) REFERENCES `mexican_tortilla_design` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_permission` (
+  `username` varchar(255) NOT NULL,
+  `permission_name` varchar(255) NOT NULL,
+  `validity_period` datetime NOT NULL,
+  PRIMARY KEY (`username`, `permission_name`),
+  CONSTRAINT `user_permission_ibfk_1` FOREIGN KEY (`username`) REFERENCES `user` (`username`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_permission_ibfk_2` FOREIGN KEY (`permission_name`) REFERENCES `permission` (`name`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

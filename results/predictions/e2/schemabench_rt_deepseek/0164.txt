@@ -1,0 +1,121 @@
+-- Schema for database: schemabench_0164
+CREATE TABLE `Customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `home_store_id` int(11) NOT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `joined_since` date NOT NULL,
+  `loyalty_card_number` varchar(50) DEFAULT NULL,
+  `birthdate` date DEFAULT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `birth_year` int(4) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Generation` (
+  `generation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `birth_year` int(4) NOT NULL,
+  `generation_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`generation_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Product` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_group` varchar(255) NOT NULL,
+  `category` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `unit_of_measure` varchar(50) NOT NULL,
+  `wholesale_price` decimal(10,2) NOT NULL,
+  `retail_price` decimal(10,2) NOT NULL,
+  `tax_exempt` tinyint(1) NOT NULL DEFAULT 0,
+  `promo_status` tinyint(1) NOT NULL DEFAULT 0,
+  `new_product_status` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Date` (
+  `date_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_date` date NOT NULL,
+  `week_id` int(11) NOT NULL,
+  `week_description` varchar(255) NOT NULL,
+  `month_id` int(11) NOT NULL,
+  `month_name` varchar(255) NOT NULL,
+  `quarter_id` int(11) NOT NULL,
+  `quarter_name` varchar(255) NOT NULL,
+  `year_id` int(11) NOT NULL,
+  PRIMARY KEY (`date_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Pastry_Inventory` (
+  `sales_outlet_id` int(11) NOT NULL,
+  `transaction_date` date NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `start_of_day` int(11) NOT NULL,
+  `quantity_sold` int(11) NOT NULL,
+  `waste` int(11) NOT NULL,
+  `waste_percentage` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`sales_outlet_id`, `transaction_date`, `product_id`),
+  CONSTRAINT `pastry_inventory_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `Product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Sales_Target` (
+  `sales_outlet_id` int(11) NOT NULL,
+  `year` int(4) NOT NULL,
+  `month` int(2) NOT NULL,
+  `beans_goal` decimal(10,2) NOT NULL,
+  `beverage_goal` decimal(10,2) NOT NULL,
+  `food_goal` decimal(10,2) NOT NULL,
+  `merchandise_goal` decimal(10,2) NOT NULL,
+  `total_goal` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`sales_outlet_id`, `year`, `month`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Sales_Outlet` (
+  `sales_outlet_id` int(11) NOT NULL AUTO_INCREMENT,
+  `outlet_type` varchar(255) NOT NULL,
+  `size` varchar(50) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `state` varchar(100) NOT NULL,
+  `telephone_number` varchar(15) DEFAULT NULL,
+  `postal_code` varchar(10) DEFAULT NULL,
+  `longitude` decimal(10,8) DEFAULT NULL,
+  `latitude` decimal(10,8) DEFAULT NULL,
+  `manager` varchar(255) DEFAULT NULL,
+  `neighborhood` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`sales_outlet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Staff` (
+  `staff_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `start_date` date NOT NULL,
+  `location` varchar(255) NOT NULL,
+  PRIMARY KEY (`staff_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Sales_Receipt` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `date` date NOT NULL,
+  `time` time NOT NULL,
+  `sales_outlet_id` int(11) NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `in_store` tinyint(1) NOT NULL DEFAULT 1,
+  `order_number` varchar(50) NOT NULL,
+  `line_item_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `line_item_amount` decimal(10,2) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `promo_item` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`transaction_id`),
+  CONSTRAINT `sales_receipt_ibfk_1` FOREIGN KEY (`sales_outlet_id`) REFERENCES `Sales_Outlet` (`sales_outlet_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_receipt_ibfk_2` FOREIGN KEY (`staff_id`) REFERENCES `Staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_receipt_ibfk_3` FOREIGN KEY (`customer_id`) REFERENCES `Customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_receipt_ibfk_4` FOREIGN KEY (`product_id`) REFERENCES `Product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

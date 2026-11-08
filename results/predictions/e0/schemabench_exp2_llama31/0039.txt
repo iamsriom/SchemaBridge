@@ -1,0 +1,38 @@
+-- Schema for database: schemabench_0039
+CREATE TABLE `tag_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tag_types_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tags` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` json NOT NULL,
+  `slug` json NOT NULL,
+  `type_id` int(11) NOT NULL,
+  `order` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `tag_type_id_foreign` (`type_id`),
+  CONSTRAINT `tag_type_id_foreign` FOREIGN KEY (`type_id`) REFERENCES `tag_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `taggable_models` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_type` varchar(255) NOT NULL,
+  `model_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `taggable_models_model_type_model_id_unique` (`model_type`, `model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `taggable_taggings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `taggable_model_id` int(11) NOT NULL,
+  `tag_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `taggable_taggings_taggable_model_id_foreign` (`taggable_model_id`),
+  KEY `taggable_taggings_tag_id_foreign` (`tag_id`),
+  CONSTRAINT `taggable_taggings_taggable_model_id_foreign` FOREIGN KEY (`taggable_model_id`) REFERENCES `taggable_models` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `taggable_taggings_tag_id_foreign` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

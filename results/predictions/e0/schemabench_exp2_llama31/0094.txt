@@ -1,0 +1,47 @@
+-- Schema for database: schemabench_0094
+CREATE TABLE `chemical_compounds` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `half_life` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `atoms` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `compound_id` int(11) NOT NULL,
+  `atomic_number` int(11) NOT NULL,
+  `atomic_mass` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `compound_id` (`compound_id`),
+  CONSTRAINT `atoms_ibfk_1` FOREIGN KEY (`compound_id`) REFERENCES `chemical_compounds` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `molecules` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `compound_id` int(11) NOT NULL,
+  `molecular_formula` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `compound_id` (`compound_id`),
+  CONSTRAINT `molecules_ibfk_1` FOREIGN KEY (`compound_id`) REFERENCES `chemical_compounds` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `molecular_groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `molecule_id` int(11) NOT NULL,
+  `group_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `molecule_id` (`molecule_id`),
+  CONSTRAINT `molecular_groups_ibfk_1` FOREIGN KEY (`molecule_id`) REFERENCES `molecules` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bonds` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `atom1_id` int(11) NOT NULL,
+  `atom2_id` int(11) NOT NULL,
+  `bond_type` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `atom1_id` (`atom1_id`),
+  KEY `atom2_id` (`atom2_id`),
+  CONSTRAINT `bonds_ibfk_1` FOREIGN KEY (`atom1_id`) REFERENCES `atoms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bonds_ibfk_2` FOREIGN KEY (`atom2_id`) REFERENCES `atoms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

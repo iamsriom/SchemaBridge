@@ -1,0 +1,94 @@
+-- Schema for database: schemabench_0175
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `job_title` varchar(255) NOT NULL,
+  `supervisor_id` int(11) DEFAULT NULL,
+  `birth_date` datetime DEFAULT NULL,
+  `hire_date` datetime DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`supervisor_id`) REFERENCES `employee` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `company` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `support_rep_id` int(11) NOT NULL,
+  PRIMARY KEY (`customer_id`),
+  CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`support_rep_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `invoice` (
+  `invoice_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `invoice_date` datetime NOT NULL,
+  `billing_address` varchar(255) DEFAULT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`invoice_id`),
+  CONSTRAINT `invoice_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `artist` (
+  `artist_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`artist_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `album` (
+  `album_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `artist_id` int(11) NOT NULL,
+  PRIMARY KEY (`album_id`),
+  CONSTRAINT `album_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artist` (`artist_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `media_type` (
+  `media_type_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`media_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `genre` (
+  `genre_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`genre_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `track` (
+  `track_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `album_id` int(11) NOT NULL,
+  `media_type_id` int(11) NOT NULL,
+  `genre_id` int(11) NOT NULL,
+  `composer` varchar(255) DEFAULT NULL,
+  `duration` int(11) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`track_id`),
+  CONSTRAINT `track_ibfk_1` FOREIGN KEY (`album_id`) REFERENCES `album` (`album_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `track_ibfk_2` FOREIGN KEY (`media_type_id`) REFERENCES `media_type` (`media_type_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `track_ibfk_3` FOREIGN KEY (`genre_id`) REFERENCES `genre` (`genre_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `invoice_line` (
+  `invoice_line_id` int(11) NOT NULL,
+  `invoice_id` int(11) NOT NULL,
+  `track_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`invoice_line_id`),
+  CONSTRAINT `invoice_line_ibfk_1` FOREIGN KEY (`invoice_id`) REFERENCES `invoice` (`invoice_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `invoice_line_ibfk_2` FOREIGN KEY (`track_id`) REFERENCES `track` (`track_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `playlist_track` (
+  `playlist_id` int(11) NOT NULL,
+  `track_id` int(11) NOT NULL,
+  PRIMARY KEY (`playlist_id`, `track_id`),
+  CONSTRAINT `playlist_track_ibfk_1` FOREIGN KEY (`track_id`) REFERENCES `track` (`track_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

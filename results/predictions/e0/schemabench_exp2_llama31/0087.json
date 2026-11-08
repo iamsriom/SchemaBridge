@@ -1,0 +1,24 @@
+{
+  "text_number": 87,
+  "id": "SB-087",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0087",
+  "question": "1) Background / Context\n\nThe project involves developing a component of the Laravel ecosystem, specifically focusing on integrating the Cashier package with Paddle's subscription billing services. Laravel Cashier Paddle serves as an abstraction layer, offering a streamlined API for Laravel applications to manage Stripe and customer subscriptions, including recurring billing operations.\n\n 2) Objectives\n\nThe primary objective is to provide a fluent interface that simplifies the management of subscription billing within Laravel applications. This includes basic and advanced subscription management features, reducing the overhead of writing subscription billing code.\n\n 3) Stakeholders & Users\n\n- Developers: Individuals or teams using Laravel to build applications that require subscription billing functionality.\n- End Users: Customers who will interact with the subscription services indirectly via applications utilizing this package.\n- Business Owners: Organizations aiming to leverage subscription-based business models.\n\n 4) Functional Descriptions\n\n- Subscription Management: Enable the creation, updating, and cancellation of customer subscriptions.\n- Subscription Swapping: Allow customers to switch between different subscription plans.\n- Quantity Management: Manage the quantities associated with customer subscriptions.\n- Subscription Pausing: Provide options to pause and resume subscriptions, with grace periods as needed.\n- Receipts: Generate and store transaction receipts with relevant details such as amounts, taxes, and currency.\n- Data Linking: Utilize a database schema to track customers, subscriptions, and receipts while maintaining referential integrity through foreign keys.\n\n 5) Non-Functional Descriptions\n\n- Usability: The API should be intuitive and offer a fluent interface to reduce the complexity of billing operations for developers.\n- Scalability: The system should efficiently handle a large number of customers and transactions.\n- Reliability: Ensure data consistency and integrity within the database, especially concerning billing operations.\n- Security: Protect sensitive customer data and secure transactions using industry-standard practices.\n- Performance: Optimize for quick response times when performing billing operations.",
+  "ddl": "-- Schema for database: schemabench_0087\nCREATE TABLE `customers` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `email` varchar(255) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `subscription_plans` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  `price` decimal(10,2) NOT NULL,\n  `currency` char(3) NOT NULL,\n  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `subscriptions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_id` int(11) NOT NULL,\n  `plan_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL DEFAULT 1,\n  `status` enum('active','paused','cancelled') NOT NULL DEFAULT 'active',\n  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `subscriptions_ibfk_1` (`customer_id`),\n  KEY `subscriptions_ibfk_2` (`plan_id`),\n  CONSTRAINT `subscriptions_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `subscriptions_ibfk_2` FOREIGN KEY (`plan_id`) REFERENCES `subscription_plans` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `receipts` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `subscription_id` int(11) NOT NULL,\n  `amount` decimal(10,2) NOT NULL,\n  `tax` decimal(10,2) NOT NULL,\n  `currency` char(3) NOT NULL,\n  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `receipts_ibfk_1` (`subscription_id`),\n  CONSTRAINT `receipts_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "customers",
+      "subscription_plans",
+      "subscriptions",
+      "receipts"
+    ],
+    "columns_by_table": {
+      "customers": [],
+      "subscription_plans": [],
+      "subscriptions": [],
+      "receipts": []
+    }
+  }
+}

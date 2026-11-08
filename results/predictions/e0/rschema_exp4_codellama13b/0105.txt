@@ -1,0 +1,79 @@
+-- Schema for database: rschema_0105
+
+CREATE TABLE users (
+  user_id INT(11) NOT NULL AUTO_INCREMENT,
+  username VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  phone VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  gender VARCHAR(255) NOT NULL,
+  registration_time DATETIME NOT NULL,
+  birthday DATETIME NOT NULL,
+  PRIMARY KEY (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE profiles (
+  profile_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  nickname VARCHAR(255) NOT NULL,
+  avatar VARCHAR(255) NOT NULL,
+  bio TEXT NOT NULL,
+  PRIMARY KEY (profile_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE dynamics (
+  dynamic_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  content TEXT NOT NULL,
+  publish_time DATETIME NOT NULL,
+  likes INT(11) NOT NULL DEFAULT 0,
+  comments INT(11) NOT NULL DEFAULT 0,
+  favorites INT(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (dynamic_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE interactions (
+  interaction_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  dynamic_id INT(11) NOT NULL,
+  interaction_type VARCHAR(255) NOT NULL,
+  interaction_time DATETIME NOT NULL,
+  PRIMARY KEY (interaction_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (dynamic_id) REFERENCES dynamics(dynamic_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE contacts (
+  contact_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  contact_user_id INT(11) NOT NULL,
+  relationship_type VARCHAR(255) NOT NULL,
+  notes TEXT NOT NULL,
+  PRIMARY KEY (contact_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (contact_user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE social_activities (
+  social_activity_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  dynamic_id INT(11) NOT NULL,
+  interaction_type VARCHAR(255) NOT NULL,
+  interaction_time DATETIME NOT NULL,
+  PRIMARY KEY (social_activity_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (dynamic_id) REFERENCES dynamics(dynamic_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE social_activity_logs (
+  social_activity_log_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  dynamic_id INT(11) NOT NULL,
+  interaction_type VARCHAR(255) NOT NULL,
+  interaction_time DATETIME NOT NULL,
+  PRIMARY KEY (social_activity_log_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (dynamic_id) REFERENCES dynamics(dynamic_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

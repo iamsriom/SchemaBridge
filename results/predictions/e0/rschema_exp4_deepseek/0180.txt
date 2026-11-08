@@ -1,0 +1,52 @@
+--Schemafordatabase:rschema_0180
+
+--Foreachtable:
+
+CREATE TABLE `pizza_shop`.`pizza` (
+  `PizzaID` INT NOT NULL,
+  `PizzaName` VARCHAR(255) NOT NULL,
+  `Price` DECIMAL(10,2) NOT NULL,
+  `StockQuantity` INT NOT NULL,
+  PRIMARY KEY (`PizzaID`)
+) ENGINE = InnoDB;
+
+CREATE TABLE `pizza_shop`.`customer` (
+  `CustomerID` INT NOT NULL,
+  `CustomerName` VARCHAR(255) NOT NULL,
+  `CustomerPhone` VARCHAR(20) NOT NULL,
+  `CustomerAddress` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`CustomerID`)
+) ENGINE = InnoDB;
+
+CREATE TABLE `pizza_shop`.`order` (
+  `OrderID` INT NOT NULL,
+  `CustomerID` INT NOT NULL,
+  `OrderDate` DATETIME NOT NULL,
+  `ExpectedDeliveryDate` DATETIME NOT NULL,
+  `OrderStatus` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`OrderID`),
+  INDEX `CustomerID_idx` (`CustomerID` ASC) VISIBLE,
+  CONSTRAINT `CustomerID`
+    FOREIGN KEY (`CustomerID`)
+    REFERENCES `pizza_shop`.`customer` (`CustomerID`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE = InnoDB;
+
+CREATE TABLE `pizza_shop`.`order_pizza` (
+  `OrderID` INT NOT NULL,
+  `PizzaID` INT NOT NULL,
+  `Quantity` INT NOT NULL,
+  PRIMARY KEY (`OrderID`, `PizzaID`),
+  INDEX `PizzaID_idx` (`PizzaID` ASC) VISIBLE,
+  CONSTRAINT `OrderID`
+    FOREIGN KEY (`OrderID`)
+    REFERENCES `pizza_shop`.`order` (`OrderID`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `PizzaID`
+    FOREIGN KEY (`PizzaID`)
+    REFERENCES `pizza_shop`.`pizza` (`PizzaID`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE = InnoDB;

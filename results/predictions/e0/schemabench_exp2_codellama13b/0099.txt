@@ -1,0 +1,128 @@
+-- Schema for database: schemabench_0099
+
+CREATE TABLE publications (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  title VARCHAR(255) NOT NULL,
+  authors VARCHAR(255) NOT NULL,
+  year INT(11) NOT NULL,
+  class VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE citations (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  publication_id INT(11) NOT NULL,
+  cited_publication_id INT(11) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (publication_id) REFERENCES publications (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (cited_publication_id) REFERENCES publications (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE word_vectors (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  publication_id INT(11) NOT NULL,
+  word_vector TEXT NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (publication_id) REFERENCES publications (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE classifications (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  publication_id INT(11) NOT NULL,
+  class VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (publication_id) REFERENCES publications (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE users (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE user_roles (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  role VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE permissions (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  user_role_id INT(11) NOT NULL,
+  permission VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (user_role_id) REFERENCES user_roles (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE data_sources (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE data_source_publications (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  data_source_id INT(11) NOT NULL,
+  publication_id INT(11) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (data_source_id) REFERENCES data_sources (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (publication_id) REFERENCES publications (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE data_source_citations (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  data_source_id INT(11) NOT NULL,
+  citation_id INT(11) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (data_source_id) REFERENCES data_sources (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (citation_id) REFERENCES citations (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE data_source_word_vectors (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  data_source_id INT(11) NOT NULL,
+  word_vector_id INT(11) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (data_source_id) REFERENCES data_sources (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (word_vector_id) REFERENCES word_vectors (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE data_source_classifications (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  data_source_id INT(11) NOT NULL,
+  classification_id INT(11) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (data_source_id) REFERENCES data_sources (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (classification_id) REFERENCES classifications (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE data_source_users (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  data_source_id INT(11) NOT NULL,
+  user_id INT(11) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (data_source_id) REFERENCES data_sources (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE data_source_user_roles (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  data_source_id INT(11) NOT NULL,
+  user_role_id INT(11) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (data_source_id) REFERENCES data_sources (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (user_role_id) REFERENCES user_roles (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE data_source_permissions (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  data_source_id INT(11) NOT NULL,
+  permission_id INT(11) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (data_source_id) REFERENCES data_sources (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (permission_id) REFERENCES permissions (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

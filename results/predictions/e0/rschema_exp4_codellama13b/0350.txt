@@ -1,0 +1,85 @@
+-- Schema for database: rschema_0350
+
+CREATE TABLE participants (
+  participant_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  company VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  PRIMARY KEY (participant_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE tickets (
+  ticket_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  workshops TINYINT(1) NOT NULL,
+  PRIMARY KEY (ticket_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE discount_codes (
+  code VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  type VARCHAR(255) NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE participant_tickets (
+  participant_id INT(11) NOT NULL,
+  ticket_id INT(11) NOT NULL,
+  discount_code_id INT(11) NULL,
+  net_price DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (participant_id, ticket_id),
+  FOREIGN KEY (participant_id) REFERENCES participants(participant_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (discount_code_id) REFERENCES discount_codes(code) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE meetings (
+  meeting_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  date DATE NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
+  room VARCHAR(255) NOT NULL,
+  PRIMARY KEY (meeting_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE workshops (
+  workshop_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  requirements VARCHAR(255) NOT NULL,
+  location VARCHAR(255) NOT NULL,
+  date DATE NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
+  capacity INT(11) NOT NULL,
+  PRIMARY KEY (workshop_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE speakers (
+  speaker_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  company VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  PRIMARY KEY (speaker_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE meeting_speakers (
+  meeting_id INT(11) NOT NULL,
+  speaker_id INT(11) NOT NULL,
+  PRIMARY KEY (meeting_id, speaker_id),
+  FOREIGN KEY (meeting_id) REFERENCES meetings(meeting_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (speaker_id) REFERENCES speakers(speaker_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE workshop_speakers (
+  workshop_id INT(11) NOT NULL,
+  speaker_id INT(11) NOT NULL,
+  PRIMARY KEY (workshop_id, speaker_id),
+  FOREIGN KEY (workshop_id) REFERENCES workshops(workshop_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (speaker_id) REFERENCES speakers(speaker_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

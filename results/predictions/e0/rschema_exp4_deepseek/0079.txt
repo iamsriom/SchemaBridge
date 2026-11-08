@@ -1,0 +1,59 @@
+-- Schema for database: `rschema_0079`
+
+-- For table: `stock_fund`
+CREATE TABLE `stock_fund` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `market` varchar(255) NOT NULL,
+  `owner` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `holdings`
+CREATE TABLE `holdings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `stock_fund_id` int(11) NOT NULL,
+  `total_investment_amount` decimal(10, 2) NOT NULL,
+  `holding_shares` int(11) NOT NULL,
+  `last_trading_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`stock_fund_id`) REFERENCES `stock_fund` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `trading_configuration`
+CREATE TABLE `trading_configuration` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `stock_fund_id` int(11) NOT NULL,
+  `trading_fees` decimal(10, 2) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`stock_fund_id`) REFERENCES `stock_fund` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `trading_order`
+CREATE TABLE `trading_order` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `out_id` varchar(255) NOT NULL,
+  `order_type` varchar(255) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `trading_date` datetime NOT NULL,
+  `transaction_amount` decimal(10, 2) NOT NULL,
+  `transaction_quantity` int(11) NOT NULL,
+  `transaction_service_fee` decimal(10, 2) NOT NULL,
+  `status` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `transaction_record`
+CREATE TABLE `transaction_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `trading_order_id` int(11) NOT NULL,
+  `holdings_id` int(11) NOT NULL,
+  `transaction_amount` decimal(10, 2) NOT NULL,
+  `transaction_quantity` int(11) NOT NULL,
+  `transaction_service_fee` decimal(10, 2) NOT NULL,
+  `transaction_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`trading_order_id`) REFERENCES `trading_order` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`holdings_id`) REFERENCES `holdings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

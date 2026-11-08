@@ -1,0 +1,26 @@
+{
+  "text_number": 89,
+  "id": "67552f0a13602ec03b41a881",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "rschema_0089",
+  "question": "Design a database for a blockchain or cryptocurrency system to store and manage transactions, blocks, and account information.\nThe system shall record detailed information about transactions, including transaction hash, timestamp, fee, input address, and output address;     \ninformation about blocks, including block hash, height, timestamp, previous block hash, and Merkle root;\nas well as account addresses and balances.\nThe system shall support querying the block a transaction belongs to, as well as the relationship between transactions and accounts.",
+  "ddl": "-- Schema for database: rschema_0089\n\nCREATE TABLE transactions (\n  transaction_id int(11) NOT NULL AUTO_INCREMENT,\n  transaction_hash varchar(255) NOT NULL,\n  timestamp datetime NOT NULL,\n  fee int(11) NOT NULL,\n  input_address varchar(255) NOT NULL,\n  output_address varchar(255) NOT NULL,\n  PRIMARY KEY (transaction_id),\n  FOREIGN KEY (input_address) REFERENCES accounts (address) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (output_address) REFERENCES accounts (address) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE blocks (\n  block_id int(11) NOT NULL AUTO_INCREMENT,\n  block_hash varchar(255) NOT NULL,\n  height int(11) NOT NULL,\n  timestamp datetime NOT NULL,\n  previous_block_hash varchar(255) NOT NULL,\n  merkle_root varchar(255) NOT NULL,\n  PRIMARY KEY (block_id),\n  FOREIGN KEY (previous_block_hash) REFERENCES blocks (block_hash) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE accounts (\n  address varchar(255) NOT NULL,\n  balance int(11) NOT NULL,\n  PRIMARY KEY (address)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE transactions_blocks (\n  transaction_id int(11) NOT NULL,\n  block_id int(11) NOT NULL,\n  PRIMARY KEY (transaction_id, block_id),\n  FOREIGN KEY (transaction_id) REFERENCES transactions (transaction_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (block_id) REFERENCES blocks (block_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE accounts_transactions (\n  account_address varchar(255) NOT NULL,\n  transaction_id int(11) NOT NULL,\n  PRIMARY KEY (account_address, transaction_id),\n  FOREIGN KEY (account_address) REFERENCES accounts (address) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (transaction_id) REFERENCES transactions (transaction_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "transactions",
+      "blocks",
+      "accounts",
+      "transactions_blocks",
+      "accounts_transactions"
+    ],
+    "columns_by_table": {
+      "transactions": [],
+      "blocks": [],
+      "accounts": [],
+      "transactions_blocks": [],
+      "accounts_transactions": []
+    }
+  }
+}

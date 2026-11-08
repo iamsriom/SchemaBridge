@@ -1,0 +1,66 @@
+-- Schema for database: `rschema_0095Naturallanguagedescription`
+
+-- For table: `customer`
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `registration_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `interaction`
+CREATE TABLE `interaction` (
+  `interaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `interaction_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `interaction_type` varchar(255) NOT NULL,
+  `interaction_details` text NOT NULL,
+  PRIMARY KEY (`interaction_id`),
+  KEY `customer_id` (`customer_id`),
+  CONSTRAINT `interaction_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `market_segmentation`
+CREATE TABLE `market_segmentation` (
+  `segment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `segment_name` varchar(255) NOT NULL,
+  `segment_description` text NOT NULL,
+  PRIMARY KEY (`segment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `customer_segmentation`
+CREATE TABLE `customer_segmentation` (
+  `customer_id` int(11) NOT NULL,
+  `segment_id` int(11) NOT NULL,
+  PRIMARY KEY (`customer_id`,`segment_id`),
+  KEY `segment_id` (`segment_id`),
+  CONSTRAINT `customer_segmentation_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customer_segmentation_ibfk_2` FOREIGN KEY (`segment_id`) REFERENCES `market_segmentation` (`segment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `service_request`
+CREATE TABLE `service_request` (
+  `request_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `request_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `request_type` varchar(255) NOT NULL,
+  `request_details` text NOT NULL,
+  PRIMARY KEY (`request_id`),
+  KEY `customer_id` (`customer_id`),
+  CONSTRAINT `service_request_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `sales_opportunity`
+CREATE TABLE `sales_opportunity` (
+  `opportunity_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `opportunity_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `opportunity_type` varchar(255) NOT NULL,
+  `opportunity_details` text NOT NULL,
+  PRIMARY KEY (`opportunity_id`),
+  KEY `customer_id` (`customer_id`),
+  CONSTRAINT `sales_opportunity_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

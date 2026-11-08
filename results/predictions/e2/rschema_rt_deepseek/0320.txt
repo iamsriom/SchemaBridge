@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0320
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `product_description` text DEFAULT NULL,
+  `product_category` varchar(255) DEFAULT NULL,
+  `product_slogan` varchar(255) DEFAULT NULL,
+  `default_price` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `style` (
+  `style_id` int(11) NOT NULL,
+  `style_name` varchar(255) NOT NULL,
+  `is_default_style` tinyint(1) DEFAULT NULL,
+  `original_price` decimal(10,2) DEFAULT NULL,
+  `sale_price` decimal(10,2) DEFAULT NULL,
+  `associated_product_id` int(11) NOT NULL,
+  PRIMARY KEY (`style_id`),
+  CONSTRAINT `style_ibfk_1` FOREIGN KEY (`associated_product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `feature` (
+  `feature_id` int(11) NOT NULL,
+  `feature_name` varchar(255) NOT NULL,
+  `feature_value` varchar(255) DEFAULT NULL,
+  `associated_product_id` int(11) NOT NULL,
+  PRIMARY KEY (`feature_id`),
+  CONSTRAINT `feature_ibfk_1` FOREIGN KEY (`associated_product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sku` (
+  `sku_id` int(11) NOT NULL,
+  `size` varchar(50) DEFAULT NULL,
+  `stock_quantity` int(11) DEFAULT NULL,
+  `associated_style_id` int(11) NOT NULL,
+  PRIMARY KEY (`sku_id`),
+  CONSTRAINT `sku_ibfk_1` FOREIGN KEY (`associated_style_id`) REFERENCES `style` (`style_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `photo` (
+  `photo_id` int(11) NOT NULL,
+  `photo_url` varchar(255) DEFAULT NULL,
+  `thumbnail_url` varchar(255) DEFAULT NULL,
+  `associated_style_id` int(11) NOT NULL,
+  PRIMARY KEY (`photo_id`),
+  CONSTRAINT `photo_ibfk_1` FOREIGN KEY (`associated_style_id`) REFERENCES `style` (`style_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

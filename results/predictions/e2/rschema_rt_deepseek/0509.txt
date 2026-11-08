@@ -1,0 +1,77 @@
+-- Schema for database: rschema_0509
+CREATE TABLE `patient` (
+  `patient_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `age` int(11) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `identity_card_number` varchar(20) NOT NULL,
+  `medical_record_number` varchar(20) NOT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  `emergency_contact_phone` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `contact_phone` varchar(15) DEFAULT NULL,
+  `department_head_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctor` (
+  `doctor_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `title` varchar(100) NOT NULL,
+  `contact_phone` varchar(15) DEFAULT NULL,
+  `department_id` int(11) NOT NULL,
+  PRIMARY KEY (`doctor_id`),
+  CONSTRAINT `doctor_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ward` (
+  `ward_id` int(11) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `bed_count` int(11) NOT NULL,
+  `remaining_bed_count` int(11) NOT NULL,
+  `head_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`ward_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `hospitalization_record` (
+  `record_id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `ward_id` int(11) NOT NULL,
+  `attending_physician_id` int(11) NOT NULL,
+  `bed_number` varchar(10) NOT NULL,
+  `hospitalization_start_time` datetime NOT NULL,
+  `discharge_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `hospitalization_record_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `hospitalization_record_ibfk_2` FOREIGN KEY (`ward_id`) REFERENCES `ward` (`ward_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `hospitalization_record_ibfk_3` FOREIGN KEY (`attending_physician_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `registration_record` (
+  `record_id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `doctor_id` int(11) NOT NULL,
+  `consultation_time` datetime NOT NULL,
+  `diagnosis_result` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `registration_record_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `registration_record_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `nurse` (
+  `nurse_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  `title` varchar(100) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  PRIMARY KEY (`nurse_id`),
+  CONSTRAINT `nurse_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

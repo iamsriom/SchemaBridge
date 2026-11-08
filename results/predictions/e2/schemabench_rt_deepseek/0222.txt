@@ -1,0 +1,189 @@
+-- Schema for database: schemabench_0222
+CREATE TABLE `artist_info_t` (
+  `artist_id` int(11) NOT NULL AUTO_INCREMENT,
+  `artist_name` varchar(255) NOT NULL,
+  `artist_dob` date NOT NULL,
+  `artist_apt` varchar(255) NOT NULL,
+  `artist_street` varchar(255) NOT NULL,
+  `artist_country` varchar(255) NOT NULL,
+  `artist_state` varchar(255) NOT NULL,
+  `artist_zip` varchar(10) NOT NULL,
+  `artist_email` varchar(255) NOT NULL,
+  `artist_phone` varchar(15) NOT NULL,
+  PRIMARY KEY (`artist_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `event_t` (
+  `event_id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_name` varchar(255) NOT NULL,
+  `event_desc` text NOT NULL,
+  `event_start_date` datetime NOT NULL,
+  `event_end_date` datetime NOT NULL,
+  `event_start_time` time NOT NULL,
+  `event_end_time` time NOT NULL,
+  PRIMARY KEY (`event_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_info_t` (
+  `emp_id` int(11) NOT NULL AUTO_INCREMENT,
+  `emp_name` varchar(255) NOT NULL,
+  `emp_dob` date NOT NULL,
+  `emp_apt` varchar(255) NOT NULL,
+  `emp_street` varchar(255) NOT NULL,
+  `emp_country` varchar(255) NOT NULL,
+  `emp_state` varchar(255) NOT NULL,
+  `emp_zip` varchar(10) NOT NULL,
+  `emp_email` varchar(255) NOT NULL,
+  `emp_phone` varchar(15) NOT NULL,
+  `emp_start_date` date NOT NULL,
+  `emp_end_date` date NOT NULL,
+  `emp_salary` decimal(10,2) NOT NULL,
+  `emp_title` varchar(255) NOT NULL,
+  PRIMARY KEY (`emp_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_info_t` (
+  `cust_id` int(11) NOT NULL AUTO_INCREMENT,
+  `cust_name` varchar(255) NOT NULL,
+  `cust_dob` date DEFAULT NULL,
+  `cust_phone` varchar(15) DEFAULT NULL,
+  `cust_email` varchar(255) DEFAULT NULL,
+  `cust_street` varchar(255) DEFAULT NULL,
+  `cust_apt` varchar(255) DEFAULT NULL,
+  `cust_country` varchar(255) DEFAULT NULL,
+  `cust_state` varchar(255) DEFAULT NULL,
+  `cust_zip` varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`cust_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_info_t` (
+  `prod_id` int(11) NOT NULL AUTO_INCREMENT,
+  `prod_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`prod_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_interest_t` (
+  `cust_id` int(11) NOT NULL,
+  `prod_id` int(11) NOT NULL,
+  PRIMARY KEY (`cust_id`, `prod_id`),
+  CONSTRAINT `customer_interest_t_ibfk_1` FOREIGN KEY (`cust_id`) REFERENCES `customer_info_t` (`cust_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customer_interest_t_ibfk_2` FOREIGN KEY (`prod_id`) REFERENCES `product_info_t` (`prod_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inventory_art_t` (
+  `item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `item_name` varchar(255) NOT NULL,
+  `artist_id` int(11) NOT NULL,
+  `item_create_date` datetime NOT NULL,
+  `item_move_in_date` datetime NOT NULL,
+  `item_moveout_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`item_id`),
+  CONSTRAINT `inventory_art_t_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artist_info_t` (`artist_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `partner_org_t` (
+  `partorg_id` int(11) NOT NULL AUTO_INCREMENT,
+  `partorg_name` varchar(255) NOT NULL,
+  `partorg_apt` varchar(255) NOT NULL,
+  `partorg_street` varchar(255) NOT NULL,
+  `partorg_country` varchar(255) NOT NULL,
+  `partorg_state` varchar(255) NOT NULL,
+  `partorg_zip` varchar(10) NOT NULL,
+  `partorg_email` varchar(255) NOT NULL,
+  `partorg_phone` varchar(15) NOT NULL,
+  `partorg_start_date` date NOT NULL,
+  `partorg_type` enum('janitorial', 'catering', 'wastedisposal') NOT NULL,
+  PRIMARY KEY (`partorg_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `display_art_t` (
+  `item_id` int(11) NOT NULL,
+  `display_location` enum('H1', 'H2', 'H3') NOT NULL,
+  PRIMARY KEY (`item_id`),
+  CONSTRAINT `display_art_t_ibfk_1` FOREIGN KEY (`item_id`) REFERENCES `inventory_art_t` (`item_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ledger_t` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_amt` decimal(10,2) NOT NULL,
+  `transaction_ts` datetime NOT NULL,
+  PRIMARY KEY (`transaction_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `credit_t` (
+  `transaction_id` int(11) NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  CONSTRAINT `credit_t_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `ledger_t` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `debit_t` (
+  `transaction_id` int(11) NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  CONSTRAINT `debit_t_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `ledger_t` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `collab_t` (
+  `collab_id` int(11) NOT NULL AUTO_INCREMENT,
+  `collab_name` varchar(255) NOT NULL,
+  `collab_desc` text NOT NULL,
+  `collab_start_date` date NOT NULL,
+  `collab_end_date` date DEFAULT NULL,
+  PRIMARY KEY (`collab_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `artist_contract_t` (
+  `contract_id` int(11) NOT NULL AUTO_INCREMENT,
+  `artist_id` int(11) NOT NULL,
+  `contract_sign_date` datetime NOT NULL,
+  `contract_start_date` datetime NOT NULL,
+  `contract_end_date` datetime NOT NULL,
+  `contract_com_per` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`contract_id`),
+  CONSTRAINT `artist_contract_t_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artist_info_t` (`artist_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_t` (
+  `sales_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `cust_id` int(11) NOT NULL,
+  `salesman_id` int(11) NOT NULL,
+  `sales_amount` decimal(10,2) NOT NULL,
+  `artist_id` int(11) NOT NULL,
+  PRIMARY KEY (`sales_id`),
+  CONSTRAINT `sales_t_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `ledger_t` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_t_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `inventory_art_t` (`item_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_t_ibfk_3` FOREIGN KEY (`cust_id`) REFERENCES `customer_info_t` (`cust_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_t_ibfk_4` FOREIGN KEY (`salesman_id`) REFERENCES `employee_info_t` (`emp_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_t_ibfk_5` FOREIGN KEY (`artist_id`) REFERENCES `artist_info_t` (`artist_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `artistcontract_audit_t` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `action` varchar(255) NOT NULL,
+  `change_timestamp` datetime NOT NULL,
+  `artist_id` int(11) NOT NULL,
+  `contract_sign_date` datetime NOT NULL,
+  `contract_start_date` datetime NOT NULL,
+  `contract_end_date` datetime NOT NULL,
+  `contract_com_per` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `partnerorg_audit_t` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `action` varchar(255) NOT NULL,
+  `change_timestamp` datetime NOT NULL,
+  `partorg_id` int(11) NOT NULL,
+  `partorg_name` varchar(255) NOT NULL,
+  `partorg_apt` varchar(255) NOT NULL,
+  `partorg_street` varchar(255) NOT NULL,
+  `partorg_country` varchar(255) NOT NULL,
+  `partorg_state` varchar(255) NOT NULL,
+  `partorg_zip` varchar(10) NOT NULL,
+  `partorg_email` varchar(255) NOT NULL,
+  `partorg_phone` varchar(15) NOT NULL,
+  `partorg_start_date` date NOT NULL,
+  `partorg_type` enum('janitorial', 'catering', 'wastedisposal') NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

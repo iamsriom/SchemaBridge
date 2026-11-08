@@ -1,0 +1,57 @@
+-- Schema for database: rschema_0515
+CREATE TABLE `User` (
+  `phone_number` varchar(15) NOT NULL,
+  `credit_status` varchar(50) DEFAULT NULL,
+  `verification_code` varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`phone_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Bike` (
+  `Bike_ID` int(11) NOT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `location_info` varchar(255) DEFAULT NULL,
+  `qr_code` varchar(100) DEFAULT NULL,
+  `unlock_password` varchar(50) DEFAULT NULL,
+  `User_phone_number` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`Bike_ID`),
+  CONSTRAINT `Bike_ibfk_1` FOREIGN KEY (`User_phone_number`) REFERENCES `User` (`phone_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Trip` (
+  `trip_id` int(11) NOT NULL,
+  `Bike_ID` int(11) DEFAULT NULL,
+  `User_phone_number` varchar(15) DEFAULT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `fee` decimal(10,2) DEFAULT NULL,
+  `payment_status` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`trip_id`),
+  CONSTRAINT `Trip_ibfk_1` FOREIGN KEY (`Bike_ID`) REFERENCES `Bike` (`Bike_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Trip_ibfk_2` FOREIGN KEY (`User_phone_number`) REFERENCES `User` (`phone_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Malfunction` (
+  `User_phone_number` varchar(15) NOT NULL,
+  `Bike_ID` int(11) NOT NULL,
+  `report_time` datetime NOT NULL,
+  `malfunction_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`User_phone_number`, `Bike_ID`, `report_time`),
+  CONSTRAINT `Malfunction_ibfk_1` FOREIGN KEY (`User_phone_number`) REFERENCES `User` (`phone_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Malfunction_ibfk_2` FOREIGN KEY (`Bike_ID`) REFERENCES `Bike` (`Bike_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_trip` (
+  `User_phone_number` varchar(15) DEFAULT NULL,
+  `trip_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`User_phone_number`, `trip_id`),
+  CONSTRAINT `User_trip_ibfk_1` FOREIGN KEY (`User_phone_number`) REFERENCES `User` (`phone_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `User_trip_ibfk_2` FOREIGN KEY (`trip_id`) REFERENCES `Trip` (`trip_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Use_bike` (
+  `Bike_ID` int(11) DEFAULT NULL,
+  `Trip_ID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Bike_ID`, `Trip_ID`),
+  CONSTRAINT `Use_bike_ibfk_1` FOREIGN KEY (`Bike_ID`) REFERENCES `Bike` (`Bike_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Use_bike_ibfk_2` FOREIGN KEY (`Trip_ID`) REFERENCES `Trip` (`trip_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

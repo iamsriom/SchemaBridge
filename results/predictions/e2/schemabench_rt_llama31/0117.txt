@@ -1,0 +1,55 @@
+-- Schema for database: schemabench_0117
+CREATE TABLE `drugs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `activity` varchar(255) DEFAULT NULL,
+  `logp_value` float DEFAULT NULL,
+  `lumo_value` float DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `atoms` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `element` varchar(50) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `charge` int(11) DEFAULT NULL,
+  `drug_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `atoms_ibfk_1` FOREIGN KEY (`drug_id`) REFERENCES `drugs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bonds` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `bond_type` varchar(50) NOT NULL,
+  `atom1_id` int(11) NOT NULL,
+  `atom2_id` int(11) NOT NULL,
+  `drug_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `bonds_ibfk_1` FOREIGN KEY (`atom1_id`) REFERENCES `atoms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bonds_ibfk_2` FOREIGN KEY (`atom2_id`) REFERENCES `atoms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bonds_ibfk_3` FOREIGN KEY (`drug_id`) REFERENCES `drugs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `rings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ring_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ring_atom` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `atom_id` int(11) NOT NULL,
+  `ring_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `ring_atom_ibfk_1` FOREIGN KEY (`atom_id`) REFERENCES `atoms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ring_atom_ibfk_2` FOREIGN KEY (`ring_id`) REFERENCES `rings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ring_strucs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `structure_description` varchar(255) NOT NULL,
+  `ring_id` int(11) NOT NULL,
+  `drug_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `ring_strucs_ibfk_1` FOREIGN KEY (`ring_id`) REFERENCES `rings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ring_strucs_ibfk_2` FOREIGN KEY (`drug_id`) REFERENCES `drugs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,62 @@
+-- Schema for database: rschema_0166
+CREATE TABLE `patient` (
+  `patient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `age` int(11) NOT NULL,
+  `contact_details` varchar(255) NOT NULL,
+  `medical_records` text DEFAULT NULL,
+  PRIMARY KEY (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctor` (
+  `doctor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  `department` varchar(255) NOT NULL,
+  PRIMARY KEY (`doctor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medical_image` (
+  `image_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `image_data` blob NOT NULL,
+  `enhancement_info` varchar(255) DEFAULT NULL,
+  `resolution` varchar(50) DEFAULT NULL,
+  `type` varchar(50) NOT NULL,
+  PRIMARY KEY (`image_id`),
+  CONSTRAINT `medical_image_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctor_operation_on_image` (
+  `operation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `doctor_id` int(11) NOT NULL,
+  `image_id` int(11) NOT NULL,
+  `operation_remarks` text DEFAULT NULL,
+  `operation_time` datetime NOT NULL,
+  `operation_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`operation_id`),
+  CONSTRAINT `doctor_operation_on_image_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `doctor_operation_on_image_ibfk_2` FOREIGN KEY (`image_id`) REFERENCES `medical_image` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctor_upload_image` (
+  `upload_id` int(11) NOT NULL AUTO_INCREMENT,
+  `doctor_id` int(11) NOT NULL,
+  `image_id` int(11) NOT NULL,
+  `server_path` varchar(255) NOT NULL,
+  `upload_time` datetime NOT NULL,
+  PRIMARY KEY (`upload_id`),
+  CONSTRAINT `doctor_upload_image_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `doctor_upload_image_ibfk_2` FOREIGN KEY (`image_id`) REFERENCES `medical_image` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctor_share_image` (
+  `share_id` int(11) NOT NULL AUTO_INCREMENT,
+  `doctor_id` int(11) NOT NULL,
+  `image_id` int(11) NOT NULL,
+  `target_institution` varchar(255) NOT NULL,
+  `sharing_time` datetime NOT NULL,
+  PRIMARY KEY (`share_id`),
+  CONSTRAINT `doctor_share_image_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `doctor_share_image_ibfk_2` FOREIGN KEY (`image_id`) REFERENCES `medical_image` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,109 @@
+-- Schema for database: schemabench_0120
+CREATE TABLE `seasons` (
+  `season_id` int(11) NOT NULL AUTO_INCREMENT,
+  `season_number` int(11) NOT NULL,
+  `day_zero_date` date NOT NULL,
+  `regional_designation` varchar(255) NOT NULL,
+  PRIMARY KEY (`season_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teams` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `regular_season_compact_results` (
+  `result_id` int(11) NOT NULL AUTO_INCREMENT,
+  `season_id` int(11) NOT NULL,
+  `day_number` int(11) NOT NULL,
+  `winning_team_id` int(11) NOT NULL,
+  `losing_team_id` int(11) NOT NULL,
+  `winning_score` int(11) NOT NULL,
+  `losing_score` int(11) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  PRIMARY KEY (`result_id`),
+  CONSTRAINT `regular_season_compact_results_ibfk_1` FOREIGN KEY (`season_id`) REFERENCES `seasons` (`season_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `regular_season_compact_results_ibfk_2` FOREIGN KEY (`winning_team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `regular_season_compact_results_ibfk_3` FOREIGN KEY (`losing_team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `regular_season_detailed_results` (
+  `result_id` int(11) NOT NULL AUTO_INCREMENT,
+  `season_id` int(11) NOT NULL,
+  `day_number` int(11) NOT NULL,
+  `winning_team_id` int(11) NOT NULL,
+  `losing_team_id` int(11) NOT NULL,
+  `winning_score` int(11) NOT NULL,
+  `losing_score` int(11) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `game_details` text DEFAULT NULL,
+  PRIMARY KEY (`result_id`),
+  CONSTRAINT `regular_season_detailed_results_ibfk_1` FOREIGN KEY (`season_id`) REFERENCES `seasons` (`season_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `regular_season_detailed_results_ibfk_2` FOREIGN KEY (`winning_team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `regular_season_detailed_results_ibfk_3` FOREIGN KEY (`losing_team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tourney_compact_results` (
+  `result_id` int(11) NOT NULL AUTO_INCREMENT,
+  `season_id` int(11) NOT NULL,
+  `day_number` int(11) NOT NULL,
+  `winning_team_id` int(11) NOT NULL,
+  `losing_team_id` int(11) NOT NULL,
+  `winning_score` int(11) NOT NULL,
+  `losing_score` int(11) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  PRIMARY KEY (`result_id`),
+  CONSTRAINT `tourney_compact_results_ibfk_1` FOREIGN KEY (`season_id`) REFERENCES `seasons` (`season_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tourney_compact_results_ibfk_2` FOREIGN KEY (`winning_team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tourney_compact_results_ibfk_3` FOREIGN KEY (`losing_team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tourney_detailed_results` (
+  `result_id` int(11) NOT NULL AUTO_INCREMENT,
+  `season_id` int(11) NOT NULL,
+  `day_number` int(11) NOT NULL,
+  `winning_team_id` int(11) NOT NULL,
+  `losing_team_id` int(11) NOT NULL,
+  `winning_score` int(11) NOT NULL,
+  `losing_score` int(11) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `game_details` text DEFAULT NULL,
+  PRIMARY KEY (`result_id`),
+  CONSTRAINT `tourney_detailed_results_ibfk_1` FOREIGN KEY (`season_id`) REFERENCES `seasons` (`season_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tourney_detailed_results_ibfk_2` FOREIGN KEY (`winning_team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tourney_detailed_results_ibfk_3` FOREIGN KEY (`losing_team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `target` (
+  `target_id` int(11) NOT NULL AUTO_INCREMENT,
+  `season_id` int(11) NOT NULL,
+  `team_id` int(11) NOT NULL,
+  `predictions` varchar(255) NOT NULL,
+  `win_loss_record` varchar(10) NOT NULL,
+  PRIMARY KEY (`target_id`),
+  CONSTRAINT `target_ibfk_1` FOREIGN KEY (`season_id`) REFERENCES `seasons` (`season_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `target_ibfk_2` FOREIGN KEY (`team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tourney_seeds` (
+  `seed_id` int(11) NOT NULL AUTO_INCREMENT,
+  `season_id` int(11) NOT NULL,
+  `seed` int(11) NOT NULL,
+  `team_id` int(11) NOT NULL,
+  PRIMARY KEY (`seed_id`),
+  CONSTRAINT `tourney_seeds_ibfk_1` FOREIGN KEY (`season_id`) REFERENCES `seasons` (`season_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tourney_seeds_ibfk_2` FOREIGN KEY (`team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tourney_slots` (
+  `slot_id` int(11) NOT NULL AUTO_INCREMENT,
+  `season_id` int(11) NOT NULL,
+  `slot` int(11) NOT NULL,
+  `strong_seed` int(11) NOT NULL,
+  `weak_seed` int(11) NOT NULL,
+  PRIMARY KEY (`slot_id`),
+  CONSTRAINT `tourney_slots_ibfk_1` FOREIGN KEY (`season_id`) REFERENCES `seasons` (`season_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tourney_slots_ibfk_2` FOREIGN KEY (`strong_seed`) REFERENCES `tourney_seeds` (`seed_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tourney_slots_ibfk_3` FOREIGN KEY (`weak_seed`) REFERENCES `tourney_seeds` (`seed_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

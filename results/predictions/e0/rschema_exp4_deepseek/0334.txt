@@ -1,0 +1,36 @@
+-- Schema for database: rschema_0334
+
+-- Table: users
+CREATE TABLE `users` (
+    `UserID` int(11) NOT NULL AUTO_INCREMENT,
+    `FirstName` varchar(255) NOT NULL,
+    `LastName` varchar(255) NOT NULL,
+    `EmailAddress` varchar(255) NOT NULL,
+    `AvatarPath` varchar(255) DEFAULT NULL,
+    `Password` varchar(255) NOT NULL,
+    `DateofBirth` date NOT NULL,
+    PRIMARY KEY (`UserID`),
+    UNIQUE KEY `EmailAddress` (`EmailAddress`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: posts
+CREATE TABLE `posts` (
+    `PostID` int(11) NOT NULL AUTO_INCREMENT,
+    `PosterUserID` int(11) NOT NULL,
+    `PostTitle` varchar(255) NOT NULL,
+    `PostContent` text NOT NULL,
+    PRIMARY KEY (`PostID`),
+    KEY `PosterUserID` (`PosterUserID`),
+    CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`PosterUserID`) REFERENCES `users` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: comments
+CREATE TABLE `comments` (
+    `CommenterUserID` int(11) NOT NULL,
+    `CommentedPostID` int(11) NOT NULL,
+    `CommentContent` text NOT NULL,
+    PRIMARY KEY (`CommenterUserID`,`CommentedPostID`),
+    KEY `CommentedPostID` (`CommentedPostID`),
+    CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`CommenterUserID`) REFERENCES `users` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`CommentedPostID`) REFERENCES `posts` (`PostID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

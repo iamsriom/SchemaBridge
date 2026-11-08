@@ -1,0 +1,69 @@
+-- Schema for database: rschema_0028
+CREATE TABLE `departments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `person_in_charge` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employees` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(255) NOT NULL,
+  `phone_number` varchar(255) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `timber` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `procurement` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `timber_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `purchaser_id` int(11) NOT NULL,
+  `supplier_id` int(11) NOT NULL,
+  `purchase_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `procurement_ibfk_1` (`timber_id`),
+  KEY `procurement_ibfk_2` (`purchaser_id`),
+  KEY `procurement_ibfk_3` (`supplier_id`),
+  CONSTRAINT `procurement_ibfk_1` FOREIGN KEY (`timber_id`) REFERENCES `timber` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `procurement_ibfk_2` FOREIGN KEY (`purchaser_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `procurement_ibfk_3` FOREIGN KEY (`supplier_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `processing` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `timber_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `processor_id` int(11) NOT NULL,
+  `processing_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `processing_ibfk_1` (`timber_id`),
+  KEY `processing_ibfk_2` (`processor_id`),
+  CONSTRAINT `processing_ibfk_1` FOREIGN KEY (`timber_id`) REFERENCES `timber` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `processing_ibfk_2` FOREIGN KEY (`processor_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `timber_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `salesperson_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `sales_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `sales_ibfk_1` (`timber_id`),
+  KEY `sales_ibfk_2` (`salesperson_id`),
+  KEY `sales_ibfk_3` (`customer_id`),
+  CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`timber_id`) REFERENCES `timber` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_ibfk_2` FOREIGN KEY (`salesperson_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_ibfk_3` FOREIGN KEY (`customer_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

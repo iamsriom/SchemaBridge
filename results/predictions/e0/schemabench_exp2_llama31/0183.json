@@ -1,0 +1,32 @@
+{
+  "text_number": 183,
+  "id": "SB-183",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0183",
+  "question": "Background / Context\n\nThe project involves developing a database and application system for a record store. This system is designed to facilitate store employees in efficiently locating and managing the records customers are interested in purchasing. The system will store and manage data related to records, artists, songs, genres, and inventory across various store locations.\n\nObjectives\n\n1. Provide a reliable database system to store detailed information about albums, songs, artists, and genres.\n2. Enable employees to easily search and retrieve information to assist customers.\n3. Maintain an accurate and up-to-date inventory of albums available at each store location.\n\nStakeholders & Users\n\n- Store Employees: Primary users who will interact with the system to assist customers and manage inventory.\n- Store Managers: Oversee operations and ensure the inventory is accurate and sufficient.\n- Developers: Responsible for developing and maintaining the system.\n\nFunctional Descriptions\n\n1. Employee Management:\n   - Manage employee records and associate them with specific store locations.\n   \n2. Album and Song Management:\n   - Store detailed information about albums, their release dates, and pricing.\n   - Manage songs, including titles, duration, lyrics, and associated albums.\n   \n3. Genre Management:\n   - Maintain a list of genres and associate them with songs.\n   \n4. Artist Management:\n   - Record details about artists, including stage names, solo/band status, and group memberships.\n   \n5. Inventory Management:\n   - Track the availability of albums at different store locations to ensure stock is maintained.\n\n6. Location Management:\n   - Manage records of store locations with contact information and addresses.\n\nNon-Functional Descriptions\n\n1. Performance:\n   - The system should efficiently handle data operations for multiple locations without user-perceptible delay.\n\n2. Scalability:\n   - Capable of scaling to accommodate additional locations and a growing number of records.\n\n3. Reliability:\n   - Ensure accurate data entry, storage, and retrieval to minimize errors and redundancy.\n\n4. Security:\n   - Protect sensitive information related to employees, inventory, and transactions.",
+  "ddl": "-- Schema for database: schemabench_0183\nCREATE TABLE `artists` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `stage_name` varchar(255) DEFAULT NULL,\n  `solo_band_status` enum('solo','band') DEFAULT NULL,\n  `group_memberships` text DEFAULT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `genres` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `locations` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `address` text NOT NULL,\n  `contact_info` text NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `albums` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `release_date` datetime NOT NULL,\n  `price` decimal(10,2) NOT NULL,\n  `artist_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `artist_id` (`artist_id`),\n  CONSTRAINT `albums_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `songs` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `duration` time NOT NULL,\n  `lyrics` text DEFAULT NULL,\n  `album_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `album_id` (`album_id`),\n  CONSTRAINT `songs_ibfk_1` FOREIGN KEY (`album_id`) REFERENCES `albums` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `genre_songs` (\n  `genre_id` int(11) NOT NULL,\n  `song_id` int(11) NOT NULL,\n  PRIMARY KEY (`genre_id`, `song_id`),\n  KEY `genre_id` (`genre_id`),\n  KEY `song_id` (`song_id`),\n  CONSTRAINT `genre_songs_ibfk_1` FOREIGN KEY (`genre_id`) REFERENCES `genres` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `genre_songs_ibfk_2` FOREIGN KEY (`song_id`) REFERENCES `songs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `inventory` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `album_id` int(11) NOT NULL,\n  `location_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `album_id` (`album_id`),\n  KEY `location_id` (`location_id`),\n  CONSTRAINT `inventory_ibfk_1` FOREIGN KEY (`album_id`) REFERENCES `albums` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `inventory_ibfk_2` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `employees` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `location_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `location_id` (`location_id`),\n  CONSTRAINT `employees_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "artists",
+      "genres",
+      "locations",
+      "albums",
+      "songs",
+      "genre_songs",
+      "inventory",
+      "employees"
+    ],
+    "columns_by_table": {
+      "artists": [],
+      "genres": [],
+      "locations": [],
+      "albums": [],
+      "songs": [],
+      "genre_songs": [],
+      "inventory": [],
+      "employees": []
+    }
+  }
+}

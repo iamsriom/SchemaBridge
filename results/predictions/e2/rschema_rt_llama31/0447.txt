@@ -1,0 +1,57 @@
+-- Schema for database: rschema_0447
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `role` varchar(50) NOT NULL,
+  `unit` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `financial_document` (
+  `document_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `attachment_path` varchar(255) NOT NULL,
+  `category` varchar(100) NOT NULL,
+  `content` text NOT NULL,
+  `level` int(11) NOT NULL,
+  `number` varchar(50) NOT NULL,
+  `issue_date` datetime NOT NULL,
+  `issuing_unit` varchar(100) NOT NULL,
+  `remarks` text DEFAULT NULL,
+  `validity_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`document_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notification` (
+  `notification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `issue_date` datetime NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`notification_id`),
+  CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `system_configuration` (
+  `configuration_id` int(11) NOT NULL AUTO_INCREMENT,
+  `admin_id` int(11) NOT NULL,
+  `data_type` varchar(50) NOT NULL,
+  `database_directory` varchar(255) NOT NULL,
+  `file_upload_directory` varchar(255) NOT NULL,
+  `system_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`configuration_id`),
+  CONSTRAINT `system_configuration_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `document_management` (
+  `admin_id` int(11) NOT NULL,
+  `document_id` int(11) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `operation_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`admin_id`, `document_id`),
+  CONSTRAINT `document_management_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `document_management_ibfk_2` FOREIGN KEY (`document_id`) REFERENCES `financial_document` (`document_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

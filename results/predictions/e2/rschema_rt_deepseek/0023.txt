@@ -1,0 +1,45 @@
+-- Schema for database: rschema_0023
+CREATE TABLE `donor` (
+  `donor_number` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`donor_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `recipient` (
+  `recipient_number` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`recipient_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `donated_item` (
+  `item_number` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`item_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `donation_record` (
+  `donation_record_id` int(11) NOT NULL,
+  `donor_number` int(11) NOT NULL,
+  `recipient_number` int(11) NOT NULL,
+  `donation_time` datetime NOT NULL,
+  `item_number` int(11) NOT NULL,
+  PRIMARY KEY (`donation_record_id`),
+  CONSTRAINT `donation_record_ibfk_1` FOREIGN KEY (`donor_number`) REFERENCES `donor` (`donor_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `donation_record_ibfk_2` FOREIGN KEY (`recipient_number`) REFERENCES `recipient` (`recipient_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `donation_record_details` (
+  `donation_record_id` int(11) NOT NULL,
+  `item_number` int(11) NOT NULL,
+  PRIMARY KEY (`item_number`, `donation_record_id`),
+  CONSTRAINT `donation_record_details_ibfk_1` FOREIGN KEY (`donation_record_id`) REFERENCES `donation_record` (`donation_record_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `donation_record_details_ibfk_2` FOREIGN KEY (`item_number`) REFERENCES `donated_item` (`item_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

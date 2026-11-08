@@ -1,0 +1,34 @@
+{
+  "text_number": 374,
+  "id": "67552f0a13602ec03b41a953",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0374",
+  "question": "This is a government department resource management system, mainly used for managing and tracking resource allocation, reception and donation transactions between government departments. For user management, the system requires users to provide basic information such as username, password and email for registration and login. Each user is assigned a specific role, such as administrator or regular user, with different roles having different operation permissions. The system records all user operations with time and operator for accountability tracking. For organizational structure, the system has multiple supervisory departments, each with a unique name and responsibility description. Under each supervisory department are several work units, which also have unique names and responsibility descriptions, and clearly belong to a specific supervisory department's management. For resource management, the system records basic Attributes such as resource code and name. When a resource transaction occurs, the system records detailed information including the work unit involved, resource code, receiver's user ID, storage location, budget year, and resource acquisition value. To ensure transaction compliance, the system also manages a series of approval documents, recording document names and contents.",
+  "ddl": "-- Schema for database: rschema_0374\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `password` char(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `role` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `roles` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_operations` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `operation_time` datetime NOT NULL,\n  `operator` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `user_operations_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `departments` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `responsibility` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `work_units` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `responsibility` varchar(255) NOT NULL,\n  `department_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `department_id` (`department_id`),\n  CONSTRAINT `work_units_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `resources` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `code` varchar(255) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `transactions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `work_unit_id` int(11) NOT NULL,\n  `resource_id` int(11) NOT NULL,\n  `receiver_id` int(11) NOT NULL,\n  `storage_location` varchar(255) NOT NULL,\n  `budget_year` int(11) NOT NULL,\n  `value` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `work_unit_id` (`work_unit_id`),\n  KEY `resource_id` (`resource_id`),\n  KEY `receiver_id` (`receiver_id`),\n  CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`work_unit_id`) REFERENCES `work_units` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`resource_id`) REFERENCES `resources` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `transactions_ibfk_3` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `approval_documents` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `content` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `transaction_approvals` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `transaction_id` int(11) NOT NULL,\n  `approval_document_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `transaction_id` (`transaction_id`),\n  KEY `approval_document_id` (`approval_document_id`),\n  CONSTRAINT `transaction_approvals_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `transaction_approvals_ibfk_2` FOREIGN KEY (`approval_document_id`) REFERENCES `approval_documents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "roles",
+      "user_operations",
+      "departments",
+      "work_units",
+      "resources",
+      "transactions",
+      "approval_documents",
+      "transaction_approvals"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "roles": [],
+      "user_operations": [],
+      "departments": [],
+      "work_units": [],
+      "resources": [],
+      "transactions": [],
+      "approval_documents": [],
+      "transaction_approvals": []
+    }
+  }
+}

@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0511
+CREATE TABLE `owners` (
+  `owner_number` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `room_number` int(11) NOT NULL,
+  `house_area` varchar(255) DEFAULT NULL,
+  `work_unit` varchar(255) DEFAULT NULL,
+  `contact_number` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`owner_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `departments` (
+  `department_number` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `head` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`department_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employees` (
+  `employee_number` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `gender` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `contact_number` varchar(255) DEFAULT NULL,
+  `department_number` int(11) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`employee_number`),
+  KEY `employees_ibfk_1` (`department_number`),
+  CONSTRAINT `employees_ibfk_1` FOREIGN KEY (`department_number`) REFERENCES `departments` (`department_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `charges` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `room_number` int(11) NOT NULL,
+  `owner_number` int(11) NOT NULL,
+  `charge_date` datetime NOT NULL,
+  `charge_type` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `charge_amount` decimal(10,2) NOT NULL,
+  `employee_number` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `charges_ibfk_1` (`owner_number`),
+  KEY `charges_ibfk_2` (`employee_number`),
+  KEY `charges_ibfk_3` (`room_number`),
+  CONSTRAINT `charges_ibfk_1` FOREIGN KEY (`owner_number`) REFERENCES `owners` (`owner_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `charges_ibfk_2` FOREIGN KEY (`employee_number`) REFERENCES `employees` (`employee_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `charges_ibfk_3` FOREIGN KEY (`room_number`) REFERENCES `owners` (`room_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

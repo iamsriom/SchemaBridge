@@ -1,0 +1,46 @@
+-- Schema for database: rschema_0003
+CREATE TABLE `warehouse` (
+  `warehouse_number` int(11) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `capacity` int(11) NOT NULL,
+  PRIMARY KEY (`warehouse_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `goods` (
+  `goods_id` int(11) NOT NULL,
+  `goods_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`goods_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `loader` (
+  `loader_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `phone` varchar(15) NOT NULL,
+  PRIMARY KEY (`loader_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction_record` (
+  `transaction_id` int(11) NOT NULL,
+  `time` datetime NOT NULL,
+  `warehouse_number` int(11) NOT NULL,
+  `transaction_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  CONSTRAINT `transaction_record_ibfk_1` FOREIGN KEY (`warehouse_number`) REFERENCES `warehouse` (`warehouse_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `good_transaction_record_details` (
+  `goods_id` int(11) NOT NULL,
+  `transaction_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`goods_id`, `transaction_id`),
+  CONSTRAINT `good_transaction_record_details_ibfk_1` FOREIGN KEY (`goods_id`) REFERENCES `goods` (`goods_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `good_transaction_record_details_ibfk_2` FOREIGN KEY (`transaction_id`) REFERENCES `transaction_record` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stevedore_transaction_record` (
+  `loader_id` int(11) NOT NULL,
+  `transaction_id` int(11) NOT NULL,
+  PRIMARY KEY (`loader_id`, `transaction_id`),
+  CONSTRAINT `stevedore_transaction_record_ibfk_1` FOREIGN KEY (`loader_id`) REFERENCES `loader` (`loader_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `stevedore_transaction_record_ibfk_2` FOREIGN KEY (`transaction_id`) REFERENCES `transaction_record` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

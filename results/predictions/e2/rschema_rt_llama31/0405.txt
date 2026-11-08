@@ -1,0 +1,73 @@
+-- Schema for database: rschema_0405
+CREATE TABLE `drug` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `specification` varchar(255) NOT NULL,
+  `usage` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctor` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `phone_number` varchar(15) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patient` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `phone_number` varchar(15) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prescription` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `medical_orders` text NOT NULL,
+  `date` datetime NOT NULL,
+  `category` varchar(255) NOT NULL,
+  `doctor_id` int(11) NOT NULL,
+  `remarks` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `prescription_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `outpatient_management` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `doctor_id` int(11) NOT NULL,
+  `outpatient_type` varchar(255) NOT NULL,
+  `opening_time` time NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `outpatient_management_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patient_outpatient_consultation` (
+  `patient_id` int(11) NOT NULL,
+  `outpatient_id` int(11) NOT NULL,
+  `consultation_time` datetime NOT NULL,
+  `consultation_content` text NOT NULL,
+  PRIMARY KEY (`patient_id`, `outpatient_id`, `consultation_time`),
+  CONSTRAINT `patient_outpatient_consultation_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `patient_outpatient_consultation_ibfk_2` FOREIGN KEY (`outpatient_id`) REFERENCES `outpatient_management` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patient_payment_prescription` (
+  `patient_id` int(11) NOT NULL,
+  `prescription_id` int(11) NOT NULL,
+  `payment_amount` decimal(10,2) NOT NULL,
+  `discount` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`patient_id`, `prescription_id`),
+  CONSTRAINT `patient_payment_prescription_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `patient_payment_prescription_ibfk_2` FOREIGN KEY (`prescription_id`) REFERENCES `prescription` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prescription_contains_drug` (
+  `prescription_id` int(11) NOT NULL,
+  `drug_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`prescription_id`, `drug_id`),
+  CONSTRAINT `prescription_contains_drug_ibfk_1` FOREIGN KEY (`prescription_id`) REFERENCES `prescription` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `prescription_contains_drug_ibfk_2` FOREIGN KEY (`drug_id`) REFERENCES `drug` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

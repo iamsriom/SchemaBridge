@@ -1,0 +1,91 @@
+-- Schema for database: rschema_0448
+CREATE TABLE `User` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  `role` varchar(50) NOT NULL,
+  `unit` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Experimental_Equipment` (
+  `device_id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_name` varchar(255) NOT NULL,
+  `device_model` varchar(255) NOT NULL,
+  `manufacturer` varchar(255) NOT NULL,
+  `acquisition_time` datetime NOT NULL,
+  `device_category` varchar(100) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  PRIMARY KEY (`device_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Experimental_Consumables` (
+  `consumable_id` int(11) NOT NULL AUTO_INCREMENT,
+  `consumable_name` varchar(255) NOT NULL,
+  `category` varchar(100) NOT NULL,
+  `inventory_quantity` int(11) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  PRIMARY KEY (`consumable_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Hazardous_Chemicals` (
+  `chemical_id` int(11) NOT NULL AUTO_INCREMENT,
+  `chemical_name` varchar(255) NOT NULL,
+  `inventory_quantity` int(11) NOT NULL,
+  `issuance_time` datetime NOT NULL,
+  `status` varchar(50) NOT NULL,
+  PRIMARY KEY (`chemical_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Experimental_Course` (
+  `course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_name` varchar(255) NOT NULL,
+  `class_location` varchar(255) NOT NULL,
+  `class_time` datetime NOT NULL,
+  `participants` int(11) NOT NULL,
+  `teacher_id` int(11) NOT NULL,
+  PRIMARY KEY (`course_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Usage_of_Equipment` (
+  `usage_id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `usage_purpose` varchar(255) NOT NULL,
+  `usage_time` datetime NOT NULL,
+  PRIMARY KEY (`usage_id`),
+  CONSTRAINT `User_Usage_of_Equipment_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `Experimental_Equipment` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `User_Usage_of_Equipment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `User` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Purchase_Consumables` (
+  `purchase_id` int(11) NOT NULL AUTO_INCREMENT,
+  `consumable_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `purchase_time` datetime NOT NULL,
+  PRIMARY KEY (`purchase_id`),
+  CONSTRAINT `User_Purchase_Consumables_ibfk_1` FOREIGN KEY (`consumable_id`) REFERENCES `Experimental_Consumables` (`consumable_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `User_Purchase_Consumables_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `User` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Purchase_Hazardous_Chemicals` (
+  `purchase_id` int(11) NOT NULL AUTO_INCREMENT,
+  `chemical_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `purchase_time` datetime NOT NULL,
+  PRIMARY KEY (`purchase_id`),
+  CONSTRAINT `User_Purchase_Hazardous_Chemicals_ibfk_1` FOREIGN KEY (`chemical_id`) REFERENCES `Hazardous_Chemicals` (`chemical_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `User_Purchase_Hazardous_Chemicals_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `User` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Participation_in_Course` (
+  `participation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `experimental_course_grade` varchar(10) DEFAULT NULL,
+  `participation_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`participation_id`),
+  CONSTRAINT `User_Participation_in_Course_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `Experimental_Course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `User_Participation_in_Course_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `User` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

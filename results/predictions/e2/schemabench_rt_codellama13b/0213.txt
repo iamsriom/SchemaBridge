@@ -1,0 +1,69 @@
+-- Schema for database: schemabench_0213
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `category` varchar(255) NOT NULL,
+  `sub_category` varchar(255) NOT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `order_date` datetime NOT NULL,
+  `market` varchar(255) NOT NULL,
+  `order_priority` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `shipping_cost` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales` (
+  `order_id` int(11) NOT NULL,
+  `sales_amount` decimal(10,2) NOT NULL,
+  `discount` decimal(10,2) NOT NULL,
+  `profit` decimal(10,2) NOT NULL,
+  `shipping_cost` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `address` (
+  `address_id` int(11) NOT NULL,
+  `city` varchar(255) NOT NULL,
+  `state` varchar(255) NOT NULL,
+  `country` varchar(255) NOT NULL,
+  `postal_code` varchar(20) NOT NULL,
+  `region` varchar(255) NOT NULL,
+  PRIMARY KEY (`address_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shipping` (
+  `order_id` int(11) NOT NULL,
+  `address_id` int(11) NOT NULL,
+  `shipping_date` datetime NOT NULL,
+  `shipping_mode` varchar(255) NOT NULL,
+  `shipping_cost` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `shipping_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `shipping_ibfk_2` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_` (
+  `sales_id` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `cost` decimal(10,2) NOT NULL,
+  `discount` decimal(10,2) NOT NULL,
+  `shipping_cost` decimal(10,2) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `location_id` int(11) NOT NULL,
+  `time_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  PRIMARY KEY (`sales_id`),
+  CONSTRAINT `sales__ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales__ibfk_2` FOREIGN KEY (`time_id`) REFERENCES `time` (`time_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales__ibfk_3` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

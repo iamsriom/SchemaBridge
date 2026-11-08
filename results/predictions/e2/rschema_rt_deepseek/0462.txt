@@ -1,0 +1,43 @@
+-- Schema for database: rschema_0462
+CREATE TABLE `Member` (
+  `member_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `postal_code` varchar(10) DEFAULT NULL,
+  `points` int(11) DEFAULT NULL,
+  `consumption_amount` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Book` (
+  `isbn` varchar(13) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `author_name` varchar(255) NOT NULL,
+  `publisher` varchar(255) DEFAULT NULL,
+  `category_name` varchar(255) DEFAULT NULL,
+  `price` decimal(10,2) DEFAULT NULL,
+  `publication_date` date DEFAULT NULL,
+  PRIMARY KEY (`isbn`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Order` (
+  `order_id` int(11) NOT NULL,
+  `member_id` int(11) NOT NULL,
+  `order_date` datetime NOT NULL,
+  `sales_amount` decimal(10,2) DEFAULT NULL,
+  `shipping_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`member_id`) REFERENCES `Member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Purchase` (
+  `order_id` int(11) NOT NULL,
+  `isbn` varchar(13) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`order_id`, `isbn`),
+  CONSTRAINT `purchase_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `Order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchase_ibfk_2` FOREIGN KEY (`isbn`) REFERENCES `Book` (`isbn`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

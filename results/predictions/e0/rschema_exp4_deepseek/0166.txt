@@ -1,0 +1,65 @@
+-- Schema for database: `rschema_0166`
+
+-- Table: `patient_info`
+
+CREATE TABLE `patient_info` (
+    `patient_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    `age` INT(11) NOT NULL,
+    `gender` CHAR(6) NOT NULL,
+    `contact_info` VARCHAR(255) NOT NULL,
+    `medical_records` TEXT,
+    PRIMARY KEY (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `doctor_info`
+
+CREATE TABLE `doctor_info` (
+    `doctor_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    `department` VARCHAR(255) NOT NULL,
+    `contact_info` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`doctor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `medical_images`
+
+CREATE TABLE `medical_images` (
+    `image_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `patient_id` INT(11) NOT NULL,
+    `image_type` VARCHAR(255) NOT NULL,
+    `film_time` DATETIME NOT NULL,
+    `image_data` BLOB NOT NULL,
+    `image_resolution` VARCHAR(255) NOT NULL,
+    `image_enhancement_info` TEXT,
+    PRIMARY KEY (`image_id`),
+    FOREIGN KEY (`patient_id`) REFERENCES `patient_info` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `image_operations`
+
+CREATE TABLE `image_operations` (
+    `operation_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `doctor_id` INT(11) NOT NULL,
+    `image_id` INT(11) NOT NULL,
+    `operation_content` TEXT NOT NULL,
+    `operation_time` DATETIME NOT NULL,
+    PRIMARY KEY (`operation_id`),
+    FOREIGN KEY (`doctor_id`) REFERENCES `doctor_info` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`image_id`) REFERENCES `medical_images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `image_sharing`
+
+CREATE TABLE `image_sharing` (
+    `share_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `doctor_id` INT(11) NOT NULL,
+    `image_id` INT(11) NOT NULL,
+    `upload_time` DATETIME NOT NULL,
+    `server_path` VARCHAR(255) NOT NULL,
+    `sharing_time` DATETIME NOT NULL,
+    `target_institution` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`share_id`),
+    FOREIGN KEY (`doctor_id`) REFERENCES `doctor_info` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`image_id`) REFERENCES `medical_images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

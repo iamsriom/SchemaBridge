@@ -1,0 +1,38 @@
+{
+  "text_number": 155,
+  "id": "SB-155",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "schemabench_0155",
+  "question": "Background / Context\n\nIn a suburban home, the sudden death of a young girl named Sarah has left her family engulfed in grief and mystery. In a world where androids have become as common as household appliances, Sarah's family owns five, each designed for specific functions such as protection and domestic assistance. Recent incidents involving androids nationwide have raised public fear and suspicion about their autonomy and obedience.\n\n Objectives\n\nThe project's primary goal is to uncover the truth behind Sarah's death. This involves analyzing advanced data systems in the house and each android's memory and code to detect any anomalies or evidence of breached programming. The investigation aims to identify the responsible human or android.\n\n Stakeholders & Users\n\n- Federal Investigators: Tasked with the investigation, utilizing the data analysis system.\n- Family Members: Residents of the house and direct stakeholders affected by the incident.\n- Law Enforcement Agencies: Interested in understanding potential threats related to androids.\n- Technologists/Engineers: Responsible for interpreting technical data from androids and the monitoring system.\n\n Functional Descriptions\n\n- Data Collection: Utilize bracelets worn by residents, employees, and robots to track movements within the house.\n- Monitoring System: Deploy CCTV cameras and an integrated database to record and analyze movement and activities.\n- Evidence Management: Compile and cross-reference evidence, disturbances, and modifications to the environment.\n- Crime Analysis: Identify suspects through post-crime analysis, using tables (Innocent, Real_Suspect, Culprit) which link bracelets to individuals.\n- Android Examination: Access and probe androids' memory banks and code for any signs of anomaly or intent.\n\n Non-Functional Descriptions\n\n- Security: Ensure all data, especially evidence and surveillance data, is stored securely and free from unauthorized access.\n- Scalability: System should efficiently handle data from multiple devices and users simultaneously.\n- Reliability: Monitoring and tracking must produce consistent, accurate results to support the investigation.\n- User Interface: Provide a clear, intuitive interface for investigators to interact with the system and analyze data.",
+  "ddl": "-- Schema for database: `schemabench_0155`\n\n-- For table: `household`\n\nCREATE TABLE `household` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `role` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `androids`\n\nCREATE TABLE `androids` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `role` varchar(255) NOT NULL,\n  `memory_bank` varchar(255) NOT NULL,\n  `code` varchar(255) NOT NULL,\n  `household_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`household_id`) REFERENCES `household` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `bracelets`\n\nCREATE TABLE `bracelets` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `serial_number` varchar(255) NOT NULL,\n  `location` varchar(255) NOT NULL,\n  `android_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`android_id`) REFERENCES `androids` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `movements`\n\nCREATE TABLE `movements` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `date_time` datetime NOT NULL,\n  `location` varchar(255) NOT NULL,\n  `bracelet_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`bracelet_id`) REFERENCES `bracelets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `evidence`\n\nCREATE TABLE `evidence` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `description` varchar(255) NOT NULL,\n  `location` varchar(255) NOT NULL,\n  `movement_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`movement_id`) REFERENCES `movements` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `tables`\n\nCREATE TABLE `tables` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `location` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `tables_evidence`\n\nCREATE TABLE `tables_evidence` (\n  `table_id` int(11) NOT NULL,\n  `evidence_id` int(11) NOT NULL,\n  PRIMARY KEY (`table_id`, `evidence_id`),\n  FOREIGN KEY (`table_id`) REFERENCES `tables` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`evidence_id`) REFERENCES `evidence` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `tables_movements`\n\nCREATE TABLE `tables_movements` (\n  `table_id` int(11) NOT NULL,\n  `movement_id` int(11) NOT NULL,\n  PRIMARY KEY (`table_id`, `movement_id`),\n  FOREIGN KEY (`table_id`) REFERENCES `tables` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`movement_id`) REFERENCES `movements` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `tables_androids`\n\nCREATE TABLE `tables_androids` (\n  `table_id` int(11) NOT NULL,\n  `android_id` int(11) NOT NULL,\n  PRIMARY KEY (`table_id`, `android_id`),\n  FOREIGN KEY (`table_id`) REFERENCES `tables` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`android_id`) REFERENCES `androids` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `tables_bracelets`\n\nCREATE TABLE `tables_bracelets` (\n  `table_id` int(11) NOT NULL,\n  `bracelet_id` int(11) NOT NULL,\n  PRIMARY KEY (`table_id`, `bracelet_id`),\n  FOREIGN KEY (`table_id`) REFERENCES `tables` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`bracelet_id`) REFERENCES `bracelets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `tables_household`\n\nCREATE TABLE `tables_household` (\n  `table_id` int(11) NOT NULL,\n  `household_id` int(11) NOT NULL,\n  PRIMARY KEY (`table_id`, `household_id`),\n  FOREIGN KEY (`table_id`) REFERENCES `tables` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`household_id`) REFERENCES `household` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "household",
+      "androids",
+      "bracelets",
+      "movements",
+      "evidence",
+      "tables",
+      "tables_evidence",
+      "tables_movements",
+      "tables_androids",
+      "tables_bracelets",
+      "tables_household"
+    ],
+    "columns_by_table": {
+      "household": [],
+      "androids": [],
+      "bracelets": [],
+      "movements": [],
+      "evidence": [],
+      "tables": [],
+      "tables_evidence": [],
+      "tables_movements": [],
+      "tables_androids": [],
+      "tables_bracelets": [],
+      "tables_household": []
+    }
+  }
+}

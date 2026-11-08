@@ -1,0 +1,34 @@
+{
+  "text_number": 17,
+  "id": "SB-017",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0017",
+  "question": "1) Background / Context\n\nAkaunting is an open-source, online accounting and invoicing platform designed for small businesses and freelancers. It offers comprehensive financial management tools, enabling users to handle invoicing, expense tracking, and accounting tasks efficiently in a digital environment.\n\n2) Objectives\n\nThe primary objective of Akaunting is to provide a streamlined financial management experience for users by centralizing all monetary transactions and documentation. The system aims to facilitate better decision-making by offering insights into cash flow and expenses, and promote faster payments through professional invoicing.\n\n3) Stakeholders & Users\n\n- Primary Users: Small business owners, freelancers.\n- Stakeholders: Software developers, business analysts, financial consultants, and end users who rely on precise and efficient financial management tools.\n\n4) Functional Descriptions\n\n- Invoicing: Create and manage professional invoices to facilitate quicker payments from clients.\n- Expense Tracking: Monitor and categorize expenses to understand outgoing funds comprehensively.\n- Cash Flow Management: Provide tools to analyze and visualize cash flow to aid in strategic decision-making.\n- Transaction Categories: Allow users to define categories for income, expenses, and items for better organization and overview.\n- Bill and Invoice Management: Manage bill histories, item taxes, and track invoice histories for better financial documentation.\n- Account and Reconciliation: Manage accounts with features to reconcile transactions, track balances, and manage currency settings.\n\n5) Non-Functional Descriptions\n\n- Scalability: The system should efficiently support a growing number of users and transactions.\n- Security: Ensure secure handling of sensitive financial data and support user authentication and authorization.\n- Usability: Provide an intuitive user interface to facilitate ease of use for non-technical users.\n- Accessibility: Available online to allow users to manage their accounting needs from anywhere.\n- Integrations: Support integrations with other financial tools and payment gateways to expand functionality.",
+  "ddl": "-- Schema for database: schemabench_0017\nCREATE TABLE `accounts` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `currency` char(3) NOT NULL,\n  `balance` decimal(10,2) NOT NULL DEFAULT 0.00,\n  PRIMARY KEY (`id`),\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `account_categories` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `type` enum('income','expense') NOT NULL,\n  PRIMARY KEY (`id`),\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `account_transactions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `account_id` int(11) NOT NULL,\n  `category_id` int(11) NOT NULL,\n  `date` datetime NOT NULL,\n  `amount` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `account_id` (`account_id`),\n  KEY `category_id` (`category_id`),\n  CONSTRAINT `account_transactions_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `account_transactions_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `account_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `bills` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `account_id` int(11) NOT NULL,\n  `date` datetime NOT NULL,\n  `amount` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `account_id` (`account_id`),\n  CONSTRAINT `bills_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `bill_items` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `bill_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `price` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `bill_id` (`bill_id`),\n  CONSTRAINT `bill_items_ibfk_1` FOREIGN KEY (`bill_id`) REFERENCES `bills` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `currencies` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `code` char(3) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `invoices` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `account_id` int(11) NOT NULL,\n  `date` datetime NOT NULL,\n  `due_date` datetime NOT NULL,\n  `amount` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `account_id` (`account_id`),\n  CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `invoice_items` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `invoice_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `price` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `invoice_id` (`invoice_id`),\n  CONSTRAINT `invoice_items_ibfk_1` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `password` char(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "accounts",
+      "account_categories",
+      "account_transactions",
+      "bills",
+      "bill_items",
+      "currencies",
+      "invoices",
+      "invoice_items",
+      "users"
+    ],
+    "columns_by_table": {
+      "accounts": [],
+      "account_categories": [],
+      "account_transactions": [],
+      "bills": [],
+      "bill_items": [],
+      "currencies": [],
+      "invoices": [],
+      "invoice_items": [],
+      "users": []
+    }
+  }
+}

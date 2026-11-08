@@ -1,0 +1,40 @@
+{
+  "text_number": 171,
+  "id": "SB-171",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0171",
+  "question": "Background / Context\n\nThe project involves developing a relational database for managing the lifecycle of trades within a bank’s trading system. The system will support tracking trades from execution to settlement, providing essential information for financial operations.\n\n Objectives\n\nThe primary objective is to capture detailed trade information and monitor the status of trades effectively using dedicated data storage mechanisms. The system should ensure data integrity and provide seamless tracking and management of trade status and related activities.\n\n Stakeholders & Users\n\n- Bank Traders: Responsible for executing and managing trades.\n- Trading Analysts: Monitor trade performance and compliance.\n- Database Administrators: Manage the database operations and maintenance.\n- Bank Executives: Use trade data for strategic decision-making.\n\n Functional Descriptions\n\n1. Trade Data Management:\n   - Store and manage trade information including portfolios, trade dates, instrument details, quantities, and prices.\n\n2. Audit Trail:\n   - Track all activities related to trades, capturing timestamped logs of every action taken.\n\n3. Counterparty Management:\n   - Record and manage counterparties associated with each trade, including exposure limits.\n\n4. Instrument Tracking:\n   - Store details of financial instruments utilized in trades, such as maturity dates, settlement types, and currency codes.\n\n5. Trader Information:\n   - Maintain records of traders, including contact details and trade associations.\n\n6. Trade Status Monitoring:\n   - Track and update the status of each trade to reflect its current stage in the lifecycle.\n\n Non-Functional Descriptions\n\n- Data Integrity: Ensure referential integrity across related tables using foreign key constraints.\n- Performance: The system should efficiently manage and query large volumes of trade data.\n- Scalability: Support future expansion to accommodate additional trade types and increasing data loads.\n- Security: Implement measures to secure sensitive trade data from unauthorized access.",
+  "ddl": "-- Schema for database: schemabench_0171\n\nCREATE TABLE trade_data (\n  trade_id INT(11) NOT NULL AUTO_INCREMENT,\n  portfolio_id INT(11) NOT NULL,\n  trade_date DATE NOT NULL,\n  instrument_id INT(11) NOT NULL,\n  quantity INT(11) NOT NULL,\n  price DECIMAL(10,2) NOT NULL,\n  PRIMARY KEY (trade_id),\n  FOREIGN KEY (portfolio_id) REFERENCES portfolio (portfolio_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (instrument_id) REFERENCES instrument (instrument_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE audit_trail (\n  audit_id INT(11) NOT NULL AUTO_INCREMENT,\n  trade_id INT(11) NOT NULL,\n  action VARCHAR(255) NOT NULL,\n  timestamp DATETIME NOT NULL,\n  PRIMARY KEY (audit_id),\n  FOREIGN KEY (trade_id) REFERENCES trade_data (trade_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE counterparty (\n  counterparty_id INT(11) NOT NULL AUTO_INCREMENT,\n  counterparty_name VARCHAR(255) NOT NULL,\n  exposure_limit DECIMAL(10,2) NOT NULL,\n  PRIMARY KEY (counterparty_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE instrument (\n  instrument_id INT(11) NOT NULL AUTO_INCREMENT,\n  instrument_name VARCHAR(255) NOT NULL,\n  maturity_date DATE NOT NULL,\n  settlement_type VARCHAR(255) NOT NULL,\n  currency_code VARCHAR(3) NOT NULL,\n  PRIMARY KEY (instrument_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE trader (\n  trader_id INT(11) NOT NULL AUTO_INCREMENT,\n  trader_name VARCHAR(255) NOT NULL,\n  contact_details VARCHAR(255) NOT NULL,\n  PRIMARY KEY (trader_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE trade_status (\n  trade_status_id INT(11) NOT NULL AUTO_INCREMENT,\n  trade_id INT(11) NOT NULL,\n  status VARCHAR(255) NOT NULL,\n  PRIMARY KEY (trade_status_id),\n  FOREIGN KEY (trade_id) REFERENCES trade_data (trade_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE portfolio (\n  portfolio_id INT(11) NOT NULL AUTO_INCREMENT,\n  portfolio_name VARCHAR(255) NOT NULL,\n  PRIMARY KEY (portfolio_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE trade_portfolio (\n  trade_id INT(11) NOT NULL,\n  portfolio_id INT(11) NOT NULL,\n  PRIMARY KEY (trade_id, portfolio_id),\n  FOREIGN KEY (trade_id) REFERENCES trade_data (trade_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (portfolio_id) REFERENCES portfolio (portfolio_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE trade_counterparty (\n  trade_id INT(11) NOT NULL,\n  counterparty_id INT(11) NOT NULL,\n  PRIMARY KEY (trade_id, counterparty_id),\n  FOREIGN KEY (trade_id) REFERENCES trade_data (trade_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (counterparty_id) REFERENCES counterparty (counterparty_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE trade_instrument (\n  trade_id INT(11) NOT NULL,\n  instrument_id INT(11) NOT NULL,\n  PRIMARY KEY (trade_id, instrument_id),\n  FOREIGN KEY (trade_id) REFERENCES trade_data (trade_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (instrument_id) REFERENCES instrument (instrument_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE trade_trader (\n  trade_id INT(11) NOT NULL,\n  trader_id INT(11) NOT NULL,\n  PRIMARY KEY (trade_id, trader_id),\n  FOREIGN KEY (trade_id) REFERENCES trade_data (trade_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (trader_id) REFERENCES trader (trader_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE trade_status_history (\n  trade_status_id INT(11) NOT NULL,\n  trade_id INT(11) NOT NULL,\n  status_date DATETIME NOT NULL,\n  PRIMARY KEY (trade_status_id, trade_id),\n  FOREIGN KEY (trade_status_id) REFERENCES trade_status (trade_status_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (trade_id) REFERENCES trade_data (trade_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "trade_data",
+      "audit_trail",
+      "counterparty",
+      "instrument",
+      "trader",
+      "trade_status",
+      "portfolio",
+      "trade_portfolio",
+      "trade_counterparty",
+      "trade_instrument",
+      "trade_trader",
+      "trade_status_history"
+    ],
+    "columns_by_table": {
+      "trade_data": [],
+      "audit_trail": [],
+      "counterparty": [],
+      "instrument": [],
+      "trader": [],
+      "trade_status": [],
+      "portfolio": [],
+      "trade_portfolio": [],
+      "trade_counterparty": [],
+      "trade_instrument": [],
+      "trade_trader": [],
+      "trade_status_history": []
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "text_number": 202,
+  "id": "SB-202",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0202",
+  "question": "Background / Context\n\nThe project involves creating an `EmployeeManagementSystem`, a comprehensive database solution to manage employee records efficiently. This system supports an organizational structure that includes departments and positions, with details on employee roles and management hierarchies.\n\nObjectives\n\n- Develop a database to maintain structured employee data.\n- Enable linkages between employees, departments, and positions.\n- Facilitate management tracking and hierarchical relationships.\n\nStakeholders & Users\n\n- Administrators: Responsible for entering and updating employee, department, and position data.\n- HR Personnel: Utilize the system to retrieve and manage employee records.\n- Managers: Access department and management hierarchy information.\n\nFunctional Descriptions\n\n1. Employee Management:\n   - Store and manage details of each employee including first name, last name, email, phone number, address, birth date, salary, and hire date.\n   - Assign employees to specific departments and positions.\n\n2. Department & Position Management:\n   - Maintain department information such as department ID, name, manager, location, and description.\n   - Record various positions with attributes including position ID, name, description, and salary range.\n\n3. Relationships & Hierarchies:\n   - Link employees to their respective departments and positions.\n   - Track the historical allocation of employees to departments over time.\n   - Manage employee-manager relationships to reflect reporting lines.\n\nNon-Functional Descriptions\n\n- The database must ensure data integrity and enforce referential constraints.\n- It should provide easy scalability to accommodate organizational growth.\n- Designed with robust security to protect sensitive employee information.",
+  "ddl": "-- Schema for database: schemabench_0202\nCREATE TABLE employees (\n  employee_id INT(11) NOT NULL AUTO_INCREMENT,\n  first_name VARCHAR(255) NOT NULL,\n  last_name VARCHAR(255) NOT NULL,\n  email VARCHAR(255) NOT NULL,\n  phone_number VARCHAR(255) NOT NULL,\n  address VARCHAR(255) NOT NULL,\n  birth_date DATE NOT NULL,\n  salary DECIMAL(10,2) NOT NULL,\n  hire_date DATE NOT NULL,\n  PRIMARY KEY (employee_id),\n  UNIQUE KEY (email)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE departments (\n  department_id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  manager_id INT(11) NOT NULL,\n  location VARCHAR(255) NOT NULL,\n  description TEXT NOT NULL,\n  PRIMARY KEY (department_id),\n  FOREIGN KEY (manager_id) REFERENCES employees(employee_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE positions (\n  position_id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  description TEXT NOT NULL,\n  salary_range DECIMAL(10,2) NOT NULL,\n  PRIMARY KEY (position_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE employee_department_history (\n  employee_id INT(11) NOT NULL,\n  department_id INT(11) NOT NULL,\n  start_date DATE NOT NULL,\n  end_date DATE NOT NULL,\n  PRIMARY KEY (employee_id, department_id, start_date),\n  FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE employee_position_history (\n  employee_id INT(11) NOT NULL,\n  position_id INT(11) NOT NULL,\n  start_date DATE NOT NULL,\n  end_date DATE NOT NULL,\n  PRIMARY KEY (employee_id, position_id, start_date),\n  FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (position_id) REFERENCES positions(position_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE employee_manager_history (\n  employee_id INT(11) NOT NULL,\n  manager_id INT(11) NOT NULL,\n  start_date DATE NOT NULL,\n  end_date DATE NOT NULL,\n  PRIMARY KEY (employee_id, manager_id, start_date),\n  FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (manager_id) REFERENCES employees(employee_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "schemabench_0202",
+    "tables": [
+      "employees",
+      "departments",
+      "positions",
+      "employee_department_history",
+      "employee_position_history",
+      "employee_manager_history"
+    ],
+    "columns_by_table": {
+      "employees": [],
+      "departments": [],
+      "positions": [],
+      "employee_department_history": [],
+      "employee_position_history": [],
+      "employee_manager_history": []
+    }
+  }
+}

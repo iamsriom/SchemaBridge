@@ -1,0 +1,77 @@
+-- Schema for database: schemabench_0088
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL,
+  `level_id` int(11) NOT NULL,
+  `experience_points` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `unique_level_experience` (`level_id`, `experience_points`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`level_id`) REFERENCES `levels` (`level_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `levels` (
+  `level_id` int(11) NOT NULL,
+  `experience_required` int(11) NOT NULL,
+  PRIMARY KEY (`level_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `experiences` (
+  `experience_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `level_id` int(11) NOT NULL,
+  PRIMARY KEY (`experience_id`),
+  CONSTRAINT `experiences_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `experiences_ibfk_2` FOREIGN KEY (`level_id`) REFERENCES `levels` (`level_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `streaks` (
+  `streak_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`streak_id`),
+  CONSTRAINT `streaks_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `streak_activities` (
+  `activity_id` int(11) NOT NULL,
+  `activity_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`activity_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `streak_histories` (
+  `history_id` int(11) NOT NULL,
+  `streak_id` int(11) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  `activities_performed` int(11) NOT NULL,
+  `total_experience` int(11) NOT NULL,
+  PRIMARY KEY (`history_id`),
+  CONSTRAINT `streak_histories_ibfk_1` FOREIGN KEY (`streak_id`) REFERENCES `streaks` (`streak_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `achievements` (
+  `achievement_id` int(11) NOT NULL,
+  `achievement_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`achievement_id`),
+  UNIQUE KEY `unique_achievement_name` (`achievement_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `achievement_user` (
+  `achievement_user_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `achievement_id` int(11) NOT NULL,
+  `activities_performed` int(11) NOT NULL,
+  `total_experience` int(11) NOT NULL,
+  PRIMARY KEY (`achievement_user_id`),
+  CONSTRAINT `achievement_user_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `achievement_user_ibfk_2` FOREIGN KEY (`achievement_id`) REFERENCES `achievements` (`achievement_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `experience_audits` (
+  `audit_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `level_id` int(11) NOT NULL,
+  `change_reason` varchar(255) NOT NULL,
+  `change_date` datetime NOT NULL,
+  PRIMARY KEY (`audit_id`),
+  CONSTRAINT `experience_audits_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `experience_audits_ibfk_2` FOREIGN KEY (`level_id`) REFERENCES `levels` (`level_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,20 @@
+{
+  "text_number": 358,
+  "id": "67552f0a13602ec03b41a932",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "rschema_0358",
+  "question": "Business requirements description of workflow management system: The system is used to manage complex business processes and supports the recording and monitoring of scheduled tasks and execution instances. Each scheduled task has a task ID, task type, lock information, execution instance ID, process instance ID, process definition ID, number of retries, exception information, expiration time, repeat configuration, processor configuration, and tenant ID. The system needs to record the execution of each task, including the start time, end time, execution result, and exception information of the task. Each execution of a task needs to be associated with an execution instance, which has an execution instance ID, process instance ID, and process definition ID. An execution instance can include the execution of multiple tasks. By recording the relationship between tasks and execution instances, the system can track the execution of each task and support task scheduling, retries, and exception handling. At the same time, the system needs to support multi-tenant scenarios to ensure the isolation of task data of different tenants.",
+  "ddl": "--Schemafordatabase:rschema_0358\n--Foreachtable:\n\nCREATE TABLE `scheduled_tasks` (\n  `task_id` int(11) NOT NULL,\n  `task_type` varchar(255) NOT NULL,\n  `lock_info` varchar(255),\n  `execution_instance_id` int(11) NOT NULL,\n  `process_instance_id` int(11) NOT NULL,\n  `process_definition_id` int(11) NOT NULL,\n  `num_retries` int(11) NOT NULL DEFAULT 0,\n  `exception_info` text,\n  `expiration_time` datetime NOT NULL,\n  `repeat_config` varchar(255),\n  `processor_config` varchar(255),\n  `tenant_id` int(11) NOT NULL,\n  PRIMARY KEY (`task_id`),\n  KEY `fk_execution_instance_id` (`execution_instance_id`),\n  KEY `fk_process_instance_id` (`process_instance_id`),\n  KEY `fk_process_definition_id` (`process_definition_id`),\n  KEY `fk_tenant_id` (`tenant_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `execution_instances` (\n  `execution_instance_id` int(11) NOT NULL,\n  `process_instance_id` int(11) NOT NULL,\n  `process_definition_id` int(11) NOT NULL,\n  `start_time` datetime NOT NULL,\n  `end_time` datetime,\n  `execution_result` varchar(255),\n  `exception_info` text,\n  PRIMARY KEY (`execution_instance_id`),\n  KEY `fk_process_instance_id` (`process_instance_id`),\n  KEY `fk_process_definition_id` (`process_definition_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nALTER TABLE `execution_instances`\n  ADD CONSTRAINT `fk_process_instance_id` FOREIGN KEY (`process_instance_id`) REFERENCES `scheduled_tasks` (`process_instance_id`) ON DELETE CASCADE ON UPDATE CASCADE;\n\nALTER TABLE `execution_instances`\n  ADD CONSTRAINT `fk_process_definition_id` FOREIGN KEY (`process_definition_id`) REFERENCES `scheduled_tasks` (`process_definition_id`) ON DELETE CASCADE ON UPDATE CASCADE;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "scheduled_tasks",
+      "execution_instances"
+    ],
+    "columns_by_table": {
+      "scheduled_tasks": [],
+      "execution_instances": []
+    }
+  }
+}

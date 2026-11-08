@@ -1,0 +1,90 @@
+-- Schema for database: schemabench_0187
+CREATE TABLE `region` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `zip_code` varchar(10) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `distributor` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dealership` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `distributor_id` int(11) NOT NULL,
+  `region_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `dealership_ibfk_1` FOREIGN KEY (`distributor_id`) REFERENCES `distributor` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `dealership_ibfk_2` FOREIGN KEY (`region_id`) REFERENCES `region` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vehicle` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `make` varchar(255) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  `body_type` varchar(50) NOT NULL,
+  `model_year` int(4) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `dealership_id` int(11) NOT NULL,
+  `distributor_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `vehicle_ibfk_1` FOREIGN KEY (`dealership_id`) REFERENCES `dealership` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `vehicle_ibfk_2` FOREIGN KEY (`distributor_id`) REFERENCES `distributor` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `manager` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `salary` decimal(10,2) NOT NULL,
+  `bonus` decimal(10,2) NOT NULL,
+  `dealership_id` int(11) NOT NULL,
+  `distributor_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `manager_ibfk_1` FOREIGN KEY (`dealership_id`) REFERENCES `dealership` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `manager_ibfk_2` FOREIGN KEY (`distributor_id`) REFERENCES `distributor` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_agent` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `salary` decimal(10,2) NOT NULL,
+  `manager_id` int(11) NOT NULL,
+  `dealership_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `sales_agent_ibfk_1` FOREIGN KEY (`manager_id`) REFERENCES `manager` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_agent_ibfk_2` FOREIGN KEY (`dealership_id`) REFERENCES `dealership` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `phone_number` varchar(15) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `sales_agent_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`sales_agent_id`) REFERENCES `sales_agent` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `insurance` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `policy_type` varchar(255) NOT NULL,
+  `renewal_date` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `deal` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `vehicle_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `sales_agent_id` int(11) NOT NULL,
+  `insurance_id` int(11) NOT NULL,
+  `deal_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `deal_ibfk_1` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicle` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `deal_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `deal_ibfk_3` FOREIGN KEY (`sales_agent_id`) REFERENCES `sales_agent` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `deal_ibfk_4` FOREIGN KEY (`insurance_id`) REFERENCES `insurance` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

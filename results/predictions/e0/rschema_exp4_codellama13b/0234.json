@@ -1,0 +1,28 @@
+{
+  "text_number": 234,
+  "id": "67552f0a13602ec03b41a911",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "rschema_0234",
+  "question": "The advertising management system requires the management of multi-level tag information. Each tag includes a primary category and a secondary category, with corresponding numerical codes assigned to each. The system needs to track the creation time and update time for each tag to facilitate subsequent queries and statistics. Additionally, the system should use a status field to indicate whether a tag is active. The system should store the tag's categories, codes, creation and update times, as well as the tag's status. It should ensure support for quick queries based on categories and codes.",
+  "ddl": "-- Schema for database: rschema_0234\n\nCREATE TABLE `tags` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `primary_category` varchar(255) NOT NULL,\n  `secondary_category` varchar(255) NOT NULL,\n  `primary_code` int(11) NOT NULL,\n  `secondary_code` int(11) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  `status` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `primary_category_secondary_category_unique` (`primary_category`,`secondary_category`),\n  KEY `primary_category_index` (`primary_category`),\n  KEY `secondary_category_index` (`secondary_category`),\n  KEY `primary_code_index` (`primary_code`),\n  KEY `secondary_code_index` (`secondary_code`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tag_categories` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `category` varchar(255) NOT NULL,\n  `code` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `category_code_unique` (`category`,`code`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tag_statuses` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `status` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tag_history` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `tag_id` int(11) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tag_category_history` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `tag_id` int(11) NOT NULL,\n  `category_id` int(11) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`category_id`) REFERENCES `tag_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tag_status_history` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `tag_id` int(11) NOT NULL,\n  `status_id` int(11) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`status_id`) REFERENCES `tag_statuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "tags",
+      "tag_categories",
+      "tag_statuses",
+      "tag_history",
+      "tag_category_history",
+      "tag_status_history"
+    ],
+    "columns_by_table": {
+      "tags": [],
+      "tag_categories": [],
+      "tag_statuses": [],
+      "tag_history": [],
+      "tag_category_history": [],
+      "tag_status_history": []
+    }
+  }
+}

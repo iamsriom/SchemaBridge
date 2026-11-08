@@ -1,0 +1,93 @@
+-- Schema for database: schemabench_0069
+CREATE TABLE `oauth_applications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `redirect_uri` varchar(255) NOT NULL,
+  `client_id` varchar(255) NOT NULL,
+  `client_secret` char(32) NOT NULL,
+  `client_type` enum('confidential','public') NOT NULL DEFAULT 'confidential',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `client_id` (`client_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth_authorization_codes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_id` int(11) NOT NULL,
+  `code` char(32) NOT NULL,
+  `redirect_uri` varchar(255) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `expires_in` int(11) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `application_id` (`application_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `oauth_authorization_codes_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `oauth_applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `oauth_authorization_codes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `oauth_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth_access_tokens` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `token` char(32) NOT NULL,
+  `expires_in` int(11) NOT NULL,
+  `scopes` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `application_id` (`application_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `oauth_access_tokens_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `oauth_applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `oauth_access_tokens_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `oauth_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth_refresh_tokens` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `token` char(32) NOT NULL,
+  `expires_in` int(11) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `application_id` (`application_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `oauth_refresh_tokens_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `oauth_applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `oauth_refresh_tokens_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `oauth_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth_users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` char(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth_scopes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth_scope_grants` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_id` int(11) NOT NULL,
+  `scope_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `application_id` (`application_id`),
+  KEY `scope_id` (`scope_id`),
+  CONSTRAINT `oauth_scope_grants_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `oauth_applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `oauth_scope_grants_ibfk_2` FOREIGN KEY (`scope_id`) REFERENCES `oauth_scopes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth_token_introspection` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `token` char(32) NOT NULL,
+  `client_id` varchar(255) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `scopes` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

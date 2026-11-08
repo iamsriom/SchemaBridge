@@ -1,0 +1,66 @@
+-- Schema for database: schemabench_0171
+CREATE TABLE `audit` (
+  `AuditID` int(11) NOT NULL AUTO_INCREMENT,
+  `TradeID` int(11) NOT NULL,
+  `Activity` varchar(255) NOT NULL,
+  `ActivityTimestamp` timestamp NOT NULL,
+  PRIMARY KEY (`AuditID`),
+  CONSTRAINT `audit_ibfk_1` FOREIGN KEY (`TradeID`) REFERENCES `trades` (`TradeID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `counterparties` (
+  `TradeID` int(11) NOT NULL,
+  `CounterpartyID` int(11) NOT NULL,
+  `CounterpartyName` varchar(255) NOT NULL,
+  `ExposureLimit` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`TradeID`, `CounterpartyID`),
+  CONSTRAINT `counterparties_ibfk_1` FOREIGN KEY (`TradeID`) REFERENCES `trades` (`TradeID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `instrument` (
+  `InstrumentID` int(11) NOT NULL AUTO_INCREMENT,
+  `InstrumentLabel` varchar(255) NOT NULL,
+  `TradeID` int(11) NOT NULL,
+  `MaturityDate` date NOT NULL,
+  `SettlementType` varchar(50) NOT NULL,
+  `Currency` varchar(10) NOT NULL,
+  PRIMARY KEY (`InstrumentID`),
+  CONSTRAINT `instrument_ibfk_1` FOREIGN KEY (`TradeID`) REFERENCES `trades` (`TradeID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trader` (
+  `TraderID` int(11) NOT NULL AUTO_INCREMENT,
+  `TraderName` varchar(255) NOT NULL,
+  `TraderEmail` varchar(255) NOT NULL,
+  `TradeID` int(11) NOT NULL,
+  PRIMARY KEY (`TraderID`),
+  CONSTRAINT `trader_ibfk_1` FOREIGN KEY (`TradeID`) REFERENCES `trades` (`TradeID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trades` (
+  `TradeID` int(11) NOT NULL AUTO_INCREMENT,
+  `Portfolio` varchar(255) NOT NULL,
+  `TradeDate` date NOT NULL,
+  `InstrumentID` int(11) NOT NULL,
+  `Quantity` int(11) NOT NULL,
+  `Price` decimal(10,2) NOT NULL,
+  `Typology` varchar(50) NOT NULL,
+  `CounterpartyID` int(11) NOT NULL,
+  `TraderID` int(11) NOT NULL,
+  `Notional` decimal(10,2) NOT NULL,
+  `FixedRate` decimal(10,4) NOT NULL,
+  `FloatRateIndex` varchar(50) NOT NULL,
+  `Spread` decimal(10,4) NOT NULL,
+  PRIMARY KEY (`TradeID`),
+  CONSTRAINT `trades_ibfk_1` FOREIGN KEY (`InstrumentID`) REFERENCES `instrument` (`InstrumentID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trades_ibfk_2` FOREIGN KEY (`CounterpartyID`) REFERENCES `counterparties` (`CounterpartyID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trades_ibfk_3` FOREIGN KEY (`TraderID`) REFERENCES `trader` (`TraderID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tradestatus` (
+  `TradeID` int(11) NOT NULL,
+  `StatusID` int(11) NOT NULL,
+  `StatusName` varchar(255) NOT NULL,
+  PRIMARY KEY (`TradeID`),
+  CONSTRAINT `tradestatus_ibfk_1` FOREIGN KEY (`TradeID`) REFERENCES `trades` (`TradeID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

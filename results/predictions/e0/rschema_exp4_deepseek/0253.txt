@@ -1,0 +1,62 @@
+-- Schema for database: `instant_messaging_system`
+
+-- For table: `users`
+
+CREATE TABLE `users` (
+  `UserID` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `contact_information` varchar(255) NOT NULL,
+  `registration_time` datetime NOT NULL,
+  PRIMARY KEY (`UserID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `group_chats`
+
+CREATE TABLE `group_chats` (
+  `GroupChatID` int(11) NOT NULL AUTO_INCREMENT,
+  `group_chat_name` varchar(255) NOT NULL,
+  `creator_UserID` int(11) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `number_of_members` int(11) NOT NULL,
+  PRIMARY KEY (`GroupChatID`),
+  FOREIGN KEY (`creator_UserID`) REFERENCES `users` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `chat_records`
+
+CREATE TABLE `chat_records` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sender_UserID` int(11) NOT NULL,
+  `receiver_UserID` int(11) NOT NULL,
+  `send_time` datetime NOT NULL,
+  `message_type` varchar(255) NOT NULL,
+  `message_content` varchar(255) NOT NULL,
+  `read_time` datetime NOT NULL,
+  PRIMARY KEY (`record_id`),
+  FOREIGN KEY (`sender_UserID`) REFERENCES `users` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`receiver_UserID`) REFERENCES `users` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `user_joining_group_chats`
+
+CREATE TABLE `user_joining_group_chats` (
+  `UserID` int(11) NOT NULL,
+  `GroupChatID` int(11) NOT NULL,
+  `join_time` datetime NOT NULL,
+  `notes` varchar(255),
+  PRIMARY KEY (`UserID`,`GroupChatID`),
+  FOREIGN KEY (`UserID`) REFERENCES `users` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`GroupChatID`) REFERENCES `group_chats` (`GroupChatID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `user_leaving_group_chats`
+
+CREATE TABLE `user_leaving_group_chats` (
+  `UserID` int(11) NOT NULL,
+  `GroupChatID` int(11) NOT NULL,
+  `leave_time` datetime NOT NULL,
+  PRIMARY KEY (`UserID`,`GroupChatID`),
+  FOREIGN KEY (`UserID`) REFERENCES `users` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`GroupChatID`) REFERENCES `group_chats` (`GroupChatID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

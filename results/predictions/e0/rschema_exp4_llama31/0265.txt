@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0265
+CREATE TABLE `chessboards` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `chess_pieces` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `chessboard_id` int(11) NOT NULL,
+  `color` varchar(255) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `chess_pieces_ibfk_1` (`chessboard_id`),
+  CONSTRAINT `chess_pieces_ibfk_1` FOREIGN KEY (`chessboard_id`) REFERENCES `chessboards` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inspections` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `chess_piece_id` int(11) NOT NULL,
+  `inspection_time` datetime NOT NULL,
+  `result` varchar(255) NOT NULL,
+  `defect_type` varchar(255),
+  PRIMARY KEY (`id`),
+  KEY `inspections_ibfk_1` (`chess_piece_id`),
+  CONSTRAINT `inspections_ibfk_1` FOREIGN KEY (`chess_piece_id`) REFERENCES `chess_pieces` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `quality_alerts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `inspection_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `quality_alerts_ibfk_1` (`inspection_id`),
+  CONSTRAINT `quality_alerts_ibfk_1` FOREIGN KEY (`inspection_id`) REFERENCES `inspections` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `quality_models` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `quality_results` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `quality_model_id` int(11) NOT NULL,
+  `chess_piece_id` int(11) NOT NULL,
+  `model_running_time` datetime NOT NULL,
+  `result` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `quality_results_ibfk_1` (`quality_model_id`),
+  KEY `quality_results_ibfk_2` (`chess_piece_id`),
+  CONSTRAINT `quality_results_ibfk_1` FOREIGN KEY (`quality_model_id`) REFERENCES `quality_models` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `quality_results_ibfk_2` FOREIGN KEY (`chess_piece_id`) REFERENCES `chess_pieces` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

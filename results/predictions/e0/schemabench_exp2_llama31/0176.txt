@@ -1,0 +1,82 @@
+-- Schema for database: schemabench_0176
+CREATE TABLE `departments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `job_roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `suppliers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `water_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `water_consumption` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date` datetime NOT NULL,
+  `water_type_id` int(11) NOT NULL,
+  `quantity` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `water_type_id` (`water_type_id`),
+  CONSTRAINT `water_consumption_ibfk_1` FOREIGN KEY (`water_type_id`) REFERENCES `water_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `water_deliveries` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_id` int(11) NOT NULL,
+  `water_type_id` int(11) NOT NULL,
+  `date` datetime NOT NULL,
+  `quantity` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `supplier_id` (`supplier_id`),
+  KEY `water_type_id` (`water_type_id`),
+  CONSTRAINT `water_deliveries_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `water_deliveries_ibfk_2` FOREIGN KEY (`water_type_id`) REFERENCES `water_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `worker_shifts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `workers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `department_id` int(11) NOT NULL,
+  `job_role_id` int(11) NOT NULL,
+  `shift_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `department_id` (`department_id`),
+  KEY `job_role_id` (`job_role_id`),
+  KEY `shift_id` (`shift_id`),
+  CONSTRAINT `workers_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `workers_ibfk_2` FOREIGN KEY (`job_role_id`) REFERENCES `job_roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `workers_ibfk_3` FOREIGN KEY (`shift_id`) REFERENCES `worker_shifts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `water_balance` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `water_type_id` int(11) NOT NULL,
+  `balance` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `water_type_id` (`water_type_id`),
+  CONSTRAINT `water_balance_ibfk_1` FOREIGN KEY (`water_type_id`) REFERENCES `water_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,77 @@
+-- Schema for database: `social_media_platform`
+
+-- Table: `users`
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `profile_photo` varchar(255) DEFAULT NULL,
+  `bio` text,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `posts`
+CREATE TABLE `posts` (
+  `post_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `caption` text,
+  `location` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`post_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `media`
+CREATE TABLE `media` (
+  `media_id` int(11) NOT NULL AUTO_INCREMENT,
+  `post_id` int(11) NOT NULL,
+  `media_type` enum('photo','video') NOT NULL,
+  `media_url` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`media_id`),
+  KEY `post_id` (`post_id`),
+  CONSTRAINT `media_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `interactions`
+CREATE TABLE `interactions` (
+  `user_id` int(11) NOT NULL,
+  `post_id` int(11) NOT NULL,
+  `interaction_type` enum('like','comment','follow','bookmark') NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`,`post_id`,`interaction_type`),
+  KEY `post_id` (`post_id`),
+  CONSTRAINT `interactions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `interactions_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `hashtags`
+CREATE TABLE `hashtags` (
+  `hashtag_id` int(11) NOT NULL AUTO_INCREMENT,
+  `hashtag_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`hashtag_id`),
+  UNIQUE KEY `hashtag_name` (`hashtag_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `post_hashtags`
+CREATE TABLE `post_hashtags` (
+  `post_id` int(11) NOT NULL,
+  `hashtag_id` int(11) NOT NULL,
+  PRIMARY KEY (`post_id`,`hashtag_id`),
+  KEY `hashtag_id` (`hashtag_id`),
+  CONSTRAINT `post_hashtags_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `post_hashtags_ibfk_2` FOREIGN KEY (`hashtag_id`) REFERENCES `hashtags` (`hashtag_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `login_tracking`
+CREATE TABLE `login_tracking` (
+  `user_id` int(11) NOT NULL,
+  `login_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `ip_address` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`,`login_time`),
+  CONSTRAINT `login_tracking_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,117 @@
+-- Schema for database: rschema_0306
+
+CREATE TABLE tasks (
+  task_id INT(11) NOT NULL AUTO_INCREMENT,
+  task_name VARCHAR(255) NOT NULL,
+  task_description VARCHAR(255) NOT NULL,
+  class_name VARCHAR(255) NOT NULL,
+  persistence_flag VARCHAR(255) NOT NULL,
+  concurrent_execution_flag VARCHAR(255) NOT NULL,
+  PRIMARY KEY (task_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE schedulers (
+  scheduler_id INT(11) NOT NULL AUTO_INCREMENT,
+  scheduler_name VARCHAR(255) NOT NULL,
+  scheduler_status VARCHAR(255) NOT NULL,
+  scheduler_configuration VARCHAR(255) NOT NULL,
+  scheduler_logs VARCHAR(255) NOT NULL,
+  PRIMARY KEY (scheduler_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE triggers (
+  trigger_id INT(11) NOT NULL AUTO_INCREMENT,
+  trigger_name VARCHAR(255) NOT NULL,
+  trigger_type VARCHAR(255) NOT NULL,
+  repeat_count INT(11) NOT NULL,
+  repeat_interval INT(11) NOT NULL,
+  triggered_count INT(11) NOT NULL,
+  PRIMARY KEY (trigger_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE simple_triggers (
+  trigger_id INT(11) NOT NULL,
+  trigger_name VARCHAR(255) NOT NULL,
+  trigger_type VARCHAR(255) NOT NULL,
+  repeat_count INT(11) NOT NULL,
+  repeat_interval INT(11) NOT NULL,
+  triggered_count INT(11) NOT NULL,
+  PRIMARY KEY (trigger_id),
+  FOREIGN KEY (trigger_id) REFERENCES triggers(trigger_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE cron_triggers (
+  trigger_id INT(11) NOT NULL,
+  trigger_name VARCHAR(255) NOT NULL,
+  trigger_type VARCHAR(255) NOT NULL,
+  cron_expression VARCHAR(255) NOT NULL,
+  timezone VARCHAR(255) NOT NULL,
+  PRIMARY KEY (trigger_id),
+  FOREIGN KEY (trigger_id) REFERENCES triggers(trigger_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE complex_triggers (
+  trigger_id INT(11) NOT NULL,
+  trigger_name VARCHAR(255) NOT NULL,
+  trigger_type VARCHAR(255) NOT NULL,
+  string_attribute VARCHAR(255) NOT NULL,
+  integer_attribute INT(11) NOT NULL,
+  long_integer_attribute BIGINT(20) NOT NULL,
+  decimal_attribute DECIMAL(10,2) NOT NULL,
+  boolean_attribute BOOLEAN NOT NULL,
+  PRIMARY KEY (trigger_id),
+  FOREIGN KEY (trigger_id) REFERENCES triggers(trigger_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE blob_triggers (
+  trigger_id INT(11) NOT NULL,
+  trigger_name VARCHAR(255) NOT NULL,
+  trigger_type VARCHAR(255) NOT NULL,
+  binary_attribute BLOB NOT NULL,
+  PRIMARY KEY (trigger_id),
+  FOREIGN KEY (trigger_id) REFERENCES triggers(trigger_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE locks (
+  lock_id INT(11) NOT NULL AUTO_INCREMENT,
+  lock_name VARCHAR(255) NOT NULL,
+  lock_status VARCHAR(255) NOT NULL,
+  lock_description VARCHAR(255) NOT NULL,
+  PRIMARY KEY (lock_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE task_to_trigger (
+  task_id INT(11) NOT NULL,
+  trigger_id INT(11) NOT NULL,
+  next_execution_time DATETIME NOT NULL,
+  last_execution_time DATETIME NOT NULL,
+  priority INT(11) NOT NULL,
+  trigger_status VARCHAR(255) NOT NULL,
+  start_time DATETIME NOT NULL,
+  end_time DATETIME NOT NULL,
+  calendar_name VARCHAR(255) NOT NULL,
+  fault_instruction VARCHAR(255) NOT NULL,
+  PRIMARY KEY (task_id, trigger_id),
+  FOREIGN KEY (task_id) REFERENCES tasks(task_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (trigger_id) REFERENCES triggers(trigger_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE scheduler_to_task (
+  scheduler_id INT(11) NOT NULL,
+  task_id INT(11) NOT NULL,
+  trigger_id INT(11) NOT NULL,
+  PRIMARY KEY (scheduler_id, task_id, trigger_id),
+  FOREIGN KEY (scheduler_id) REFERENCES schedulers(scheduler_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (task_id) REFERENCES tasks(task_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (trigger_id) REFERENCES triggers(trigger_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE scheduler_to_lock (
+  scheduler_id INT(11) NOT NULL,
+  lock_id INT(11) NOT NULL,
+  acquisition_time DATETIME NOT NULL,
+  release_time DATETIME NOT NULL,
+  PRIMARY KEY (scheduler_id, lock_id),
+  FOREIGN KEY (scheduler_id) REFERENCES schedulers(scheduler_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (lock_id) REFERENCES locks(lock_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

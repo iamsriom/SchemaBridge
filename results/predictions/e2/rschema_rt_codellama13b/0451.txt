@@ -1,0 +1,49 @@
+-- Schema for database: rschema_0451
+CREATE TABLE `intrusion_detection_record` (
+  `record_id` int(11) NOT NULL,
+  `attack_type` varchar(255) NOT NULL,
+  `destination_ip` varchar(45) NOT NULL,
+  `destination_port` int(11) NOT NULL,
+  `detection_time` datetime NOT NULL,
+  `source_ip` varchar(45) NOT NULL,
+  `source_port` int(11) NOT NULL,
+  `threat_level` varchar(50) NOT NULL,
+  PRIMARY KEY (`record_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `knowledge_base` (
+  `knowledge_id` int(11) NOT NULL,
+  `category` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `source` varchar(255) NOT NULL,
+  `reliability` varchar(50) NOT NULL,
+  PRIMARY KEY (`knowledge_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `response_plan` (
+  `plan_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `generation_time` datetime NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `record_id` int(11) NOT NULL,
+  PRIMARY KEY (`plan_id`),
+  CONSTRAINT `response_plan_ibfk_1` FOREIGN KEY (`record_id`) REFERENCES `intrusion_detection_record` (`record_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alarm_information` (
+  `alarm_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `level` varchar(50) NOT NULL,
+  `time` datetime NOT NULL,
+  `intrusion_detection_record_id` int(11) NOT NULL,
+  PRIMARY KEY (`alarm_id`),
+  CONSTRAINT `alarm_information_ibfk_1` FOREIGN KEY (`intrusion_detection_record_id`) REFERENCES `intrusion_detection_record` (`record_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `plan_knowledge_base` (
+  `plan_id` int(11) NOT NULL,
+  `knowledge_id` int(11) NOT NULL,
+  PRIMARY KEY (`plan_id`, `knowledge_id`),
+  CONSTRAINT `plan_knowledge_base_ibfk_1` FOREIGN KEY (`knowledge_id`) REFERENCES `knowledge_base` (`knowledge_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `plan_knowledge_base_ibfk_2` FOREIGN KEY (`plan_id`) REFERENCES `response_plan` (`plan_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

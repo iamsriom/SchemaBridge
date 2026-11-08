@@ -1,0 +1,71 @@
+-- Schema for database: rschema_0103
+
+CREATE TABLE `employees` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(255) NOT NULL,
+  `date_of_birth` datetime NOT NULL,
+  `hire_date` datetime NOT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `position_history` (
+  `employee_id` int(11) NOT NULL,
+  `original_department` varchar(255) NOT NULL,
+  `original_position` varchar(255) NOT NULL,
+  `current_department` varchar(255) NOT NULL,
+  `current_position` varchar(255) NOT NULL,
+  `entry_date` datetime NOT NULL,
+  `departure_date` datetime NOT NULL,
+  PRIMARY KEY (`employee_id`, `entry_date`),
+  FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `departments` (
+  `department_code` varchar(255) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
+  `person_in_charge` varchar(255) NOT NULL,
+  PRIMARY KEY (`department_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_department_affiliations` (
+  `employee_id` int(11) NOT NULL,
+  `department_code` varchar(255) NOT NULL,
+  `entry_date` datetime NOT NULL,
+  `departure_date` datetime NOT NULL,
+  PRIMARY KEY (`employee_id`, `department_code`, `entry_date`),
+  FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`department_code`) REFERENCES `departments` (`department_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `salary_standards` (
+  `standard_description` varchar(255) NOT NULL,
+  `standard_value` int(11) NOT NULL,
+  PRIMARY KEY (`standard_description`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `salaries` (
+  `employee_id` int(11) NOT NULL,
+  `standard_description` varchar(255) NOT NULL,
+  `standard_value` int(11) NOT NULL,
+  `payment_date` datetime NOT NULL,
+  PRIMARY KEY (`employee_id`, `payment_date`),
+  FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`standard_description`) REFERENCES `salary_standards` (`standard_description`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `salary_inquiries` (
+  `employee_id` int(11) NOT NULL,
+  `inquiry_date` datetime NOT NULL,
+  `inquiry_result` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`, `inquiry_date`),
+  FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `departmental_salary_statistics` (
+  `department_code` varchar(255) NOT NULL,
+  `statistics_date` datetime NOT NULL,
+  `statistics_result` int(11) NOT NULL,
+  PRIMARY KEY (`department_code`, `statistics_date`),
+  FOREIGN KEY (`department_code`) REFERENCES `departments` (`department_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

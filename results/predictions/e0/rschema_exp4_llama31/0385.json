@@ -1,0 +1,22 @@
+{
+  "text_number": 385,
+  "id": "67552f0a13602ec03b41a973",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0385",
+  "question": "The Bank Account and Transaction Management System is used to track and manage user accounts, transactions, and transaction statuses. The system can manage different currency types and record detailed information for each account, including account balance, frozen amount, and the currency used by the account. The system is able to record transactions between accounts, including the initiating account, receiving account, transaction amount, and transaction status. Each transaction has a status (such as success, failure, processing) and detailed error information is recorded when a transaction fails for subsequent analysis.\n\nThe system also includes transaction status management, supporting tracking and updating of transaction statuses to ensure transparency and traceability of the transaction process. The bank account information management function allows querying and updating of account balances and frozen amounts, ensuring the accuracy of account data. Through these functions, the system is able to support complex bank transaction processing flows, including transfer, deposit, withdrawal, and other operations, while supporting transaction status updates and failure reason recording.",
+  "ddl": "-- Schema for database: rschema_0385\nCREATE TABLE `accounts` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `currency` varchar(255) NOT NULL,\n  `balance` decimal(10,2) NOT NULL DEFAULT 0.00,\n  `frozen_amount` decimal(10,2) NOT NULL DEFAULT 0.00,\n  PRIMARY KEY (`id`),\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `transactions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `initiating_account_id` int(11) NOT NULL,\n  `receiving_account_id` int(11) NOT NULL,\n  `amount` decimal(10,2) NOT NULL,\n  `status` enum('success','failure','processing') NOT NULL DEFAULT 'processing',\n  `error_info` text,\n  PRIMARY KEY (`id`),\n  KEY `FK_transactions_accounts` (`initiating_account_id`),\n  KEY `FK_transactions_accounts_2` (`receiving_account_id`),\n  CONSTRAINT `FK_transactions_accounts` FOREIGN KEY (`initiating_account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `FK_transactions_accounts_2` FOREIGN KEY (`receiving_account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `transaction_statuses` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `transaction_id` int(11) NOT NULL,\n  `status` enum('success','failure','processing') NOT NULL DEFAULT 'processing',\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `FK_transaction_statuses_transactions` (`transaction_id`),\n  CONSTRAINT `FK_transaction_statuses_transactions` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "accounts",
+      "transactions",
+      "transaction_statuses"
+    ],
+    "columns_by_table": {
+      "accounts": [],
+      "transactions": [],
+      "transaction_statuses": []
+    }
+  }
+}

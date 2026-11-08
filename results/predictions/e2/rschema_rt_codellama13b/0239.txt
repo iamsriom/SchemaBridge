@@ -1,0 +1,30 @@
+-- Schema for database: rschema_0239
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `user_name` varchar(255) NOT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  `user_permissions` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `article` (
+  `article_id` int(11) NOT NULL,
+  `number_of_likes` int(11) NOT NULL,
+  `number_of_reads` int(11) NOT NULL,
+  `publication_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `publishing_user` int(11) NOT NULL,
+  `status` enum('draft', 'published') DEFAULT 'draft',
+  PRIMARY KEY (`article_id`),
+  CONSTRAINT `article_ibfk_1` FOREIGN KEY (`publishing_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CHECK (`status` IN ('draft', 'published'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comment` (
+  `comment_id` int(11) NOT NULL,
+  `publication_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `publishing_user` int(11) NOT NULL,
+  `status` enum('pending', 'approved') DEFAULT 'pending',
+  PRIMARY KEY (`comment_id`),
+  CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`publishing_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CHECK (`status` IN ('pending', 'approved'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

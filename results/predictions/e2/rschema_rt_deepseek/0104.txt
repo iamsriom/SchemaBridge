@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0104
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `account_status` varchar(255) DEFAULT NULL,
+  `email_address` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `email_campaign` (
+  `campaign_id` int(11) NOT NULL,
+  `campaign_subject` varchar(255) DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `scheduled_sending_time` datetime DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`campaign_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `mailing_list` (
+  `mailing_list_id` int(11) NOT NULL,
+  `list_name` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`mailing_list_id`),
+  CONSTRAINT `mailing_list_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscriber` (
+  `subscriber_id` int(11) NOT NULL,
+  `email_address` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `subscription_status` varchar(255) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`subscriber_id`),
+  CONSTRAINT `subscriber_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `campaign_mailing_list_association` (
+  `mailing_list_id` int(11) NOT NULL,
+  `campaign_id` int(11) NOT NULL,
+  PRIMARY KEY (`mailing_list_id`, `campaign_id`),
+  CONSTRAINT `campaign_mailing_list_association_ibfk_1` FOREIGN KEY (`mailing_list_id`) REFERENCES `mailing_list` (`mailing_list_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `campaign_mailing_list_association_ibfk_2` FOREIGN KEY (`campaign_id`) REFERENCES `email_campaign` (`campaign_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `message` (
+  `subscriber_id` int(11) NOT NULL,
+  `campaign_id` int(11) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `message_status` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`subscriber_id`, `campaign_id`, `creation_time`),
+  CONSTRAINT `message_ibfk_1` FOREIGN KEY (`subscriber_id`) REFERENCES `subscriber` (`subscriber_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `message_ibfk_2` FOREIGN KEY (`campaign_id`) REFERENCES `email_campaign` (`campaign_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

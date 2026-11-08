@@ -1,0 +1,78 @@
+-- Schema for database: rschema_0506
+CREATE TABLE `construction_management_unit` (
+  `unit_id` int(11) NOT NULL,
+  `supervision_department_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`unit_id`),
+  CONSTRAINT `construction_management_unit_ibfk_1` FOREIGN KEY (`supervision_department_id`) REFERENCES `collaborative_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `business_project_department_progress` (
+  `project_department_id` int(11) NOT NULL,
+  PRIMARY KEY (`project_department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resource_allocation` (
+  `resource_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  PRIMARY KEY (`resource_id`, `project_id`),
+  CONSTRAINT `resource_allocation_ibfk_1` FOREIGN KEY (`resource_id`) REFERENCES `resource_table` (`resource_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `resource_allocation_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `supervision_project_department` (`supervision_department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `collaborative_task` (
+  `task_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  PRIMARY KEY (`task_id`, `project_id`),
+  CONSTRAINT `collaborative_task_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `collaborative_work_platform` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `collaborative_task_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `supervision_project_department` (`supervision_department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supervision_project_department` (
+  `supervision_department_id` int(11) NOT NULL,
+  PRIMARY KEY (`supervision_department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `electrical_grid_infrastructure_project` (
+  `project_id` int(11) NOT NULL,
+  `task_id` int(11) DEFAULT NULL,
+  `unit_id` int(11) DEFAULT NULL,
+  `project_department_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`project_id`),
+  CONSTRAINT `electrical_grid_infrastructure_project_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `collaborative_work_platform` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `electrical_grid_infrastructure_project_ibfk_2` FOREIGN KEY (`unit_id`) REFERENCES `construction_management_unit` (`unit_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `electrical_grid_infrastructure_project_ibfk_3` FOREIGN KEY (`project_department_id`) REFERENCES `business_project_department_progress` (`project_department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resource_table` (
+  `resource_id` int(11) NOT NULL,
+  PRIMARY KEY (`resource_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `collaborative_work_platform` (
+  `task_id` int(11) NOT NULL,
+  PRIMARY KEY (`task_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_management` (
+  `unit_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  PRIMARY KEY (`unit_id`, `project_id`),
+  CONSTRAINT `project_management_ibfk_1` FOREIGN KEY (`unit_id`) REFERENCES `construction_management_unit` (`unit_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_management_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `supervision_project_department` (`supervision_department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_department_management` (
+  `project_id` int(11) NOT NULL,
+  `project_department_id` int(11) NOT NULL,
+  PRIMARY KEY (`project_id`, `project_department_id`),
+  CONSTRAINT `project_department_management_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `supervision_project_department` (`supervision_department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_department_management_ibfk_2` FOREIGN KEY (`project_department_id`) REFERENCES `business_project_department_progress` (`project_department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supervision_department_management` (
+  `supervision_department_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  PRIMARY KEY (`supervision_department_id`, `project_id`),
+  CONSTRAINT `supervision_department_management_ibfk_1` FOREIGN KEY (`supervision_department_id`) REFERENCES `collaborative_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `supervision_department_management_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `supervision_project_department` (`supervision_department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

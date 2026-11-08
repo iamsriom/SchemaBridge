@@ -1,0 +1,41 @@
+#--Schemafordatabase:rschema_0075
+--Foreachtable:
+CREATE TABLE `analysts` (
+  `AnalystID` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `dateofhire` datetime NOT NULL,
+  `contactnumber` char(10) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stocks` (
+  `stockcode` int(11) NOT NULL,
+  `stockname` varchar(255) NOT NULL,
+  `currentprice` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `analyst_stock_analysis` (
+  `analysisID` int(11) NOT NULL AUTO_INCREMENT,
+  `AnalystID` int(11) NOT NULL,
+  `stockcode` int(11) NOT NULL,
+  `dateofanalysis` datetime NOT NULL,
+  `results` text NOT NULL,
+  `reasoning` text NOT NULL,
+  PRIMARY KEY (`analysisID`),
+  KEY `AnalystID` (`AnalystID`),
+  KEY `stockcode` (`stockcode`),
+  CONSTRAINT `analyst_stock_analysis_ibfk_1` FOREIGN KEY (`AnalystID`) REFERENCES `analysts` (`AnalystID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `analyst_stock_analysis_ibfk_2` FOREIGN KEY (`stockcode`) REFERENCES `stocks` (`stockcode`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `historical_stock_prices` (
+  `date` date NOT NULL,
+  `stockcode` int(11) NOT NULL,
+  `closingprice` decimal(10,2) NOT NULL,
+  `openingprice` decimal(10,2) NOT NULL,
+  `highestprice` decimal(10,2) NOT NULL,
+  `lowestprice` decimal(10,2) NOT NULL,
+  `tradingvolume` int(11) NOT NULL,
+  PRIMARY KEY (`date`,`stockcode`),
+  KEY `stockcode` (`stockcode`),
+  CONSTRAINT `historical_stock_prices_ibfk_1` FOREIGN KEY (`stockcode`) REFERENCES `stocks` (`stockcode`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

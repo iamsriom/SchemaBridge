@@ -1,0 +1,36 @@
+{
+  "text_number": 112,
+  "id": "SB-112",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0112",
+  "question": "1) Background / Context\n\nThe project involves developing a comprehensive hockey database, inspired by the Lahman Baseball Database design. This database includes detailed statistics for individual players and teams across various hockey leagues, including the NHL, NHA, PCHA, WCHL, and WHA, covering the period from 1909 to the present.\n\n2) Objectives\n\nThe primary objective is to create an accessible platform that stores and manages extensive hockey-related data, enabling users to query detailed information on players, coaches, teams, and league statistics.\n\n3) Stakeholders & Users\n\n- Stakeholders: Hockey analysts, statisticians, sports historians, team managers, and developers interested in sports analytics.\n- Users: Researchers, sports journalists, team staff, and hockey enthusiasts who require historical and analytical data.\n\n4) Functional Descriptions\n\n- Player Information Management: Store and retrieve player personal and performance data through tables such as `Master`, `Goalies`, and `Scoring`.\n- Coaching Records: Maintain records of coach achievements and statistics in `Coaches` and `AwardsCoaches`.\n- Team Performance Tracking: Tables like `Teams`, `TeamsHalf`, and `TeamsPost` manage team stats across different time periods and playoff contexts.\n- Awards Management: Track player and coach awards using `AwardsPlayers` and `AwardsCoaches`.\n- Statistical Analysis: Support queries for comprehensive insights into game results, player achievements, and comparative statistics.\n\n5) Non-Functional Descriptions\n\n- Data Integrity: Ensure all foreign key relationships maintain the integrity of references across tables, enabling accurate cross-data querying.\n- Scalability: The database should accommodate historical data while supporting future updates and expansions.\n- Accessibility: Provide user-friendly interfaces for querying and displaying data, ensuring broad accessibility for both technical and non-technical users.\n- Performance: Optimize for quick query responses and handle a substantial number of concurrent users efficiently.",
+  "ddl": "-- Schema for database: schemabench_0112\nCREATE TABLE `leagues` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `abbreviation` varchar(10) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `teams` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `league_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `teams_ibfk_1` (`league_id`),\n  CONSTRAINT `teams_ibfk_1` FOREIGN KEY (`league_id`) REFERENCES `leagues` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `teams_half` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `team_id` int(11) NOT NULL,\n  `season` int(4) NOT NULL,\n  `wins` int(11) NOT NULL,\n  `losses` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `teams_half_ibfk_1` (`team_id`),\n  CONSTRAINT `teams_half_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `teams_post` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `team_id` int(11) NOT NULL,\n  `season` int(4) NOT NULL,\n  `wins` int(11) NOT NULL,\n  `losses` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `teams_post_ibfk_1` (`team_id`),\n  CONSTRAINT `teams_post_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `coaches` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `awards_coaches` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `coach_id` int(11) NOT NULL,\n  `award` varchar(255) NOT NULL,\n  `year` int(4) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `awards_coaches_ibfk_1` (`coach_id`),\n  CONSTRAINT `awards_coaches_ibfk_1` FOREIGN KEY (`coach_id`) REFERENCES `coaches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `players` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `first_name` varchar(255) NOT NULL,\n  `last_name` varchar(255) NOT NULL,\n  `birth_date` date NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `goalies` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `player_id` int(11) NOT NULL,\n  `games_played` int(11) NOT NULL,\n  `wins` int(11) NOT NULL,\n  `losses` int(11) NOT NULL,\n  `shutouts` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `goalies_ibfk_1` (`player_id`),\n  CONSTRAINT `goalies_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `scoring` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `player_id` int(11) NOT NULL,\n  `games_played` int(11) NOT NULL,\n  `goals` int(11) NOT NULL,\n  `assists` int(11) NOT NULL,\n  `points` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `scoring_ibfk_1` (`player_id`),\n  CONSTRAINT `scoring_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `awards_players` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `player_id` int(11) NOT NULL,\n  `award` varchar(255) NOT NULL,\n  `year` int(4) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `awards_players_ibfk_1` (`player_id`),\n  CONSTRAINT `awards_players_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "leagues",
+      "teams",
+      "teams_half",
+      "teams_post",
+      "coaches",
+      "awards_coaches",
+      "players",
+      "goalies",
+      "scoring",
+      "awards_players"
+    ],
+    "columns_by_table": {
+      "leagues": [],
+      "teams": [],
+      "teams_half": [],
+      "teams_post": [],
+      "coaches": [],
+      "awards_coaches": [],
+      "players": [],
+      "goalies": [],
+      "scoring": [],
+      "awards_players": []
+    }
+  }
+}

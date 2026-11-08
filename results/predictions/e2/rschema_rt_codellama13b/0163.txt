@@ -1,0 +1,55 @@
+-- Schema for database: rschema_0163
+CREATE TABLE `sugar_cane_variety` (
+  `variety_id` int(11) NOT NULL,
+  `variety_name` varchar(255) NOT NULL,
+  `maturation_cycle` varchar(255) NOT NULL,
+  `suitable_climate` varchar(255) NOT NULL,
+  `suitable_soil` varchar(255) NOT NULL,
+  PRIMARY KEY (`variety_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(10) NOT NULL,
+  `phone` varchar(15) NOT NULL,
+  `working_hours` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `plot` (
+  `plot_id` int(11) NOT NULL,
+  `area` float NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `organic_matter_content` float NOT NULL,
+  `person_in_charge_id` int(11) NOT NULL,
+  `soil_ph` float NOT NULL,
+  `soil_type` varchar(255) NOT NULL,
+  PRIMARY KEY (`plot_id`),
+  CONSTRAINT `plot_ibfk_1` FOREIGN KEY (`person_in_charge_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `planting_record` (
+  `planter_id` int(11) NOT NULL,
+  `plot_id` int(11) NOT NULL,
+  `variety_id` int(11) NOT NULL,
+  `planting_method` varchar(255) NOT NULL,
+  `planting_quantity` float NOT NULL,
+  `planting_time` datetime NOT NULL,
+  PRIMARY KEY (`plot_id`, `variety_id`, `planting_time`),
+  CONSTRAINT `planting_record_ibfk_1` FOREIGN KEY (`plot_id`) REFERENCES `plot` (`plot_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `planting_record_ibfk_2` FOREIGN KEY (`variety_id`) REFERENCES `sugar_cane_variety` (`variety_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fertilization_record` (
+  `person_in_charge_id` int(11) NOT NULL,
+  `plot_id` int(11) NOT NULL,
+  `fertilization_time` datetime NOT NULL,
+  `fertilization_amount` float NOT NULL,
+  `fertilization_method` varchar(255) NOT NULL,
+  `fertilization_type` varchar(255) NOT NULL,
+  `remarks` text NOT NULL,
+  PRIMARY KEY (`person_in_charge_id`, `plot_id`, `fertilization_time`),
+  CONSTRAINT `fertilization_record_ibfk_1` FOREIGN KEY (`person_in_charge_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fertilization_record_ibfk_2` FOREIGN KEY (`plot_id`) REFERENCES `plot` (`plot_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,86 @@
+-- Schema for database: `uefa_champions_league`
+
+-- Table: `cities`
+CREATE TABLE `cities` (
+  `city_id` int(11) NOT NULL AUTO_INCREMENT,
+  `city_name` varchar(255) NOT NULL,
+  `country` varchar(255) NOT NULL,
+  PRIMARY KEY (`city_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `stadiums`
+CREATE TABLE `stadiums` (
+  `stadium_id` int(11) NOT NULL AUTO_INCREMENT,
+  `stadium_name` varchar(255) NOT NULL,
+  `city_id` int(11) NOT NULL,
+  `seating_capacity` int(11) NOT NULL,
+  PRIMARY KEY (`stadium_id`),
+  FOREIGN KEY (`city_id`) REFERENCES `cities` (`city_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `teams`
+CREATE TABLE `teams` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_name` varchar(255) NOT NULL,
+  `country` varchar(255) NOT NULL,
+  `stadium_id` int(11) NOT NULL,
+  PRIMARY KEY (`team_id`),
+  FOREIGN KEY (`stadium_id`) REFERENCES `stadiums` (`stadium_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `players`
+CREATE TABLE `players` (
+  `player_id` int(11) NOT NULL AUTO_INCREMENT,
+  `player_name` varchar(255) NOT NULL,
+  `nationality` varchar(255) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `jersey_number` int(11) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `height` int(11) NOT NULL,
+  `weight` int(11) NOT NULL,
+  `preferred_foot` varchar(255) NOT NULL,
+  `team_id` int(11) NOT NULL,
+  PRIMARY KEY (`player_id`),
+  FOREIGN KEY (`team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `managers`
+CREATE TABLE `managers` (
+  `manager_id` int(11) NOT NULL AUTO_INCREMENT,
+  `manager_name` varchar(255) NOT NULL,
+  `nationality` varchar(255) NOT NULL,
+  `team_id` int(11) NOT NULL,
+  PRIMARY KEY (`manager_id`),
+  FOREIGN KEY (`team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `matches`
+CREATE TABLE `matches` (
+  `match_id` int(11) NOT NULL AUTO_INCREMENT,
+  `season` varchar(255) NOT NULL,
+  `date_and_time` datetime NOT NULL,
+  `team1_id` int(11) NOT NULL,
+  `team2_id` int(11) NOT NULL,
+  `stadium_id` int(11) NOT NULL,
+  `score` varchar(255) NOT NULL,
+  `penalty_shoot_out_status` varchar(255) NOT NULL,
+  `attendance` int(11) NOT NULL,
+  PRIMARY KEY (`match_id`),
+  FOREIGN KEY (`team1_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`team2_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`stadium_id`) REFERENCES `stadiums` (`stadium_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `goals`
+CREATE TABLE `goals` (
+  `goal_id` int(11) NOT NULL AUTO_INCREMENT,
+  `match_id` int(11) NOT NULL,
+  `scoring_player_id` int(11) NOT NULL,
+  `duration` varchar(255) NOT NULL,
+  `assisting_player_id` int(11) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`goal_id`),
+  FOREIGN KEY (`match_id`) REFERENCES `matches` (`match_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`scoring_player_id`) REFERENCES `players` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`assisting_player_id`) REFERENCES `players` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

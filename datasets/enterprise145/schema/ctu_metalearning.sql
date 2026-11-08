@@ -1,0 +1,690 @@
+-- Schema for database: ctu_metalearning
+
+journal
+;
+
+
+CREATE TABLE `journal_Accidents` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_AustralianFootball` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_Basketball_men` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_Biodegradability` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_CORA` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_Carcinogenesis` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_Chess` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_Facebook` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_Hepatitis_std` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_Mondial` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_PTE` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_PremierLeague` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_Student_loan` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_VisualGenome` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_Walmart` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) DEFAULT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `run_time` float DEFAULT NULL,
+  `predictor_name` varchar(255) DEFAULT NULL,
+  `predictor_long_name` varchar(255) DEFAULT NULL,
+  `table_name` varchar(255) DEFAULT NULL,
+  `column_list` varchar(255) DEFAULT NULL,
+  `propagation_path` varchar(255) DEFAULT NULL,
+  `propagation_depth` int(11) DEFAULT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) DEFAULT NULL,
+  `pattern_name` varchar(255) DEFAULT NULL,
+  `pattern_author` varchar(255) DEFAULT NULL,
+  `pattern_code` text DEFAULT NULL,
+  `sql_code` text DEFAULT NULL,
+  `data_type` varchar(255) DEFAULT NULL,
+  `category_type` varchar(255) DEFAULT NULL,
+  `target` varchar(255) DEFAULT NULL,
+  `relevance_units` float DEFAULT NULL,
+  `concept_drift_units` float DEFAULT NULL,
+  `weighted_relevance_units` float DEFAULT NULL,
+  `qc_row_count` int(11) DEFAULT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) DEFAULT NULL,
+  `is_duplicate` int(11) DEFAULT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_WebKP` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_ccs` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_financial` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_ftp` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_nations` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_sakila` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+
+
+CREATE TABLE `journal_world` (
+  `predictor_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `run_time` float NOT NULL,
+  `predictor_name` varchar(255) NOT NULL,
+  `predictor_long_name` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `column_list` varchar(255) NOT NULL,
+  `propagation_path` varchar(255) NOT NULL,
+  `propagation_depth` int(11) NOT NULL,
+  `date_constrain` varchar(255) DEFAULT NULL,
+  `parameter_list` varchar(255) NOT NULL,
+  `pattern_name` varchar(255) NOT NULL,
+  `pattern_author` varchar(255) NOT NULL,
+  `pattern_code` text NOT NULL,
+  `sql_code` text NOT NULL,
+  `target` varchar(255) NOT NULL,
+  `relevance` float NOT NULL,
+  `concept_drift` text DEFAULT NULL,
+  `qc_row_count` int(11) NOT NULL,
+  `qc_null_count` int(11) DEFAULT NULL,
+  `exception_message` varchar(255) DEFAULT NULL,
+  `is_ok` int(11) NOT NULL,
+  `is_duplicate` int(11) NOT NULL,
+  `duplicate_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`predictor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+;
+

@@ -1,0 +1,36 @@
+{
+  "text_number": 6,
+  "id": "SB-006",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "schemabench_0006",
+  "question": "Background / Context\n\nThe project involves developing a content management system (CMS) tailored for Ruby on Rails developers. Refinery CMS is designed to create customizable and content-manageable websites efficiently by adhering to \"The Rails Way.\" It is well-suited for developers familiar with Ruby on Rails and aims to streamline the development process.\n\nObjectives\n\n- Provide an intuitive CMS for building and managing websites.\n- Simplify content creation and management with visual tools.\n- Support easy customization through extensions and plugins.\n- Facilitate secure user authentication and role management.\n- Enable seamless integration of media files and resources.\n\nStakeholders & Users\n\n- Developers: Primarily Ruby on Rails developers who will implement and customize websites using Refinery CMS.\n- Administrators: Users responsible for managing website content, structure, and user access.\n- End-users: Individuals who will interact with the front-end of websites built on Refinery CMS.\n\nFunctional Descriptions\n\n1. Page Management: \n   - Edit and organize pages using a visual editor.\n   - Manage site structure and navigation.\n\n2. Media Management:\n   - Upload and insert images seamlessly using Dragonfly.\n   - Store media on Amazon S3 for scalability.\n   - Manage and link to various resources such as PDF documents.\n\n3. User Authentication & Roles:\n   - Manage user access and roles using Devise.\n   - Define permissions for extensions and functionalities per user.\n\n4. Extension Support:\n   - Generate custom extensions using the Refinery extension generator.\n   - Popular extensions include:\n     - Blog: Manage posts, categories, and comments.\n     - Portfolio: Create image galleries.\n     - News: Post and manage news items.\n     - Inquiries: Handle contact form submissions and notifications.\n\nNon-Functional Descriptions\n\n- Ease of Use: Designed to be approachable for Ruby on Rails developers, leveraging Rails conventions.\n- Scalability: Supports scalable media storage with Amazon S3 integration.\n- Security: Secure authentication and role management using industry-standard practices (Devise).\n- Extensibility: Easily extensible through generators and available plugins.",
+  "ddl": "-- Schema for database: `refinery_cms_0006`\n\n-- For table: `pages`\nCREATE TABLE `pages` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `slug` varchar(255) NOT NULL,\n  `menu_title` varchar(255) DEFAULT NULL,\n  `content` text,\n  `position` int(11) DEFAULT NULL,\n  `parent_id` int(11) DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `index_pages_on_parent_id` (`parent_id`),\n  KEY `index_pages_on_slug` (`slug`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `media`\nCREATE TABLE `media` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `file` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `users`\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `email` varchar(255) NOT NULL,\n  `encrypted_password` varchar(255) NOT NULL,\n  `reset_password_token` varchar(255) DEFAULT NULL,\n  `reset_password_sent_at` datetime DEFAULT NULL,\n  `remember_created_at` datetime DEFAULT NULL,\n  `sign_in_count` int(11) DEFAULT '0',\n  `current_sign_in_at` datetime DEFAULT NULL,\n  `last_sign_in_at` datetime DEFAULT NULL,\n  `current_sign_in_ip` varchar(255) DEFAULT NULL,\n  `last_sign_in_ip` varchar(255) DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `roles`\nCREATE TABLE `roles` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `users_roles`\nCREATE TABLE `users_roles` (\n  `user_id` int(11) NOT NULL,\n  `role_id` int(11) NOT NULL,\n  PRIMARY KEY (`user_id`,`role_id`),\n  KEY `index_users_roles_on_user_id` (`user_id`),\n  KEY `index_users_roles_on_role_id` (`role_id`),\n  CONSTRAINT `fk_users_roles_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `fk_users_roles_role_id` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `extensions`\nCREATE TABLE `extensions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `version` varchar(255) NOT NULL,\n  `enabled` tinyint(1) NOT NULL DEFAULT '1',\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `blog_posts`\nCREATE TABLE `blog_posts` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `body` text NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `portfolio_items`\nCREATE TABLE `portfolio_items` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `description` text NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `news_items`\nCREATE TABLE `news_items` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `body` text NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `inquiries`\nCREATE TABLE `inquiries` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `message` text NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "pages",
+      "media",
+      "users",
+      "roles",
+      "users_roles",
+      "extensions",
+      "blog_posts",
+      "portfolio_items",
+      "news_items",
+      "inquiries"
+    ],
+    "columns_by_table": {
+      "pages": [],
+      "media": [],
+      "users": [],
+      "roles": [],
+      "users_roles": [],
+      "extensions": [],
+      "blog_posts": [],
+      "portfolio_items": [],
+      "news_items": [],
+      "inquiries": []
+    }
+  }
+}

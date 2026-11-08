@@ -1,0 +1,71 @@
+-- Schema for database: rschema_0481
+
+CREATE TABLE `crop` (
+`crop_id` int(11) NOT NULL,
+`crop_name` varchar(255) NOT NULL,
+`crop_type` varchar(255) NOT NULL,
+PRIMARY KEY (`crop_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sensor` (
+`sensor_id` int(11) NOT NULL,
+`sensor_location` varchar(255) NOT NULL,
+`sensor_type` varchar(255) NOT NULL,
+PRIMARY KEY (`sensor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_type` (
+`data_type_id` int(11) NOT NULL,
+`data_type_name` varchar(255) NOT NULL,
+PRIMARY KEY (`data_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_value` (
+`data_value_id` int(11) NOT NULL,
+`data_value` varchar(255) NOT NULL,
+PRIMARY KEY (`data_value_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_collection` (
+`data_collection_id` int(11) NOT NULL,
+`sensor_id` int(11) NOT NULL,
+`data_type_id` int(11) NOT NULL,
+`data_value_id` int(11) NOT NULL,
+`collection_time` datetime NOT NULL,
+PRIMARY KEY (`data_collection_id`),
+FOREIGN KEY (`sensor_id`) REFERENCES `sensor` (`sensor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`data_type_id`) REFERENCES `data_type` (`data_type_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`data_value_id`) REFERENCES `data_value` (`data_value_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_processing` (
+`data_processing_id` int(11) NOT NULL,
+`data_collection_id` int(11) NOT NULL,
+`analysis_result` varchar(255) NOT NULL,
+PRIMARY KEY (`data_processing_id`),
+FOREIGN KEY (`data_collection_id`) REFERENCES `data_collection` (`data_collection_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_visualization` (
+`data_visualization_id` int(11) NOT NULL,
+`data_processing_id` int(11) NOT NULL,
+`visualization_result` varchar(255) NOT NULL,
+PRIMARY KEY (`data_visualization_id`),
+FOREIGN KEY (`data_processing_id`) REFERENCES `data_processing` (`data_processing_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_prediction` (
+`data_prediction_id` int(11) NOT NULL,
+`data_processing_id` int(11) NOT NULL,
+`prediction_result` varchar(255) NOT NULL,
+PRIMARY KEY (`data_prediction_id`),
+FOREIGN KEY (`data_processing_id`) REFERENCES `data_processing` (`data_processing_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_statistics` (
+`data_statistics_id` int(11) NOT NULL,
+`data_processing_id` int(11) NOT NULL,
+`statistics_result` varchar(255) NOT NULL,
+PRIMARY KEY (`data_statistics_id`),
+FOREIGN KEY (`data_processing_id`) REFERENCES `data_processing` (`data_processing_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

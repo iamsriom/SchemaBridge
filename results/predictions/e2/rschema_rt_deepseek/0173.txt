@@ -1,0 +1,41 @@
+-- Schema for database: rschema_0173
+CREATE TABLE `Borrower` (
+  `Borrower_ID` int(11) NOT NULL,
+  `Fines` decimal(10,2) DEFAULT NULL,
+  `Name` varchar(255) DEFAULT NULL,
+  `Overdue_Books` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Borrower_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Book` (
+  `Book_ID` int(11) NOT NULL,
+  `Author` varchar(255) DEFAULT NULL,
+  `Book_Title` varchar(255) DEFAULT NULL,
+  `Fine` decimal(10,2) DEFAULT NULL,
+  `Loan_Duration` int(11) DEFAULT NULL,
+  `Loan_Status` varchar(50) DEFAULT NULL,
+  `Publication_Date` date DEFAULT NULL,
+  `Publisher` varchar(255) DEFAULT NULL,
+  `Stock` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Book_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Borrower_Loaned_Books` (
+  `Book_ID` int(11) NOT NULL,
+  `Borrower_ID` int(11) NOT NULL,
+  `Expected_Return_Date` date DEFAULT NULL,
+  `Loan_Date` date DEFAULT NULL,
+  PRIMARY KEY (`Book_ID`, `Borrower_ID`),
+  CONSTRAINT `Borrower_Loaned_Books_ibfk_1` FOREIGN KEY (`Book_ID`) REFERENCES `Book` (`Book_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Borrower_Loaned_Books_ibfk_2` FOREIGN KEY (`Borrower_ID`) REFERENCES `Borrower` (`Borrower_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Fines` (
+  `Book_ID` int(11) NOT NULL,
+  `Borrower_ID` int(11) NOT NULL,
+  `Fine_Amount` decimal(10,2) DEFAULT NULL,
+  `Overdue_Days` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Book_ID`, `Borrower_ID`),
+  CONSTRAINT `Fines_ibfk_1` FOREIGN KEY (`Book_ID`) REFERENCES `Book` (`Book_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Fines_ibfk_2` FOREIGN KEY (`Borrower_ID`) REFERENCES `Borrower` (`Borrower_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

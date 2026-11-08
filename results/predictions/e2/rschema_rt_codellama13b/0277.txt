@@ -1,0 +1,63 @@
+-- Schema for database: rschema_0277
+CREATE TABLE `service_team` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_evaluation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `evaluation` varchar(255) NOT NULL,
+  `effectiveness` varchar(255) NOT NULL,
+  `service_fee` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `service_evaluation_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `housekeeper` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  `professional_skills` varchar(255) NOT NULL,
+  `service_type` varchar(255) NOT NULL,
+  `team_id` int(11) NOT NULL,
+  `years_of_experience` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `housekeeper_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `service_team` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_task` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_address` varchar(255) NOT NULL,
+  `service_date` datetime NOT NULL,
+  `service_duration` int(11) NOT NULL,
+  `service_type` varchar(255) NOT NULL,
+  `evaluation_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `service_task_ibfk_1` FOREIGN KEY (`evaluation_id`) REFERENCES `service_evaluation` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staff_task` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `housekeeper_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `staff_task_ibfk_1` FOREIGN KEY (`housekeeper_id`) REFERENCES `housekeeper` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `staff_task_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `service_task` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_task` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `customer_task_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customer_task_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `service_task` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

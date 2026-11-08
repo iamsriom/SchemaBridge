@@ -1,0 +1,52 @@
+-- Schema for database: rschema_0276
+CREATE TABLE `maintenance_technician` (
+  `technician_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `phone` varchar(15) NOT NULL,
+  `position` varchar(100) NOT NULL,
+  `employment_date` datetime NOT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`technician_id`),
+  CONSTRAINT `maintenance_technician_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `customer` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_team` (
+  `team_id` int(11) NOT NULL,
+  `team_name` varchar(255) NOT NULL,
+  `team_leader_id` int(11) DEFAULT NULL,
+  `team_responsibilities` text DEFAULT NULL,
+  `total_team_members` int(11) NOT NULL,
+  PRIMARY KEY (`team_id`),
+  CONSTRAINT `maintenance_team_ibfk_1` FOREIGN KEY (`team_leader_id`) REFERENCES `maintenance_technician` (`technician_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  `customer_phone` varchar(15) NOT NULL,
+  `customer_address` varchar(255) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_task` (
+  `maintenance_task_number` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `maintenance_cost` decimal(10,2) NOT NULL,
+  `maintenance_duration` int(11) NOT NULL,
+  `maintenance_result` text DEFAULT NULL,
+  `maintenance_time` datetime NOT NULL,
+  `maintenance_technician` int(11) NOT NULL,
+  PRIMARY KEY (`maintenance_task_number`),
+  CONSTRAINT `maintenance_task_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_task_ibfk_2` FOREIGN KEY (`maintenance_technician`) REFERENCES `maintenance_technician` (`technician_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_feedback` (
+  `maintenance_task_number` int(11) NOT NULL,
+  `feedback_content` text NOT NULL,
+  `feedback_resolution_result` varchar(255) DEFAULT NULL,
+  `customer_satisfaction` int(11) NOT NULL,
+  PRIMARY KEY (`maintenance_task_number`),
+  CONSTRAINT `maintenance_feedback_ibfk_1` FOREIGN KEY (`maintenance_task_number`) REFERENCES `maintenance_task` (`maintenance_task_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

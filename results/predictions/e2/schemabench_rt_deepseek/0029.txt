@@ -1,0 +1,47 @@
+-- Schema for database: schemabench_0029
+CREATE TABLE `robots_rule` (
+  `id` int(11) NOT NULL,
+  `robot` varchar(255) NOT NULL,
+  `crawl_delay` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `django_site` (
+  `id` int(11) NOT NULL,
+  `domain` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `robots_rule_allowed` (
+  `id` int(11) NOT NULL,
+  `rule_id` int(11) NOT NULL,
+  `url_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `robots_rule_allowed_ibfk_1` FOREIGN KEY (`rule_id`) REFERENCES `robots_rule` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `robots_rule_allowed_ibfk_2` FOREIGN KEY (`url_id`) REFERENCES `robots_url` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `robots_rule_disallowed` (
+  `id` int(11) NOT NULL,
+  `rule_id` int(11) NOT NULL,
+  `url_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `robots_rule_disallowed_ibfk_1` FOREIGN KEY (`rule_id`) REFERENCES `robots_rule` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `robots_rule_disallowed_ibfk_2` FOREIGN KEY (`url_id`) REFERENCES `robots_url` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `robots_rule_sites` (
+  `id` int(11) NOT NULL,
+  `rule_id` int(11) NOT NULL,
+  `site_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `robots_rule_sites_ibfk_1` FOREIGN KEY (`rule_id`) REFERENCES `robots_rule` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `robots_rule_sites_ibfk_2` FOREIGN KEY (`site_id`) REFERENCES `django_site` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `robots_url` (
+  `id` int(11) NOT NULL,
+  `pattern` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

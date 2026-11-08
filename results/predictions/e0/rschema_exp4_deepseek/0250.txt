@@ -1,0 +1,58 @@
+#--Schemafordatabase:rschema_0250
+
+--Foreachtable:
+
+CREATE TABLE `users` (
+  `UserID` int(11) NOT NULL AUTO_INCREMENT,
+  `Username` varchar(255) NOT NULL,
+  `Password` varchar(255) NOT NULL,
+  `PhoneNumber` varchar(255) NOT NULL,
+  `RegistrationTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `LastLoginTime` datetime DEFAULT NULL,
+  `Role` varchar(255) NOT NULL,
+  PRIMARY KEY (`UserID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `ProductID` int(11) NOT NULL AUTO_INCREMENT,
+  `ProductName` varchar(255) NOT NULL,
+  `ProductDescription` text NOT NULL,
+  `Price` decimal(10,2) NOT NULL,
+  `StockQuantity` int(11) NOT NULL,
+  `ProductCategory` varchar(255) NOT NULL,
+  `ShelvingTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ProductID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `OrderID` int(11) NOT NULL AUTO_INCREMENT,
+  `UserID` int(11) NOT NULL,
+  `OrderStatus` varchar(255) NOT NULL,
+  `TotalAmount` decimal(10,2) NOT NULL,
+  `OrderTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `PaymentTime` datetime DEFAULT NULL,
+  `DeliveryAddress` text NOT NULL,
+  PRIMARY KEY (`OrderID`),
+  KEY `UserID` (`UserID`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `users` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_details` (
+  `OrderID` int(11) NOT NULL,
+  `ProductID` int(11) NOT NULL,
+  `Quantity` int(11) NOT NULL,
+  PRIMARY KEY (`OrderID`,`ProductID`),
+  KEY `ProductID` (`ProductID`),
+  CONSTRAINT `order_details_ibfk_1` FOREIGN KEY (`OrderID`) REFERENCES `orders` (`OrderID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_details_ibfk_2` FOREIGN KEY (`ProductID`) REFERENCES `products` (`ProductID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shopping_cart` (
+  `UserID` int(11) NOT NULL,
+  `ProductID` int(11) NOT NULL,
+  `Quantity` int(11) NOT NULL,
+  PRIMARY KEY (`UserID`,`ProductID`),
+  KEY `ProductID` (`ProductID`),
+  CONSTRAINT `shopping_cart_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `users` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `shopping_cart_ibfk_2` FOREIGN KEY (`ProductID`) REFERENCES `products` (`ProductID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

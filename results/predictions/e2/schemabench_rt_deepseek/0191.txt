@@ -1,0 +1,66 @@
+-- Schema for database: schemabench_0191
+CREATE TABLE `Customers` (
+  `Customer_ID` int(11) NOT NULL,
+  `Full_Name` varchar(255) DEFAULT NULL,
+  `Phone_Number` varchar(13) DEFAULT NULL,
+  PRIMARY KEY (`Customer_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Staff` (
+  `Staff_ID` int(11) NOT NULL,
+  `Name` varchar(100) DEFAULT NULL,
+  `Role` varchar(100) DEFAULT NULL,
+  `Salary` int(11) DEFAULT NULL,
+  `Address` varchar(255) DEFAULT NULL,
+  `Contact_Number` varchar(13) DEFAULT NULL,
+  `Email` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`Staff_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Bookings` (
+  `Booking_ID` int(11) NOT NULL,
+  `Booking_Date` datetime DEFAULT NULL,
+  `Customer_ID` int(11) DEFAULT NULL,
+  `Table_number` int(11) DEFAULT NULL,
+  `Number_of_Persons` int(11) DEFAULT NULL,
+  `Staff_ID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Booking_ID`),
+  CONSTRAINT `Bookings_ibfk_1` FOREIGN KEY (`Customer_ID`) REFERENCES `Customers` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Bookings_ibfk_2` FOREIGN KEY (`Staff_ID`) REFERENCES `Staff` (`Staff_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Orders` (
+  `Order_ID` int(11) NOT NULL,
+  `Table_number` int(11) NOT NULL,
+  `Order_Date` datetime DEFAULT NULL,
+  `Total_Cost` decimal(10,2) DEFAULT NULL,
+  `Booking_ID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Order_ID`, `Table_number`),
+  CONSTRAINT `Orders_ibfk_1` FOREIGN KEY (`Booking_ID`) REFERENCES `Bookings` (`Booking_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Orders_Delivery_Status` (
+  `Order_ID` int(11) NOT NULL,
+  `Delivery_Date` datetime DEFAULT NULL,
+  `Delivery_Status` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`Order_ID`),
+  CONSTRAINT `Orders_Delivery_Status_ibfk_1` FOREIGN KEY (`Order_ID`) REFERENCES `Orders` (`Order_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Menu` (
+  `Item_ID` int(11) NOT NULL,
+  `Name` varchar(45) DEFAULT NULL,
+  `Category` varchar(45) DEFAULT NULL,
+  `Cuisine` varchar(45) DEFAULT NULL,
+  `Price` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Item_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Orders_Details` (
+  `OrderID` int(11) NOT NULL,
+  `Item_ID` int(11) NOT NULL,
+  `Quantity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`OrderID`, `Item_ID`),
+  CONSTRAINT `Orders_Details_ibfk_1` FOREIGN KEY (`OrderID`) REFERENCES `Orders` (`Order_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Orders_Details_ibfk_2` FOREIGN KEY (`Item_ID`) REFERENCES `Menu` (`Item_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

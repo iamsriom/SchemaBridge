@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0253
+CREATE TABLE `User` (
+  `User_ID` int(11) NOT NULL,
+  `Games` varchar(255) DEFAULT NULL,
+  `Password` varchar(255) DEFAULT NULL,
+  `Phone` varchar(255) DEFAULT NULL,
+  `Registration_Time` datetime DEFAULT NULL,
+  `Username` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`User_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Group_Chat` (
+  `Group_Chat_ID` int(11) NOT NULL,
+  `Group_Chat_Name` varchar(255) DEFAULT NULL,
+  `Total_Members` int(11) DEFAULT NULL,
+  `Creation_Time` datetime DEFAULT NULL,
+  `Creator_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Group_Chat_ID`),
+  CONSTRAINT `group_chat_ibfk_1` FOREIGN KEY (`Creator_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Chat_Record` (
+  `User_1_ID` int(11) NOT NULL,
+  `User_2_ID` int(11) NOT NULL,
+  `Send_Time` datetime NOT NULL,
+  `Message_Content` varchar(255) DEFAULT NULL,
+  `Message_Type` varchar(255) DEFAULT NULL,
+  `Read_Time` datetime DEFAULT NULL,
+  PRIMARY KEY (`User_1_ID`, `User_2_ID`, `Send_Time`),
+  CONSTRAINT `chat_record_ibfk_1` FOREIGN KEY (`User_1_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `chat_record_ibfk_2` FOREIGN KEY (`User_2_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Joining_Group_Chat` (
+  `User_ID` int(11) NOT NULL,
+  `Group_Chat_ID` int(11) NOT NULL,
+  `Join_Time` datetime NOT NULL,
+  `Application_Information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`User_ID`, `Group_Chat_ID`, `Join_Time`),
+  CONSTRAINT `user_joining_group_chat_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_joining_group_chat_ibfk_2` FOREIGN KEY (`Group_Chat_ID`) REFERENCES `Group_Chat` (`Group_Chat_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Leaving_Group_Chat` (
+  `User_ID` int(11) NOT NULL,
+  `Group_Chat_ID` int(11) NOT NULL,
+  `Leaving_Time` datetime NOT NULL,
+  PRIMARY KEY (`User_ID`, `Group_Chat_ID`, `Leaving_Time`),
+  CONSTRAINT `user_leaving_group_chat_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_leaving_group_chat_ibfk_2` FOREIGN KEY (`Group_Chat_ID`) REFERENCES `Group_Chat` (`Group_Chat_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,106 @@
+-- Schema for database: schemabench_0050
+
+CREATE TABLE `tickets` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`title` varchar(255) NOT NULL,
+`description` text NOT NULL,
+`status` varchar(255) NOT NULL,
+`priority` varchar(255) NOT NULL,
+`assignee` varchar(255) NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`assignee`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `leads` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`email` varchar(255) NOT NULL,
+`phone` varchar(255) NOT NULL,
+`status` varchar(255) NOT NULL,
+`assignee` varchar(255) NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`assignee`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`email` varchar(255) NOT NULL,
+`password` varchar(255) NOT NULL,
+`role` varchar(255) NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teams` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`description` text NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `team_members` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`team_id` int(11) NOT NULL,
+`user_id` int(11) NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tickets_leads` (
+`ticket_id` int(11) NOT NULL,
+`lead_id` int(11) NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`ticket_id`, `lead_id`),
+FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (`lead_id`) REFERENCES `leads` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reports` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`description` text NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `report_data` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`report_id` int(11) NOT NULL,
+`data` text NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`report_id`) REFERENCES `reports` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `settings` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`value` text NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `logs` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`user_id` int(11) NOT NULL,
+`action` varchar(255) NOT NULL,
+`created_at` datetime NOT NULL,
+`updated_at` datetime NOT NULL,
+PRIMARY KEY (`id`),
+FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

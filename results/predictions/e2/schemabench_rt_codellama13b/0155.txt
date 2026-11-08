@@ -1,0 +1,170 @@
+-- Schema for database: schemabench_0155
+CREATE TABLE `residents` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `birth_date` date NOT NULL,
+  `role` varchar(255) NOT NULL,
+  `bracelet_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `bracelet_id` (`bracelet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employees` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `birth_date` date NOT NULL,
+  `hire_date` date NOT NULL,
+  `function` varchar(255) NOT NULL,
+  `bracelet_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `bracelet_id` (`bracelet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `robots` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `company` varchar(255) NOT NULL,
+  `function` varchar(255) NOT NULL,
+  `hire_date` date NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `bracelet_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `bracelet_id` (`bracelet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `houses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `room_name` varchar(255) NOT NULL,
+  `cctv_id` int(11) NOT NULL,
+  `crime_scene` varchar(255) NOT NULL,
+  `bracelet_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `cctv_id` (`cctv_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `locations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `house_id` int(11) NOT NULL,
+  `time` datetime NOT NULL,
+  `bracelet_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `locations_ibfk_1` FOREIGN KEY (`house_id`) REFERENCES `houses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  UNIQUE KEY `bracelet_id` (`bracelet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bracelets` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `bracelet_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cctv` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `cctv_room` varchar(255) NOT NULL,
+  `date` date NOT NULL,
+  `switch_on` datetime NOT NULL,
+  `switch_off` datetime NOT NULL,
+  `breakdown` varchar(255) NOT NULL,
+  `modification` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `modification_type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `cctv_id` int(11) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `modification_type_ibfk_1` FOREIGN KEY (`cctv_id`) REFERENCES `cctv` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `evidence_one` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `evidence_two` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `evidence_three` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ransack_one` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ransack_two` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ransack_three` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `crime_scene` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `victim` varchar(255) NOT NULL,
+  `date` date NOT NULL,
+  `house_id` int(11) NOT NULL,
+  `evidence_one_id` int(11) NOT NULL,
+  `evidence_two_id` int(11) NOT NULL,
+  `evidence_three_id` int(11) NOT NULL,
+  `ransack_one_id` int(11) NOT NULL,
+  `ransack_two_id` int(11) NOT NULL,
+  `ransack_three_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `crime_scene_ibfk_1` FOREIGN KEY (`house_id`) REFERENCES `houses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `crime_scene_ibfk_2` FOREIGN KEY (`evidence_one_id`) REFERENCES `evidence_one` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `crime_scene_ibfk_3` FOREIGN KEY (`evidence_two_id`) REFERENCES `evidence_two` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `crime_scene_ibfk_4` FOREIGN KEY (`evidence_three_id`) REFERENCES `evidence_three` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `crime_scene_ibfk_5` FOREIGN KEY (`ransack_one_id`) REFERENCES `ransack_one` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `crime_scene_ibfk_6` FOREIGN KEY (`ransack_two_id`) REFERENCES `ransack_two` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `crime_scene_ibfk_7` FOREIGN KEY (`ransack_three_id`) REFERENCES `ransack_three` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `suspect_analyse_post_crime` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `bracelet_id` int(11) NOT NULL,
+  `analyse` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `bracelet_id` (`bracelet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `innocent` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `bracelet_id` int(11) NOT NULL,
+  `statut` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `bracelet_id` (`bracelet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `real_suspect` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `bracelet_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `bracelet_id` (`bracelet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `culprit` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `bracelet_id` int(11) NOT NULL,
+  `statut` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `bracelet_id` (`bracelet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

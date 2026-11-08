@@ -1,0 +1,30 @@
+{
+  "text_number": 425,
+  "id": "67552f0b13602ec03b41aa15",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "rschema_0425",
+  "question": "The student dormitory management system business requirement description:\nA student dormitory management system includes functions such as user management, building management, dormitory management, and student management. The system has users with different roles, such as administrators, dormitory managers, students, and maintenance staff. Each user has a unique ID, username, and password. Building information includes building ID, name, type, location, description, and the responsible dormitory manager. Dormitory information includes dormitory ID, name, type, number of beds, belonging building, supporting facilities, and the responsible dormitory manager. Student information includes student ID, name, gender, belonging dormitory, class, etc. Students can submit various applications (bed change, repair, absence registration, check-out application, etc.). The system records application ID, application type, applicant student ID, application content, application time, application status, and administrator's processing opinion. Administrators can process these applications, review and approve or reject them. Dormitory managers can handle students' leave and repair applications, and manage absence registration. Maintenance staff can handle repair applications and record maintenance information. Maintenance records include maintenance record ID, dormitory ID, fault description, repair time, maintenance staff ID, maintenance situation, and completion time. The system also includes announcement management for administrators to publish and manage announcement information. Announcement information includes announcement ID, announcement title, announcement content, release time, and the ID of the administrator who released the announcement.",
+  "ddl": "-- Schema for database: rschema_0425\n\n-- Table: users\nCREATE TABLE `users` (\n  `user_id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `role` varchar(255) NOT NULL,\n  PRIMARY KEY (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: buildings\nCREATE TABLE `buildings` (\n  `building_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `type` varchar(255) NOT NULL,\n  `location` varchar(255) NOT NULL,\n  `description` text,\n  `dormitory_manager_id` int(11),\n  PRIMARY KEY (`building_id`),\n  FOREIGN KEY (`dormitory_manager_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: dormitories\nCREATE TABLE `dormitories` (\n  `dormitory_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `type` varchar(255) NOT NULL,\n  `num_beds` int(11) NOT NULL,\n  `building_id` int(11) NOT NULL,\n  `supporting_facilities` text,\n  `dormitory_manager_id` int(11),\n  PRIMARY KEY (`dormitory_id`),\n  FOREIGN KEY (`building_id`) REFERENCES `buildings` (`building_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`dormitory_manager_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: students\nCREATE TABLE `students` (\n  `student_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `gender` varchar(255) NOT NULL,\n  `dormitory_id` int(11),\n  `class` varchar(255),\n  PRIMARY KEY (`student_id`),\n  FOREIGN KEY (`dormitory_id`) REFERENCES `dormitories` (`dormitory_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: applications\nCREATE TABLE `applications` (\n  `application_id` int(11) NOT NULL AUTO_INCREMENT,\n  `type` varchar(255) NOT NULL,\n  `student_id` int(11) NOT NULL,\n  `content` text NOT NULL,\n  `time` datetime NOT NULL,\n  `status` varchar(255) NOT NULL,\n  `admin_opinion` text,\n  PRIMARY KEY (`application_id`),\n  FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: maintenance\nCREATE TABLE `maintenance` (\n  `record_id` int(11) NOT NULL AUTO_INCREMENT,\n  `dormitory_id` int(11) NOT NULL,\n  `fault_description` text NOT NULL,\n  `repair_time` datetime NOT NULL,\n  `staff_id` int(11) NOT NULL,\n  `situation` text NOT NULL,\n  `completion_time` datetime,\n  PRIMARY KEY (`record_id`),\n  FOREIGN KEY (`dormitory_id`) REFERENCES `dormitories` (`dormitory_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`staff_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: announcements\nCREATE TABLE `announcements` (\n  `announcement_id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `content` text NOT NULL,\n  `release_time` datetime NOT NULL,\n  `admin_id` int(11) NOT NULL,\n  PRIMARY KEY (`announcement_id`),\n  FOREIGN KEY (`admin_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "buildings",
+      "dormitories",
+      "students",
+      "applications",
+      "maintenance",
+      "announcements"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "buildings": [],
+      "dormitories": [],
+      "students": [],
+      "applications": [],
+      "maintenance": [],
+      "announcements": []
+    }
+  }
+}

@@ -1,0 +1,74 @@
+-- Schema for database: rschema_0090
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `authentication_method` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `user_permission` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `venue` (
+  `venue_id` int(11) NOT NULL,
+  `venue_name` varchar(255) NOT NULL,
+  `venue_address` varchar(255) NOT NULL,
+  `geographic_location` varchar(255) NOT NULL,
+  PRIMARY KEY (`venue_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `conference` (
+  `conference_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `subtitle` varchar(255) NOT NULL,
+  `administrator` int(11) NOT NULL,
+  `creator` int(11) NOT NULL,
+  `conference_time` datetime NOT NULL,
+  PRIMARY KEY (`conference_id`),
+  CONSTRAINT `conference_ibfk_1` FOREIGN KEY (`administrator`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `conference_ibfk_2` FOREIGN KEY (`creator`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `session` (
+  `session_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `abstract` text NOT NULL,
+  `speaker` varchar(255) NOT NULL,
+  `duration` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `belonging_conference` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`session_id`),
+  CONSTRAINT `session_ibfk_1` FOREIGN KEY (`belonging_conference`) REFERENCES `conference` (`conference_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `conference_venue_selection` (
+  `conference_id` int(11) NOT NULL,
+  `venue_id` int(11) NOT NULL,
+  PRIMARY KEY (`conference_id`, `venue_id`),
+  CONSTRAINT `conference_venue_selection_ibfk_1` FOREIGN KEY (`conference_id`) REFERENCES `conference` (`conference_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `conference_venue_selection_ibfk_2` FOREIGN KEY (`venue_id`) REFERENCES `venue` (`venue_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_create_conference` (
+  `user_id` int(11) NOT NULL,
+  `conference_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`, `conference_id`),
+  CONSTRAINT `user_create_conference_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_create_conference_ibfk_2` FOREIGN KEY (`conference_id`) REFERENCES `conference` (`conference_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_manage_conference` (
+  `user_id` int(11) NOT NULL,
+  `conference_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`, `conference_id`),
+  CONSTRAINT `user_manage_conference_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_manage_conference_ibfk_2` FOREIGN KEY (`conference_id`) REFERENCES `conference` (`conference_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_presentation` (
+  `session_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`session_id`, `user_id`),
+  CONSTRAINT `user_presentation_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_presentation_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

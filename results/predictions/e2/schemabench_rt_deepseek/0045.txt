@@ -1,0 +1,165 @@
+-- Schema for database: schemabench_0045
+CREATE TABLE `users` (
+  `github_id` bigint(20) NOT NULL,
+  `github_login` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `last_synced_at` datetime DEFAULT NULL,
+  `refresh_interval` int(11) DEFAULT NULL,
+  `api_token` varchar(255) DEFAULT NULL,
+  `sync_job_id` bigint(20) DEFAULT NULL,
+  `encrypted_access_token` varchar(255) DEFAULT NULL,
+  `encrypted_access_token_iv` varchar(255) DEFAULT NULL,
+  `encrypted_personal_access_token` varchar(255) DEFAULT NULL,
+  `encrypted_personal_access_token_iv` varchar(255) DEFAULT NULL,
+  `encrypted_app_token` varchar(255) DEFAULT NULL,
+  `encrypted_app_token_iv` varchar(255) DEFAULT NULL,
+  `theme` varchar(50) DEFAULT NULL,
+  `display_comments` boolean DEFAULT NULL,
+  PRIMARY KEY (`github_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `app_installations` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `github_id` bigint(20) NOT NULL,
+  `app_id` bigint(20) NOT NULL,
+  `account_login` varchar(255) NOT NULL,
+  `account_id` bigint(20) NOT NULL,
+  `account_type` varchar(50) NOT NULL,
+  `target_type` varchar(50) NOT NULL,
+  `target_id` bigint(20) NOT NULL,
+  `permission_statuses` json DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `app_installation_permissions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_github_id` bigint(20) NOT NULL,
+  `app_installation_id` bigint(20) NOT NULL,
+  `permissions` json DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `app_installation_permissions_ibfk_1` FOREIGN KEY (`user_github_id`) REFERENCES `users` (`github_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `app_installation_permissions_ibfk_2` FOREIGN KEY (`app_installation_id`) REFERENCES `app_installations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comments` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `subject_id` bigint(20) NOT NULL,
+  `github_id` bigint(20) NOT NULL,
+  `author` varchar(255) NOT NULL,
+  `author_association` varchar(50) NOT NULL,
+  `body` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `review_state` varchar(50) DEFAULT NULL,
+  `url` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `labels` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `color` varchar(7) NOT NULL,
+  `subject_id` bigint(20) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `github_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notifications` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `github_id` bigint(20) NOT NULL,
+  `repository_id` bigint(20) NOT NULL,
+  `repository_full_name` varchar(255) NOT NULL,
+  `subject_title` varchar(255) NOT NULL,
+  `subject_url` varchar(255) NOT NULL,
+  `subject_type` varchar(50) NOT NULL,
+  `reason` varchar(50) NOT NULL,
+  `unread` boolean NOT NULL,
+  `last_read_at` datetime DEFAULT NULL,
+  `url` varchar(255) NOT NULL,
+  `archived` boolean NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `starred` boolean NOT NULL,
+  `repository_owner_name` varchar(255) NOT NULL,
+  `latest_comment_url` varchar(255) DEFAULT NULL,
+  `mute_timestamp` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pinned_searches` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `query` text NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `repositories` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(255) NOT NULL,
+  `github_id` bigint(20) NOT NULL,
+  `privacy_status` varchar(50) NOT NULL,
+  `owner` varchar(255) NOT NULL,
+  `last_synced_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `app_installation_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subjects` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `url` varchar(255) NOT NULL,
+  `state` varchar(50) NOT NULL,
+  `author` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `html_url` varchar(255) NOT NULL,
+  `assignees` json DEFAULT NULL,
+  `github_id` bigint(20) NOT NULL,
+  `repository_full_name` varchar(255) NOT NULL,
+  `locked` boolean NOT NULL,
+  `sha` varchar(40) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `body` text NOT NULL,
+  `comment_count` int(11) NOT NULL,
+  `draft` boolean NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscription_plans` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `github_id` bigint(20) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `monthly_price_cents` int(11) NOT NULL,
+  `yearly_price_cents` int(11) NOT NULL,
+  `price_model` varchar(50) NOT NULL,
+  `free_trial` boolean NOT NULL,
+  `unit_name` varchar(50) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscription_purchases` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `subscription_plan_id` bigint(20) NOT NULL,
+  `account_id` bigint(20) NOT NULL,
+  `billing_cycle` varchar(50) NOT NULL,
+  `unit_count` int(11) NOT NULL,
+  `free_trial` boolean NOT NULL,
+  `free_trial_end_date` datetime DEFAULT NULL,
+  `next_billing_date` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

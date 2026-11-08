@@ -1,0 +1,52 @@
+-- Schema for database: rschema_0088
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `emails` (
+  `email_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sender_id` int(11) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `body` text NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `sending_time` datetime NOT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`email_id`),
+  FOREIGN KEY (`sender_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `recipients` (
+  `recipient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `email_id` int(11) NOT NULL,
+  `delivered` tinyint(1) NOT NULL,
+  `read` tinyint(1) NOT NULL,
+  PRIMARY KEY (`recipient_id`),
+  FOREIGN KEY (`email_id`) REFERENCES `emails` (`email_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attachments` (
+  `attachment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `email_id` int(11) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `file_size` int(11) NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  PRIMARY KEY (`attachment_id`),
+  FOREIGN KEY (`email_id`) REFERENCES `emails` (`email_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attachment_recipients` (
+  `attachment_id` int(11) NOT NULL,
+  `recipient_id` int(11) NOT NULL,
+  `delivered` tinyint(1) NOT NULL,
+  `read` tinyint(1) NOT NULL,
+  PRIMARY KEY (`attachment_id`, `recipient_id`),
+  FOREIGN KEY (`attachment_id`) REFERENCES `attachments` (`attachment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`recipient_id`) REFERENCES `recipients` (`recipient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

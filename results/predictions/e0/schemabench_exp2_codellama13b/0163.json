@@ -1,0 +1,48 @@
+{
+  "text_number": 163,
+  "id": "SB-163",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0163",
+  "question": "1) Background / Context:\nThe project involves the development of a system to manage athletic events efficiently. This system is centered around the collaboration between customers, employees, and the facilities where events take place. It focuses on ensuring streamlined event planning and resource allocation.\n\n2) Objectives:\n- Facilitate the request and management of athletic events.\n- Enable efficient coordination of event plans and associated resources.\n- Ensure accurate record-keeping for customers, facilities, and event details.\n\n3) Stakeholders & Users:\n- Customers: Individuals or organizations that request events.\n- Employees: Staff responsible for managing event plans.\n- Facility Managers: Personnel overseeing venue availability and assignment.\n\n4) Functional Descriptions:\n- Customer Management: Store and maintain customer details, allowing them to request events.\n- Event Request Processing: Allow customers to submit event requests, specifying desired dates, costs, and audience size. Requests must be approved, pending, or denied.\n- Employee Management: Keep track of employees who manage event plans.\n- Event Planning: Develop detailed event plans including timeline and assigned resources. Each plan is managed by an employee and linked to an event request.\n- Resource Allocation: Assign resources such as equipment to event plans, ensuring availability and proper cost management.\n- Location and Facility Management: Manage facility locations and link them to event plans, ensuring proper tracking and availability.\n\n5) Non-Functional Descriptions:\n- Data Integrity: Maintain accuracy and consistency across tables, with constraints to ensure valid statuses, audience estimates, and resource rates.\n- Security: Ensure that data access is controlled and restricted to authorized users.\n- Scalability: Support a growing number of event requests and plans without degradation in performance.\n- Usability: Provide an intuitive interface for customers to request events and employees to manage plans efficiently.",
+  "ddl": "-- Schema for database: schemabench_0163\n\nCREATE TABLE customers (\n  customer_id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  email VARCHAR(255) NOT NULL,\n  phone VARCHAR(255) NOT NULL,\n  PRIMARY KEY (customer_id)\n);\n\nCREATE TABLE events (\n  event_id INT(11) NOT NULL AUTO_INCREMENT,\n  customer_id INT(11) NOT NULL,\n  event_name VARCHAR(255) NOT NULL,\n  event_date DATE NOT NULL,\n  event_cost DECIMAL(10,2) NOT NULL,\n  audience_size INT(11) NOT NULL,\n  PRIMARY KEY (event_id),\n  FOREIGN KEY (customer_id) REFERENCES customers (customer_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE event_requests (\n  request_id INT(11) NOT NULL AUTO_INCREMENT,\n  event_id INT(11) NOT NULL,\n  request_status VARCHAR(255) NOT NULL,\n  PRIMARY KEY (request_id),\n  FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE employees (\n  employee_id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  email VARCHAR(255) NOT NULL,\n  phone VARCHAR(255) NOT NULL,\n  PRIMARY KEY (employee_id)\n);\n\nCREATE TABLE event_plans (\n  plan_id INT(11) NOT NULL AUTO_INCREMENT,\n  employee_id INT(11) NOT NULL,\n  event_id INT(11) NOT NULL,\n  plan_name VARCHAR(255) NOT NULL,\n  plan_description TEXT NOT NULL,\n  PRIMARY KEY (plan_id),\n  FOREIGN KEY (employee_id) REFERENCES employees (employee_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE resources (\n  resource_id INT(11) NOT NULL AUTO_INCREMENT,\n  resource_name VARCHAR(255) NOT NULL,\n  resource_description TEXT NOT NULL,\n  PRIMARY KEY (resource_id)\n);\n\nCREATE TABLE resource_allocations (\n  allocation_id INT(11) NOT NULL AUTO_INCREMENT,\n  resource_id INT(11) NOT NULL,\n  event_plan_id INT(11) NOT NULL,\n  PRIMARY KEY (allocation_id),\n  FOREIGN KEY (resource_id) REFERENCES resources (resource_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (event_plan_id) REFERENCES event_plans (plan_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE facilities (\n  facility_id INT(11) NOT NULL AUTO_INCREMENT,\n  facility_name VARCHAR(255) NOT NULL,\n  facility_description TEXT NOT NULL,\n  PRIMARY KEY (facility_id)\n);\n\nCREATE TABLE facility_allocations (\n  allocation_id INT(11) NOT NULL AUTO_INCREMENT,\n  facility_id INT(11) NOT NULL,\n  event_plan_id INT(11) NOT NULL,\n  PRIMARY KEY (allocation_id),\n  FOREIGN KEY (facility_id) REFERENCES facilities (facility_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (event_plan_id) REFERENCES event_plans (plan_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE user_roles (\n  role_id INT(11) NOT NULL AUTO_INCREMENT,\n  role_name VARCHAR(255) NOT NULL,\n  PRIMARY KEY (role_id)\n);\n\nCREATE TABLE user_role_assignments (\n  assignment_id INT(11) NOT NULL AUTO_INCREMENT,\n  user_id INT(11) NOT NULL,\n  role_id INT(11) NOT NULL,\n  PRIMARY KEY (assignment_id),\n  FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (role_id) REFERENCES user_roles (role_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE user_permissions (\n  permission_id INT(11) NOT NULL AUTO_INCREMENT,\n  permission_name VARCHAR(255) NOT NULL,\n  PRIMARY KEY (permission_id)\n);\n\nCREATE TABLE user_permission_assignments (\n  assignment_id INT(11) NOT NULL AUTO_INCREMENT,\n  user_id INT(11) NOT NULL,\n  permission_id INT(11) NOT NULL,\n  PRIMARY KEY (assignment_id),\n  FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (permission_id) REFERENCES user_permissions (permission_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE user_sessions (\n  session_id INT(11) NOT NULL AUTO_INCREMENT,\n  user_id INT(11) NOT NULL,\n  session_start TIMESTAMP NOT NULL,\n  session_end TIMESTAMP NOT NULL,\n  PRIMARY KEY (session_id),\n  FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE user_activity_logs (\n  log_id INT(11) NOT NULL AUTO_INCREMENT,\n  user_id INT(11) NOT NULL,\n  log_type VARCHAR(255) NOT NULL,\n  log_description TEXT NOT NULL,\n  log_timestamp TIMESTAMP NOT NULL,\n  PRIMARY KEY (log_id),\n  FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE system_logs (\n  log_id INT(11) NOT NULL AUTO_INCREMENT,\n  log_type VARCHAR(255) NOT NULL,\n  log_description TEXT NOT NULL,\n  log_timestamp TIMESTAMP NOT NULL,\n  PRIMARY KEY (log_id)\n);",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "customers",
+      "events",
+      "event_requests",
+      "employees",
+      "event_plans",
+      "resources",
+      "resource_allocations",
+      "facilities",
+      "facility_allocations",
+      "user_roles",
+      "user_role_assignments",
+      "user_permissions",
+      "user_permission_assignments",
+      "user_sessions",
+      "user_activity_logs",
+      "system_logs"
+    ],
+    "columns_by_table": {
+      "customers": [],
+      "events": [],
+      "event_requests": [],
+      "employees": [],
+      "event_plans": [],
+      "resources": [],
+      "resource_allocations": [],
+      "facilities": [],
+      "facility_allocations": [],
+      "user_roles": [],
+      "user_role_assignments": [],
+      "user_permissions": [],
+      "user_permission_assignments": [],
+      "user_sessions": [],
+      "user_activity_logs": [],
+      "system_logs": []
+    }
+  }
+}

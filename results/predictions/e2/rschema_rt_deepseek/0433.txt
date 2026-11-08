@@ -1,0 +1,43 @@
+-- Schema for database: rschema_0433
+CREATE TABLE `Module` (
+  `Module_Code` varchar(255) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Creation_Time` datetime NOT NULL,
+  `Update_Time` datetime NOT NULL,
+  PRIMARY KEY (`Module_Code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User` (
+  `User_ID` int(11) NOT NULL,
+  `Contact_Information` varchar(255) DEFAULT NULL,
+  `Department` varchar(255) DEFAULT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Role` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`User_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Business_Entity` (
+  `Entity_ID` int(11) NOT NULL,
+  `Creation_Time` datetime NOT NULL,
+  `Creator_User_ID` int(11) NOT NULL,
+  `Module_Code` varchar(255) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Type` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Entity_ID`),
+  CONSTRAINT `Business_Entity_ibfk_1` FOREIGN KEY (`Creator_User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Business_Entity_ibfk_2` FOREIGN KEY (`Module_Code`) REFERENCES `Module` (`Module_Code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Attachment` (
+  `Attachment_ID` int(11) NOT NULL,
+  `Belonging_Entity_ID` int(11) NOT NULL,
+  `Creation_Time` datetime NOT NULL,
+  `File_Name` varchar(255) NOT NULL,
+  `File_Path` varchar(255) NOT NULL,
+  `File_Size` int(11) NOT NULL,
+  `File_Status` varchar(255) DEFAULT NULL,
+  `Uploader_User_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Attachment_ID`),
+  CONSTRAINT `Attachment_ibfk_1` FOREIGN KEY (`Belonging_Entity_ID`) REFERENCES `Business_Entity` (`Entity_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Attachment_ibfk_2` FOREIGN KEY (`Uploader_User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

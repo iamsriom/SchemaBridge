@@ -1,0 +1,92 @@
+-- Schema for database: rschema_0476
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_number` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `expected_delivery_date` datetime NOT NULL,
+  `order_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `sales_orders_ibfk_1` (`customer_id`),
+  CONSTRAINT `sales_orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `production_planning` (
+  `production_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `production_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`production_id`),
+  KEY `production_planning_ibfk_1` (`order_id`),
+  CONSTRAINT `production_planning_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `sales_orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inventory_management` (
+  `inventory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pizza_id` int(11) NOT NULL,
+  `raw_material_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `status` varchar(255) NOT NULL,
+  PRIMARY KEY (`inventory_id`),
+  KEY `inventory_management_ibfk_1` (`pizza_id`),
+  KEY `inventory_management_ibfk_2` (`raw_material_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `purchase_orders` (
+  `purchase_order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_id` int(11) NOT NULL,
+  `raw_material_id` int(11) NOT NULL,
+  `order_quantity` int(11) NOT NULL,
+  `supply_quantity` int(11) NOT NULL,
+  `order_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`purchase_order_id`),
+  KEY `purchase_orders_ibfk_1` (`supplier_id`),
+  KEY `purchase_orders_ibfk_2` (`raw_material_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `delivery_records` (
+  `delivery_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `delivery_time` datetime NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `status` varchar(255) NOT NULL,
+  PRIMARY KEY (`delivery_id`),
+  KEY `delivery_records_ibfk_1` (`order_id`),
+  CONSTRAINT `delivery_records_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `sales_orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `financial_records` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_type` varchar(255) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `date` datetime NOT NULL,
+  `status` varchar(255) NOT NULL,
+  PRIMARY KEY (`transaction_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `suppliers` (
+  `supplier_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_number` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  PRIMARY KEY (`supplier_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pizza_recipes` (
+  `pizza_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `ingredients` varchar(255) NOT NULL,
+  PRIMARY KEY (`pizza_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `raw_materials` (
+  `raw_material_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`raw_material_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

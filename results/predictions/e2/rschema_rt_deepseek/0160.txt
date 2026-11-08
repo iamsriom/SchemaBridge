@@ -1,0 +1,61 @@
+-- Schema for database: rschema_0160
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `countryside_scenic_spot` (
+  `scenic_spot_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `main_scenic_spot_introduction` text DEFAULT NULL,
+  PRIMARY KEY (`scenic_spot_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `agricultural_product` (
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(255) DEFAULT NULL,
+  `product_price` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `scenic_spot_comment` (
+  `scenic_spot_id` int(11) NOT NULL,
+  `comment_content` text DEFAULT NULL,
+  `posting_user` int(11) NOT NULL,
+  `comment_time` datetime NOT NULL,
+  PRIMARY KEY (`scenic_spot_id`, `posting_user`, `comment_time`),
+  CONSTRAINT `scenic_spot_comment_ibfk_1` FOREIGN KEY (`posting_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_comment` (
+  `product_id` int(11) NOT NULL,
+  `comment_content` text DEFAULT NULL,
+  `posting_user` int(11) NOT NULL,
+  `posting_time` datetime NOT NULL,
+  PRIMARY KEY (`product_id`, `posting_user`, `posting_time`),
+  CONSTRAINT `product_comment_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `agricultural_product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `product_comment_ibfk_2` FOREIGN KEY (`posting_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order` (
+  `order_id` int(11) NOT NULL,
+  `ordering_user` int(11) NOT NULL,
+  `order_time` datetime DEFAULT NULL,
+  `order_amount` decimal(10,2) DEFAULT NULL,
+  `order_status` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`ordering_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_detail` (
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`order_id`, `product_id`),
+  CONSTRAINT `order_detail_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_detail_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `agricultural_product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

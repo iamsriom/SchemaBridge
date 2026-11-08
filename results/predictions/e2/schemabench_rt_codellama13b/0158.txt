@@ -1,0 +1,53 @@
+-- Schema for database: schemabench_0158
+CREATE TABLE `installations` (
+  `installation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`installation_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `labor_codes` (
+  `labor_code_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`labor_code_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `billing_codes` (
+  `billing_code_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`billing_code_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tickets` (
+  `ticket_id` int(11) NOT NULL,
+  `installation_id` int(11) NOT NULL,
+  `ticket_number` varchar(255) NOT NULL UNIQUE,
+  `description` text DEFAULT NULL,
+  `labor_code_id` int(11) DEFAULT NULL,
+  `creation_date` datetime NOT NULL,
+  `isclosed` boolean NOT NULL DEFAULT FALSE,
+  PRIMARY KEY (`ticket_id`, `installation_id`),
+  CONSTRAINT `tickets_ibfk_1` FOREIGN KEY (`installation_id`) REFERENCES `installations` (`installation_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `tickets_ibfk_2` FOREIGN KEY (`labor_code_id`) REFERENCES `labor_codes` (`labor_code_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reports` (
+  `report_id` int(11) NOT NULL,
+  `ticket_id` int(11) NOT NULL,
+  `billing_code_id` int(11) NOT NULL DEFAULT 'B05',
+  `report_date` datetime NOT NULL,
+  `arrival_time` datetime DEFAULT NULL,
+  `exit_time` datetime DEFAULT NULL,
+  `activities` text DEFAULT NULL,
+  PRIMARY KEY (`report_id`, `ticket_id`),
+  CONSTRAINT `reports_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`ticket_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `reports_ibfk_2` FOREIGN KEY (`billing_code_id`) REFERENCES `billing_codes` (`billing_code_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shell` (
+  `shell_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `icon` varchar(255) DEFAULT NULL,
+  `menu_items` text DEFAULT NULL,
+  `theme` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`shell_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

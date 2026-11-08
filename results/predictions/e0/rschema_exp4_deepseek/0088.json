@@ -1,0 +1,26 @@
+{
+  "text_number": 88,
+  "id": "67552f0a13602ec03b41a87a",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "rschema_0088",
+  "question": "The mail system manages multiple users, each of whom has a user ID, email account, name, password, and creation time. The system manages multiple emails, each of which has an email ID, sender ID, subject, body, status, sending time, and creation time. Each time an email is sent, the recipient information of the email needs to be recorded, including the recipient ID, whether it was successfully delivered, and whether it has been read. The system also supports the email attachment function, and each attachment has an attachment ID, attachment file name, attachment size, and attachment file storage path. Each email sent can be accompanied by multiple attachments, and whether the attachments were successfully delivered and whether they have been read is recorded. By recording information about users, emails, recipients, and attachments, the integrity and efficiency of the mail system are ensured.",
+  "ddl": "--Schemafordatabase:rschema_0088\n--Foreachtable:\n\nCREATE TABLE `users` (\n  `user_id` int(11) NOT NULL AUTO_INCREMENT,\n  `email_account` varchar(255) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `creation_time` datetime NOT NULL,\n  PRIMARY KEY (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `emails` (\n  `email_id` int(11) NOT NULL AUTO_INCREMENT,\n  `sender_id` int(11) NOT NULL,\n  `subject` varchar(255) NOT NULL,\n  `body` text NOT NULL,\n  `status` enum('sent','draft') NOT NULL,\n  `sending_time` datetime DEFAULT NULL,\n  `creation_time` datetime NOT NULL,\n  PRIMARY KEY (`email_id`),\n  KEY `sender_id` (`sender_id`),\n  CONSTRAINT `emails_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `recipients` (\n  `recipient_id` int(11) NOT NULL AUTO_INCREMENT,\n  `email_id` int(11) NOT NULL,\n  `delivery_status` enum('success','failed') NOT NULL,\n  `read_status` enum('read','unread') NOT NULL,\n  PRIMARY KEY (`recipient_id`),\n  KEY `email_id` (`email_id`),\n  CONSTRAINT `recipients_ibfk_1` FOREIGN KEY (`email_id`) REFERENCES `emails` (`email_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `attachments` (\n  `attachment_id` int(11) NOT NULL AUTO_INCREMENT,\n  `email_id` int(11) NOT NULL,\n  `filename` varchar(255) NOT NULL,\n  `size` int(11) NOT NULL,\n  `storage_path` varchar(255) NOT NULL,\n  PRIMARY KEY (`attachment_id`),\n  KEY `email_id` (`email_id`),\n  CONSTRAINT `attachments_ibfk_1` FOREIGN KEY (`email_id`) REFERENCES `emails` (`email_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `delivery_status` (\n  `delivery_id` int(11) NOT NULL AUTO_INCREMENT,\n  `recipient_id` int(11) NOT NULL,\n  `delivery_status` enum('success','failed') NOT NULL,\n  `read_status` enum('read','unread') NOT NULL,\n  PRIMARY KEY (`delivery_id`),\n  KEY `recipient_id` (`recipient_id`),\n  CONSTRAINT `delivery_status_ibfk_1` FOREIGN KEY (`recipient_id`) REFERENCES `recipients` (`recipient_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "emails",
+      "recipients",
+      "attachments",
+      "delivery_status"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "emails": [],
+      "recipients": [],
+      "attachments": [],
+      "delivery_status": []
+    }
+  }
+}

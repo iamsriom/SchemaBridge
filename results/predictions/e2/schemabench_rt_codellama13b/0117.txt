@@ -1,0 +1,47 @@
+-- Schema for database: schemabench_0117
+CREATE TABLE `atoms` (
+  `atom_id` int(11) NOT NULL,
+  `element` varchar(50) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `charge` int(11) DEFAULT 0,
+  `drug_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  CONSTRAINT `atoms_ibfk_1` FOREIGN KEY (`drug_id`) REFERENCES `drugs` (`drug_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `bonds` (
+  `bond_id` int(11) NOT NULL,
+  `bond_type` varchar(50) NOT NULL,
+  `atom_id_1` int(11) NOT NULL,
+  `atom_id_2` int(11) NOT NULL,
+  PRIMARY KEY (`bond_id`),
+  CONSTRAINT `bonds_ibfk_1` FOREIGN KEY (`atom_id_1`) REFERENCES `atoms` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bonds_ibfk_2` FOREIGN KEY (`atom_id_2`) REFERENCES `atoms` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `drugs` (
+  `drug_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `ind1` varchar(50) NOT NULL,
+  `inda` varchar(50) NOT NULL,
+  `act` varchar(50) NOT NULL,
+  PRIMARY KEY (`drug_id`),
+  UNIQUE KEY `unique_drug` (`ind1`, `inda`, `act`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `ring_atom` (
+  `ring_atom_id` int(11) NOT NULL,
+  `ring_id` int(11) NOT NULL,
+  `atom_id` int(11) NOT NULL,
+  PRIMARY KEY (`ring_atom_id`),
+  CONSTRAINT `ring_atom_ibfk_1` FOREIGN KEY (`ring_id`) REFERENCES `rings` (`ring_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ring_atom_ibfk_2` FOREIGN KEY (`atom_id`) REFERENCES `atoms` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `ring_strucs` (
+  `ring_id` int(11) NOT NULL,
+  `ring_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`ring_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `rings` (
+  `ring_id` int(11) NOT NULL,
+  `structure_id` int(11) NOT NULL,
+  PRIMARY KEY (`ring_id`),
+  CONSTRAINT `rings_ibfk_1` FOREIGN KEY (`structure_id`) REFERENCES `ring_strucs` (`ring_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

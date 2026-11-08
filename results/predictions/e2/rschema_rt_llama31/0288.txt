@@ -1,0 +1,49 @@
+-- Schema for database: rschema_0288
+CREATE TABLE `monitoring_site` (
+  `site_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `responsible_person_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`site_id`),
+  CONSTRAINT `monitoring_site_ibfk_1` FOREIGN KEY (`responsible_person_id`) REFERENCES `monitoring_personnel` (`person_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `monitoring_personnel` (
+  `person_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  `scope_of_work` varchar(255) NOT NULL,
+  PRIMARY KEY (`person_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_personnel` (
+  `person_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  `scope_of_work` varchar(255) NOT NULL,
+  PRIMARY KEY (`person_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site_monitoring_data` (
+  `site_id` int(11) NOT NULL,
+  `monitoring_personnel_id` int(11) NOT NULL,
+  `record_time` datetime NOT NULL,
+  `air_quality` float DEFAULT NULL,
+  `water_quality` float DEFAULT NULL,
+  `noise_level` float DEFAULT NULL,
+  `result` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`site_id`, `record_time`, `monitoring_personnel_id`),
+  CONSTRAINT `site_monitoring_data_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `monitoring_site` (`site_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `site_monitoring_data_ibfk_2` FOREIGN KEY (`monitoring_personnel_id`) REFERENCES `monitoring_personnel` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site_maintenance_data` (
+  `site_id` int(11) NOT NULL,
+  `maintenance_personnel_id` int(11) NOT NULL,
+  `maintenance_time` datetime NOT NULL,
+  `maintenance_content` varchar(255) DEFAULT NULL,
+  `maintenance_cost` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`site_id`, `maintenance_personnel_id`, `maintenance_time`),
+  CONSTRAINT `site_maintenance_data_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `monitoring_site` (`site_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `site_maintenance_data_ibfk_2` FOREIGN KEY (`maintenance_personnel_id`) REFERENCES `maintenance_personnel` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

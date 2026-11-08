@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0352
+CREATE TABLE `Supplier` (
+  `Supplier_ID` int(11) NOT NULL,
+  `Supplier_Name` varchar(255) NOT NULL,
+  `Supplier_Address` varchar(255) DEFAULT NULL,
+  `Supplier_Phone` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`Supplier_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Customer` (
+  `Customer_ID` int(11) NOT NULL,
+  `First_Name` varchar(255) NOT NULL,
+  `Last_Name` varchar(255) NOT NULL,
+  `Address` varchar(255) DEFAULT NULL,
+  `Phone` varchar(15) DEFAULT NULL,
+  `Email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Customer_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Product` (
+  `Product_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Description` varchar(255) DEFAULT NULL,
+  `Purchase_Price` decimal(10,2) NOT NULL,
+  `Selling_Price` decimal(10,2) NOT NULL,
+  `Stock_Quantity` int(11) NOT NULL,
+  `Minimum_Stock_Quantity` int(11) NOT NULL,
+  `Supplier_ID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Product_ID`),
+  CONSTRAINT `product_ibfk_1` FOREIGN KEY (`Supplier_ID`) REFERENCES `Supplier` (`Supplier_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Invoice` (
+  `Invoice_ID` int(11) NOT NULL,
+  `Customer_ID` int(11) NOT NULL,
+  `Date` datetime NOT NULL,
+  `Tax_Amount` decimal(10,2) DEFAULT NULL,
+  `Total_Value` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`Invoice_ID`),
+  CONSTRAINT `invoice_ibfk_1` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Invoice_Product` (
+  `Invoice_ID` int(11) NOT NULL,
+  `Product_ID` int(11) NOT NULL,
+  `Product_Quantity` int(11) NOT NULL,
+  PRIMARY KEY (`Invoice_ID`, `Product_ID`),
+  CONSTRAINT `invoice_product_ibfk_1` FOREIGN KEY (`Invoice_ID`) REFERENCES `Invoice` (`Invoice_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `invoice_product_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `Product` (`Product_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

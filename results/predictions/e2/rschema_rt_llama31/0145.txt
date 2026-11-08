@@ -1,0 +1,78 @@
+-- Schema for database: rschema_0145
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `solid_state_disk` (
+  `disk_id` int(11) NOT NULL AUTO_INCREMENT,
+  `brand` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  PRIMARY KEY (`disk_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `telephone` varchar(15) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_order` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_time` datetime NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `sales_order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `purchase_record` (
+  `purchase_id` int(11) NOT NULL AUTO_INCREMENT,
+  `purchase_time` datetime NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  PRIMARY KEY (`purchase_id`),
+  CONSTRAINT `purchase_record_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `warehouse` (
+  `warehouse_id` int(11) NOT NULL AUTO_INCREMENT,
+  `administrator` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `warehouse_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`warehouse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_order_details` (
+  `order_id` int(11) NOT NULL,
+  `disk_id` int(11) NOT NULL,
+  PRIMARY KEY (`order_id`, `disk_id`),
+  CONSTRAINT `sales_order_details_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `sales_order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_order_details_ibfk_2` FOREIGN KEY (`disk_id`) REFERENCES `solid_state_disk` (`disk_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `purchase_order_details` (
+  `purchase_id` int(11) NOT NULL,
+  `disk_id` int(11) NOT NULL,
+  PRIMARY KEY (`purchase_id`, `disk_id`),
+  CONSTRAINT `purchase_order_details_ibfk_1` FOREIGN KEY (`purchase_id`) REFERENCES `purchase_record` (`purchase_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchase_order_details_ibfk_2` FOREIGN KEY (`disk_id`) REFERENCES `solid_state_disk` (`disk_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `hard_disk_storage` (
+  `disk_id` int(11) NOT NULL,
+  `warehouse_id` int(11) NOT NULL,
+  PRIMARY KEY (`disk_id`, `warehouse_id`),
+  CONSTRAINT `hard_disk_storage_ibfk_1` FOREIGN KEY (`disk_id`) REFERENCES `solid_state_disk` (`disk_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `hard_disk_storage_ibfk_2` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

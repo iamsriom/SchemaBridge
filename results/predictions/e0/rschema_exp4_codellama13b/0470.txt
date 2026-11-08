@@ -1,0 +1,59 @@
+-- Schema for database: rschema_0470
+
+CREATE TABLE employees (
+  employee_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(255) NOT NULL,
+  address VARCHAR(255) NOT NULL,
+  PRIMARY KEY (employee_id)
+);
+
+CREATE TABLE menu_items (
+  dish_id INT(11) NOT NULL AUTO_INCREMENT,
+  dish_name VARCHAR(255) NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  special_offer_indicator TINYINT(1) NOT NULL,
+  PRIMARY KEY (dish_id)
+);
+
+CREATE TABLE orders (
+  order_number INT(11) NOT NULL AUTO_INCREMENT,
+  employee_id INT(11) NOT NULL,
+  menu_number INT(11) NOT NULL,
+  quantity INT(11) NOT NULL,
+  total_price DECIMAL(10,2) NOT NULL,
+  delivery_time DATETIME NOT NULL,
+  delivery_address VARCHAR(255) NOT NULL,
+  payment_method VARCHAR(255) NOT NULL,
+  PRIMARY KEY (order_number),
+  FOREIGN KEY (employee_id) REFERENCES employees (employee_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (menu_number) REFERENCES menu_items (dish_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE delivery_records (
+  delivery_record_id INT(11) NOT NULL AUTO_INCREMENT,
+  order_id INT(11) NOT NULL,
+  delivery_time DATETIME NOT NULL,
+  delivery_person_id INT(11) NOT NULL,
+  PRIMARY KEY (delivery_record_id),
+  FOREIGN KEY (order_id) REFERENCES orders (order_number) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (delivery_person_id) REFERENCES delivery_persons (delivery_person_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE delivery_persons (
+  delivery_person_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(255) NOT NULL,
+  address VARCHAR(255) NOT NULL,
+  PRIMARY KEY (delivery_person_id)
+);
+
+CREATE TABLE payment_requests (
+  order_id INT(11) NOT NULL,
+  employee_id INT(11) NOT NULL,
+  payment_status VARCHAR(255) NOT NULL,
+  payment_amount DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (order_id),
+  FOREIGN KEY (order_id) REFERENCES orders (order_number) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (employee_id) REFERENCES employees (employee_id) ON DELETE CASCADE ON UPDATE CASCADE
+);

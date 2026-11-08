@@ -1,0 +1,37 @@
+-- Schema for database: schemabench_0024
+CREATE TABLE `tag` ( 
+  `id` int(11) NOT NULL AUTO_INCREMENT, 
+  `name` varchar(255) NOT NULL, 
+  `slug` varchar(255) NOT NULL, 
+  PRIMARY KEY (`id`), 
+  UNIQUE KEY `tag_slug_unique` (`slug`) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `taggeditem` ( 
+  `id` int(11) NOT NULL AUTO_INCREMENT, 
+  `tag_id` int(11) NOT NULL, 
+  `content_type_id` int(11) NOT NULL, 
+  `object_id` int(11) NOT NULL, 
+  PRIMARY KEY (`id`), 
+  KEY `taggeditem_tag_id_foreign` (`tag_id`), 
+  KEY `taggeditem_content_type_id_foreign` (`content_type_id`), 
+  KEY `taggeditem_object_id_foreign` (`object_id`), 
+  CONSTRAINT `taggeditem_tag_id_foreign` FOREIGN KEY (`tag_id`) REFERENCES `tag` (`id`) ON DELETE CASCADE ON UPDATE CASCADE, 
+  CONSTRAINT `taggeditem_content_type_id_foreign` FOREIGN KEY (`content_type_id`) REFERENCES `content_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE, 
+  CONSTRAINT `taggeditem_object_id_foreign` FOREIGN KEY (`object_id`) REFERENCES `object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `content_type` ( 
+  `id` int(11) NOT NULL AUTO_INCREMENT, 
+  `name` varchar(255) NOT NULL, 
+  PRIMARY KEY (`id`), 
+  UNIQUE KEY `content_type_name_unique` (`name`) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `object` ( 
+  `id` int(11) NOT NULL AUTO_INCREMENT, 
+  `content_type_id` int(11) NOT NULL, 
+  PRIMARY KEY (`id`), 
+  KEY `object_content_type_id_foreign` (`content_type_id`), 
+  CONSTRAINT `object_content_type_id_foreign` FOREIGN KEY (`content_type_id`) REFERENCES `content_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

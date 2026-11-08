@@ -1,0 +1,45 @@
+--Schemafordatabase:rschema_0236
+--Foreachtable:
+
+CREATE TABLE `cameras` (
+  `camera_id` int(11) NOT NULL AUTO_INCREMENT,
+  `camera_title` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `RTSP_stream_address` varchar(255) NOT NULL,
+  `real_time_video_stream_path` varchar(255) NOT NULL,
+  `recording_analysis_time` datetime NOT NULL,
+  PRIMARY KEY (`camera_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `videos` (
+  `video_id` int(11) NOT NULL AUTO_INCREMENT,
+  `camera_id` int(11) NOT NULL,
+  `video_file_path` varchar(255) NOT NULL,
+  `cover_path` varchar(255) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `duration` int(11) NOT NULL,
+  PRIMARY KEY (`video_id`),
+  FOREIGN KEY (`camera_id`) REFERENCES `cameras` (`camera_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alarms` (
+  `alarm_id` int(11) NOT NULL AUTO_INCREMENT,
+  `video_id` int(11) NOT NULL,
+  `alarm_type` varchar(255) NOT NULL,
+  `level` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  PRIMARY KEY (`alarm_id`),
+  FOREIGN KEY (`video_id`) REFERENCES `videos` (`video_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `events` (
+  `event_id` int(11) NOT NULL AUTO_INCREMENT,
+  `video_id` int(11) NOT NULL,
+  `coordinates` varchar(255) NOT NULL,
+  `dimensions` varchar(255) NOT NULL,
+  `event_type` varchar(255) NOT NULL,
+  `occurrence_time` datetime NOT NULL,
+  PRIMARY KEY (`event_id`),
+  FOREIGN KEY (`video_id`) REFERENCES `videos` (`video_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

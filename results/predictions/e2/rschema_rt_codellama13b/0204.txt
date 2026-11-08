@@ -1,0 +1,40 @@
+-- Schema for database: rschema_0204
+CREATE TABLE `participating_teams` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_name` varchar(255) NOT NULL,
+  `team_size` int(11) NOT NULL,
+  `team_leader` varchar(255) NOT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `referees` (
+  `referee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `referee_name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  PRIMARY KEY (`referee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `events` (
+  `event_id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_name` varchar(255) NOT NULL,
+  `event_type` varchar(255) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  `referee_id` int(11) NOT NULL,
+  `winning_team_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`event_id`),
+  CONSTRAINT `events_ibfk_1` FOREIGN KEY (`referee_id`) REFERENCES `referees` (`referee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `events_ibfk_2` FOREIGN KEY (`winning_team_id`) REFERENCES `participating_teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `match_results` (
+  `match_id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_id` int(11) NOT NULL,
+  `team_id` int(11) NOT NULL,
+  `team_ranking` int(11) NOT NULL,
+  `referee_evaluation` varchar(255) NOT NULL,
+  PRIMARY KEY (`match_id`),
+  CONSTRAINT `match_results_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `match_results_ibfk_2` FOREIGN KEY (`team_id`) REFERENCES `participating_teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

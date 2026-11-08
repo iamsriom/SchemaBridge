@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0045
+CREATE TABLE `warehouse` (
+  `warehouse_number` int(11) NOT NULL,
+  `warehouse_name` varchar(255) NOT NULL,
+  `warehouse_address` varchar(255) NOT NULL,
+  `inventory_accuracy` decimal(5,2) NOT NULL,
+  `outbound_efficiency` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`warehouse_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `good` (
+  `good_barcode` varchar(255) NOT NULL,
+  `good_name` varchar(255) NOT NULL,
+  `good_model` varchar(255) NOT NULL,
+  `good_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`good_barcode`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `warehouse_good_record` (
+  `warehouse_number` int(11) NOT NULL,
+  `good_barcode` varchar(255) NOT NULL,
+  PRIMARY KEY (`warehouse_number`, `good_barcode`),
+  CONSTRAINT `warehouse_good_record_ibfk_1` FOREIGN KEY (`warehouse_number`) REFERENCES `warehouse` (`warehouse_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `warehouse_good_record_ibfk_2` FOREIGN KEY (`good_barcode`) REFERENCES `good` (`good_barcode`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inventory` (
+  `warehouse_number` int(11) NOT NULL,
+  `good_barcode` varchar(255) NOT NULL,
+  `inventory_time` datetime NOT NULL,
+  `inventory_person` varchar(255) NOT NULL,
+  `inventory_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`warehouse_number`, `good_barcode`, `inventory_time`),
+  CONSTRAINT `inventory_ibfk_1` FOREIGN KEY (`warehouse_number`) REFERENCES `warehouse` (`warehouse_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `inventory_ibfk_2` FOREIGN KEY (`good_barcode`) REFERENCES `good` (`good_barcode`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `outgoing_record` (
+  `warehouse_number` int(11) NOT NULL,
+  `good_barcode` varchar(255) NOT NULL,
+  `outgoing_time` datetime NOT NULL,
+  `outgoing_quantity` int(11) NOT NULL,
+  `outgoing_person` varchar(255) NOT NULL,
+  `receiving_unit` varchar(255) NOT NULL,
+  PRIMARY KEY (`warehouse_number`, `good_barcode`, `outgoing_time`),
+  CONSTRAINT `outgoing_record_ibfk_1` FOREIGN KEY (`warehouse_number`) REFERENCES `warehouse` (`warehouse_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `outgoing_record_ibfk_2` FOREIGN KEY (`good_barcode`) REFERENCES `good` (`good_barcode`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,104 @@
+-- Schema for database: schemabench_0019
+CREATE TABLE `auth_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `last_login` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `accounts_profile` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `next_report_date` datetime DEFAULT NULL,
+  `reports_allowed` int(11) NOT NULL,
+  `ping_log_limit` int(11) NOT NULL,
+  `check_limit` int(11) NOT NULL,
+  `sms_limit` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `accounts_profile_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `accounts_project` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_id` int(11) NOT NULL,
+  `project_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `accounts_project_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `accounts_member` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `accounts_member_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `accounts_member_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `accounts_project` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `api_channel` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `code` varchar(255) NOT NULL,
+  `kind` varchar(255) NOT NULL,
+  `last_error` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `api_channel_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `accounts_project` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `api_check` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `code` varchar(255) NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `schedule` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `api_check_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `accounts_project` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `api_flip` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `check_id` int(11) NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `timestamp` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `api_flip_ibfk_1` FOREIGN KEY (`check_id`) REFERENCES `api_check` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `api_notification` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `channel_id` int(11) NOT NULL,
+  `message` varchar(255) NOT NULL,
+  `sent_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `api_notification_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `api_channel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `api_ping` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `check_id` int(11) NOT NULL,
+  `method` varchar(255) NOT NULL,
+  `scheme` varchar(255) NOT NULL,
+  `body` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `api_ping_ibfk_1` FOREIGN KEY (`check_id`) REFERENCES `api_check` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `api_tokenbucket` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `value` int(11) NOT NULL,
+  `tokens_available` int(11) NOT NULL,
+  `last_update` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payments_subscription` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `customer_id` varchar(255) NOT NULL,
+  `payment_method` varchar(255) NOT NULL,
+  `plan_details` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `payments_subscription_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

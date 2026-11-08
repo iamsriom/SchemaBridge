@@ -1,0 +1,61 @@
+-- Schema for database: schemabench_0115
+CREATE TABLE `legalacts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `hash` varchar(255) NOT NULL,
+  `update_timestamp` datetime NOT NULL,
+  `court` varchar(255) NOT NULL,
+  `case_kind` varchar(255) NOT NULL,
+  `case_number` varchar(255) NOT NULL,
+  `act_year` int(11) NOT NULL,
+  `judge` varchar(255) NOT NULL,
+  `act_kind` varchar(255) NOT NULL,
+  `act_number` varchar(255) NOT NULL,
+  `start_date` date NOT NULL,
+  `legal_date` date NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `act_link` varchar(255) NOT NULL,
+  `motive_date` date DEFAULT NULL,
+  `motive_link` varchar(255) DEFAULT NULL,
+  `high_court` varchar(255) DEFAULT NULL,
+  `out_number` varchar(255) DEFAULT NULL,
+  `year_higher_court` int(11) DEFAULT NULL,
+  `type_of_document` varchar(255) NOT NULL,
+  `send_date` date DEFAULT NULL,
+  `result_of_appeal` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `people` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `jury_status` varchar(255) NOT NULL,
+  `court_affiliation` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `legalact_link` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `act_id_1` int(11) NOT NULL,
+  `act_id_2` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `legalact_link_ibfk_1` FOREIGN KEY (`act_id_1`) REFERENCES `legalacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `legalact_link_ibfk_2` FOREIGN KEY (`act_id_2`) REFERENCES `legalacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `legalact_people` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `legalact_id` int(11) NOT NULL,
+  `person_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `legalact_people_ibfk_1` FOREIGN KEY (`legalact_id`) REFERENCES `legalacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `legalact_people_ibfk_2` FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `scrapefix` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` text NOT NULL,
+  `contributor` varchar(255) NOT NULL,
+  `legalact_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `scrapefix_ibfk_1` FOREIGN KEY (`legalact_id`) REFERENCES `legalacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

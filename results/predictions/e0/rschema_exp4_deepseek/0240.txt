@@ -1,0 +1,64 @@
+-- Schema for database: `rschema_0240`
+
+-- Table: `Ships`
+
+CREATE TABLE `ships` (
+  `ShipID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Type` varchar(255) NOT NULL,
+  `FleetID` int(11) NOT NULL,
+  `ConstructionDate` datetime NOT NULL,
+  `ServiceStatus` varchar(255) NOT NULL,
+  PRIMARY KEY (`ShipID`),
+  FOREIGN KEY (`FleetID`) REFERENCES `Fleets` (`FleetID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `CrewMembers`
+
+CREATE TABLE `crew_members` (
+  `CrewMemberID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Gender` char(6) NOT NULL,
+  `Position` varchar(255) NOT NULL,
+  `FleetID` int(11) NOT NULL,
+  `PhoneNumber` varchar(255) NOT NULL,
+  `LengthofService` int(11) NOT NULL,
+  PRIMARY KEY (`CrewMemberID`),
+  FOREIGN KEY (`FleetID`) REFERENCES `Fleets` (`FleetID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `Fleets`
+
+CREATE TABLE `fleets` (
+  `FleetID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `CommanderID` int(11) NOT NULL,
+  PRIMARY KEY (`FleetID`),
+  FOREIGN KEY (`CommanderID`) REFERENCES `CrewMembers` (`CrewMemberID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `Missions`
+
+CREATE TABLE `missions` (
+  `CrewMemberID` int(11) NOT NULL,
+  `FleetID` int(11) NOT NULL,
+  `ExecutionTime` datetime NOT NULL,
+  `Remarks` varchar(255) NOT NULL,
+  `IsCrewMemberPrimaryResponsible` varchar(255) NOT NULL,
+  PRIMARY KEY (`CrewMemberID`, `FleetID`),
+  FOREIGN KEY (`CrewMemberID`) REFERENCES `CrewMembers` (`CrewMemberID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`FleetID`) REFERENCES `Fleets` (`FleetID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `ShipSupplies`
+
+CREATE TABLE `ship_supplies` (
+  `ResponsibleSupplyCrewMemberID` int(11) NOT NULL,
+  `ShipID` int(11) NOT NULL,
+  `SupplyTime` datetime NOT NULL,
+  `SupplyItems` varchar(255) NOT NULL,
+  `SupplyQuantity` int(11) NOT NULL,
+  PRIMARY KEY (`ResponsibleSupplyCrewMemberID`, `ShipID`),
+  FOREIGN KEY (`ResponsibleSupplyCrewMemberID`) REFERENCES `CrewMembers` (`CrewMemberID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`ShipID`) REFERENCES `Ships` (`ShipID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

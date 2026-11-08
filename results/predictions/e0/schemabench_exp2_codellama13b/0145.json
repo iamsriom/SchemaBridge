@@ -1,0 +1,48 @@
+{
+  "text_number": 145,
+  "id": "SB-145",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0145",
+  "question": "1) Background / Context:\n\nThe project involves developing a digital encyclopedia, called the Pokedex, which serves as a comprehensive reference for 722 Pokemon. The database encompasses 14 tables and 5 views, containing details about various aspects of Pokemon. The Pokedex aims to provide thorough and flexible data, leveraging the strong Pokemon community resources like PokeAPI and Veekun. Each Pokemon game has its unique Pokedex with variances, but this project focuses on the National Pokedex for consistency.\n\n2) Objectives:\n\n- Create a robust database to store detailed information about Pokemon, including their types, moves, evolutions, abilities, and habitats.\n- Enable users such as hobbyists, competitive players, and others interested in specific Pokemon details to access and utilize this information.\n\n3) Stakeholders & Users:\n\n- Stakeholders: Database developers, Pokemon community members, application developers who may integrate this database.\n- Users: Pokemon hobbyists, competitive players, researchers, and educators interested in Pokemon data.\n\n4) Functional Descriptions:\n\n- Store information about different Pokemon types and their effectiveness against each other.\n- Maintain a record of all moves, including power, accuracy, and type affiliation.\n- Track Pokemon attributes like height, weight, and base experience.\n- Document the evolution chain and conditions for different Pokemon species.\n- Record Pokemon abilities and whether they are hidden or not.\n- List the base statistics (HP, attack, defense, etc.) for each Pokemon.\n- Classify Pokemon into different habitats.\n- Maintain historical data of Pokemon versions and their classification.\n\n5) Non-Functional Descriptions:\n\n- Ensure data integrity and consistency across all relational tables.\n- Provide scalability to accommodate future additions of Pokemon and data fields.\n- Secure access to sensitive data.\n- Optimize for fast query performance to support real-time data retrieval by users.",
+  "ddl": "-- Schema for database: schemabench_0145\nCREATE TABLE pokemon (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  type VARCHAR(255) NOT NULL,\n  height INT(11) NOT NULL,\n  weight INT(11) NOT NULL,\n  base_experience INT(11) NOT NULL,\n  PRIMARY KEY (id),\n  UNIQUE KEY name (name)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE types (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  PRIMARY KEY (id),\n  UNIQUE KEY name (name)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE moves (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  type VARCHAR(255) NOT NULL,\n  power INT(11) NOT NULL,\n  accuracy INT(11) NOT NULL,\n  PRIMARY KEY (id),\n  UNIQUE KEY name (name)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE evolutions (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  pokemon_id INT(11) NOT NULL,\n  evolution_id INT(11) NOT NULL,\n  evolution_type VARCHAR(255) NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (pokemon_id) REFERENCES pokemon (id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (evolution_id) REFERENCES pokemon (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE abilities (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  hidden BOOLEAN NOT NULL,\n  PRIMARY KEY (id),\n  UNIQUE KEY name (name)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE base_stats (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  pokemon_id INT(11) NOT NULL,\n  hp INT(11) NOT NULL,\n  attack INT(11) NOT NULL,\n  defense INT(11) NOT NULL,\n  special_attack INT(11) NOT NULL,\n  special_defense INT(11) NOT NULL,\n  speed INT(11) NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (pokemon_id) REFERENCES pokemon (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE habitats (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  PRIMARY KEY (id),\n  UNIQUE KEY name (name)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE historical_data (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  pokemon_id INT(11) NOT NULL,\n  version VARCHAR(255) NOT NULL,\n  classification VARCHAR(255) NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (pokemon_id) REFERENCES pokemon (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE pokemon_types (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  pokemon_id INT(11) NOT NULL,\n  type_id INT(11) NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (pokemon_id) REFERENCES pokemon (id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (type_id) REFERENCES types (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE move_types (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  move_id INT(11) NOT NULL,\n  type_id INT(11) NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (move_id) REFERENCES moves (id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (type_id) REFERENCES types (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE pokemon_abilities (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  pokemon_id INT(11) NOT NULL,\n  ability_id INT(11) NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (pokemon_id) REFERENCES pokemon (id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (ability_id) REFERENCES abilities (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE pokemon_base_stats (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  pokemon_id INT(11) NOT NULL,\n  base_stat_id INT(11) NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (pokemon_id) REFERENCES pokemon (id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (base_stat_id) REFERENCES base_stats (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE pokemon_habitats (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  pokemon_id INT(11) NOT NULL,\n  habitat_id INT(11) NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (pokemon_id) REFERENCES pokemon (id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (habitat_id) REFERENCES habitats (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE pokemon_historical_data (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  pokemon_id INT(11) NOT NULL,\n  historical_data_id INT(11) NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (pokemon_id) REFERENCES pokemon (id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (historical_data_id) REFERENCES historical_data (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE pokemon_types_types (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  pokemon_type_id INT(11) NOT NULL,\n  type_id INT(11) NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (pokemon_type_id) REFERENCES pokemon_types (id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (type_id) REFERENCES types (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE move_types_types (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  move_type_id INT(11) NOT NULL,",
+  "metadata": {
+    "database": "schemabench_0145",
+    "tables": [
+      "pokemon",
+      "types",
+      "moves",
+      "evolutions",
+      "abilities",
+      "base_stats",
+      "habitats",
+      "historical_data",
+      "pokemon_types",
+      "move_types",
+      "pokemon_abilities",
+      "pokemon_base_stats",
+      "pokemon_habitats",
+      "pokemon_historical_data",
+      "pokemon_types_types",
+      "move_types_types"
+    ],
+    "columns_by_table": {
+      "pokemon": [],
+      "types": [],
+      "moves": [],
+      "evolutions": [],
+      "abilities": [],
+      "base_stats": [],
+      "habitats": [],
+      "historical_data": [],
+      "pokemon_types": [],
+      "move_types": [],
+      "pokemon_abilities": [],
+      "pokemon_base_stats": [],
+      "pokemon_habitats": [],
+      "pokemon_historical_data": [],
+      "pokemon_types_types": [],
+      "move_types_types": []
+    }
+  }
+}

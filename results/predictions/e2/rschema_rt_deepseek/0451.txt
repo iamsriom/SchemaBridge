@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0451
+CREATE TABLE `intrusion_detection_record` (
+  `record_id` int(11) NOT NULL,
+  `attack_type` varchar(255) DEFAULT NULL,
+  `destination_ip` varchar(45) DEFAULT NULL,
+  `destination_port` int(11) DEFAULT NULL,
+  `time_of_detection` datetime DEFAULT NULL,
+  `source_ip` varchar(45) DEFAULT NULL,
+  `source_port` int(11) DEFAULT NULL,
+  `threat_level` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`record_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `knowledge_base` (
+  `knowledge_id` int(11) NOT NULL,
+  `category` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `source` varchar(255) DEFAULT NULL,
+  `reliability` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`knowledge_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `response_plan` (
+  `plan_id` int(11) NOT NULL,
+  `execution_status` varchar(50) DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `time_generated` datetime DEFAULT NULL,
+  `plan_type` varchar(255) DEFAULT NULL,
+  `record_id` int(11) NOT NULL,
+  PRIMARY KEY (`plan_id`),
+  CONSTRAINT `response_plan_ibfk_1` FOREIGN KEY (`record_id`) REFERENCES `intrusion_detection_record` (`record_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alarm_information` (
+  `alarm_id` int(11) NOT NULL,
+  `content` text DEFAULT NULL,
+  `alarm_level` varchar(50) DEFAULT NULL,
+  `time_of_alarm` datetime DEFAULT NULL,
+  `record_id` int(11) NOT NULL,
+  `processing_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`alarm_id`),
+  CONSTRAINT `alarm_information_ibfk_1` FOREIGN KEY (`record_id`) REFERENCES `intrusion_detection_record` (`record_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `plan_knowledge_base` (
+  `knowledge_id` int(11) NOT NULL,
+  `plan_id` int(11) NOT NULL,
+  PRIMARY KEY (`knowledge_id`, `plan_id`),
+  CONSTRAINT `plan_knowledge_base_ibfk_1` FOREIGN KEY (`knowledge_id`) REFERENCES `knowledge_base` (`knowledge_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `plan_knowledge_base_ibfk_2` FOREIGN KEY (`plan_id`) REFERENCES `response_plan` (`plan_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

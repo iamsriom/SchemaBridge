@@ -1,0 +1,46 @@
+-- Schema for database: rschema_0263
+CREATE TABLE `lecturers` (
+  `lecturer_id` int(11) NOT NULL,
+  `lecturer_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`lecturer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `students` (
+  `student_id` int(11) NOT NULL,
+  `student_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `homework_submissions` (
+  `submission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `lecturer_id` int(11) NOT NULL,
+  `submission_date` datetime NOT NULL,
+  PRIMARY KEY (`submission_id`),
+  KEY `student_id` (`student_id`),
+  KEY `lecturer_id` (`lecturer_id`),
+  CONSTRAINT `homework_submissions_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `homework_submissions_ibfk_2` FOREIGN KEY (`lecturer_id`) REFERENCES `lecturers` (`lecturer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `homework_grades` (
+  `grade_id` int(11) NOT NULL AUTO_INCREMENT,
+  `submission_id` int(11) NOT NULL,
+  `score` int(11) NOT NULL,
+  `evaluation` varchar(255) NOT NULL,
+  PRIMARY KEY (`grade_id`),
+  KEY `submission_id` (`submission_id`),
+  CONSTRAINT `homework_grades_ibfk_1` FOREIGN KEY (`submission_id`) REFERENCES `homework_submissions` (`submission_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `random_inspection_reports` (
+  `report_id` int(11) NOT NULL AUTO_INCREMENT,
+  `lecturer_id` int(11) NOT NULL,
+  `submission_id` int(11) NOT NULL,
+  `inspection_opinion` varchar(255) NOT NULL,
+  PRIMARY KEY (`report_id`),
+  KEY `lecturer_id` (`lecturer_id`),
+  KEY `submission_id` (`submission_id`),
+  CONSTRAINT `random_inspection_reports_ibfk_1` FOREIGN KEY (`lecturer_id`) REFERENCES `lecturers` (`lecturer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `random_inspection_reports_ibfk_2` FOREIGN KEY (`submission_id`) REFERENCES `homework_submissions` (`submission_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

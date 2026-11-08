@@ -1,0 +1,42 @@
+-- Schema for database: rschema_0488
+CREATE TABLE `departments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text,
+  `email` varchar(255),
+  `sort_order` int(11) NOT NULL,
+  `customer_submittable` tinyint(1) NOT NULL,
+  `email_pipeline_only` tinyint(1) NOT NULL,
+  `auto_replies_disabled` tinyint(1) NOT NULL,
+  `hidden` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `email_servers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `host` varchar(255) NOT NULL,
+  `port` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department_email_servers` (
+  `department_id` int(11) NOT NULL,
+  `email_server_id` int(11) NOT NULL,
+  PRIMARY KEY (`department_id`, `email_server_id`),
+  KEY `department_id` (`department_id`),
+  KEY `email_server_id` (`email_server_id`),
+  CONSTRAINT `department_email_servers_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `department_email_servers_ibfk_2` FOREIGN KEY (`email_server_id`) REFERENCES `email_servers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_email_servers` (
+  `employee_id` int(11) NOT NULL,
+  `email_server_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`, `email_server_id`),
+  KEY `employee_id` (`employee_id`),
+  KEY `email_server_id` (`email_server_id`),
+  CONSTRAINT `employee_email_servers_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `departments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_email_servers_ibfk_2` FOREIGN KEY (`email_server_id`) REFERENCES `email_servers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

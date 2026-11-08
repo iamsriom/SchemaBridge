@@ -1,0 +1,68 @@
+-- Schema for database: rschema_0375
+CREATE TABLE `device` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `ip_address` varchar(255) NOT NULL,
+  `installation_location` varchar(255) NOT NULL,
+  `installation_time` datetime NOT NULL,
+  `status` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staff` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `network_traffic` (
+  `device_id` int(11) NOT NULL,
+  `timestamp` datetime NOT NULL,
+  `download_traffic` bigint(20) NOT NULL,
+  `upload_traffic` bigint(20) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  PRIMARY KEY (`device_id`, `timestamp`),
+  CONSTRAINT `network_traffic_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device_failure_record` (
+  `device_id` int(11) NOT NULL,
+  `failure_occurrence_time` datetime NOT NULL,
+  `failure_description` varchar(255) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `handling_status` varchar(50) NOT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`device_id`, `failure_occurrence_time`),
+  CONSTRAINT `device_failure_record_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_connection_device` (
+  `user_id` int(11) NOT NULL,
+  `device_id` int(11) NOT NULL,
+  `connection_time` datetime NOT NULL,
+  `disconnection_time` datetime DEFAULT NULL,
+  `used_bandwidth` bigint(20) NOT NULL,
+  `user_ip` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`, `device_id`, `connection_time`),
+  CONSTRAINT `user_connection_device_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_connection_device_ibfk_2` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device_maintenance_record` (
+  `device_id` int(11) NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  `maintenance_time` datetime NOT NULL,
+  `maintenance_content` varchar(255) NOT NULL,
+  `result` varchar(255) NOT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`device_id`, `staff_id`, `maintenance_time`),
+  CONSTRAINT `device_maintenance_record_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `device_maintenance_record_ibfk_2` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

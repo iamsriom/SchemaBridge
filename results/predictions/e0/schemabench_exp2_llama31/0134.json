@@ -1,0 +1,48 @@
+{
+  "text_number": 134,
+  "id": "SB-134",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0134",
+  "question": "Background / Context  \nThe project involves developing a decision support system benchmarked against the TPC-H standard published by the Transaction Processing Performance Council (TPC). TPC-H is used to evaluate the performance of decision support systems that handle business-oriented ad hoc queries.\n\nObjectives  \n1. To implement a robust decision support system for managing complex relational databases.  \n2. To provide a high-performance environment for processing large volumes of queries and transactions.  \n3. To comply with TPC-H benchmarking standards to ensure system reliability and efficiency.\n\nStakeholders & Users  \n- Administrators: Responsible for managing database configuration and system performance.  \n- Data Analysts: Use the system to query and analyze data for decision-making purposes.  \n- IT Support Staff: Provide technical support and maintenance for the system's operations.\n\nFunctional Descriptions  \n1. User Management:  \n   - Manage user permissions and access levels via `E_ACCOUNT_PERMISSION`.  \n  \n2. Data Storage and Maintenance:  \n   - Store customer, account, and transaction details using tables like `E_CUSTOMER`, `E_CUSTOMER_ACCOUNT`, and `E_CASH_TRANSACTION`.  \n   - Track market data with `E_DAILY_MARKET` and `E_FINANCIAL`.  \n\n3. Transaction Processing:  \n   - Process trade and settlement records through `E_TRADE` and `E_SETTLEMENT`.  \n   - Manage historical trade data with `E_TRADE_HISTORY` and `E_HOLDING_HISTORY`.  \n\n4. Market Information:  \n   - Maintain and update market information related to securities and exchanges (`E_SECURITY`, `E_EXCHANGE`).  \n\n5. Reporting and Analysis:  \n   - Generate reports on industry and company performance using `E_INDUSTRY`, `E_COMPANY`, and related financial tables.\n\nNon-Functional Descriptions  \n1. Performance:  \n   - The system should efficiently handle a high volume of transactions and complex queries in line with TPC-H performance benchmarks.  \n\n2. Scalability:  \n   - Ability to scale with increasing data volume and user demand without degradation of performance.  \n\n3. Security:  \n   - Implement robust security measures to protect sensitive financial and personal data.  \n\n4. Reliability:  \n   - Ensure consistent uptime and data integrity across all database operations.",
+  "ddl": "-- Schema for database: schemabench_0134\nCREATE TABLE `e_account_permission` (\n  `account_id` int(11) NOT NULL,\n  `permission_level` varchar(255) NOT NULL,\n  PRIMARY KEY (`account_id`, `permission_level`),\n  KEY `account_id` (`account_id`),\n  CONSTRAINT `e_account_permission_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `e_customer_account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `e_cash_transaction` (\n  `transaction_id` int(11) NOT NULL,\n  `customer_account_id` int(11) NOT NULL,\n  `transaction_date` datetime NOT NULL,\n  `amount` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`transaction_id`),\n  KEY `customer_account_id` (`customer_account_id`),\n  CONSTRAINT `e_cash_transaction_ibfk_1` FOREIGN KEY (`customer_account_id`) REFERENCES `e_customer_account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `e_company` (\n  `company_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`company_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `e_customer` (\n  `customer_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`customer_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `e_customer_account` (\n  `account_id` int(11) NOT NULL,\n  `customer_id` int(11) NOT NULL,\n  `account_number` varchar(255) NOT NULL,\n  PRIMARY KEY (`account_id`),\n  KEY `customer_id` (`customer_id`),\n  CONSTRAINT `e_customer_account_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `e_customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `e_daily_market` (\n  `market_id` int(11) NOT NULL,\n  `date` date NOT NULL,\n  `open` decimal(10,2) NOT NULL,\n  `high` decimal(10,2) NOT NULL,\n  `low` decimal(10,2) NOT NULL,\n  `close` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`market_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `e_exchange` (\n  `exchange_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`exchange_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `e_financial` (\n  `financial_id` int(11) NOT NULL,\n  `date` date NOT NULL,\n  `revenue` decimal(10,2) NOT NULL,\n  `cost` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`financial_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `e_holding_history` (\n  `holding_id` int(11) NOT NULL,\n  `customer_account_id` int(11) NOT NULL,\n  `security_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `date` date NOT NULL,\n  PRIMARY KEY (`holding_id`),\n  KEY `customer_account_id` (`customer_account_id`),\n  KEY `security_id` (`security_id`),\n  CONSTRAINT `e_holding_history_ibfk_1` FOREIGN KEY (`customer_account_id`) REFERENCES `e_customer_account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `e_holding_history_ibfk_2` FOREIGN KEY (`security_id`) REFERENCES `e_security` (`security_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `e_industry` (\n  `industry_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`industry_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `e_security` (\n  `security_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `exchange_id` int(11) NOT NULL,\n  PRIMARY KEY (`security_id`),\n  KEY `exchange_id` (`exchange_id`),\n  CONSTRAINT `e_security_ibfk_1` FOREIGN KEY (`exchange_id`) REFERENCES `e_exchange` (`exchange_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `e_settlement` (\n  `settlement_id` int(11) NOT NULL,\n  `trade_id` int(11) NOT NULL,\n  `settlement_date` date NOT NULL,\n  PRIMARY KEY (`settlement_id`),\n  KEY `trade_id` (`trade_id`),\n  CONSTRAINT `e_settlement_ibfk_1` FOREIGN KEY (`trade_id`) REFERENCES `e_trade` (`trade_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `e_trade` (\n  `trade_id` int(11) NOT NULL,\n  `customer_account_id` int(11) NOT NULL,\n  `security_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `trade_date` date NOT NULL,\n  PRIMARY KEY (`trade_id`),\n  KEY `customer_account_id` (`customer_account_id`),\n  KEY `security_id` (`security_id`),\n  CONSTRAINT `e_trade_ibfk_1` FOREIGN KEY (`customer_account_id`) REFERENCES `e_customer_account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `e_trade_ibfk_2` FOREIGN KEY (`security_id`) REFERENCES `e_security` (`security_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `e_trade_history` (\n  `trade_history_id` int(11) NOT NULL,\n  `trade_id` int(11) NOT NULL,\n  `date` date NOT NULL,\n  PRIMARY KEY (`trade_history_id`),\n  KEY `trade_id` (`trade_id`),\n  CONSTRAINT `e_trade_history_ibfk_1` FOREIGN KEY (`trade_id`) REFERENCES `e_trade` (`trade_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `e_user` (\n  `user_id` int(11) NOT NULL,\n  `username` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  PRIMARY KEY (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `e_user_account_permission` (\n  `user_id` int(11) NOT NULL,\n  `account_id` int(11) NOT NULL,\n  `permission_level` varchar(255) NOT NULL,\n  PRIMARY KEY (`user_id`, `account_id`, `permission_level`),\n  KEY `user_id` (`user_id`),\n  KEY `account_id` (`account_id`),\n  CONSTRAINT `e_user_account_permission_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `e_user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `e_user_account_permission_ibfk_2` FOREIGN KEY (`account_id`) REFERENCES `e_customer_account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "e_account_permission",
+      "e_cash_transaction",
+      "e_company",
+      "e_customer",
+      "e_customer_account",
+      "e_daily_market",
+      "e_exchange",
+      "e_financial",
+      "e_holding_history",
+      "e_industry",
+      "e_security",
+      "e_settlement",
+      "e_trade",
+      "e_trade_history",
+      "e_user",
+      "e_user_account_permission"
+    ],
+    "columns_by_table": {
+      "e_account_permission": [],
+      "e_cash_transaction": [],
+      "e_company": [],
+      "e_customer": [],
+      "e_customer_account": [],
+      "e_daily_market": [],
+      "e_exchange": [],
+      "e_financial": [],
+      "e_holding_history": [],
+      "e_industry": [],
+      "e_security": [],
+      "e_settlement": [],
+      "e_trade": [],
+      "e_trade_history": [],
+      "e_user": [],
+      "e_user_account_permission": []
+    }
+  }
+}

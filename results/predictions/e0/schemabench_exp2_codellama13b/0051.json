@@ -1,0 +1,34 @@
+{
+  "text_number": 51,
+  "id": "SB-051",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0051",
+  "question": "Background / Context\n\nThe project involves developing a deployment tool for PHP applications. This tool, called \"Deployer,\" is powered by Laravel 5.5 and is designed to automate the deployment of applications to multiple servers using SSH. It is written and maintained by Stephen Ball.\n\nObjectives\n\nThe primary objective of the Deployer tool is to streamline the process of deploying PHP applications by automating several key tasks, thereby reducing manual effort and the potential for errors. The tool aims to provide a robust and reliable deployment workflow.\n\nStakeholders & Users\n\n- Developers: Individuals or teams responsible for deploying PHP applications.\n- Administrators: Users who manage server configurations and oversee deployment processes.\n\nFunctional Descriptions\n\n1. SSH-Based Deployment: Deploys applications to multiple servers accessible through SSH.\n2. Git Repository Integration: Clones the project's git repository as part of the deployment process.\n3. Composer Dependency Installation: Automatically installs necessary composer dependencies.\n4. Command Execution: Allows for running arbitrary bash commands within the deployment workflow.\n5. Failure Management: Gracefully handles failures during the deployment process, ensuring rollbacks or retries as required.\n6. Deployment History: Maintains a record of previous deployments for auditing and rollback purposes.\n7. Cron Job Monitoring: Ensures that cron jobs are running as expected on deployed servers.\n8. Webhook Integration: Supports triggering deployments via webhooks for continuous integration and deployment pipelines.\n\nNon-Functional Descriptions\n\n- Reliability: The system should maintain high availability and gracefully handle errors and failures.\n- Scalability: Capable of deploying to an increasing number of servers as needed by the projects.\n- Security: Secure SSH connections must be enforced, and sensitive data such as keys should be handled with care.\n- Performance: Optimized for efficient execution of deployment tasks, minimizing downtime.\n- Usability: The interface and command execution process should be user-friendly, reducing the learning curve for new users.",
+  "ddl": "-- Schema for database: schemabench_0051\n\nCREATE TABLE `deployments` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`project_id` int(11) NOT NULL,\n`server_id` int(11) NOT NULL,\n`deployment_date` datetime NOT NULL,\n`deployment_status` varchar(255) NOT NULL,\n`deployment_message` varchar(255) NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`server_id`) REFERENCES `servers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `projects` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`name` varchar(255) NOT NULL,\n`description` varchar(255) NOT NULL,\n`git_repository` varchar(255) NOT NULL,\n`composer_dependencies` varchar(255) NOT NULL,\n`deployment_commands` varchar(255) NOT NULL,\nPRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `servers` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`name` varchar(255) NOT NULL,\n`ip_address` varchar(255) NOT NULL,\n`ssh_key` varchar(255) NOT NULL,\n`cron_jobs` varchar(255) NOT NULL,\nPRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `users` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`name` varchar(255) NOT NULL,\n`email` varchar(255) NOT NULL,\n`password` varchar(255) NOT NULL,\nPRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `roles` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`name` varchar(255) NOT NULL,\n`description` varchar(255) NOT NULL,\nPRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_roles` (\n`user_id` int(11) NOT NULL,\n`role_id` int(11) NOT NULL,\nPRIMARY KEY (`user_id`, `role_id`),\nFOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `deployment_history` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`deployment_id` int(11) NOT NULL,\n`deployment_date` datetime NOT NULL,\n`deployment_status` varchar(255) NOT NULL,\n`deployment_message` varchar(255) NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`deployment_id`) REFERENCES `deployments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `cron_jobs` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`server_id` int(11) NOT NULL,\n`cron_job_name` varchar(255) NOT NULL,\n`cron_job_command` varchar(255) NOT NULL,\n`cron_job_schedule` varchar(255) NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`server_id`) REFERENCES `servers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `webhooks` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`project_id` int(11) NOT NULL,\n`webhook_url` varchar(255) NOT NULL,\n`webhook_secret` varchar(255) NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "deployments",
+      "projects",
+      "servers",
+      "users",
+      "roles",
+      "user_roles",
+      "deployment_history",
+      "cron_jobs",
+      "webhooks"
+    ],
+    "columns_by_table": {
+      "deployments": [],
+      "projects": [],
+      "servers": [],
+      "users": [],
+      "roles": [],
+      "user_roles": [],
+      "deployment_history": [],
+      "cron_jobs": [],
+      "webhooks": []
+    }
+  }
+}

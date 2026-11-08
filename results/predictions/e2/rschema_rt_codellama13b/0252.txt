@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0252
+CREATE TABLE `Player` (
+  `player_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  `registration_time` datetime NOT NULL,
+  `game` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`player_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Game_Record` (
+  `game_id` int(11) NOT NULL,
+  `game_content` text NOT NULL,
+  `game_rules` text NOT NULL,
+  `max_players` int(11) NOT NULL,
+  PRIMARY KEY (`game_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Player_Communication` (
+  `first_player_id` int(11) NOT NULL,
+  `second_player_id` int(11) NOT NULL,
+  `communication_start_time` datetime NOT NULL,
+  `communication_end_time` datetime DEFAULT NULL,
+  `communication_content` text NOT NULL,
+  PRIMARY KEY (`first_player_id`, `second_player_id`, `communication_start_time`),
+  CONSTRAINT `player_communication_ibfk_1` FOREIGN KEY (`first_player_id`) REFERENCES `Player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `player_communication_ibfk_2` FOREIGN KEY (`second_player_id`) REFERENCES `Player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Single_Player_Game` (
+  `player_id` int(11) NOT NULL,
+  `game_id` int(11) NOT NULL,
+  `game_start_time` datetime NOT NULL,
+  `game_end_time` datetime DEFAULT NULL,
+  `game_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`player_id`, `game_id`, `game_start_time`),
+  CONSTRAINT `single_player_game_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `Player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `single_player_game_ibfk_2` FOREIGN KEY (`game_id`) REFERENCES `Game_Record` (`game_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Two_Player_Battle_Game` (
+  `first_player_id` int(11) NOT NULL,
+  `second_player_id` int(11) NOT NULL,
+  `game_id` int(11) NOT NULL,
+  `battle_start_time` datetime NOT NULL,
+  `battle_end_time` datetime DEFAULT NULL,
+  `battle_result` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`first_player_id`, `second_player_id`, `game_id`, `battle_start_time`),
+  CONSTRAINT `two_player_battle_game_ibfk_1` FOREIGN KEY (`first_player_id`) REFERENCES `Player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `two_player_battle_game_ibfk_2` FOREIGN KEY (`second_player_id`) REFERENCES `Player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `two_player_battle_game_ibfk_3` FOREIGN KEY (`game_id`) REFERENCES `Game_Record` (`game_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

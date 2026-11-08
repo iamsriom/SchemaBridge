@@ -1,0 +1,52 @@
+-- Schema for database: rschema_0363
+CREATE TABLE `book` (
+  `isbn` varchar(13) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `authors` varchar(255) NOT NULL,
+  `publisher` varchar(255) NOT NULL,
+  `publication_date` date NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `library_location` varchar(255) NOT NULL,
+  `shelf_number` varchar(50) NOT NULL,
+  `available_copies` int(11) NOT NULL,
+  `circulating_copies` int(11) NOT NULL,
+  PRIMARY KEY (`isbn`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reader` (
+  `reader_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(20) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `age` int(11) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `library_card_number` varchar(50) NOT NULL,
+  `loan_period` int(11) NOT NULL,
+  `max_borrowing_limit` int(11) NOT NULL,
+  `reader_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`reader_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reader_book_borrowing` (
+  `reader_id` int(11) NOT NULL,
+  `isbn` varchar(13) NOT NULL,
+  `borrowing_time` datetime NOT NULL,
+  `due_date` datetime NOT NULL,
+  `actual_return_date` datetime DEFAULT NULL,
+  `borrowing_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`reader_id`, `isbn`, `borrowing_time`),
+  CONSTRAINT `reader_book_borrowing_ibfk_1` FOREIGN KEY (`reader_id`) REFERENCES `reader` (`reader_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reader_book_borrowing_ibfk_2` FOREIGN KEY (`isbn`) REFERENCES `book` (`isbn`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reader_book_reservation` (
+  `reader_id` int(11) NOT NULL,
+  `isbn` varchar(13) NOT NULL,
+  `reservation_time` datetime NOT NULL,
+  `reservation_expiration_time` datetime NOT NULL,
+  `reservation_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`reader_id`, `isbn`, `reservation_time`),
+  CONSTRAINT `reader_book_reservation_ibfk_1` FOREIGN KEY (`reader_id`) REFERENCES `reader` (`reader_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reader_book_reservation_ibfk_2` FOREIGN KEY (`isbn`) REFERENCES `book` (`isbn`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

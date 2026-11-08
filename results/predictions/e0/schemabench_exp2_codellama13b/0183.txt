@@ -1,0 +1,125 @@
+-- Schema for database: schemabench_0183
+
+CREATE TABLE employees (
+  employee_id INT(11) NOT NULL AUTO_INCREMENT,
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  phone VARCHAR(255) NOT NULL,
+  store_id INT(11) NOT NULL,
+  PRIMARY KEY (employee_id),
+  FOREIGN KEY (store_id) REFERENCES stores (store_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE albums (
+  album_id INT(11) NOT NULL AUTO_INCREMENT,
+  title VARCHAR(255) NOT NULL,
+  release_date DATE NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (album_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE songs (
+  song_id INT(11) NOT NULL AUTO_INCREMENT,
+  title VARCHAR(255) NOT NULL,
+  duration INT(11) NOT NULL,
+  lyrics TEXT NOT NULL,
+  album_id INT(11) NOT NULL,
+  PRIMARY KEY (song_id),
+  FOREIGN KEY (album_id) REFERENCES albums (album_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE genres (
+  genre_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  PRIMARY KEY (genre_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE artists (
+  artist_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  stage_name VARCHAR(255) NOT NULL,
+  solo_band_status VARCHAR(255) NOT NULL,
+  group_membership VARCHAR(255) NOT NULL,
+  PRIMARY KEY (artist_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE inventory (
+  inventory_id INT(11) NOT NULL AUTO_INCREMENT,
+  album_id INT(11) NOT NULL,
+  store_id INT(11) NOT NULL,
+  quantity INT(11) NOT NULL,
+  PRIMARY KEY (inventory_id),
+  FOREIGN KEY (album_id) REFERENCES albums (album_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (store_id) REFERENCES stores (store_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE stores (
+  store_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  address VARCHAR(255) NOT NULL,
+  phone VARCHAR(255) NOT NULL,
+  PRIMARY KEY (store_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE locations (
+  location_id INT(11) NOT NULL AUTO_INCREMENT,
+  store_id INT(11) NOT NULL,
+  address VARCHAR(255) NOT NULL,
+  PRIMARY KEY (location_id),
+  FOREIGN KEY (store_id) REFERENCES stores (store_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE transactions (
+  transaction_id INT(11) NOT NULL AUTO_INCREMENT,
+  employee_id INT(11) NOT NULL,
+  store_id INT(11) NOT NULL,
+  transaction_date DATE NOT NULL,
+  PRIMARY KEY (transaction_id),
+  FOREIGN KEY (employee_id) REFERENCES employees (employee_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (store_id) REFERENCES stores (store_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE transaction_items (
+  transaction_item_id INT(11) NOT NULL AUTO_INCREMENT,
+  transaction_id INT(11) NOT NULL,
+  album_id INT(11) NOT NULL,
+  quantity INT(11) NOT NULL,
+  PRIMARY KEY (transaction_item_id),
+  FOREIGN KEY (transaction_id) REFERENCES transactions (transaction_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (album_id) REFERENCES albums (album_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE genre_songs (
+  genre_id INT(11) NOT NULL,
+  song_id INT(11) NOT NULL,
+  PRIMARY KEY (genre_id, song_id),
+  FOREIGN KEY (genre_id) REFERENCES genres (genre_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (song_id) REFERENCES songs (song_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE artist_songs (
+  artist_id INT(11) NOT NULL,
+  song_id INT(11) NOT NULL,
+  PRIMARY KEY (artist_id, song_id),
+  FOREIGN KEY (artist_id) REFERENCES artists (artist_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (song_id) REFERENCES songs (song_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE inventory_items (
+  inventory_item_id INT(11) NOT NULL AUTO_INCREMENT,
+  inventory_id INT(11) NOT NULL,
+  album_id INT(11) NOT NULL,
+  quantity INT(11) NOT NULL,
+  PRIMARY KEY (inventory_item_id),
+  FOREIGN KEY (inventory_id) REFERENCES inventory (inventory_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (album_id) REFERENCES albums (album_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE location_inventory (
+  location_id INT(11) NOT NULL,
+  inventory_id INT(11) NOT NULL,
+  PRIMARY KEY (location_id, inventory_id),
+  FOREIGN KEY (location_id) REFERENCES locations (location_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (inventory_id) REFERENCES inventory (inventory_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

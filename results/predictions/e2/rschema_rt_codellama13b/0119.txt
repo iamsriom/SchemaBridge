@@ -1,0 +1,44 @@
+-- Schema for database: rschema_0119
+CREATE TABLE `User` (
+  `User_ID` int(11) NOT NULL,
+  `Age` int(11) DEFAULT 0,
+  `Email` varchar(255) DEFAULT NULL,
+  `Gender` varchar(50) DEFAULT NULL,
+  `Name` varchar(255) DEFAULT NULL,
+  `Phone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`User_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Indicator` (
+  `Indicator_ID` int(11) NOT NULL,
+  `Indicator_name` varchar(255) DEFAULT NULL,
+  `Indicator_description` varchar(255) DEFAULT NULL,
+  `Indicator_target` varchar(255) DEFAULT NULL,
+  `Calculation_method` varchar(255) DEFAULT NULL,
+  `Unit` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`Indicator_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_assigned_indicator` (
+  `User_ID` int(11) NOT NULL,
+  `Indicator_ID` int(11) NOT NULL,
+  `Allocation_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`User_ID`, `Indicator_ID`, `Allocation_time`),
+  UNIQUE KEY `unique_assignment` (`User_ID`, `Indicator_ID`),
+  KEY `idx_user` (`User_ID`),
+  CONSTRAINT `user_assigned_indicator_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_assigned_indicator_ibfk_2` FOREIGN KEY (`Indicator_ID`) REFERENCES `Indicator` (`Indicator_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Indicator_data_record` (
+  `User_ID` int(11) NOT NULL,
+  `Indicator_ID` int(11) NOT NULL,
+  `Submission_record_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Record_indicator_value` float DEFAULT NULL,
+  `Remarks` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`User_ID`, `Indicator_ID`, `Submission_record_time`),
+  UNIQUE KEY `unique_data_record` (`User_ID`, `Indicator_ID`, `Submission_record_time`),
+  KEY `idx_user_indicator` (`User_ID`, `Indicator_ID`),
+  CONSTRAINT `indicator_data_record_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `indicator_data_record_ibfk_2` FOREIGN KEY (`Indicator_ID`) REFERENCES `Indicator` (`Indicator_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

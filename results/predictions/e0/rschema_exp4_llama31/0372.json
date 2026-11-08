@@ -1,0 +1,24 @@
+{
+  "text_number": 372,
+  "id": "67552f0a13602ec03b41a950",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0372",
+  "question": "This database table is used for a sports league management system. The specific functions are as follows:\n\n1. League management: league information can be added, modified and deleted, including league name, region, parent league and person in charge.\n\n2. Regional association: leagues can be associated with specific regions. When a region is deleted, all leagues under the region will be automatically deleted.\n\n3. League hierarchy: leagues can have hierarchical relationships. For example, top leagues (such as the Bundesliga) can have lower leagues (such as regional leagues).\n\n4. User management: leagues can specify a person in charge, who can be a user in the system.\n\n5. Data tracking: record the creation time and creator of league information, as well as the last modification time and modifier, to facilitate tracking of data change history.\n\n6. Concurrency control: detect concurrency issues through version numbers to ensure data consistency when multiple users modify the same league information at the same time.\n\nThis system can be used to manage and maintain information of various sports leagues, support the hierarchical relationship and regional division of leagues, and provide user management and data change history tracking functions.",
+  "ddl": "-- Schema for database: rschema_0372\nCREATE TABLE `regions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `parent_id` int(11) DEFAULT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `created_by` int(11) DEFAULT NULL,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `updated_by` int(11) DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  KEY `regions_ibfk_1` (`parent_id`),\n  CONSTRAINT `regions_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `regions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `password` char(60) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `league_versions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `league_id` int(11) NOT NULL,\n  `version` int(11) NOT NULL DEFAULT 1,\n  `data` longtext NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `created_by` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `league_versions_ibfk_1` (`league_id`),\n  CONSTRAINT `league_versions_ibfk_1` FOREIGN KEY (`league_id`) REFERENCES `leagues` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `leagues` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `region_id` int(11) NOT NULL,\n  `parent_id` int(11) DEFAULT NULL,\n  `person_in_charge_id` int(11) DEFAULT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `created_by` int(11) NOT NULL,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `updated_by` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `leagues_ibfk_1` (`region_id`),\n  KEY `leagues_ibfk_2` (`parent_id`),\n  KEY `leagues_ibfk_3` (`person_in_charge_id`),\n  CONSTRAINT `leagues_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `regions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `leagues_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `leagues` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `leagues_ibfk_3` FOREIGN KEY (`person_in_charge_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "regions",
+      "users",
+      "league_versions",
+      "leagues"
+    ],
+    "columns_by_table": {
+      "regions": [],
+      "users": [],
+      "league_versions": [],
+      "leagues": []
+    }
+  }
+}

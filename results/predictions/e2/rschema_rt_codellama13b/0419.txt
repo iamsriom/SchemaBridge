@@ -1,0 +1,57 @@
+-- Schema for database: rschema_0419
+CREATE TABLE `Dish` (
+  `Dish_ID` int(11) NOT NULL,
+  `cuisine_type` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `ingredients` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `recommendation_index` int(11) DEFAULT NULL,
+  `recommended_status` boolean NOT NULL,
+  `special_features` text DEFAULT NULL,
+  `taste` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Dish_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User` (
+  `User_ID` int(11) NOT NULL,
+  `account_status` varchar(50) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `registration_time` datetime NOT NULL,
+  `username` varchar(255) NOT NULL,
+  PRIMARY KEY (`User_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Order` (
+  `order_id` int(11) NOT NULL,
+  `delivery_address` varchar(255) NOT NULL,
+  `delivery_person` varchar(255) DEFAULT NULL,
+  `delivery_time` datetime DEFAULT NULL,
+  `order_status` varchar(50) DEFAULT NULL,
+  `order_time` datetime NOT NULL,
+  PRIMARY KEY (`order_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Shopping_cart` (
+  `Dish_ID` int(11) NOT NULL,
+  `User_ID` int(11) NOT NULL,
+  `Add_time` datetime NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `settlement_status` boolean NOT NULL,
+  PRIMARY KEY (`Dish_ID`, `User_ID`, `Add_time`),
+  CONSTRAINT `shopping_cart_ibfk_1` FOREIGN KEY (`Dish_ID`) REFERENCES `Dish` (`Dish_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `shopping_cart_ibfk_2` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Order_detail` (
+  `Dish_ID` int(11) NOT NULL,
+  `Order_ID` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`Dish_ID`, `Order_ID`),
+  CONSTRAINT `order_detail_ibfk_1` FOREIGN KEY (`Dish_ID`) REFERENCES `Dish` (`Dish_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_detail_ibfk_2` FOREIGN KEY (`Order_ID`) REFERENCES `Order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

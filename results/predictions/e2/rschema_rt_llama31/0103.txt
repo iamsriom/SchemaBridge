@@ -1,0 +1,41 @@
+-- Schema for database: rschema_0103
+CREATE TABLE `department` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_code` varchar(50) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `person_in_charge` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `salary_standard` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) NOT NULL,
+  `value` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `hire_date` date NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `salary_standard_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_ibfk_2` FOREIGN KEY (`salary_standard_id`) REFERENCES `salary_standard` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_position_change` (
+  `employee_id` int(11) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `departure_time` datetime NOT NULL,
+  `original_department` varchar(255) NOT NULL,
+  `original_position` varchar(255) NOT NULL,
+  `entry_time` datetime NOT NULL,
+  PRIMARY KEY (`employee_id`, `department_id`, `departure_time`),
+  CONSTRAINT `employee_position_change_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_position_change_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

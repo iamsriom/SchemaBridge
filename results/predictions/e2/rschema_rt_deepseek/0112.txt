@@ -1,0 +1,99 @@
+-- Schema for database: rschema_0112
+CREATE TABLE `Employee` (
+  `Employee_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Email` varchar(255) NOT NULL,
+  `Office_phone` varchar(20) DEFAULT NULL,
+  `Position` varchar(100) NOT NULL,
+  `Base_salary` decimal(10,2) NOT NULL,
+  `Commission_rate` decimal(5,2) DEFAULT NULL,
+  `Hire_date` datetime NOT NULL,
+  `Supervisor_ID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Employee_ID`),
+  CONSTRAINT `Employee_ibfk_1` FOREIGN KEY (`Supervisor_ID`) REFERENCES `Employee` (`Employee_ID`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Product` (
+  `Product_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Brand` varchar(100) NOT NULL,
+  `Model` varchar(100) DEFAULT NULL,
+  `Description` text DEFAULT NULL,
+  `Specification` text DEFAULT NULL,
+  `Cost_price` decimal(10,2) NOT NULL,
+  `Suggested_retail_price` decimal(10,2) NOT NULL,
+  `Inventory_quantity` int(11) NOT NULL,
+  `Supplier` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Product_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Order` (
+  `Order_ID` int(11) NOT NULL,
+  `Order_date` datetime NOT NULL,
+  `Required_delivery_date` datetime NOT NULL,
+  `Actual_shipping_date` datetime DEFAULT NULL,
+  `Order_status` varchar(50) NOT NULL,
+  `Notes` text DEFAULT NULL,
+  `Special_instructions` text DEFAULT NULL,
+  PRIMARY KEY (`Order_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Office_location` (
+  `Office_location_ID` int(11) NOT NULL,
+  `Street_address` varchar(255) NOT NULL,
+  `City` varchar(100) NOT NULL,
+  `Postal_code` varchar(20) NOT NULL,
+  `Country` varchar(100) NOT NULL,
+  `State_province` varchar(100) DEFAULT NULL,
+  `Contact_phone` varchar(20) DEFAULT NULL,
+  `Fax` varchar(20) DEFAULT NULL,
+  `Manager_employee_ID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Office_location_ID`),
+  CONSTRAINT `Office_location_ibfk_1` FOREIGN KEY (`Manager_employee_ID`) REFERENCES `Employee` (`Employee_ID`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Customer` (
+  `Customer_ID` int(11) NOT NULL,
+  `Customer_company_name` varchar(255) NOT NULL,
+  `Contact_person_name` varchar(255) NOT NULL,
+  `Contact_person_phone` varchar(20) DEFAULT NULL,
+  `Contact_person_position` varchar(100) DEFAULT NULL,
+  `Credit_limit` decimal(10,2) DEFAULT NULL,
+  `City` varchar(100) NOT NULL,
+  `State_province` varchar(100) DEFAULT NULL,
+  `Postal_code` varchar(20) NOT NULL,
+  `Country` varchar(100) NOT NULL,
+  PRIMARY KEY (`Customer_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Sales_performance_record` (
+  `Record_ID` int(11) NOT NULL,
+  `Sales_person_ID` int(11) NOT NULL,
+  `Total_sales` decimal(10,2) NOT NULL,
+  `Year` int(4) NOT NULL,
+  PRIMARY KEY (`Record_ID`),
+  CONSTRAINT `Sales_performance_record_ibfk_1` FOREIGN KEY (`Sales_person_ID`) REFERENCES `Employee` (`Employee_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Order_detail` (
+  `Line_number` int(11) NOT NULL,
+  `Order_ID` int(11) NOT NULL,
+  `Product_ID` int(11) NOT NULL,
+  `Quantity` int(11) NOT NULL,
+  `Unit_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`Order_ID`, `Product_ID`),
+  CONSTRAINT `Order_detail_ibfk_1` FOREIGN KEY (`Order_ID`) REFERENCES `Order` (`Order_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Order_detail_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `Product` (`Product_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Payment_record` (
+  `Record_ID` int(11) NOT NULL,
+  `Paying_customer_ID` int(11) NOT NULL,
+  `Check_number` varchar(50) NOT NULL,
+  `Invoice_amount` decimal(10,2) NOT NULL,
+  `Customer_accounts_receivable` decimal(10,2) NOT NULL,
+  `Payment_date` datetime NOT NULL,
+  `Check_clearing_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`Record_ID`),
+  CONSTRAINT `Payment_record_ibfk_1` FOREIGN KEY (`Paying_customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

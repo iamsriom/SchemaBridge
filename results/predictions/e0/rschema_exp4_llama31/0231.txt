@@ -1,0 +1,35 @@
+-- Schema for database: rschema_0231
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `login_password` varchar(255) NOT NULL,
+  `contact_email` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `registration_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `experience_records` (
+  `experience_id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` text NOT NULL,
+  `code_content` text NOT NULL,
+  `creator_user_id` int(11) NOT NULL,
+  `creation_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modification_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `status` char(1) NOT NULL DEFAULT 'F',
+  PRIMARY KEY (`experience_id`),
+  KEY `fk_experience_records_users` (`creator_user_id`),
+  CONSTRAINT `fk_experience_records_users` FOREIGN KEY (`creator_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_activity_logs` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `experience_id` int(11) NOT NULL,
+  `creator_user_id` int(11) NOT NULL,
+  `creation_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`log_id`),
+  KEY `fk_user_activity_logs_experience_records` (`experience_id`),
+  KEY `fk_user_activity_logs_users` (`creator_user_id`),
+  CONSTRAINT `fk_user_activity_logs_experience_records` FOREIGN KEY (`experience_id`) REFERENCES `experience_records` (`experience_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_user_activity_logs_users` FOREIGN KEY (`creator_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

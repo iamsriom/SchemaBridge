@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0308
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `abbreviation` varchar(50) DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `active_status` tinyint(1) NOT NULL DEFAULT '1',
+  `status_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project` (
+  `project_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `scale` varchar(50) DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  `project_manager_id` int(11) NOT NULL,
+  PRIMARY KEY (`project_id`),
+  CONSTRAINT `project_ibfk_1` FOREIGN KEY (`project_manager_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_report` (
+  `report_date` datetime NOT NULL,
+  `report_time` time NOT NULL,
+  `description` text NOT NULL,
+  `creator_user_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  PRIMARY KEY (`report_date`, `report_time`),
+  CONSTRAINT `project_report_ibfk_1` FOREIGN KEY (`creator_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_report_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_customer_record` (
+  `customer_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  PRIMARY KEY (`customer_id`, `project_id`),
+  CONSTRAINT `project_customer_record_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_customer_record_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

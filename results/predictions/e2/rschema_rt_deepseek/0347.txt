@@ -1,0 +1,108 @@
+-- Schema for database: rschema_0347
+CREATE TABLE `leaderboard_metadata` (
+  `run_id` int(11) NOT NULL,
+  `execution_time` datetime NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  `run_time` int(11) NOT NULL,
+  `run_path` varchar(255) NOT NULL,
+  `max_models` int(11) NOT NULL,
+  `model_species` varchar(255) NOT NULL,
+  PRIMARY KEY (`run_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `leaderboard` (
+  `model_id` int(11) NOT NULL,
+  `model_name` varchar(255) NOT NULL,
+  `rmse` float NOT NULL,
+  `mse` float NOT NULL,
+  `mae` float NOT NULL,
+  `rmsle` float NOT NULL,
+  `stacked_ensemble_best_of_family` boolean NOT NULL,
+  PRIMARY KEY (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `model_map` (
+  `model_type_id` int(11) NOT NULL,
+  `model_type_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`model_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dataset_variable_details` (
+  `var_id` int(11) NOT NULL,
+  `variable_name` varchar(255) NOT NULL,
+  `data_type` varchar(100) NOT NULL,
+  `unique_values` int(11) NOT NULL,
+  `null_values` int(11) NOT NULL,
+  `dataset_id` int(11) NOT NULL,
+  PRIMARY KEY (`var_id`),
+  CONSTRAINT `dataset_variable_details_ibfk_1` FOREIGN KEY (`dataset_id`) REFERENCES `dataset_metadata` (`dataset_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tags` (
+  `tag_id` int(11) NOT NULL,
+  `tag_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`tag_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `hyperparameter_value` (
+  `hyperparameter_id` int(11) NOT NULL,
+  `model_id` int(11) NOT NULL,
+  `value` float NOT NULL,
+  PRIMARY KEY (`hyperparameter_id`, `model_id`),
+  CONSTRAINT `hyperparameter_value_ibfk_1` FOREIGN KEY (`hyperparameter_id`) REFERENCES `hyperparameter` (`hyperparameter_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `hyperparameter_value_ibfk_2` FOREIGN KEY (`model_id`) REFERENCES `leaderboard` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `model_run` (
+  `model_id` int(11) NOT NULL,
+  `run_id` int(11) NOT NULL,
+  PRIMARY KEY (`model_id`, `run_id`),
+  CONSTRAINT `model_run_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `leaderboard` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `model_run_ibfk_2` FOREIGN KEY (`run_id`) REFERENCES `leaderboard_metadata` (`run_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_map` (
+  `dataset_id` int(11) NOT NULL,
+  `run_id` int(11) NOT NULL,
+  PRIMARY KEY (`dataset_id`, `run_id`),
+  CONSTRAINT `data_map_ibfk_1` FOREIGN KEY (`dataset_id`) REFERENCES `dataset_metadata` (`dataset_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `data_map_ibfk_2` FOREIGN KEY (`run_id`) REFERENCES `leaderboard_metadata` (`run_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `hyperparameter_def_values` (
+  `model_type_id` int(11) NOT NULL,
+  `hyperparameter_id` int(11) NOT NULL,
+  PRIMARY KEY (`model_type_id`, `hyperparameter_id`),
+  CONSTRAINT `hyperparameter_def_values_ibfk_1` FOREIGN KEY (`hyperparameter_id`) REFERENCES `hyperparameter` (`hyperparameter_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `hyperparameter_def_values_ibfk_2` FOREIGN KEY (`model_type_id`) REFERENCES `model_map` (`model_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `id_map` (
+  `model_id` int(11) NOT NULL,
+  `model_type_id` int(11) NOT NULL,
+  PRIMARY KEY (`model_id`),
+  CONSTRAINT `id_map_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `leaderboard` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `id_map_ibfk_2` FOREIGN KEY (`model_type_id`) REFERENCES `model_map` (`model_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `hyperparameter` (
+  `hyperparameter_id` int(11) NOT NULL,
+  `hyperparameter_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`hyperparameter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dataset_metadata` (
+  `dataset_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `owner` varchar(255) NOT NULL,
+  `license` varchar(255) NOT NULL,
+  `visibility` varchar(100) NOT NULL,
+  `url` varchar(255) NOT NULL,
+  `date_created` datetime NOT NULL,
+  `last_updated` datetime NOT NULL,
+  `data_size` int(11) NOT NULL,
+  `number_of_rows` int(11) NOT NULL,
+  `number_of_columns` int(11) NOT NULL,
+  PRIMARY KEY (`dataset_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

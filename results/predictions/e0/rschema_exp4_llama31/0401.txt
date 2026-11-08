@@ -1,0 +1,65 @@
+-- Schema for database: rschema_0401
+CREATE TABLE `students` (
+  `student_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `grade` char(1) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `home_address` varchar(255) DEFAULT NULL,
+  `date_of_birth` datetime NOT NULL,
+  `enrollment_time` datetime NOT NULL,
+  PRIMARY KEY (`student_id`),
+  KEY `department_id` (`department_id`),
+  CONSTRAINT `students_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `classes` (
+  `class_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `grade` char(1) NOT NULL,
+  `major_id` int(11) NOT NULL,
+  `head_teacher_id` int(11) NOT NULL,
+  PRIMARY KEY (`class_id`),
+  KEY `major_id` (`major_id`),
+  KEY `head_teacher_id` (`head_teacher_id`),
+  CONSTRAINT `classes_ibfk_1` FOREIGN KEY (`major_id`) REFERENCES `majors` (`major_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `classes_ibfk_2` FOREIGN KEY (`head_teacher_id`) REFERENCES `teachers` (`teacher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `departments` (
+  `department_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `size` int(11) NOT NULL,
+  `subordinate_majors` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `majors` (
+  `major_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`major_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student_classes` (
+  `student_id` int(11) NOT NULL,
+  `class_id` int(11) NOT NULL,
+  PRIMARY KEY (`student_id`, `class_id`),
+  KEY `student_id` (`student_id`),
+  KEY `class_id` (`class_id`),
+  CONSTRAINT `student_classes_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `student_classes_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `classes` (`class_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teachers` (
+  `teacher_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `grade` char(1) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `home_address` varchar(255) DEFAULT NULL,
+  `date_of_birth` datetime NOT NULL,
+  `entry_time` datetime NOT NULL,
+  PRIMARY KEY (`teacher_id`),
+  KEY `department_id` (`department_id`),
+  CONSTRAINT `teachers_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

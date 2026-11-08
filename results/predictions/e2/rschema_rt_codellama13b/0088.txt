@@ -1,0 +1,45 @@
+-- Schema for database: rschema_0088
+CREATE TABLE `User` (
+  `User_ID` int(11) NOT NULL,
+  `Email` varchar(255) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Password` varchar(255) NOT NULL,
+  `Creation_Time` datetime NOT NULL,
+  PRIMARY KEY (`User_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Attachment` (
+  `Attachment_ID` int(11) NOT NULL,
+  `File_Name` varchar(255) NOT NULL,
+  `Storage_Path` varchar(255) NOT NULL,
+  `Size` int(11) NOT NULL,
+  PRIMARY KEY (`Attachment_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Mail` (
+  `Mail_ID` int(11) NOT NULL,
+  `Body` text NOT NULL,
+  `Creation_Time` datetime NOT NULL,
+  `Sender_ID` int(11) NOT NULL,
+  `Sending_Time` datetime NOT NULL,
+  `Status` varchar(50) NOT NULL,
+  `Subject` varchar(255) NOT NULL,
+  PRIMARY KEY (`Mail_ID`),
+  CONSTRAINT `mail_ibfk_1` FOREIGN KEY (`Sender_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Mail_Attachment` (
+  `Mail_ID` int(11) NOT NULL,
+  `Attachment_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Mail_ID`, `Attachment_ID`),
+  CONSTRAINT `mail_attachment_ibfk_1` FOREIGN KEY (`Mail_ID`) REFERENCES `Mail` (`Mail_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `mail_attachment_ibfk_2` FOREIGN KEY (`Attachment_ID`) REFERENCES `Attachment` (`Attachment_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Mail_Recipient` (
+  `Mail_ID` int(11) NOT NULL,
+  `Recipient_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Mail_ID`, `Recipient_ID`),
+  CONSTRAINT `mail_recipient_ibfk_1` FOREIGN KEY (`Mail_ID`) REFERENCES `Mail` (`Mail_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `mail_recipient_ibfk_2` FOREIGN KEY (`Recipient_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

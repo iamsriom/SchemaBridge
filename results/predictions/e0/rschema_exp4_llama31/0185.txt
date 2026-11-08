@@ -1,0 +1,40 @@
+-- Schema for database: rschema_0185
+CREATE TABLE `proposals` (
+  `proposal_id` int(11) NOT NULL AUTO_INCREMENT,
+  `proposal_content` varchar(255) NOT NULL,
+  `proposal_time` datetime NOT NULL,
+  `status` varchar(255) NOT NULL,
+  PRIMARY KEY (`proposal_id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `proposers` (
+  `member_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(255) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `party_affiliation` varchar(255) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  PRIMARY KEY (`member_id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `proposal_handlers` (
+  `proposal_id` int(11) NOT NULL,
+  `handler_id` int(11) NOT NULL,
+  `handling_time` datetime NOT NULL,
+  `handling_opinion` varchar(255) NOT NULL,
+  PRIMARY KEY (`proposal_id`, `handler_id`),
+  KEY `proposal_id` (`proposal_id`),
+  KEY `handler_id` (`handler_id`),
+  CONSTRAINT `proposal_handlers_ibfk_1` FOREIGN KEY (`proposal_id`) REFERENCES `proposals` (`proposal_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `proposal_handlers_ibfk_2` FOREIGN KEY (`handler_id`) REFERENCES `proposers` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `proposal_proposers` (
+  `proposal_id` int(11) NOT NULL,
+  `member_id` int(11) NOT NULL,
+  PRIMARY KEY (`proposal_id`, `member_id`),
+  KEY `proposal_id` (`proposal_id`),
+  KEY `member_id` (`member_id`),
+  CONSTRAINT `proposal_proposers_ibfk_1` FOREIGN KEY (`proposal_id`) REFERENCES `proposals` (`proposal_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `proposal_proposers_ibfk_2` FOREIGN KEY (`member_id`) REFERENCES `proposers` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

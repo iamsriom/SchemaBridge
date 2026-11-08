@@ -1,0 +1,63 @@
+-- Schema for database: rschema_0379
+CREATE TABLE `Customer` (
+  `Customer_ID` int(11) NOT NULL,
+  `Customer_Name` varchar(255) NOT NULL,
+  `Contact_Person` varchar(255) DEFAULT NULL,
+  `Contact_Information` varchar(255) DEFAULT NULL,
+  `Customer_Address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Customer_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Invoice` (
+  `Invoice_ID` int(11) NOT NULL,
+  `Customer_ID` int(11) NOT NULL,
+  `Invoice_Date` datetime NOT NULL,
+  `Due_Date` datetime NOT NULL,
+  `Total_Amount` decimal(10,2) NOT NULL,
+  `Payment_Amount` decimal(10,2) DEFAULT NULL,
+  `Payment_Date` datetime DEFAULT NULL,
+  `Status` varchar(50) DEFAULT NULL,
+  `Notes` text DEFAULT NULL,
+  `Electronic_Version_Content` blob DEFAULT NULL,
+  `Electronic_Version_MIME_Type` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`Invoice_ID`),
+  CONSTRAINT `invoice_ibfk_1` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Terms` (
+  `Term_ID` int(11) NOT NULL,
+  `Invoice_ID` int(11) NOT NULL,
+  `Interest_Rate` decimal(5,2) NOT NULL,
+  `Payment_Days` int(11) NOT NULL,
+  `Term_Description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Term_ID`),
+  CONSTRAINT `terms_ibfk_1` FOREIGN KEY (`Invoice_ID`) REFERENCES `Invoice` (`Invoice_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Invoice_and_Customer` (
+  `Invoice_ID` int(11) NOT NULL,
+  `Customer_ID` int(11) NOT NULL,
+  `Invoice_Date` datetime NOT NULL,
+  `Due_Date` datetime NOT NULL,
+  `Total_Amount` decimal(10,2) NOT NULL,
+  `Payment_Amount` decimal(10,2) DEFAULT NULL,
+  `Payment_Date` datetime DEFAULT NULL,
+  `Status` varchar(50) DEFAULT NULL,
+  `Notes` text DEFAULT NULL,
+  `Electronic_Version_Content` blob DEFAULT NULL,
+  `Electronic_Version_MIME_Type` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`Invoice_ID`, `Customer_ID`),
+  CONSTRAINT `invoice_and_customer_ibfk_1` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `invoice_and_customer_ibfk_2` FOREIGN KEY (`Invoice_ID`) REFERENCES `Invoice` (`Invoice_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Invoice_and_Terms` (
+  `Term_ID` int(11) NOT NULL,
+  `Invoice_ID` int(11) NOT NULL,
+  `Interest_Rate` decimal(5,2) NOT NULL,
+  `Payment_Days` int(11) NOT NULL,
+  `Term_Description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Term_ID`, `Invoice_ID`),
+  CONSTRAINT `invoice_and_terms_ibfk_1` FOREIGN KEY (`Invoice_ID`) REFERENCES `Invoice` (`Invoice_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `invoice_and_terms_ibfk_2` FOREIGN KEY (`Term_ID`) REFERENCES `Terms` (`Term_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

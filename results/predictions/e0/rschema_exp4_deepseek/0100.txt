@@ -1,0 +1,84 @@
+--Schemafordatabase:rschema_0100
+
+--Foreachtable:
+
+CREATE TABLE `customer` (
+  `CustomerID` int(11) NOT NULL,
+  `CreationTime` datetime NOT NULL,
+  `UpdateTime` datetime NOT NULL,
+  `DeletionTime` datetime DEFAULT NULL,
+  `Email` varchar(255) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  PRIMARY KEY (`CustomerID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `UserID` int(11) NOT NULL,
+  `CreationTime` datetime NOT NULL,
+  `UpdateTime` datetime NOT NULL,
+  `DeletionTime` datetime DEFAULT NULL,
+  `Email` varchar(255) NOT NULL,
+  `Username` varchar(255) NOT NULL,
+  `Password` varchar(255) NOT NULL,
+  PRIMARY KEY (`UserID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order` (
+  `OrderID` int(11) NOT NULL,
+  `CreationTime` datetime NOT NULL,
+  `UpdateTime` datetime NOT NULL,
+  `DeletionTime` datetime DEFAULT NULL,
+  `OrderDescription` text NOT NULL,
+  `DeliveryDate` date NOT NULL,
+  `InvoiceNumber` varchar(255) NOT NULL,
+  `CurrencyType` varchar(255) NOT NULL,
+  `OrderNumber` varchar(255) NOT NULL,
+  `CreatorUserID` int(11) NOT NULL,
+  `CustomerID` int(11) NOT NULL,
+  PRIMARY KEY (`OrderID`),
+  KEY `CreatorUserID` (`CreatorUserID`),
+  KEY `CustomerID` (`CustomerID`),
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`CreatorUserID`) REFERENCES `user` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_ibfk_2` FOREIGN KEY (`CustomerID`) REFERENCES `customer` (`CustomerID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_item` (
+  `OrderItemID` int(11) NOT NULL,
+  `CreationTime` datetime NOT NULL,
+  `UpdateTime` datetime NOT NULL,
+  `DeletionTime` datetime DEFAULT NULL,
+  `Description` text NOT NULL,
+  `Quantity` int(11) NOT NULL,
+  `Unit` varchar(255) NOT NULL,
+  `UnitPrice` decimal(10,2) NOT NULL,
+  `OrderID` int(11) NOT NULL,
+  PRIMARY KEY (`OrderItemID`),
+  KEY `OrderID` (`OrderID`),
+  CONSTRAINT `order_item_ibfk_1` FOREIGN KEY (`OrderID`) REFERENCES `order` (`OrderID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_customer` (
+  `UserID` int(11) NOT NULL,
+  `CustomerID` int(11) NOT NULL,
+  PRIMARY KEY (`UserID`,`CustomerID`),
+  KEY `CustomerID` (`CustomerID`),
+  CONSTRAINT `user_customer_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `user` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_customer_ibfk_2` FOREIGN KEY (`CustomerID`) REFERENCES `customer` (`CustomerID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_order` (
+  `UserID` int(11) NOT NULL,
+  `OrderID` int(11) NOT NULL,
+  PRIMARY KEY (`UserID`,`OrderID`),
+  KEY `OrderID` (`OrderID`),
+  CONSTRAINT `user_order_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `user` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_order_ibfk_2` FOREIGN KEY (`OrderID`) REFERENCES `order` (`OrderID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `quotation` (
+  `QuotationID` int(11) NOT NULL,
+  `CustomerID` int(11) NOT NULL,
+  PRIMARY KEY (`QuotationID`),
+  KEY `CustomerID` (`CustomerID`),
+  CONSTRAINT `quotation_ibfk_1` FOREIGN KEY (`CustomerID`) REFERENCES `customer` (`CustomerID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

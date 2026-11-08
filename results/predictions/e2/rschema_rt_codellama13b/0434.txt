@@ -1,0 +1,52 @@
+-- Schema for database: rschema_0434
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `registration_time` datetime NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maze` (
+  `maze_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `creation_date` datetime NOT NULL,
+  `last_modified_date` datetime NOT NULL,
+  PRIMARY KEY (`maze_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `skybox` (
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `creation_date` datetime NOT NULL,
+  `last_modified_date` datetime NOT NULL,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `map` (
+  `map_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `map_data` blob NOT NULL,
+  `creation_date` datetime NOT NULL,
+  `last_modified_date` datetime NOT NULL,
+  `associated_maze_id` int(11) NOT NULL,
+  PRIMARY KEY (`map_id`),
+  CONSTRAINT `map_ibfk_1` FOREIGN KEY (`associated_maze_id`) REFERENCES `maze` (`maze_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_game_record` (
+  `user_id` int(11) NOT NULL,
+  `maze_id` int(11) NOT NULL,
+  `game_creation_time` datetime NOT NULL,
+  `game_start_time` datetime NOT NULL,
+  `game_end_time` datetime DEFAULT NULL,
+  `game_last_modified_time` datetime DEFAULT NULL,
+  `game_status` varchar(255) DEFAULT NULL,
+  `user_score` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`, `maze_id`, `game_creation_time`),
+  CONSTRAINT `user_game_record_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_game_record_ibfk_2` FOREIGN KEY (`maze_id`) REFERENCES `maze` (`maze_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

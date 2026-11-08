@@ -1,0 +1,115 @@
+-- Schema for database: schemabench_0130
+CREATE TABLE `badges` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `date_earned` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `badges_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `post_id` int(11) NOT NULL,
+  `score` int(11) NOT NULL DEFAULT 0,
+  `text` text NOT NULL,
+  `date_created` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `user_display_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `postHistory` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `revision_type` varchar(50) NOT NULL,
+  `post_id` int(11) NOT NULL,
+  `revision_guid` varchar(255) NOT NULL,
+  `date_created` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `revision_text` text NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `postHistory_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `postHistory_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `postLinks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date_created` datetime NOT NULL,
+  `post_id` int(11) NOT NULL,
+  `related_post_id` int(11) NOT NULL,
+  `link_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `postLinks_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `postLinks_ibfk_2` FOREIGN KEY (`related_post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `posts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `post_type` varchar(50) NOT NULL,
+  `parent_post_id` int(11) DEFAULT NULL,
+  `date_created` datetime NOT NULL,
+  `score` int(11) NOT NULL DEFAULT 0,
+  `view_count` int(11) NOT NULL DEFAULT 0,
+  `body` text NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `date_last_active` datetime NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `tags` varchar(255) DEFAULT NULL,
+  `answer_count` int(11) NOT NULL DEFAULT 0,
+  `comment_count` int(11) NOT NULL DEFAULT 0,
+  `favorite_count` int(11) NOT NULL DEFAULT 0,
+  `last_edited_user_id` int(11) DEFAULT NULL,
+  `date_last_edited` datetime DEFAULT NULL,
+  `date_community_owned` datetime DEFAULT NULL,
+  `date_closed` datetime DEFAULT NULL,
+  `user_display_name` varchar(255) NOT NULL,
+  `last_edited_display_name` varchar(255) DEFAULT NULL,
+  `account_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `posts_ibfk_2` FOREIGN KEY (`last_edited_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `posts_ibfk_3` FOREIGN KEY (`parent_post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tags` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `usage_count` int(11) NOT NULL DEFAULT 0,
+  `post_id` int(11) NOT NULL,
+  `example_post_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tags_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tags_ibfk_2` FOREIGN KEY (`example_post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `reputation` int(11) NOT NULL DEFAULT 0,
+  `date_joined` datetime NOT NULL,
+  `display_name` varchar(255) NOT NULL,
+  `date_last_access` datetime DEFAULT NULL,
+  `website_url` varchar(255) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `about_me` text DEFAULT NULL,
+  `views` int(11) NOT NULL DEFAULT 0,
+  `up_votes` int(11) NOT NULL DEFAULT 0,
+  `down_votes` int(11) NOT NULL DEFAULT 0,
+  `account_id` int(11) NOT NULL,
+  `age` int(11) DEFAULT NULL,
+  `profile_image_url` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `votes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `post_id` int(11) NOT NULL,
+  `vote_type` varchar(50) NOT NULL,
+  `date_cast` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `bounty_amount` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `votes_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `votes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

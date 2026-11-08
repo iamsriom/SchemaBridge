@@ -1,0 +1,45 @@
+-- Schema for database: rschema_0351
+CREATE TABLE `object` (
+  `object_id` int(11) NOT NULL,
+  `category` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`object_id`),
+  KEY `idx_object_id` (`object_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permission_entry` (
+  `permission_entry_number` int(11) NOT NULL,
+  `log_recording_status` varchar(255) DEFAULT NULL,
+  `log_path` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`permission_entry_number`),
+  KEY `idx_permission_entry_number` (`permission_entry_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permission_inheritance` (
+  `child_object` int(11) NOT NULL,
+  `parent_object` int(11) NOT NULL,
+  PRIMARY KEY (`child_object`, `parent_object`),
+  CONSTRAINT `permission_inheritance_ibfk_1` FOREIGN KEY (`child_object`) REFERENCES `object` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `permission_inheritance_ibfk_2` FOREIGN KEY (`parent_object`) REFERENCES `object` (`object_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `authorization` (
+  `permission_entry_number` int(11) NOT NULL,
+  `authorized_object` int(11) NOT NULL,
+  PRIMARY KEY (`permission_entry_number`, `authorized_object`),
+  CONSTRAINT `authorization_ibfk_1` FOREIGN KEY (`permission_entry_number`) REFERENCES `permission_entry` (`permission_entry_number`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `object_assignment` (
+  `object_id` int(11) NOT NULL,
+  `assigned_user` int(11) NOT NULL,
+  PRIMARY KEY (`object_id`, `assigned_user`),
+  CONSTRAINT `object_assignment_ibfk_1` FOREIGN KEY (`object_id`) REFERENCES `object` (`object_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `object_assignment_ibfk_2` FOREIGN KEY (`assigned_user`) REFERENCES `user` (`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

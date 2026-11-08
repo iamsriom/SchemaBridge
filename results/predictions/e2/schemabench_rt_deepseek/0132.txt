@@ -1,0 +1,101 @@
+-- Schema for database: schemabench_0132
+CREATE TABLE `dss_customer` (
+  `c_custkey` int(11) NOT NULL,
+  `c_name` varchar(255) DEFAULT NULL,
+  `c_address` varchar(255) DEFAULT NULL,
+  `c_nationkey` int(11) DEFAULT NULL,
+  `c_phone` varchar(20) DEFAULT NULL,
+  `c_acctbal` decimal(10,2) DEFAULT NULL,
+  `c_mktsegment` varchar(50) DEFAULT NULL,
+  `c_comment` text DEFAULT NULL,
+  PRIMARY KEY (`c_custkey`),
+  CONSTRAINT `dss_customer_ibfk_1` FOREIGN KEY (`c_nationkey`) REFERENCES `dss_nation` (`n_nationkey`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dss_lineitem` (
+  `l_orderkey` int(11) NOT NULL,
+  `l_partkey` int(11) NOT NULL,
+  `l_suppkey` int(11) NOT NULL,
+  `l_linenumber` int(11) NOT NULL,
+  `l_quantity` decimal(10,2) DEFAULT NULL,
+  `l_extendedprice` decimal(10,2) DEFAULT NULL,
+  `l_discount` decimal(5,2) DEFAULT NULL,
+  `l_tax` decimal(5,2) DEFAULT NULL,
+  `l_returnflag` char(1) DEFAULT NULL,
+  `l_linestatus` char(1) DEFAULT NULL,
+  `l_shipdate` datetime DEFAULT NULL,
+  `l_commitdate` datetime DEFAULT NULL,
+  `l_receiptdate` datetime DEFAULT NULL,
+  `l_shipinstruct` varchar(50) DEFAULT NULL,
+  `l_shipmode` varchar(50) DEFAULT NULL,
+  `l_comment` text DEFAULT NULL,
+  PRIMARY KEY (`l_orderkey`, `l_partkey`, `l_suppkey`),
+  CONSTRAINT `dss_lineitem_ibfk_1` FOREIGN KEY (`l_orderkey`) REFERENCES `dss_order` (`o_orderkey`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `dss_lineitem_ibfk_2` FOREIGN KEY (`l_partkey`, `l_suppkey`) REFERENCES `dss_partsupp` (`ps_partkey`, `ps_suppkey`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dss_nation` (
+  `n_nationkey` int(11) NOT NULL,
+  `n_name` varchar(50) DEFAULT NULL,
+  `n_regionkey` int(11) DEFAULT NULL,
+  `n_comment` text DEFAULT NULL,
+  PRIMARY KEY (`n_nationkey`),
+  CONSTRAINT `dss_nation_ibfk_1` FOREIGN KEY (`n_regionkey`) REFERENCES `dss_region` (`r_regionkey`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dss_order` (
+  `o_orderkey` int(11) NOT NULL,
+  `o_custkey` int(11) DEFAULT NULL,
+  `o_orderstatus` varchar(20) DEFAULT NULL,
+  `o_totalprice` decimal(10,2) DEFAULT NULL,
+  `o_orderdate` datetime DEFAULT NULL,
+  `o_orderpriority` varchar(20) DEFAULT NULL,
+  `o_clerk` varchar(50) DEFAULT NULL,
+  `o_shippriority` int(11) DEFAULT NULL,
+  `o_comment` text DEFAULT NULL,
+  PRIMARY KEY (`o_orderkey`),
+  CONSTRAINT `dss_order_ibfk_1` FOREIGN KEY (`o_custkey`) REFERENCES `dss_customer` (`c_custkey`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dss_part` (
+  `p_partkey` int(11) NOT NULL,
+  `p_name` varchar(255) DEFAULT NULL,
+  `p_mfgr` varchar(50) DEFAULT NULL,
+  `p_brand` varchar(50) DEFAULT NULL,
+  `p_type` varchar(50) DEFAULT NULL,
+  `p_size` int(11) DEFAULT NULL,
+  `p_container` varchar(50) DEFAULT NULL,
+  `p_retailprice` decimal(10,2) DEFAULT NULL,
+  `p_comment` text DEFAULT NULL,
+  PRIMARY KEY (`p_partkey`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dss_partsupp` (
+  `ps_partkey` int(11) NOT NULL,
+  `ps_suppkey` int(11) NOT NULL,
+  `ps_availqty` int(11) DEFAULT NULL,
+  `ps_supplycost` decimal(10,2) DEFAULT NULL,
+  `ps_comment` text DEFAULT NULL,
+  PRIMARY KEY (`ps_partkey`, `ps_suppkey`),
+  CONSTRAINT `dss_partsupp_ibfk_1` FOREIGN KEY (`ps_partkey`) REFERENCES `dss_part` (`p_partkey`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `dss_partsupp_ibfk_2` FOREIGN KEY (`ps_suppkey`) REFERENCES `dss_supplier` (`s_suppkey`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dss_region` (
+  `r_regionkey` int(11) NOT NULL,
+  `r_name` varchar(50) DEFAULT NULL,
+  `r_comment` text DEFAULT NULL,
+  PRIMARY KEY (`r_regionkey`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dss_supplier` (
+  `s_suppkey` int(11) NOT NULL,
+  `s_name` varchar(255) DEFAULT NULL,
+  `s_address` varchar(255) DEFAULT NULL,
+  `s_nationkey` int(11) DEFAULT NULL,
+  `s_phone` varchar(20) DEFAULT NULL,
+  `s_acctbal` decimal(10,2) DEFAULT NULL,
+  `s_comment` text DEFAULT NULL,
+  PRIMARY KEY (`s_suppkey`),
+  CONSTRAINT `dss_supplier_ibfk_1` FOREIGN KEY (`s_nationkey`) REFERENCES `dss_nation` (`n_nationkey`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

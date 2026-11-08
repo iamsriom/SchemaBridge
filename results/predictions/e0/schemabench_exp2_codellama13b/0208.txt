@@ -1,0 +1,103 @@
+-- Schema for database: schemabench_0208
+
+CREATE TABLE events (
+  event_id int(11) NOT NULL AUTO_INCREMENT,
+  name varchar(255) NOT NULL,
+  date datetime NOT NULL,
+  venue_id int(11) NOT NULL,
+  organizer_id int(11) NOT NULL,
+  PRIMARY KEY (event_id),
+  FOREIGN KEY (venue_id) REFERENCES venues (venue_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (organizer_id) REFERENCES organizers (organizer_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE participants (
+  participant_id int(11) NOT NULL AUTO_INCREMENT,
+  name varchar(255) NOT NULL,
+  email varchar(255) NOT NULL,
+  event_id int(11) NOT NULL,
+  PRIMARY KEY (participant_id),
+  FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE venues (
+  venue_id int(11) NOT NULL AUTO_INCREMENT,
+  name varchar(255) NOT NULL,
+  capacity int(11) NOT NULL,
+  address varchar(255) NOT NULL,
+  PRIMARY KEY (venue_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE organizers (
+  organizer_id int(11) NOT NULL AUTO_INCREMENT,
+  name varchar(255) NOT NULL,
+  email varchar(255) NOT NULL,
+  description varchar(255) NOT NULL,
+  PRIMARY KEY (organizer_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE speakers (
+  speaker_id int(11) NOT NULL AUTO_INCREMENT,
+  name varchar(255) NOT NULL,
+  event_id int(11) NOT NULL,
+  PRIMARY KEY (speaker_id),
+  FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE feedback (
+  feedback_id int(11) NOT NULL AUTO_INCREMENT,
+  rating int(11) NOT NULL,
+  comment varchar(255) NOT NULL,
+  feedback_date datetime NOT NULL,
+  participant_id int(11) NOT NULL,
+  event_id int(11) NOT NULL,
+  PRIMARY KEY (feedback_id),
+  FOREIGN KEY (participant_id) REFERENCES participants (participant_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE categories (
+  category_id int(11) NOT NULL AUTO_INCREMENT,
+  name varchar(255) NOT NULL,
+  PRIMARY KEY (category_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE event_categories (
+  event_id int(11) NOT NULL,
+  category_id int(11) NOT NULL,
+  PRIMARY KEY (event_id, category_id),
+  FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (category_id) REFERENCES categories (category_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE speaker_events (
+  speaker_id int(11) NOT NULL,
+  event_id int(11) NOT NULL,
+  PRIMARY KEY (speaker_id, event_id),
+  FOREIGN KEY (speaker_id) REFERENCES speakers (speaker_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE participant_events (
+  participant_id int(11) NOT NULL,
+  event_id int(11) NOT NULL,
+  PRIMARY KEY (participant_id, event_id),
+  FOREIGN KEY (participant_id) REFERENCES participants (participant_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE venue_events (
+  venue_id int(11) NOT NULL,
+  event_id int(11) NOT NULL,
+  PRIMARY KEY (venue_id, event_id),
+  FOREIGN KEY (venue_id) REFERENCES venues (venue_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE organizer_events (
+  organizer_id int(11) NOT NULL,
+  event_id int(11) NOT NULL,
+  PRIMARY KEY (organizer_id, event_id),
+  FOREIGN KEY (organizer_id) REFERENCES organizers (organizer_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

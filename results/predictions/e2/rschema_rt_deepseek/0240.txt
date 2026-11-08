@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0240
+CREATE TABLE `Ship` (
+  `Ship_ID` int(11) NOT NULL,
+  `Name` varchar(255) DEFAULT NULL,
+  `Type` varchar(255) DEFAULT NULL,
+  `Construction_Date` datetime DEFAULT NULL,
+  `Fleet_ID` int(11) DEFAULT NULL,
+  `Service_Status` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Ship_ID`),
+  CONSTRAINT `Ship_ibfk_1` FOREIGN KEY (`Fleet_ID`) REFERENCES `Fleet` (`Fleet_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Crew_Member` (
+  `Crew_Member_ID` int(11) NOT NULL,
+  `Name` varchar(255) DEFAULT NULL,
+  `Gender` varchar(10) DEFAULT NULL,
+  `Length_of_Service` int(11) DEFAULT NULL,
+  `Phone_Number` varchar(15) DEFAULT NULL,
+  `Position` varchar(255) DEFAULT NULL,
+  `Fleet_ID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Crew_Member_ID`),
+  CONSTRAINT `Crew_Member_ibfk_1` FOREIGN KEY (`Fleet_ID`) REFERENCES `Fleet` (`Fleet_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Fleet` (
+  `Fleet_ID` int(11) NOT NULL,
+  `Name` varchar(255) DEFAULT NULL,
+  `Base` varchar(255) DEFAULT NULL,
+  `Commander_ID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Fleet_ID`),
+  CONSTRAINT `Fleet_ibfk_1` FOREIGN KEY (`Commander_ID`) REFERENCES `Crew_Member` (`Crew_Member_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Fleet_Mission_Execution` (
+  `Crew_Member_ID` int(11) NOT NULL,
+  `Fleet_ID` int(11) NOT NULL,
+  `Execution_Time` datetime NOT NULL,
+  `Is_Crew_Member_Primary_Responsible` tinyint(1) DEFAULT NULL,
+  `Remarks` text DEFAULT NULL,
+  PRIMARY KEY (`Crew_Member_ID`, `Fleet_ID`, `Execution_Time`),
+  CONSTRAINT `Fleet_Mission_Execution_ibfk_1` FOREIGN KEY (`Crew_Member_ID`) REFERENCES `Crew_Member` (`Crew_Member_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Fleet_Mission_Execution_ibfk_2` FOREIGN KEY (`Fleet_ID`) REFERENCES `Fleet` (`Fleet_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Ship_Supply` (
+  `Responsible_Supply_Crew_Member_ID` int(11) NOT NULL,
+  `Ship_ID` int(11) NOT NULL,
+  `Supply_Items` varchar(255) DEFAULT NULL,
+  `Supply_Quantity` int(11) DEFAULT NULL,
+  `Supply_Time` datetime NOT NULL,
+  PRIMARY KEY (`Responsible_Supply_Crew_Member_ID`, `Ship_ID`, `Supply_Time`),
+  CONSTRAINT `Ship_Supply_ibfk_1` FOREIGN KEY (`Responsible_Supply_Crew_Member_ID`) REFERENCES `Crew_Member` (`Crew_Member_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Ship_Supply_ibfk_2` FOREIGN KEY (`Ship_ID`) REFERENCES `Ship` (`Ship_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

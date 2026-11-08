@@ -1,0 +1,112 @@
+-- Schema for database: schemabench_0065
+CREATE TABLE `djpaypal_billingagreement` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `state` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL,
+  `payer_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `djpaypal_billingagreement_ibfk_1` FOREIGN KEY (`payer_id`) REFERENCES `djpaypal_payer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `djpaypal_billingplan` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `type` varchar(50) NOT NULL,
+  `state` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `djpaypal_billingplan_payment_definitions` (
+  `billing_plan_id` int(11) NOT NULL,
+  `payment_definition_id` int(11) NOT NULL,
+  PRIMARY KEY (`billing_plan_id`, `payment_definition_id`),
+  CONSTRAINT `djpaypal_billingplan_payment_definitions_ibfk_1` FOREIGN KEY (`billing_plan_id`) REFERENCES `djpaypal_billingplan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `djpaypal_billingplan_payment_definitions_ibfk_2` FOREIGN KEY (`payment_definition_id`) REFERENCES `djpaypal_paymentdefinition` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `djpaypal_paymentdefinition` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `frequency` varchar(50) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `djpaypal_chargemodel` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(50) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `djpaypal_dispute` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `reason` text NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `transaction_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `djpaypal_payer` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `shipping_address` text DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `djpaypal_payment` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `intent` varchar(50) NOT NULL,
+  `cart` varchar(255) NOT NULL,
+  `transactions` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `djpaypal_refund` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `amount` decimal(10,2) NOT NULL,
+  `reason` text DEFAULT NULL,
+  `parent_payment_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `djpaypal_refund_ibfk_1` FOREIGN KEY (`parent_payment_id`) REFERENCES `djpaypal_payment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `djpaypal_sale` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `amount` decimal(10,2) NOT NULL,
+  `payment_mode` varchar(50) NOT NULL,
+  `state` varchar(50) NOT NULL,
+  `payment_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `djpaypal_sale_ibfk_1` FOREIGN KEY (`payment_id`) REFERENCES `djpaypal_payment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `djpaypal_webhookevent` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_type` varchar(255) NOT NULL,
+  `resource` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `djpaypal_webhookeventtrigger` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `remote_ip` varchar(50) NOT NULL,
+  `headers` text NOT NULL,
+  `body` text NOT NULL,
+  `webhook_event_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `djpaypal_webhookeventtrigger_ibfk_1` FOREIGN KEY (`webhook_event_id`) REFERENCES `djpaypal_webhookevent` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `djpaypal_paymentdefinition_charge_models` (
+  `payment_definition_id` int(11) NOT NULL,
+  `charge_model_id` int(11) NOT NULL,
+  PRIMARY KEY (`payment_definition_id`, `charge_model_id`),
+  CONSTRAINT `djpaypal_paymentdefinition_charge_models_ibfk_1` FOREIGN KEY (`payment_definition_id`) REFERENCES `djpaypal_paymentdefinition` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `djpaypal_paymentdefinition_charge_models_ibfk_2` FOREIGN KEY (`charge_model_id`) REFERENCES `djpaypal_chargemodel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

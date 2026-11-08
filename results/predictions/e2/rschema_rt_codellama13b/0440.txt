@@ -1,0 +1,71 @@
+-- Schema for database: rschema_0440
+CREATE TABLE `device` (
+  `device_id` varchar(50) NOT NULL,
+  `device_image` varchar(255) DEFAULT NULL,
+  `device_model` varchar(100) DEFAULT NULL,
+  `device_group` varchar(100) DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `person_in_charge` varchar(100) DEFAULT NULL,
+  `product_name` varchar(100) DEFAULT NULL,
+  `qr_code` varchar(100) DEFAULT NULL,
+  `device_type` varchar(50) DEFAULT NULL,
+  `creation_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `usage_location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`device_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `role` varchar(50) DEFAULT NULL,
+  `account_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device_status` (
+  `device_id` varchar(50) NOT NULL,
+  `current_status` varchar(100) DEFAULT NULL,
+  `last_update_time` datetime DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`device_id`),
+  CONSTRAINT `device_status_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `device` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device_maintenance` (
+  `device_id` varchar(50) NOT NULL,
+  `maintenance_person_id` varchar(50) NOT NULL,
+  `maintenance_time` datetime NOT NULL,
+  `maintenance_content` varchar(255) DEFAULT NULL,
+  `maintenance_result` varchar(100) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `user_satisfaction` int(11) DEFAULT NULL,
+  PRIMARY KEY (`device_id`, `maintenance_person_id`, `maintenance_time`),
+  CONSTRAINT `device_maintenance_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `device` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `device_maintenance_ibfk_2` FOREIGN KEY (`maintenance_person_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device_repair_request` (
+  `device_id` varchar(50) NOT NULL,
+  `requester_id` varchar(50) NOT NULL,
+  `handling_personnel` varchar(100) DEFAULT NULL,
+  `handling_status` varchar(50) DEFAULT NULL,
+  `handling_time` datetime DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `request_content` varchar(255) DEFAULT NULL,
+  `request_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`device_id`, `requester_id`, `request_time`),
+  CONSTRAINT `device_repair_request_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `device` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `device_repair_request_ibfk_2` FOREIGN KEY (`requester_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device_inventory` (
+  `device_id` varchar(50) NOT NULL,
+  `inventory_person_id` varchar(50) NOT NULL,
+  `inventory_time` datetime NOT NULL,
+  `device_location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`device_id`, `inventory_person_id`, `inventory_time`),
+  CONSTRAINT `device_inventory_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `device` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `device_inventory_ibfk_2` FOREIGN KEY (`inventory_person_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

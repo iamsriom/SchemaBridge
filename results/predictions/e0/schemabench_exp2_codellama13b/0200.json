@@ -1,0 +1,44 @@
+{
+  "text_number": 200,
+  "id": "SB-200",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0200",
+  "question": "Background / Context\n\nFresh Segments is a digital marketing agency founded by Danny, specializing in analyzing online ad click behavior for businesses. By aggregating interest metrics, Fresh Segments provides insights into the interests and behaviors of clients' customer bases, enabling more efficient targeting of online marketing efforts.\n\nObjectives\n\nThe primary objective is to analyze aggregated metrics for a major client's customer list to derive high-level insights into customer interests and behaviors. This analysis aims to enhance the client's understanding of how their customers interact with online advertising content related to various interests.\n\nStakeholders & Users\n\n- Danny: Founder of Fresh Segments, overseeing operations and client satisfaction.\n- Clients: Businesses utilizing Fresh Segments’ services to analyze customer behavior and improve marketing strategies.\n- Analysts: Team members tasked with analyzing datasets and generating insights.\n\nFunctional Descriptions\n\n1. Data Aggregation: Collect and aggregate interest metrics from the client’s customer base, focusing on interactions with targeted advertising content.\n2. Interest Composition and Ranking: Provide detailed reports showing the proportion of customers engaging with specific interests, including interest ranking and composition by month.\n3. Insight Generation: Analyze datasets to derive actionable insights for the client, focusing on customer behavior trends and interest distributions.\n4. Data Integration: Link interest metrics with the interest map to enrich data analysis by integrating related interest information.\n\nNon-Functional Descriptions\n\n- Performance: Ensure efficient processing of datasets to handle large volumes of interest metrics and deliver insights in a timely manner.\n- Usability: Provide clear and interpretable insights that can be easily understood by clients and stakeholders.\n- Scalability: Support the analysis of metrics across multiple clients without degradation in performance or accuracy.",
+  "ddl": "-- Schema for database: schemabench_0200\nCREATE TABLE clients (\n  client_id INT(11) NOT NULL AUTO_INCREMENT,\n  client_name VARCHAR(255) NOT NULL,\n  PRIMARY KEY (client_id)\n);\n\nCREATE TABLE client_interests (\n  client_id INT(11) NOT NULL,\n  interest_id INT(11) NOT NULL,\n  PRIMARY KEY (client_id, interest_id),\n  FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE interests (\n  interest_id INT(11) NOT NULL AUTO_INCREMENT,\n  interest_name VARCHAR(255) NOT NULL,\n  PRIMARY KEY (interest_id)\n);\n\nCREATE TABLE interest_metrics (\n  client_id INT(11) NOT NULL,\n  interest_id INT(11) NOT NULL,\n  metric_type VARCHAR(255) NOT NULL,\n  metric_value INT(11) NOT NULL,\n  PRIMARY KEY (client_id, interest_id, metric_type),\n  FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE interest_rankings (\n  client_id INT(11) NOT NULL,\n  interest_id INT(11) NOT NULL,\n  ranking INT(11) NOT NULL,\n  PRIMARY KEY (client_id, interest_id, ranking),\n  FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE insights (\n  insight_id INT(11) NOT NULL AUTO_INCREMENT,\n  client_id INT(11) NOT NULL,\n  insight_type VARCHAR(255) NOT NULL,\n  insight_description TEXT NOT NULL,\n  PRIMARY KEY (insight_id),\n  FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE interest_map (\n  interest_id INT(11) NOT NULL,\n  related_interest_id INT(11) NOT NULL,\n  PRIMARY KEY (interest_id, related_interest_id),\n  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (related_interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE interest_map_weights (\n  interest_id INT(11) NOT NULL,\n  related_interest_id INT(11) NOT NULL,\n  weight DECIMAL(10, 2) NOT NULL,\n  PRIMARY KEY (interest_id, related_interest_id),\n  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (related_interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE interest_map_rankings (\n  interest_id INT(11) NOT NULL,\n  related_interest_id INT(11) NOT NULL,\n  ranking INT(11) NOT NULL,\n  PRIMARY KEY (interest_id, related_interest_id, ranking),\n  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (related_interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE interest_map_weights_rankings (\n  interest_id INT(11) NOT NULL,\n  related_interest_id INT(11) NOT NULL,\n  weight DECIMAL(10, 2) NOT NULL,\n  ranking INT(11) NOT NULL,\n  PRIMARY KEY (interest_id, related_interest_id, weight, ranking),\n  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (related_interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE interest_map_weights_rankings_monthly (\n  interest_id INT(11) NOT NULL,\n  related_interest_id INT(11) NOT NULL,\n  weight DECIMAL(10, 2) NOT NULL,\n  ranking INT(11) NOT NULL,\n  month INT(11) NOT NULL,\n  PRIMARY KEY (interest_id, related_interest_id, weight, ranking, month),\n  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (related_interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE interest_map_weights_rankings_monthly_client (\n  client_id INT(11) NOT NULL,\n  interest_id INT(11) NOT NULL,\n  related_interest_id INT(11) NOT NULL,\n  weight DECIMAL(10, 2) NOT NULL,\n  ranking INT(11) NOT NULL,\n  month INT(11) NOT NULL,\n  PRIMARY KEY (client_id, interest_id, related_interest_id, weight, ranking, month),\n  FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (related_interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE interest_map_weights_rankings_monthly_client_interest (\n  client_id INT(11) NOT NULL,\n  interest_id INT(11) NOT NULL,\n  related_interest_id INT(11) NOT NULL,\n  weight DECIMAL(10, 2) NOT NULL,\n  ranking INT(11) NOT NULL,\n  month INT(11) NOT NULL,\n  PRIMARY KEY (client_id, interest_id, related_interest_id, weight, ranking, month),\n  FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (related_interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE\n);\n\nCREATE TABLE interest_map_weights_rankings_monthly_client_interest_type (\n  client_id INT(11) NOT NULL,\n  interest_id INT(11) NOT NULL,\n  related_interest_id INT(11) NOT NULL,\n  weight DECIMAL(10, 2) NOT NULL,\n  ranking INT(11) NOT NULL,\n  month INT(11) NOT NULL,\n  PRIMARY KEY (",
+  "metadata": {
+    "database": "schemabench_0200",
+    "tables": [
+      "clients",
+      "client_interests",
+      "interests",
+      "interest_metrics",
+      "interest_rankings",
+      "insights",
+      "interest_map",
+      "interest_map_weights",
+      "interest_map_rankings",
+      "interest_map_weights_rankings",
+      "interest_map_weights_rankings_monthly",
+      "interest_map_weights_rankings_monthly_client",
+      "interest_map_weights_rankings_monthly_client_interest",
+      "interest_map_weights_rankings_monthly_client_interest_type"
+    ],
+    "columns_by_table": {
+      "clients": [],
+      "client_interests": [],
+      "interests": [],
+      "interest_metrics": [],
+      "interest_rankings": [],
+      "insights": [],
+      "interest_map": [],
+      "interest_map_weights": [],
+      "interest_map_rankings": [],
+      "interest_map_weights_rankings": [],
+      "interest_map_weights_rankings_monthly": [],
+      "interest_map_weights_rankings_monthly_client": [],
+      "interest_map_weights_rankings_monthly_client_interest": [],
+      "interest_map_weights_rankings_monthly_client_interest_type": []
+    }
+  }
+}

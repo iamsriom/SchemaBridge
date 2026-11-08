@@ -1,0 +1,46 @@
+-- Schema for database: rschema_0089
+
+CREATE TABLE transactions (
+  transaction_id int(11) NOT NULL AUTO_INCREMENT,
+  transaction_hash varchar(255) NOT NULL,
+  timestamp datetime NOT NULL,
+  fee int(11) NOT NULL,
+  input_address varchar(255) NOT NULL,
+  output_address varchar(255) NOT NULL,
+  PRIMARY KEY (transaction_id),
+  FOREIGN KEY (input_address) REFERENCES accounts (address) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (output_address) REFERENCES accounts (address) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE blocks (
+  block_id int(11) NOT NULL AUTO_INCREMENT,
+  block_hash varchar(255) NOT NULL,
+  height int(11) NOT NULL,
+  timestamp datetime NOT NULL,
+  previous_block_hash varchar(255) NOT NULL,
+  merkle_root varchar(255) NOT NULL,
+  PRIMARY KEY (block_id),
+  FOREIGN KEY (previous_block_hash) REFERENCES blocks (block_hash) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE accounts (
+  address varchar(255) NOT NULL,
+  balance int(11) NOT NULL,
+  PRIMARY KEY (address)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE transactions_blocks (
+  transaction_id int(11) NOT NULL,
+  block_id int(11) NOT NULL,
+  PRIMARY KEY (transaction_id, block_id),
+  FOREIGN KEY (transaction_id) REFERENCES transactions (transaction_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (block_id) REFERENCES blocks (block_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE accounts_transactions (
+  account_address varchar(255) NOT NULL,
+  transaction_id int(11) NOT NULL,
+  PRIMARY KEY (account_address, transaction_id),
+  FOREIGN KEY (account_address) REFERENCES accounts (address) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (transaction_id) REFERENCES transactions (transaction_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

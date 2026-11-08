@@ -1,0 +1,39 @@
+-- Schema for database: rschema_0489
+
+CREATE TABLE `applications` (
+    `app_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`app_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `channels` (
+    `channel_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `app_id` INT(11) NOT NULL,
+    `status` ENUM('online','offline') NOT NULL DEFAULT 'offline',
+    PRIMARY KEY (`channel_id`),
+    FOREIGN KEY (`app_id`) REFERENCES `applications`(`app_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `clients` (
+    `client_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `username` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`client_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `client_channels` (
+    `client_id` INT(11) NOT NULL,
+    `channel_id` INT(11) NOT NULL,
+    PRIMARY KEY (`client_id`, `channel_id`),
+    FOREIGN KEY (`client_id`) REFERENCES `clients`(`client_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`channel_id`) REFERENCES `channels`(`channel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `events` (
+    `event_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `channel_id` INT(11) NOT NULL,
+    `type` ENUM('message','application') NOT NULL,
+    `timestamp` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `content` TEXT NOT NULL,
+    PRIMARY KEY (`event_id`),
+    FOREIGN KEY (`channel_id`) REFERENCES `channels`(`channel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

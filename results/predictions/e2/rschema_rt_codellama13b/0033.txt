@@ -1,0 +1,60 @@
+-- Schema for database: rschema_0033
+CREATE TABLE `electronic_product` (
+  `product_id` int(11) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_team` (
+  `team_id` int(11) NOT NULL,
+  `team_name` varchar(255) NOT NULL,
+  `manager` varchar(255) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  `customer_phone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_task` (
+  `sales_task_id` int(11) NOT NULL,
+  `sales_date` datetime NOT NULL,
+  `sales_quantity` int(11) NOT NULL,
+  `sales_cost` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`sales_task_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_personnel` (
+  `sales_personnel_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`sales_personnel_id`),
+  CONSTRAINT `sales_personnel_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `sales_team` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_task_customer` (
+  `sales_task_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `feedback` varchar(255) DEFAULT NULL,
+  `rating` int(11) DEFAULT NULL,
+  PRIMARY KEY (`sales_task_id`, `customer_id`),
+  CONSTRAINT `sales_task_customer_ibfk_1` FOREIGN KEY (`sales_task_id`) REFERENCES `sales_task` (`sales_task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_task_customer_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_task_product` (
+  `sales_task_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  PRIMARY KEY (`sales_task_id`, `product_id`),
+  CONSTRAINT `sales_task_product_ibfk_1` FOREIGN KEY (`sales_task_id`) REFERENCES `sales_task` (`sales_task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_task_product_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `electronic_product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

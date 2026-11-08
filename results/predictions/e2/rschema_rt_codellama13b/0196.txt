@@ -1,0 +1,38 @@
+-- Schema for database: rschema_0196
+CREATE TABLE `Applicant` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `identification_number` varchar(50) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Approver` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Loan_Application` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `applicant_id` int(11) NOT NULL,
+  `application_number` varchar(50) NOT NULL,
+  `approval_status` varchar(50) NOT NULL,
+  `loan_amount` decimal(10,2) NOT NULL,
+  `loan_term` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `loan_application_ibfk_1` FOREIGN KEY (`applicant_id`) REFERENCES `Applicant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Loan_Approval` (
+  `approver_id` int(11) NOT NULL,
+  `application_number` varchar(50) NOT NULL,
+  `approval_date` datetime NOT NULL,
+  `approval_result` varchar(50) NOT NULL,
+  PRIMARY KEY (`approver_id`, `application_number`, `approval_date`),
+  CONSTRAINT `loan_approval_ibfk_1` FOREIGN KEY (`application_number`) REFERENCES `Loan_Application` (`application_number`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `loan_approval_ibfk_2` FOREIGN KEY (`approver_id`) REFERENCES `Approver` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

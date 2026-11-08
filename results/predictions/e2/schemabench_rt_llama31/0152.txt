@@ -1,0 +1,85 @@
+-- Schema for database: schemabench_0152
+CREATE TABLE `abilities` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `entity_id` int(11) NOT NULL,
+  `entity_type` varchar(255) NOT NULL,
+  `scope` varchar(255) DEFAULT NULL,
+  `options` json DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `model_has_abilities` (
+  `model_id` int(11) NOT NULL,
+  `model_type` varchar(255) NOT NULL,
+  `ability_id` int(11) NOT NULL,
+  PRIMARY KEY (`model_id`, `model_type`, `ability_id`),
+  CONSTRAINT `model_has_abilities_ibfk_1` FOREIGN KEY (`ability_id`) REFERENCES `abilities` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `level` int(11) NOT NULL,
+  `scope` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tenants` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `assigned_roles` (
+  `role_id` int(11) NOT NULL,
+  `entity_id` int(11) NOT NULL,
+  `entity_type` varchar(255) NOT NULL,
+  `restricted_id` int(11) DEFAULT NULL,
+  `restricted_type` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`role_id`, `entity_id`, `entity_type`),
+  CONSTRAINT `assigned_roles_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permissions` (
+  `ability_id` int(11) NOT NULL,
+  `entity_id` int(11) NOT NULL,
+  `entity_type` varchar(255) NOT NULL,
+  `forbidden` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`ability_id`, `entity_id`, `entity_type`),
+  CONSTRAINT `permissions_ibfk_1` FOREIGN KEY (`ability_id`) REFERENCES `abilities` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `activity_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `loggable_type` varchar(255) NOT NULL,
+  `loggable_id` int(11) NOT NULL,
+  `action` varchar(255) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `model_has_roles` (
+  `model_id` int(11) NOT NULL,
+  `model_type` varchar(255) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  PRIMARY KEY (`model_id`, `model_type`, `role_id`),
+  CONSTRAINT `model_has_roles_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

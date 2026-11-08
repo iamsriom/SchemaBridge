@@ -1,0 +1,58 @@
+-- Schema for database: rschema_0162
+CREATE TABLE `base_station` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `location` varchar(255) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_personnel` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  `responsible_area` varchar(255) NOT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sensor` (
+  `sensor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `base_station_id` int(11) NOT NULL,
+  `collection_frequency` varchar(50) NOT NULL,
+  `installation_location` varchar(255) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  PRIMARY KEY (`sensor_id`),
+  CONSTRAINT `sensor_ibfk_1` FOREIGN KEY (`base_station_id`) REFERENCES `base_station` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alarm_information` (
+  `alarm_id` int(11) NOT NULL AUTO_INCREMENT,
+  `base_station_id` int(11) NOT NULL,
+  `content` varchar(255) NOT NULL,
+  `time` datetime NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `processing_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`alarm_id`),
+  CONSTRAINT `alarm_information_ibfk_1` FOREIGN KEY (`base_station_id`) REFERENCES `base_station` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `monitoring_data` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `collection_time` datetime NOT NULL,
+  `data_type` varchar(50) NOT NULL,
+  `value` float NOT NULL,
+  `sensor_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `monitoring_data_ibfk_1` FOREIGN KEY (`sensor_id`) REFERENCES `sensor` (`sensor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alarm_information_processing` (
+  `processing_id` int(11) NOT NULL AUTO_INCREMENT,
+  `alarm_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `processing_method` varchar(255) NOT NULL,
+  `result` varchar(255) NOT NULL,
+  `time` datetime NOT NULL,
+  PRIMARY KEY (`processing_id`),
+  CONSTRAINT `alarm_information_processing_ibfk_1` FOREIGN KEY (`alarm_id`) REFERENCES `alarm_information` (`alarm_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `alarm_information_processing_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `maintenance_personnel` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

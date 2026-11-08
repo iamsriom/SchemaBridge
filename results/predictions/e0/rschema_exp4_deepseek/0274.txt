@@ -1,0 +1,41 @@
+-- Schema for database: rschema_0274
+
+-- Table: users
+CREATE TABLE `users` (
+    `user_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `username` VARCHAR(255) NOT NULL,
+    `contact_number` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: feedback
+CREATE TABLE `feedback` (
+    `feedback_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `user_id` INT(11) NOT NULL,
+    `feedback_content` TEXT NOT NULL,
+    `feedback_time` DATETIME NOT NULL,
+    `processing_status` ENUM('pending','processing','completed') NOT NULL DEFAULT 'pending',
+    `processing_result` TEXT,
+    PRIMARY KEY (`feedback_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: representatives
+CREATE TABLE `representatives` (
+    `employee_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    `contact_information` VARCHAR(255) NOT NULL,
+    `work_status` ENUM('available','busy') NOT NULL DEFAULT 'available',
+    PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: feedback_processing
+CREATE TABLE `feedback_processing` (
+    `feedback_id` INT(11) NOT NULL,
+    `processing_time` DATETIME NOT NULL,
+    `processing_result` TEXT,
+    `processor` INT(11) NOT NULL,
+    FOREIGN KEY (`feedback_id`) REFERENCES `feedback` (`feedback_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`processor`) REFERENCES `representatives` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

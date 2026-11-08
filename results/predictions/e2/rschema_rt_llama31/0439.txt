@@ -1,0 +1,45 @@
+-- Schema for database: rschema_0439
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `wechat_id` varchar(50) DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `merchant` (
+  `merchant_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`merchant_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `recycling_request` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `location` varchar(255) NOT NULL,
+  `time_of_recycling` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `recycling_request_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction_order` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `merchant_id` int(11) NOT NULL,
+  `order_status` varchar(50) NOT NULL,
+  `payment_amount` decimal(10,2) NOT NULL,
+  `payment_method` varchar(50) NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  CONSTRAINT `transaction_order_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `recycling_request` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_order_ibfk_2` FOREIGN KEY (`merchant_id`) REFERENCES `merchant` (`merchant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_review` (
+  `review_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `review_text` text NOT NULL,
+  PRIMARY KEY (`review_id`),
+  CONSTRAINT `order_review_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `recycling_request` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

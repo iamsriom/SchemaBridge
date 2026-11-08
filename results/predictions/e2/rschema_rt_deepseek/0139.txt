@@ -1,0 +1,60 @@
+-- Schema for database: rschema_0139
+CREATE TABLE `department` (
+  `department_name` varchar(255) NOT NULL,
+  `floor` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`department_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctor` (
+  `doctor_id` int(11) NOT NULL,
+  `gender` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`doctor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patient` (
+  `age` int(11) DEFAULT NULL,
+  `gender` varchar(255) DEFAULT NULL,
+  `patient_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`patient_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medicine` (
+  `manufacturer` varchar(255) DEFAULT NULL,
+  `medicine_name` varchar(255) NOT NULL,
+  `price` float DEFAULT NULL,
+  PRIMARY KEY (`medicine_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prescription` (
+  `prescription_information` varchar(255) NOT NULL,
+  PRIMARY KEY (`prescription_information`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `diagnosis_management` (
+  `diagnosis_information` varchar(255) DEFAULT NULL,
+  `doctor_id` int(11) NOT NULL,
+  `patient_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`doctor_id`, `patient_name`),
+  CONSTRAINT `diagnosis_management_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `diagnosis_management_ibfk_2` FOREIGN KEY (`patient_name`) REFERENCES `patient` (`patient_name`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prescription_management` (
+  `doctor_id` int(11) NOT NULL,
+  `patient_name` varchar(255) NOT NULL,
+  `prescription_information` varchar(255) NOT NULL,
+  PRIMARY KEY (`doctor_id`, `patient_name`),
+  CONSTRAINT `prescription_management_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `prescription_management_ibfk_2` FOREIGN KEY (`patient_name`) REFERENCES `patient` (`patient_name`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medicine_list_management` (
+  `medicine_name` varchar(255) NOT NULL,
+  `prescription_information` varchar(255) NOT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`prescription_information`, `medicine_name`),
+  CONSTRAINT `medicine_list_management_ibfk_1` FOREIGN KEY (`medicine_name`) REFERENCES `medicine` (`medicine_name`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `medicine_list_management_ibfk_2` FOREIGN KEY (`prescription_information`) REFERENCES `prescription` (`prescription_information`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

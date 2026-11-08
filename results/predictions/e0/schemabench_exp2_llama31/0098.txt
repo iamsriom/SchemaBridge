@@ -1,0 +1,56 @@
+-- Schema for database: schemabench_0098
+CREATE TABLE `chess_players` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `elo_rating` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `chess_games` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `player1_id` int(11) NOT NULL,
+  `player2_id` int(11) NOT NULL,
+  `event_name` varchar(255) NOT NULL,
+  `event_date` datetime NOT NULL,
+  `result` enum('win','loss','draw') NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `player1_id` (`player1_id`),
+  KEY `player2_id` (`player2_id`),
+  CONSTRAINT `chess_games_ibfk_1` FOREIGN KEY (`player1_id`) REFERENCES `chess_players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `chess_games_ibfk_2` FOREIGN KEY (`player2_id`) REFERENCES `chess_players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `chess_openings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `chess_opening_variations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `opening_id` int(11) NOT NULL,
+  `variation` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `opening_id` (`opening_id`),
+  CONSTRAINT `chess_opening_variations_ibfk_1` FOREIGN KEY (`opening_id`) REFERENCES `chess_openings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `chess_game_openings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `game_id` int(11) NOT NULL,
+  `opening_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `game_id` (`game_id`),
+  KEY `opening_id` (`opening_id`),
+  CONSTRAINT `chess_game_openings_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `chess_games` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `chess_game_openings_ibfk_2` FOREIGN KEY (`opening_id`) REFERENCES `chess_openings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `predictions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `game_id` int(11) NOT NULL,
+  `prediction` enum('win','loss','draw') NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `game_id` (`game_id`),
+  CONSTRAINT `predictions_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `chess_games` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

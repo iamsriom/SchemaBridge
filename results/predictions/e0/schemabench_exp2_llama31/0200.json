@@ -1,0 +1,28 @@
+{
+  "text_number": 200,
+  "id": "SB-200",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0200",
+  "question": "Background / Context\n\nFresh Segments is a digital marketing agency founded by Danny, specializing in analyzing online ad click behavior for businesses. By aggregating interest metrics, Fresh Segments provides insights into the interests and behaviors of clients' customer bases, enabling more efficient targeting of online marketing efforts.\n\nObjectives\n\nThe primary objective is to analyze aggregated metrics for a major client's customer list to derive high-level insights into customer interests and behaviors. This analysis aims to enhance the client's understanding of how their customers interact with online advertising content related to various interests.\n\nStakeholders & Users\n\n- Danny: Founder of Fresh Segments, overseeing operations and client satisfaction.\n- Clients: Businesses utilizing Fresh Segments’ services to analyze customer behavior and improve marketing strategies.\n- Analysts: Team members tasked with analyzing datasets and generating insights.\n\nFunctional Descriptions\n\n1. Data Aggregation: Collect and aggregate interest metrics from the client’s customer base, focusing on interactions with targeted advertising content.\n2. Interest Composition and Ranking: Provide detailed reports showing the proportion of customers engaging with specific interests, including interest ranking and composition by month.\n3. Insight Generation: Analyze datasets to derive actionable insights for the client, focusing on customer behavior trends and interest distributions.\n4. Data Integration: Link interest metrics with the interest map to enrich data analysis by integrating related interest information.\n\nNon-Functional Descriptions\n\n- Performance: Ensure efficient processing of datasets to handle large volumes of interest metrics and deliver insights in a timely manner.\n- Usability: Provide clear and interpretable insights that can be easily understood by clients and stakeholders.\n- Scalability: Support the analysis of metrics across multiple clients without degradation in performance or accuracy.",
+  "ddl": "-- Schema for database: schemabench_0200\nCREATE TABLE `advertisers` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `customers` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `advertiser_id` int(11) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `customers_ibfk_1` (`advertiser_id`),\n  CONSTRAINT `customers_ibfk_1` FOREIGN KEY (`advertiser_id`) REFERENCES `advertisers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `interests` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `interest_metrics` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_id` int(11) NOT NULL,\n  `interest_id` int(11) NOT NULL,\n  `clicks` int(11) NOT NULL DEFAULT 0,\n  `views` int(11) NOT NULL DEFAULT 0,\n  PRIMARY KEY (`id`),\n  KEY `interest_metrics_ibfk_1` (`customer_id`),\n  KEY `interest_metrics_ibfk_2` (`interest_id`),\n  CONSTRAINT `interest_metrics_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `interest_metrics_ibfk_2` FOREIGN KEY (`interest_id`) REFERENCES `interests` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `interest_map` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `interest_id` int(11) NOT NULL,\n  `related_interest_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `interest_map_ibfk_1` (`interest_id`),\n  KEY `interest_map_ibfk_2` (`related_interest_id`),\n  CONSTRAINT `interest_map_ibfk_1` FOREIGN KEY (`interest_id`) REFERENCES `interests` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `interest_map_ibfk_2` FOREIGN KEY (`related_interest_id`) REFERENCES `interests` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `insights` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_id` int(11) NOT NULL,\n  `interest_id` int(11) NOT NULL,\n  `click_rate` decimal(10,2) NOT NULL DEFAULT 0.00,\n  `view_rate` decimal(10,2) NOT NULL DEFAULT 0.00,\n  PRIMARY KEY (`id`),\n  KEY `insights_ibfk_1` (`customer_id`),\n  KEY `insights_ibfk_2` (`interest_id`),\n  CONSTRAINT `insights_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `insights_ibfk_2` FOREIGN KEY (`interest_id`) REFERENCES `interests` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "advertisers",
+      "customers",
+      "interests",
+      "interest_metrics",
+      "interest_map",
+      "insights"
+    ],
+    "columns_by_table": {
+      "advertisers": [],
+      "customers": [],
+      "interests": [],
+      "interest_metrics": [],
+      "interest_map": [],
+      "insights": []
+    }
+  }
+}

@@ -1,0 +1,71 @@
+-- Schema for database: schemabench_0131
+
+CREATE TABLE customers (
+  customer_id int(11) NOT NULL AUTO_INCREMENT,
+  name varchar(255) NOT NULL,
+  email varchar(255) NOT NULL,
+  phone varchar(255) NOT NULL,
+  address varchar(255) NOT NULL,
+  PRIMARY KEY (customer_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE orders (
+  order_id int(11) NOT NULL AUTO_INCREMENT,
+  customer_id int(11) NOT NULL,
+  order_date datetime NOT NULL,
+  order_status varchar(255) NOT NULL,
+  PRIMARY KEY (order_id),
+  FOREIGN KEY (customer_id) REFERENCES customers (customer_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE order_items (
+  order_item_id int(11) NOT NULL AUTO_INCREMENT,
+  order_id int(11) NOT NULL,
+  product_id int(11) NOT NULL,
+  quantity int(11) NOT NULL,
+  PRIMARY KEY (order_item_id),
+  FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (product_id) REFERENCES products (product_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE products (
+  product_id int(11) NOT NULL AUTO_INCREMENT,
+  name varchar(255) NOT NULL,
+  description varchar(255) NOT NULL,
+  price decimal(10,2) NOT NULL,
+  PRIMARY KEY (product_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE payments (
+  payment_id int(11) NOT NULL AUTO_INCREMENT,
+  order_id int(11) NOT NULL,
+  payment_date datetime NOT NULL,
+  payment_method varchar(255) NOT NULL,
+  PRIMARY KEY (payment_id),
+  FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE warehouses (
+  warehouse_id int(11) NOT NULL AUTO_INCREMENT,
+  name varchar(255) NOT NULL,
+  address varchar(255) NOT NULL,
+  PRIMARY KEY (warehouse_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE inventory (
+  inventory_id int(11) NOT NULL AUTO_INCREMENT,
+  warehouse_id int(11) NOT NULL,
+  product_id int(11) NOT NULL,
+  quantity int(11) NOT NULL,
+  PRIMARY KEY (inventory_id),
+  FOREIGN KEY (warehouse_id) REFERENCES warehouses (warehouse_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (product_id) REFERENCES products (product_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE reports (
+  report_id int(11) NOT NULL AUTO_INCREMENT,
+  report_type varchar(255) NOT NULL,
+  report_date datetime NOT NULL,
+  report_data text NOT NULL,
+  PRIMARY KEY (report_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

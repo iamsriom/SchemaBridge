@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0002
+CREATE TABLE `transportation_mode` (
+  `mode_id` int(11) NOT NULL AUTO_INCREMENT,
+  `schema_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`mode_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `carrier` (
+  `carrier_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_phone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`carrier_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `multimodal_transportation_task` (
+  `task_number` int(11) NOT NULL AUTO_INCREMENT,
+  `origin` varchar(255) NOT NULL,
+  `destination` varchar(255) NOT NULL,
+  `cargo_name` varchar(255) NOT NULL,
+  `weight` decimal(10,2) NOT NULL,
+  `transportation_time` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  PRIMARY KEY (`task_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_detail` (
+  `detail_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_number` int(11) NOT NULL,
+  `mode_id` int(11) NOT NULL,
+  `carrier_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  PRIMARY KEY (`detail_id`),
+  CONSTRAINT `task_detail_ibfk_1` FOREIGN KEY (`task_number`) REFERENCES `multimodal_transportation_task` (`task_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_detail_ibfk_2` FOREIGN KEY (`mode_id`) REFERENCES `transportation_mode` (`mode_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_detail_ibfk_3` FOREIGN KEY (`carrier_id`) REFERENCES `carrier` (`carrier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_transportation_mode` (
+  `task_number` int(11) NOT NULL,
+  `mode_id` int(11) NOT NULL,
+  PRIMARY KEY (`task_number`, `mode_id`),
+  CONSTRAINT `task_transportation_mode_ibfk_1` FOREIGN KEY (`task_number`) REFERENCES `multimodal_transportation_task` (`task_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_transportation_mode_ibfk_2` FOREIGN KEY (`mode_id`) REFERENCES `transportation_mode` (`mode_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_carrier` (
+  `task_number` int(11) NOT NULL,
+  `carrier_id` int(11) NOT NULL,
+  PRIMARY KEY (`task_number`, `carrier_id`),
+  CONSTRAINT `task_carrier_ibfk_1` FOREIGN KEY (`task_number`) REFERENCES `multimodal_transportation_task` (`task_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_carrier_ibfk_2` FOREIGN KEY (`carrier_id`) REFERENCES `carrier` (`carrier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

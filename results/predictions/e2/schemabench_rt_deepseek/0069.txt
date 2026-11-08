@@ -1,0 +1,49 @@
+-- Schema for database: schemabench_0069
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth_applications` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `uid` varchar(255) DEFAULT NULL,
+  `secret` varchar(255) NOT NULL,
+  `redirect_uri` varchar(255) NOT NULL,
+  `scopes` varchar(255) DEFAULT NULL,
+  `confidentiality_status` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth_access_grants` (
+  `id` int(11) NOT NULL,
+  `resource_owner_id` int(11) NOT NULL,
+  `application_id` int(11) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expiration_time` datetime DEFAULT NULL,
+  `redirect_uri` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `revoked_at` datetime DEFAULT NULL,
+  `scopes` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `oauth_access_grants_ibfk_1` FOREIGN KEY (`resource_owner_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `oauth_access_grants_ibfk_2` FOREIGN KEY (`application_id`) REFERENCES `oauth_applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth_access_tokens` (
+  `id` int(11) NOT NULL,
+  `resource_owner_id` int(11) NOT NULL,
+  `application_id` int(11) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `refresh_token` varchar(255) DEFAULT NULL,
+  `expiration_time` datetime DEFAULT NULL,
+  `revoked_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `scopes` varchar(255) NOT NULL,
+  `previous_refresh_token` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `oauth_access_tokens_ibfk_1` FOREIGN KEY (`resource_owner_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `oauth_access_tokens_ibfk_2` FOREIGN KEY (`application_id`) REFERENCES `oauth_applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

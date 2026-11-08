@@ -1,0 +1,135 @@
+-- Schema for database: rschema_0420
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `wechat_open_id` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `qq_number` varchar(20) DEFAULT NULL,
+  `email` varchar(255) NOT NULL,
+  `registration_time` datetime NOT NULL,
+  `account_status` varchar(20) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `news` (
+  `news_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `publication_time` datetime NOT NULL,
+  `read_count` int(11) DEFAULT 0,
+  `news_status` varchar(20) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  PRIMARY KEY (`news_id`),
+  CONSTRAINT `news_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `news_category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `video_category_assignment` (
+  `video_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  PRIMARY KEY (`video_id`, `category_id`),
+  CONSTRAINT `video_category_assignment_ibfk_1` FOREIGN KEY (`video_id`) REFERENCES `video` (`video_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `video_category_assignment_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `video_category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `news_category_assignment` (
+  `news_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  PRIMARY KEY (`news_id`, `category_id`),
+  CONSTRAINT `news_category_assignment_ibfk_1` FOREIGN KEY (`news_id`) REFERENCES `news` (`news_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `news_category_assignment_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `news_category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `news_category` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `sort_order` int(11) DEFAULT NULL,
+  `parent_category_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`category_id`),
+  CONSTRAINT `news_category_ibfk_1` FOREIGN KEY (`parent_category_id`) REFERENCES `news_category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `video` (
+  `video_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `cover_image_url` varchar(255) DEFAULT NULL,
+  `market` varchar(255) DEFAULT NULL,
+  `directory_structure` varchar(255) DEFAULT NULL,
+  `course_count` int(11) DEFAULT 0,
+  `total_duration` int(11) DEFAULT 0,
+  `price` decimal(10,2) DEFAULT 0.00,
+  `video_status` varchar(20) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  PRIMARY KEY (`video_id`),
+  CONSTRAINT `video_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `video_category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `instructor` (
+  `instructor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `introduction` text DEFAULT NULL,
+  `teaching_experience` int(11) DEFAULT NULL,
+  `professional_field` varchar(255) DEFAULT NULL,
+  `teaching_achievements` text DEFAULT NULL,
+  `instructor_courses` int(11) DEFAULT 0,
+  PRIMARY KEY (`instructor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `video_category` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `parent_category_id` int(11) DEFAULT NULL,
+  `child_category_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`category_id`),
+  CONSTRAINT `video_category_ibfk_1` FOREIGN KEY (`parent_category_id`) REFERENCES `video_category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `video_category_ibfk_2` FOREIGN KEY (`child_category_id`) REFERENCES `video_category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `instructor_course` (
+  `video_id` int(11) NOT NULL,
+  `instructor_id` int(11) NOT NULL,
+  PRIMARY KEY (`video_id`, `instructor_id`),
+  CONSTRAINT `instructor_course_ibfk_1` FOREIGN KEY (`video_id`) REFERENCES `video` (`video_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `instructor_course_ibfk_2` FOREIGN KEY (`instructor_id`) REFERENCES `instructor` (`instructor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_collection` (
+  `video_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `collection_time` datetime NOT NULL,
+  `valid_status` varchar(20) NOT NULL,
+  PRIMARY KEY (`video_id`, `user_id`),
+  CONSTRAINT `user_collection_ibfk_1` FOREIGN KEY (`video_id`) REFERENCES `video` (`video_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_collection_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_video_order` (
+  `video_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `order_time` datetime NOT NULL,
+  `payment_amount` decimal(10,2) NOT NULL,
+  `payment_method` varchar(50) NOT NULL,
+  `payment_status` varchar(20) NOT NULL,
+  `payment_time` datetime DEFAULT NULL,
+  `order_status` varchar(20) NOT NULL,
+  PRIMARY KEY (`video_id`, `user_id`, `order_time`),
+  CONSTRAINT `user_video_order_ibfk_1` FOREIGN KEY (`video_id`) REFERENCES `video` (`video_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_video_order_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_learning_record` (
+  `video_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `purchase_time` datetime NOT NULL,
+  `expiration_time` datetime DEFAULT NULL,
+  `viewing_duration` int(11) DEFAULT 0,
+  `last_viewing_time` datetime DEFAULT NULL,
+  `completion_status` varchar(20) NOT NULL,
+  PRIMARY KEY (`video_id`, `user_id`, `purchase_time`),
+  CONSTRAINT `user_learning_record_ibfk_1` FOREIGN KEY (`video_id`) REFERENCES `video` (`video_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_learning_record_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

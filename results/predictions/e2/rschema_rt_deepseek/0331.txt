@@ -1,0 +1,45 @@
+-- Schema for database: rschema_0331
+CREATE TABLE `Player` (
+  `player_id` int(11) NOT NULL,
+  `nickname` varchar(255) DEFAULT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `registration_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`player_id`),
+  CONSTRAINT `player_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `Player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Match_Information` (
+  `match_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `total_participants` int(11) DEFAULT NULL,
+  `match_type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`match_id`),
+  CONSTRAINT `match_information_ibfk_1` FOREIGN KEY (`match_id`) REFERENCES `Match_Information` (`match_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Match_Result` (
+  `match_id` int(11) NOT NULL,
+  `player_id` int(11) NOT NULL,
+  `ranking` int(11) DEFAULT NULL,
+  `total_score` int(11) DEFAULT NULL,
+  PRIMARY KEY (`match_id`, `player_id`),
+  CONSTRAINT `match_result_ibfk_1` FOREIGN KEY (`match_id`) REFERENCES `Match_Information` (`match_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `match_result_ibfk_2` FOREIGN KEY (`player_id`) REFERENCES `Player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Battle` (
+  `match_id` int(11) NOT NULL,
+  `player_1_id` int(11) NOT NULL,
+  `player_2_id` int(11) NOT NULL,
+  `match_start_time` datetime NOT NULL,
+  `match_end_time` datetime DEFAULT NULL,
+  `battle_duration` int(11) DEFAULT NULL,
+  `result` boolean DEFAULT NULL,
+  PRIMARY KEY (`match_id`, `player_1_id`, `player_2_id`, `match_start_time`),
+  CONSTRAINT `battle_ibfk_1` FOREIGN KEY (`match_id`) REFERENCES `Match_Information` (`match_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `battle_ibfk_2` FOREIGN KEY (`player_1_id`) REFERENCES `Player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `battle_ibfk_3` FOREIGN KEY (`player_2_id`) REFERENCES `Player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

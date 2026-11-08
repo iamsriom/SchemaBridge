@@ -1,0 +1,45 @@
+-- Schema for database: rschema_0353
+CREATE TABLE `page` (
+  `page_id` int(11) NOT NULL,
+  `page_name` varchar(255) NOT NULL,
+  `page_alias` varchar(255) NOT NULL,
+  `page_title` varchar(255) NOT NULL,
+  `display_order` int(11) NOT NULL,
+  `style` varchar(255) NOT NULL,
+  `redirection_target` varchar(255) NOT NULL,
+  `click_event` varchar(255) NOT NULL,
+  `hidden_or_not` tinyint(1) NOT NULL,
+  `page_group` varchar(255) NOT NULL,
+  PRIMARY KEY (`page_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `administrator` (
+  `administrator_id` int(11) NOT NULL,
+  `administrator_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`administrator_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `administrator_modifies_page` (
+  `page_id` int(11) NOT NULL,
+  `modification_time` datetime NOT NULL,
+  `administrator_id` int(11) NOT NULL,
+  `modification_content` text NOT NULL,
+  PRIMARY KEY (`page_id`, `modification_time`, `administrator_id`),
+  CONSTRAINT `administrator_modifies_page_ibfk_1` FOREIGN KEY (`administrator_id`) REFERENCES `administrator` (`administrator_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `administrator_modifies_page_ibfk_2` FOREIGN KEY (`page_id`) REFERENCES `page` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_access_page_record` (
+  `page_id` int(11) NOT NULL,
+  `access_time` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`page_id`, `access_time`, `user_id`),
+  CONSTRAINT `user_access_page_record_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_access_page_record_ibfk_2` FOREIGN KEY (`page_id`) REFERENCES `page` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,139 @@
+-- Schema for database: schemabench_0016
+CREATE TABLE `events` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `organizer_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `events_ibfk_1` (`organizer_id`),
+  CONSTRAINT `events_ibfk_1` FOREIGN KEY (`organizer_id`) REFERENCES `organizers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organizers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` char(60) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tickets` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_id` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tickets_ibfk_1` (`event_id`),
+  CONSTRAINT `tickets_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attendees` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` char(60) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticket_sales` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(11) NOT NULL,
+  `attendee_id` int(11) NOT NULL,
+  `purchase_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ticket_sales_ibfk_1` (`ticket_id`),
+  KEY `ticket_sales_ibfk_2` (`attendee_id`),
+  CONSTRAINT `ticket_sales_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticket_sales_ibfk_2` FOREIGN KEY (`attendee_id`) REFERENCES `attendees` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment_gateways` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment_gateway_settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `payment_gateway_id` int(11) NOT NULL,
+  `event_id` int(11) NOT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `payment_gateway_settings_ibfk_1` (`payment_gateway_id`),
+  KEY `payment_gateway_settings_ibfk_2` (`event_id`),
+  CONSTRAINT `payment_gateway_settings_ibfk_1` FOREIGN KEY (`payment_gateway_id`) REFERENCES `payment_gateways` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `payment_gateway_settings_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `refunds` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_sale_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `reason` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `refunds_ibfk_1` (`ticket_sale_id`),
+  CONSTRAINT `refunds_ibfk_1` FOREIGN KEY (`ticket_sale_id`) REFERENCES `ticket_sales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `affiliates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `affiliate_commissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `affiliate_id` int(11) NOT NULL,
+  `event_id` int(11) NOT NULL,
+  `commission_rate` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `affiliate_commissions_ibfk_1` (`affiliate_id`),
+  KEY `affiliate_commissions_ibfk_2` (`event_id`),
+  CONSTRAINT `affiliate_commissions_ibfk_1` FOREIGN KEY (`affiliate_id`) REFERENCES `affiliates` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `affiliate_commissions_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `custom_questions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_id` int(11) NOT NULL,
+  `question` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `custom_questions_ibfk_1` (`event_id`),
+  CONSTRAINT `custom_questions_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticket_custom_questions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(11) NOT NULL,
+  `custom_question_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ticket_custom_questions_ibfk_1` (`ticket_id`),
+  KEY `ticket_custom_questions_ibfk_2` (`custom_question_id`),
+  CONSTRAINT `ticket_custom_questions_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticket_custom_questions_ibfk_2` FOREIGN KEY (`custom_question_id`) REFERENCES `custom_questions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `qr_codes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(11) NOT NULL,
+  `code` char(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `qr_codes_ibfk_1` (`ticket_id`),
+  CONSTRAINT `qr_codes_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attendee_messages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `attendee_id` int(11) NOT NULL,
+  `event_id` int(11) NOT NULL,
+  `message` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `attendee_messages_ibfk_1` (`attendee_id`),
+  KEY `attendee_messages_ibfk_2` (`event_id`),
+  CONSTRAINT `attendee_messages_ibfk_1` FOREIGN KEY (`attendee_id`) REFERENCES `attendees` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `attendee_messages_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

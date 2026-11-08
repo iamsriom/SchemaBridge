@@ -1,0 +1,34 @@
+{
+  "text_number": 446,
+  "id": "67552f0b13602ec03b41aa59",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0446",
+  "question": "Requirements:\n1.User Information: Each registered user has a unique username, password, phone number, registration time, last login time, and role. Users can supply water and fertilizer to crops through sensors, and the system needs to record the supply time, location, amount of water, and amount of fertilizer. Additionally, any other actions taken by the user on the crop (such as planting, fertilizing, etc.) need to be recorded, including the time, location, type, and details of the action. Users can also evaluate the crop’s growth performance through the system.\n2.Sensor Deployment: Sensors precisely measure meteorological data and record information such as the data collection time, soil moisture, temperature, rainfall, light intensity, sensor location, and burial depth. Each sensor can infer corresponding meteorological data.\n3.Meteorology: Each meteorological record includes timestamp, temperature, humidity, rainfall, wind speed, light intensity, and location.\n4.Crops: Each crop has a unique crop ID, name, type, and a matching growth model.\n5.Growth Model: Each crop has a corresponding growth model, which includes the model name, parameters, and creation time. The crop is evaluated using this model, and the evaluation records the name of the evaluation metric, its value, and the location of the evaluation.",
+  "ddl": "-- Schema for database: rschema_0446\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `phone_number` varchar(255) NOT NULL,\n  `registration_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `last_login_time` datetime DEFAULT NULL,\n  `role` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `username` (`username`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sensors` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `location` varchar(255) NOT NULL,\n  `burial_depth` int(11) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sensor_deployments` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `sensor_id` int(11) NOT NULL,\n  `supply_time` datetime NOT NULL,\n  `supply_location` varchar(255) NOT NULL,\n  `water_amount` decimal(10,2) NOT NULL,\n  `fertilizer_amount` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  KEY `sensor_id` (`sensor_id`),\n  CONSTRAINT `sensor_deployments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `sensor_deployments_ibfk_2` FOREIGN KEY (`sensor_id`) REFERENCES `sensors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `actions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `crop_id` int(11) NOT NULL,\n  `action_time` datetime NOT NULL,\n  `action_location` varchar(255) NOT NULL,\n  `action_type` varchar(255) NOT NULL,\n  `action_details` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  KEY `crop_id` (`crop_id`),\n  CONSTRAINT `actions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `actions_ibfk_2` FOREIGN KEY (`crop_id`) REFERENCES `crops` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `meteorology` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `timestamp` datetime NOT NULL,\n  `temperature` decimal(10,2) NOT NULL,\n  `humidity` decimal(10,2) NOT NULL,\n  `rainfall` decimal(10,2) NOT NULL,\n  `wind_speed` decimal(10,2) NOT NULL,\n  `light_intensity` decimal(10,2) NOT NULL,\n  `location` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sensors_meteorology` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `sensor_id` int(11) NOT NULL,\n  `meteorology_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `sensor_id` (`sensor_id`),\n  KEY `meteorology_id` (`meteorology_id`),\n  CONSTRAINT `sensors_meteorology_ibfk_1` FOREIGN KEY (`sensor_id`) REFERENCES `sensors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `sensors_meteorology_ibfk_2` FOREIGN KEY (`meteorology_id`) REFERENCES `meteorology` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `crops` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `type` varchar(255) NOT NULL,\n  `growth_model_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `growth_model_id` (`growth_model_id`),\n  CONSTRAINT `crops_ibfk_1` FOREIGN KEY (`growth_model_id`) REFERENCES `growth_models` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `growth_models` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `parameters` varchar(255) NOT NULL,\n  `creation_time` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `evaluations` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `crop_id` int(11) NOT NULL,\n  `evaluation_time` datetime NOT NULL,\n  `evaluation_metric` varchar(255) NOT NULL,\n  `evaluation_value` decimal(10,2) NOT NULL,\n  `evaluation_location` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `crop_id` (`crop_id`),\n  CONSTRAINT `evaluations_ibfk_1` FOREIGN KEY (`crop_id`) REFERENCES `crops` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "sensors",
+      "sensor_deployments",
+      "actions",
+      "meteorology",
+      "sensors_meteorology",
+      "crops",
+      "growth_models",
+      "evaluations"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "sensors": [],
+      "sensor_deployments": [],
+      "actions": [],
+      "meteorology": [],
+      "sensors_meteorology": [],
+      "crops": [],
+      "growth_models": [],
+      "evaluations": []
+    }
+  }
+}

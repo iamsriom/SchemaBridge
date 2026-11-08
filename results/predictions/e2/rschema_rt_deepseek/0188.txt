@@ -1,0 +1,66 @@
+-- Schema for database: rschema_0188
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `product_type` varchar(255) NOT NULL,
+  `production_date` datetime NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
+  `manager` int(11) NOT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`department_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`manager`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL,
+  `employee_name` varchar(255) NOT NULL,
+  `employee_gender` char(1) NOT NULL,
+  `employee_phone` varchar(15) DEFAULT NULL,
+  `job_position` varchar(255) NOT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `production_record` (
+  `product_id` int(11) NOT NULL,
+  `producer` int(11) NOT NULL,
+  `production_time` datetime NOT NULL,
+  `production_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`production_time`, `product_id`, `producer`),
+  CONSTRAINT `production_record_ibfk_1` FOREIGN KEY (`producer`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `production_record_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inventory_record` (
+  `product_id` int(11) NOT NULL,
+  `stock_in_time` datetime NOT NULL,
+  `stock_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`product_id`),
+  CONSTRAINT `inventory_record_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_record` (
+  `salesperson` int(11) NOT NULL,
+  `customer` varchar(255) NOT NULL,
+  `sales_time` datetime NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `sales_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`product_id`, `salesperson`, `sales_time`),
+  CONSTRAINT `sales_record_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_record_ibfk_2` FOREIGN KEY (`salesperson`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `performance_evaluation` (
+  `department_id` int(11) NOT NULL,
+  `evaluation_time` datetime NOT NULL,
+  `evaluation_score` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`department_id`, `evaluation_time`),
+  CONSTRAINT `performance_evaluation_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

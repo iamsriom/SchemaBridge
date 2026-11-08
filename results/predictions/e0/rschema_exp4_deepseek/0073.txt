@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0073
+
+-- Table: agents
+CREATE TABLE `agents` (
+  `AgentID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `HireDate` datetime NOT NULL,
+  `ContactPhoneNumber` char(10) NOT NULL,
+  PRIMARY KEY (`AgentID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: customers
+CREATE TABLE `customers` (
+  `CustomerID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `IDCardNumber` char(12) NOT NULL,
+  `ContactPhoneNumber` char(10) NOT NULL,
+  PRIMARY KEY (`CustomerID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: insurance_policies
+CREATE TABLE `insurance_policies` (
+  `PolicyNumber` int(11) NOT NULL,
+  `InsuranceType` enum('Life','Health','Property') NOT NULL,
+  `InsuredAmount` int(11) NOT NULL,
+  `InsuranceTerm` int(11) NOT NULL,
+  `Premium` int(11) NOT NULL,
+  PRIMARY KEY (`PolicyNumber`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: premium_payments
+CREATE TABLE `premium_payments` (
+  `PaymentID` int(11) NOT NULL AUTO_INCREMENT,
+  `PolicyNumber` int(11) NOT NULL,
+  `PaymentAmount` int(11) NOT NULL,
+  `PaymentTime` datetime NOT NULL,
+  `PaymentMethod` enum('Cash','Cheque','Online') NOT NULL,
+  PRIMARY KEY (`PaymentID`),
+  FOREIGN KEY (`PolicyNumber`) REFERENCES `insurance_policies` (`PolicyNumber`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: claim_records
+CREATE TABLE `claim_records` (
+  `ClaimID` int(11) NOT NULL AUTO_INCREMENT,
+  `CustomerID` int(11) NOT NULL,
+  `PolicyNumber` int(11) NOT NULL,
+  PRIMARY KEY (`ClaimID`),
+  FOREIGN KEY (`CustomerID`) REFERENCES `customers` (`CustomerID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`PolicyNumber`) REFERENCES `insurance_policies` (`PolicyNumber`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

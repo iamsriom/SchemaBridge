@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0191
+CREATE TABLE `sales_teams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_personnel` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `team_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `team_id` (`team_id`),
+  CONSTRAINT `sales_personnel_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `sales_teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_tasks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(255) NOT NULL,
+  `customer_telephone` varchar(20) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `sales_date` datetime NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `cost` decimal(10,2) NOT NULL,
+  `sales_personnel_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `product_id` (`product_id`),
+  KEY `sales_personnel_id` (`sales_personnel_id`),
+  CONSTRAINT `sales_tasks_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_tasks_ibfk_2` FOREIGN KEY (`sales_personnel_id`) REFERENCES `sales_personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_evaluations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `sales_task_id` int(11) NOT NULL,
+  `evaluation` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `sales_task_id` (`sales_task_id`),
+  CONSTRAINT `customer_evaluations_ibfk_1` FOREIGN KEY (`sales_task_id`) REFERENCES `sales_tasks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

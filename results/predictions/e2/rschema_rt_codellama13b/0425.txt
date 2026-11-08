@@ -1,0 +1,72 @@
+-- Schema for database: rschema_0425
+CREATE TABLE `User` (
+  `User_ID` int(11) NOT NULL,
+  `Username` varchar(255) NOT NULL,
+  `Password` varchar(255) NOT NULL,
+  `Role` enum('administrator', 'dormitory_supervisor', 'student') NOT NULL,
+  PRIMARY KEY (`User_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Building` (
+  `Building_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Description` text DEFAULT NULL,
+  `Location` varchar(255) NOT NULL,
+  `Type` varchar(255) NOT NULL,
+  `Dormitory_Supervisor_ID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Building_ID`),
+  CONSTRAINT `building_ibfk_1` FOREIGN KEY (`Dormitory_Supervisor_ID`) REFERENCES `User` (`User_ID`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Announcement` (
+  `Announcement_ID` int(11) NOT NULL,
+  `Title` varchar(255) NOT NULL,
+  `Content` text NOT NULL,
+  `Release_Time` datetime NOT NULL,
+  `Administrator_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Announcement_ID`),
+  CONSTRAINT `announcement_ibfk_1` FOREIGN KEY (`Administrator_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Dormitory` (
+  `Dormitory_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Number_of_Beds` int(11) NOT NULL,
+  `Facilities` text DEFAULT NULL,
+  `Building_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Dormitory_ID`),
+  CONSTRAINT `dormitory_ibfk_1` FOREIGN KEY (`Building_ID`) REFERENCES `Building` (`Building_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Student` (
+  `Student_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Gender` enum('male', 'female', 'other') NOT NULL,
+  `Class` varchar(255) NOT NULL,
+  `Dormitory_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Student_ID`),
+  CONSTRAINT `student_ibfk_1` FOREIGN KEY (`Dormitory_ID`) REFERENCES `Dormitory` (`Dormitory_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Maintenance_Record` (
+  `Maintenance_ID` int(11) NOT NULL,
+  `Fault_Description` text NOT NULL,
+  `Report_Time` datetime NOT NULL,
+  `Completion_Time` datetime DEFAULT NULL,
+  `Maintenance_Status` enum('pending', 'completed', 'in_progress') NOT NULL,
+  `Dormitory_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Maintenance_ID`),
+  CONSTRAINT `maintenance_record_ibfk_1` FOREIGN KEY (`Dormitory_ID`) REFERENCES `Dormitory` (`Dormitory_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Application` (
+  `Application_ID` int(11) NOT NULL,
+  `Application_Type` varchar(255) NOT NULL,
+  `Content` text NOT NULL,
+  `Application_Time` datetime NOT NULL,
+  `Processing_Status` enum('pending', 'approved', 'rejected') NOT NULL,
+  `Processing_Opinion` text DEFAULT NULL,
+  `Student_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Application_ID`),
+  CONSTRAINT `application_ibfk_1` FOREIGN KEY (`Student_ID`) REFERENCES `Student` (`Student_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

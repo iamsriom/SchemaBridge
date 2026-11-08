@@ -1,0 +1,40 @@
+-- Schema for database: rschema_0053
+CREATE TABLE `processing_pool` (
+  `processing_pool_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `responsible_person_id` int(11) NOT NULL,
+  PRIMARY KEY (`processing_pool_id`),
+  CONSTRAINT `processing_pool_ibfk_1` FOREIGN KEY (`responsible_person_id`) REFERENCES `processing_pool_maintenance` (`responsible_person_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staff` (
+  `staff_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `responsibilities` text DEFAULT NULL,
+  PRIMARY KEY (`staff_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `processing_pool_record` (
+  `processing_pool_id` int(11) NOT NULL,
+  `recording_staff_id` int(11) NOT NULL,
+  `record_time` datetime NOT NULL,
+  `processing_capacity` float DEFAULT NULL,
+  `processing_efficiency` float DEFAULT NULL,
+  PRIMARY KEY (`processing_pool_id`, `record_time`),
+  CONSTRAINT `processing_pool_record_ibfk_1` FOREIGN KEY (`processing_pool_id`) REFERENCES `processing_pool` (`processing_pool_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `processing_pool_record_ibfk_2` FOREIGN KEY (`recording_staff_id`) REFERENCES `staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `processing_pool_maintenance` (
+  `processing_pool_id` int(11) NOT NULL,
+  `maintenance_staff_id` int(11) NOT NULL,
+  `maintenance_time` datetime NOT NULL,
+  `maintenance_content` text DEFAULT NULL,
+  `maintenance_cost` float DEFAULT NULL,
+  PRIMARY KEY (`maintenance_staff_id`, `processing_pool_id`, `maintenance_time`),
+  CONSTRAINT `processing_pool_maintenance_ibfk_1` FOREIGN KEY (`processing_pool_id`) REFERENCES `processing_pool` (`processing_pool_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `processing_pool_maintenance_ibfk_2` FOREIGN KEY (`maintenance_staff_id`) REFERENCES `staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

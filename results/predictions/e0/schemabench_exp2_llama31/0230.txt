@@ -1,0 +1,47 @@
+-- Schema for database: schemabench_0230
+CREATE TABLE `players` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `age` int(11) NOT NULL,
+  `team_id` int(11) NOT NULL,
+  `team_number` int(11) NOT NULL,
+  `injury_status` enum('healthy','injured') NOT NULL DEFAULT 'healthy',
+  PRIMARY KEY (`id`),
+  KEY `team_id` (`team_id`),
+  CONSTRAINT `players_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `manager` varchar(255) NOT NULL,
+  `captain` varchar(255) NOT NULL,
+  `num_players` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `matches` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `team1_id` int(11) NOT NULL,
+  `team2_id` int(11) NOT NULL,
+  `venue_id` int(11) NOT NULL,
+  `match_date` datetime NOT NULL,
+  `score1` int(11) NOT NULL,
+  `score2` int(11) NOT NULL,
+  `man_of_match` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `team1_id` (`team1_id`),
+  KEY `team2_id` (`team2_id`),
+  KEY `venue_id` (`venue_id`),
+  CONSTRAINT `matches_ibfk_1` FOREIGN KEY (`team1_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `matches_ibfk_2` FOREIGN KEY (`team2_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `matches_ibfk_3` FOREIGN KEY (`venue_id`) REFERENCES `venues` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `venues` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `capacity` int(11) NOT NULL,
+  `condition` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

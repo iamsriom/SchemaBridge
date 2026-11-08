@@ -1,0 +1,79 @@
+-- Schema for database: schemabench_0225
+CREATE TABLE trainers (
+  trainer_id INT(11) NOT NULL AUTO_INCREMENT,
+  employee_number VARCHAR(255) NOT NULL,
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(255) NOT NULL,
+  hire_date DATE NOT NULL,
+  PRIMARY KEY (trainer_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE courses (
+  course_id INT(11) NOT NULL AUTO_INCREMENT,
+  course_name VARCHAR(255) NOT NULL,
+  duration INT(11) NOT NULL,
+  fee DECIMAL(10,2) NOT NULL,
+  prerequisites VARCHAR(255) NOT NULL,
+  hardware_requirements VARCHAR(255) NOT NULL,
+  software_requirements VARCHAR(255) NOT NULL,
+  PRIMARY KEY (course_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE class_schedule (
+  class_id INT(11) NOT NULL AUTO_INCREMENT,
+  course_id INT(11) NOT NULL,
+  trainer_id INT(11) NOT NULL,
+  classroom VARCHAR(255) NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  PRIMARY KEY (class_id),
+  FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (trainer_id) REFERENCES trainers(trainer_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE clients (
+  client_id INT(11) NOT NULL AUTO_INCREMENT,
+  client_number VARCHAR(255) NOT NULL,
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(255) NOT NULL,
+  membership_type VARCHAR(255) NOT NULL,
+  discount INT(11) NOT NULL,
+  PRIMARY KEY (client_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE enrollments (
+  enrollment_id INT(11) NOT NULL AUTO_INCREMENT,
+  client_id INT(11) NOT NULL,
+  class_id INT(11) NOT NULL,
+  enrollment_date DATE NOT NULL,
+  PRIMARY KEY (enrollment_id),
+  FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (class_id) REFERENCES class_schedule(class_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE hardware_software (
+  hardware_software_id INT(11) NOT NULL AUTO_INCREMENT,
+  course_id INT(11) NOT NULL,
+  hardware_requirements VARCHAR(255) NOT NULL,
+  software_requirements VARCHAR(255) NOT NULL,
+  PRIMARY KEY (hardware_software_id),
+  FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE book_orders (
+  book_order_id INT(11) NOT NULL AUTO_INCREMENT,
+  course_id INT(11) NOT NULL,
+  isbn VARCHAR(255) NOT NULL,
+  author VARCHAR(255) NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  vendor_order_number VARCHAR(255) NOT NULL,
+  order_date DATE NOT NULL,
+  delivery_date DATE NOT NULL,
+  shipment_details VARCHAR(255) NOT NULL,
+  PRIMARY KEY (book_order_id),
+  FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

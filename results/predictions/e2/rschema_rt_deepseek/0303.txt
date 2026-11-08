@@ -1,0 +1,62 @@
+-- Schema for database: rschema_0303
+CREATE TABLE `Project` (
+  `project_ID` int(11) NOT NULL,
+  `project_name` varchar(255) NOT NULL,
+  `project_description` text DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`project_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Acceptance_Criteria_Table` (
+  `acceptance_criteria_ID` int(11) NOT NULL,
+  `description` text DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`acceptance_criteria_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Sprint` (
+  `sprint_ID` int(11) NOT NULL,
+  `sprint_name` varchar(255) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `project_ID` int(11) NOT NULL,
+  PRIMARY KEY (`sprint_ID`),
+  CONSTRAINT `sprint_ibfk_1` FOREIGN KEY (`project_ID`) REFERENCES `Project` (`project_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Message_Event` (
+  `message_event_ID` int(11) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `message_reference` text DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `version` int(11) DEFAULT NULL,
+  `project_ID` int(11) NOT NULL,
+  PRIMARY KEY (`message_event_ID`),
+  CONSTRAINT `message_event_ibfk_1` FOREIGN KEY (`project_ID`) REFERENCES `Project` (`project_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Story` (
+  `story_ID` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `story_points` int(11) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `project_ID` int(11) NOT NULL,
+  `sprint_ID` int(11) NOT NULL,
+  PRIMARY KEY (`story_ID`),
+  CONSTRAINT `story_ibfk_1` FOREIGN KEY (`project_ID`) REFERENCES `Project` (`project_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `story_ibfk_2` FOREIGN KEY (`sprint_ID`) REFERENCES `Sprint` (`sprint_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Task` (
+  `task_ID` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `story_ID` int(11) NOT NULL,
+  PRIMARY KEY (`task_ID`),
+  CONSTRAINT `task_ibfk_1` FOREIGN KEY (`story_ID`) REFERENCES `Story` (`story_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

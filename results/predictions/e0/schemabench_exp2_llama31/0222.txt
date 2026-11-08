@@ -1,0 +1,153 @@
+-- Schema for database: schemabench_0222
+CREATE TABLE `artist_info_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  `email` varchar(255) NOT NULL,\n
+  `phone` char(10) NOT NULL,\n
+  `address` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `artist_contract_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `artist_id` int(11) NOT NULL,\n
+  `contract_start_date` datetime NOT NULL,\n
+  `contract_end_date` datetime DEFAULT NULL,\n
+  `contract_terms` text NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `artist_id` (`artist_id`),\n
+  CONSTRAINT `artist_contract_t_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artist_info_t` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `artist_contract_audit_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `artist_contract_id` int(11) NOT NULL,\n
+  `audit_date` datetime NOT NULL,\n
+  `audit_note` text NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `artist_contract_id` (`artist_contract_id`),\n
+  CONSTRAINT `artist_contract_audit_t_ibfk_1` FOREIGN KEY (`artist_contract_id`) REFERENCES `artist_contract_t` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `collab_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `artist_id` int(11) NOT NULL,\n
+  `partner_id` int(11) NOT NULL,\n
+  `collab_start_date` datetime NOT NULL,\n
+  `collab_end_date` datetime DEFAULT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `artist_id` (`artist_id`),\n
+  KEY `partner_id` (`partner_id`),\n
+  CONSTRAINT `collab_t_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artist_info_t` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `collab_t_ibfk_2` FOREIGN KEY (`partner_id`) REFERENCES `partner_org_t` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `customer_info_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  `email` varchar(255) NOT NULL,\n
+  `phone` char(10) NOT NULL,\n
+  `address` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `customer_interest_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `customer_id` int(11) NOT NULL,\n
+  `interest` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `customer_id` (`customer_id`),\n
+  CONSTRAINT `customer_interest_t_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer_info_t` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `employee_info_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  `email` varchar(255) NOT NULL,\n
+  `phone` char(10) NOT NULL,\n
+  `address` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `event_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `title` varchar(255) NOT NULL,\n
+  `date` datetime NOT NULL,\n
+  `location` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `inventory_art_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `product_id` int(11) NOT NULL,\n
+  `artist_id` int(11) NOT NULL,\n
+  `quantity` int(11) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `product_id` (`product_id`),\n
+  KEY `artist_id` (`artist_id`),\n
+  CONSTRAINT `inventory_art_t_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product_info_t` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `inventory_art_t_ibfk_2` FOREIGN KEY (`artist_id`) REFERENCES `artist_info_t` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `partner_org_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  `email` varchar(255) NOT NULL,\n
+  `phone` char(10) NOT NULL,\n
+  `address` varchar(255) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `partner_org_audit_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `partner_org_id` int(11) NOT NULL,\n
+  `audit_date` datetime NOT NULL,\n
+  `audit_note` text NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `partner_org_id` (`partner_org_id`),\n
+  CONSTRAINT `partner_org_audit_t_ibfk_1` FOREIGN KEY (`partner_org_id`) REFERENCES `partner_org_t` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `product_info_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `name` varchar(255) NOT NULL,\n
+  `description` text NOT NULL,\n
+  `price` decimal(10,2) NOT NULL,\n
+  PRIMARY KEY (`id`)\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `sales_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `product_id` int(11) NOT NULL,\n
+  `customer_id` int(11) NOT NULL,\n
+  `sale_date` datetime NOT NULL,\n
+  `sale_price` decimal(10,2) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `product_id` (`product_id`),\n
+  KEY `customer_id` (`customer_id`),\n
+  CONSTRAINT `sales_t_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product_info_t` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n
+  CONSTRAINT `sales_t_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer_info_t` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `ledger_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `sales_id` int(11) NOT NULL,\n
+  `debit` decimal(10,2) NOT NULL,\n
+  `credit` decimal(10,2) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `sales_id` (`sales_id`),\n
+  CONSTRAINT `ledger_t_ibfk_1` FOREIGN KEY (`sales_id`) REFERENCES `sales_t` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `credit_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `sales_id` int(11) NOT NULL,\n
+  `amount` decimal(10,2) NOT NULL,\n
+  PRIMARY KEY (`id`),\n
+  KEY `sales_id` (`sales_id`),\n
+  CONSTRAINT `credit_t_ibfk_1` FOREIGN KEY (`sales_id`) REFERENCES `sales_t` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n
+\n
+CREATE TABLE `debit_t` (\n
+  `id` int(11) NOT NULL AUTO_INCREMENT,\n
+  `sales_id` int(11) NOT NULL,\n

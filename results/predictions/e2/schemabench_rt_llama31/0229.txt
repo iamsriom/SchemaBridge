@@ -1,0 +1,56 @@
+-- Schema for database: schemabench_0229
+CREATE TABLE `artifacts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `latitude` decimal(9,6) NOT NULL,
+  `longitude` decimal(9,6) NOT NULL,
+  `votes` int(11) DEFAULT NULL,
+  `reported` tinyint(1) DEFAULT NULL,
+  `open311_token` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pictures` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `artifact_id` int(11) NOT NULL,
+  `image_url` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `pictures_ibfk_1` FOREIGN KEY (`artifact_id`) REFERENCES `artifacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reflections` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `artifact_id` int(11) NOT NULL,
+  `user_name` varchar(255) NOT NULL,
+  `text` text NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `reflections_ibfk_1` FOREIGN KEY (`artifact_id`) REFERENCES `artifacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tags` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `artifact_tags` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `artifact_id` int(11) NOT NULL,
+  `tag_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `artifact_tags_ibfk_1` FOREIGN KEY (`artifact_id`) REFERENCES `artifacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `artifact_tags_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `neighborhoods` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `geom` geometry NOT NULL,
+  `artifact_count` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `schema_migrations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `version` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

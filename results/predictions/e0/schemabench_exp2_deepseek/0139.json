@@ -1,0 +1,28 @@
+{
+  "text_number": 139,
+  "id": "SB-139",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "schemabench_0139",
+  "question": "1) Background / Context\n\nVisual Genome is an ongoing project aimed at creating a comprehensive dataset that connects structured image concepts with language. It offers a knowledge base intended to enhance understanding and capabilities in image recognition and interpretation by linking visual elements to linguistic descriptions.\n\n2) Objectives\n\nThe primary objective of Visual Genome is to develop a robust dataset that facilitates the integration of image-based concepts with language. This supports advancements in visual recognition, natural language processing, and AI-driven understanding of visual data.\n\n3) Stakeholders & Users\n\n- Researchers and Developers: The tool is primarily for individuals working in AI, machine learning, and data science fields who require a robust dataset for training models related to image recognition and natural language processing.\n- Educational Institutions: Universities and educational bodies may use this dataset for research and academic purposes.\n- Tech Companies: Companies specializing in image processing and AI development could benefit from using this as a resource for developing new technologies.\n\n4) Functional Descriptions\n\n- Image Annotation: Images are annotated with objects, attributes, and relationships between objects to connect visual information with language.\n  \n- Data Management: The database schema defines tables for handling:\n  - Attributes (`ATT_CLASSES`, `IMG_OBJ_ATT`)\n  - Objects (`OBJ_CLASSES`, `IMG_OBJ`)\n  - Relationships (`PRED_CLASSES`, `IMG_REL`)\n\n- Relational Mapping: \n  - Objects within images are stored with position and size.\n  - Attributes and relationships of objects are mapped to create rich semantic connections.\n  \n- Database Integration: Images and their components (objects, attributes, relationships) are stored and referenced through an SQL-based structured database, facilitating efficient data retrieval and manipulation.\n  \n5) Non-Functional Descriptions\n\n- Scalability: The system should efficiently handle a growing dataset as new images and annotations are continually added.\n- Usability: The dataset must be easily accessible for users with varying levels of technical expertise.\n- Interoperability: The database should support integration with other systems and tools for extended use in diverse applications.",
+  "ddl": "-- Schema for database: `visual_genome`\n\n-- For table: `ATT_CLASSES`\nCREATE TABLE `ATT_CLASSES` (\n  `ATTRIBUTE_ID` int(11) NOT NULL AUTO_INCREMENT,\n  `ATTRIBUTE_NAME` varchar(255) NOT NULL,\n  PRIMARY KEY (`ATTRIBUTE_ID`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `OBJ_CLASSES`\nCREATE TABLE `OBJ_CLASSES` (\n  `OBJECT_ID` int(11) NOT NULL AUTO_INCREMENT,\n  `OBJECT_NAME` varchar(255) NOT NULL,\n  PRIMARY KEY (`OBJECT_ID`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `IMG_OBJ`\nCREATE TABLE `IMG_OBJ` (\n  `IMAGE_ID` int(11) NOT NULL,\n  `OBJECT_ID` int(11) NOT NULL,\n  `X_COORDINATE` int(11) NOT NULL,\n  `Y_COORDINATE` int(11) NOT NULL,\n  `WIDTH` int(11) NOT NULL,\n  `HEIGHT` int(11) NOT NULL,\n  PRIMARY KEY (`IMAGE_ID`,`OBJECT_ID`),\n  FOREIGN KEY (`IMAGE_ID`) REFERENCES `IMAGES`(`IMAGE_ID`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`OBJECT_ID`) REFERENCES `OBJ_CLASSES`(`OBJECT_ID`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `IMG_OBJ_ATT`\nCREATE TABLE `IMG_OBJ_ATT` (\n  `IMAGE_ID` int(11) NOT NULL,\n  `OBJECT_ID` int(11) NOT NULL,\n  `ATTRIBUTE_ID` int(11) NOT NULL,\n  PRIMARY KEY (`IMAGE_ID`,`OBJECT_ID`,`ATTRIBUTE_ID`),\n  FOREIGN KEY (`IMAGE_ID`) REFERENCES `IMAGES`(`IMAGE_ID`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`OBJECT_ID`) REFERENCES `OBJ_CLASSES`(`OBJECT_ID`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`ATTRIBUTE_ID`) REFERENCES `ATT_CLASSES`(`ATTRIBUTE_ID`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `PRED_CLASSES`\nCREATE TABLE `PRED_CLASSES` (\n  `RELATION_ID` int(11) NOT NULL AUTO_INCREMENT,\n  `RELATION_NAME` varchar(255) NOT NULL,\n  PRIMARY KEY (`RELATION_ID`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `IMG_REL`\nCREATE TABLE `IMG_REL` (\n  `IMAGE_ID` int(11) NOT NULL,\n  `OBJECT_ID_1` int(11) NOT NULL,\n  `OBJECT_ID_2` int(11) NOT NULL,\n  `RELATION_ID` int(11) NOT NULL,\n  PRIMARY KEY (`IMAGE_ID`,`OBJECT_ID_1`,`OBJECT_ID_2`,`RELATION_ID`),\n  FOREIGN KEY (`IMAGE_ID`) REFERENCES `IMAGES`(`IMAGE_ID`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`OBJECT_ID_1`) REFERENCES `OBJ_CLASSES`(`OBJECT_ID`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`OBJECT_ID_2`) REFERENCES `OBJ_CLASSES`(`OBJECT_ID`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`RELATION_ID`) REFERENCES `PRED_CLASSES`(`RELATION_ID`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "ATT_CLASSES",
+      "OBJ_CLASSES",
+      "IMG_OBJ",
+      "IMG_OBJ_ATT",
+      "PRED_CLASSES",
+      "IMG_REL"
+    ],
+    "columns_by_table": {
+      "ATT_CLASSES": [],
+      "OBJ_CLASSES": [],
+      "IMG_OBJ": [],
+      "IMG_OBJ_ATT": [],
+      "PRED_CLASSES": [],
+      "IMG_REL": []
+    }
+  }
+}

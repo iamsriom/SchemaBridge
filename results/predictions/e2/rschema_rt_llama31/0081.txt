@@ -1,0 +1,38 @@
+-- Schema for database: rschema_0081
+CREATE TABLE `user_group` (
+  `user_group_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`user_group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `user_group_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`user_group_id`) REFERENCES `user_group` (`user_group_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `api_key` (
+  `key_id` int(11) NOT NULL,
+  `key_content` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `permission_level` varchar(50) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`key_id`),
+  CONSTRAINT `api_key_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `api_call_log` (
+  `log_id` int(11) NOT NULL,
+  `response_status_code` int(11) NOT NULL,
+  `authorization_status` varchar(50) NOT NULL,
+  `api_resource_path` varchar(255) NOT NULL,
+  `used_api_key_id` int(11) NOT NULL,
+  PRIMARY KEY (`log_id`),
+  CONSTRAINT `api_call_log_ibfk_1` FOREIGN KEY (`used_api_key_id`) REFERENCES `api_key` (`key_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

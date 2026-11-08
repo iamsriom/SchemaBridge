@@ -1,0 +1,26 @@
+{
+  "text_number": 124,
+  "id": "67552f0a13602ec03b41a94a",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "rschema_0124",
+  "question": "The following describes the database business requirements for a social networking management system: It is used to manage the follow and fan relationships among users. The system supports interactions among users, recording each user's following and follower information, including the creation and update times for each follow relationship. Each user can follow other users and be followed by other users. The management of follow relationships ensures that a user cannot follow themselves and avoids duplicate followings. Users can query their list of followers and the list of users they are following. They can also access recommended content or suggestions for new users. Through follow relationships, the system can push dynamic updates to users, showcasing the content they follow or the activities of other users. Additionally, the system supports statistics on the number of followers and the number of followed users, providing data support for social interaction and user relationship analysis.",
+  "ddl": "#--Schemafordatabase:rschema_0124\n\n--Foreachtable:\n\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `username` (`username`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `follows` (\n  `follower_id` int(11) NOT NULL,\n  `followee_id` int(11) NOT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`follower_id`,`followee_id`),\n  KEY `followee_id` (`followee_id`),\n  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`follower_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `users_ibfk_2` FOREIGN KEY (`followee_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `content` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `content` text NOT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `content_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `interactions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `content_id` int(11) NOT NULL,\n  `interaction_type` varchar(255) NOT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  KEY `content_id` (`content_id`),\n  CONSTRAINT `interactions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `interactions_ibfk_2` FOREIGN KEY (`content_id`) REFERENCES `content` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `statistics` (\n  `user_id` int(11) NOT NULL,\n  `followers_count` int(11) NOT NULL DEFAULT '0',\n  `following_count` int(11) NOT NULL DEFAULT '0',\n  PRIMARY KEY (`user_id`),\n  CONSTRAINT `statistics_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "follows",
+      "content",
+      "interactions",
+      "statistics"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "follows": [],
+      "content": [],
+      "interactions": [],
+      "statistics": []
+    }
+  }
+}

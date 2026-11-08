@@ -1,0 +1,59 @@
+-- Schema for database: rschema_0332
+CREATE TABLE `artist` (
+  `artist_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`artist_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `album` (
+  `album_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `release_date` datetime NOT NULL,
+  `artist_id` int(11) NOT NULL,
+  PRIMARY KEY (`album_id`),
+  CONSTRAINT `album_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artist` (`artist_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `playlist` (
+  `playlist_id` int(11) NOT NULL AUTO_INCREMENT,
+  `creator_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `play_count` int(11) DEFAULT 0,
+  PRIMARY KEY (`playlist_id`),
+  CONSTRAINT `playlist_ibfk_1` FOREIGN KEY (`creator_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `playlist_creation` (
+  `creation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `playlist_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`creation_id`),
+  CONSTRAINT `playlist_creation_ibfk_1` FOREIGN KEY (`playlist_id`) REFERENCES `playlist` (`playlist_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `playlist_creation_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `song` (
+  `song_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `popularity` int(11) NOT NULL,
+  `video_duration` int(11) NOT NULL,
+  `video_id` varchar(255) NOT NULL,
+  `album_id` int(11) NOT NULL,
+  PRIMARY KEY (`song_id`),
+  CONSTRAINT `song_ibfk_1` FOREIGN KEY (`album_id`) REFERENCES `album` (`album_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `songs_in_album` (
+  `album_id` int(11) NOT NULL,
+  `song_id` int(11) NOT NULL,
+  PRIMARY KEY (`album_id`, `song_id`),
+  CONSTRAINT `songs_in_album_ibfk_1` FOREIGN KEY (`album_id`) REFERENCES `album` (`album_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `songs_in_album_ibfk_2` FOREIGN KEY (`song_id`) REFERENCES `song` (`song_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

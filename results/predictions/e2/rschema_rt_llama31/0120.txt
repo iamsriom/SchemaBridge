@@ -1,0 +1,58 @@
+-- Schema for database: rschema_0120
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `corporations` (
+  `corporation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticker` varchar(10) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `ceo_user_id` int(11) NOT NULL,
+  PRIMARY KEY (`corporation_id`),
+  CONSTRAINT `corporations_ibfk_1` FOREIGN KEY (`ceo_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `game_characters` (
+  `character_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `corporation_id` int(11) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `is_default` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`character_id`),
+  CONSTRAINT `game_characters_ibfk_1` FOREIGN KEY (`corporation_id`) REFERENCES `corporations` (`corporation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_login_records` (
+  `user_id` int(11) NOT NULL,
+  `source_address` varchar(255) NOT NULL,
+  `browser_agent` varchar(255) NOT NULL,
+  `login_result` varchar(50) NOT NULL,
+  `timestamp` datetime NOT NULL,
+  PRIMARY KEY (`user_id`, `timestamp`),
+  CONSTRAINT `user_login_records_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `applications` (
+  `application_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `maintainer_user_id` int(11) NOT NULL,
+  `api_key_id` int(11) NOT NULL,
+  `callback_url` varchar(255) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`application_id`),
+  CONSTRAINT `applications_ibfk_1` FOREIGN KEY (`maintainer_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `applications_ibfk_2` FOREIGN KEY (`api_key_id`) REFERENCES `api_keys` (`api_key_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `api_keys` (
+  `api_key_id` int(11) NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) NOT NULL,
+  `corporation_id` int(11) NOT NULL,
+  PRIMARY KEY (`api_key_id`),
+  CONSTRAINT `api_keys_ibfk_1` FOREIGN KEY (`corporation_id`) REFERENCES `corporations` (`corporation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

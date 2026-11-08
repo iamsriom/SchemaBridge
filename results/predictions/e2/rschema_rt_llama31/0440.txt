@@ -1,0 +1,68 @@
+-- Schema for database: rschema_0440
+CREATE TABLE `device` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `department` varchar(255) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  `group` varchar(255) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `person_in_charge` varchar(255) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `usage_location` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `role` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device_status` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_id` int(11) NOT NULL,
+  `last_update_time` datetime NOT NULL,
+  `remarks` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `device_status_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device_maintenance` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `maintenance_content` text NOT NULL,
+  `responsible_person` varchar(255) NOT NULL,
+  `result` varchar(255) NOT NULL,
+  `satisfaction` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `device_maintenance_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `device_maintenance_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device_repair_request` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `handling_personnel` varchar(255) NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `request_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `device_repair_request_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `device_repair_request_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device_inventory` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `responsible_person` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `device_inventory_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `device_inventory_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

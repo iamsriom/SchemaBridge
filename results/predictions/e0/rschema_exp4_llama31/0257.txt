@@ -1,0 +1,52 @@
+-- Schema for database: rschema_0257
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `customer_type` enum('regular','vip') NOT NULL,
+  `id_number` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(255) NOT NULL,
+  `booking_date` datetime DEFAULT NULL,
+  `check_in_time` time DEFAULT NULL,
+  `check_out_time` time DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flights` (
+  `flight_id` int(11) NOT NULL AUTO_INCREMENT,
+  `flight_name` varchar(255) NOT NULL,
+  `flight_date` date NOT NULL,
+  `airline_name` varchar(255) NOT NULL,
+  `departure_location` varchar(255) NOT NULL,
+  `departure_time` time NOT NULL,
+  `destination` varchar(255) NOT NULL,
+  `arrival_time` time NOT NULL,
+  PRIMARY KEY (`flight_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bookings` (
+  `booking_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `flight_id` int(11) NOT NULL,
+  `discount_rate` decimal(10,2) NOT NULL,
+  `ticket_order_number` int(11) NOT NULL,
+  PRIMARY KEY (`booking_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `flight_id` (`flight_id`),
+  CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bookings_ibfk_2` FOREIGN KEY (`flight_id`) REFERENCES `flights` (`flight_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `flight_id` int(11) NOT NULL,
+  `ticket_order_number` int(11) NOT NULL,
+  `discount_rate` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `flight_id` (`flight_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`flight_id`) REFERENCES `flights` (`flight_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

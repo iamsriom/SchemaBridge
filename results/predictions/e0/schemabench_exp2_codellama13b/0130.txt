@@ -1,0 +1,62 @@
+-- Schema for database: schemabench_0130
+CREATE TABLE users (
+  user_id INT(11) NOT NULL AUTO_INCREMENT,
+  display_name VARCHAR(255) NOT NULL,
+  reputation INT(11) NOT NULL,
+  PRIMARY KEY (user_id)
+);
+
+CREATE TABLE posts (
+  post_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  creation_date DATETIME NOT NULL,
+  score INT(11) NOT NULL,
+  view_count INT(11) NOT NULL,
+  PRIMARY KEY (post_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE comments (
+  comment_id INT(11) NOT NULL AUTO_INCREMENT,
+  post_id INT(11) NOT NULL,
+  user_id INT(11) NOT NULL,
+  creation_date DATETIME NOT NULL,
+  score INT(11) NOT NULL,
+  PRIMARY KEY (comment_id),
+  FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE badges (
+  badge_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  award_date DATETIME NOT NULL,
+  award_type VARCHAR(255) NOT NULL,
+  PRIMARY KEY (badge_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE votes (
+  vote_id INT(11) NOT NULL AUTO_INCREMENT,
+  post_id INT(11) NOT NULL,
+  user_id INT(11) NOT NULL,
+  vote_type VARCHAR(255) NOT NULL,
+  bounty_amount INT(11) NOT NULL,
+  PRIMARY KEY (vote_id),
+  FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE tags (
+  tag_id INT(11) NOT NULL AUTO_INCREMENT,
+  tag_name VARCHAR(255) NOT NULL,
+  PRIMARY KEY (tag_id)
+);
+
+CREATE TABLE post_tags (
+  post_id INT(11) NOT NULL,
+  tag_id INT(11) NOT NULL,
+  PRIMARY KEY (post_id, tag_id),
+  FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE ON UPDATE CASCADE
+);

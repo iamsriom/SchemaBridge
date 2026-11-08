@@ -1,0 +1,49 @@
+-- Schema for database: rschema_0451
+CREATE TABLE `intrusion_detection_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `attack_type` varchar(255) NOT NULL,
+  `source_ip` varchar(45) NOT NULL,
+  `source_port` int(11) NOT NULL,
+  `destination_ip` varchar(45) NOT NULL,
+  `destination_port` int(11) NOT NULL,
+  `threat_level` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `knowledge_base` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `category` varchar(100) NOT NULL,
+  `description` text NOT NULL,
+  `source` varchar(255) NOT NULL,
+  `reliability_level` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `response_plan` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content` text NOT NULL,
+  `generation_time` datetime NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `intrusion_detection_record_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `response_plan_ibfk_1` FOREIGN KEY (`intrusion_detection_record_id`) REFERENCES `intrusion_detection_record` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alarm_information` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `alarm_content` text NOT NULL,
+  `level` varchar(50) NOT NULL,
+  `time` datetime NOT NULL,
+  `processing_status` varchar(50) NOT NULL,
+  `intrusion_detection_record_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `alarm_information_ibfk_1` FOREIGN KEY (`intrusion_detection_record_id`) REFERENCES `intrusion_detection_record` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `plan_knowledge_base` (
+  `plan_id` int(11) NOT NULL,
+  `knowledge_id` int(11) NOT NULL,
+  PRIMARY KEY (`plan_id`, `knowledge_id`),
+  CONSTRAINT `plan_knowledge_base_ibfk_1` FOREIGN KEY (`plan_id`) REFERENCES `response_plan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `plan_knowledge_base_ibfk_2` FOREIGN KEY (`knowledge_id`) REFERENCES `knowledge_base` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

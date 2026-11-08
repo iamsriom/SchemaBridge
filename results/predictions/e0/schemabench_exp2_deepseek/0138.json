@@ -1,0 +1,28 @@
+{
+  "text_number": 138,
+  "id": "SB-138",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "schemabench_0138",
+  "question": "1) Background / Context  \nThe project involves the creation of a data management system for the Department of Computer Science and Engineering at the University of Washington (UW-CSE). The system stores and manages information regarding departmental entities, such as students and professors, as well as their interrelations, such as advisory roles and courses taught.\n\n2) Objectives  \nThe primary objective is to facilitate efficient data management and retrieval concerning key departmental entities and their relationships. The system aims to support the tracking of advisory relationships, course assignments, and individual roles and phases within the program.\n\n3) Stakeholders & Users  \n- Stakeholders: Department of Computer Science and Engineering, University Administration  \n- Primary Users: Faculty members, Administrative staff, Students  \n\n4) Functional Descriptions  \n- Entity Management: The system shall maintain a database of individuals associated with the department, including students and professors.  \n- Relationship Tracking: The system shall support the tracking of advisory relationships (e.g., which professors advise which students) and teaching assignments (e.g., which professors teach which courses).  \n- Course Management: The system shall manage course information, including course levels and the faculty responsible for teaching them.  \n\n5) Non-Functional Descriptions  \n- Data Consistency: The system must ensure data integrity through the use of foreign key constraints to maintain consistent relationships between entities.  \n- Scalability: The system should handle adjustments in the number of entities and relationships as the department grows.  \n- Security: Access to the system should be restricted to authorized personnel to prevent unauthorized data manipulation.  \n- Maintainability: The system should support easy updates and adjustments to accommodate changes in departmental needs or structure.",
+  "ddl": "-- Schema for database: `cse_uw`\n\n-- Table: `students`\nCREATE TABLE `students` (\n  `student_id` int(11) NOT NULL AUTO_INCREMENT,\n  `first_name` varchar(255) NOT NULL,\n  `last_name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `advisor_id` int(11),\n  PRIMARY KEY (`student_id`),\n  FOREIGN KEY (`advisor_id`) REFERENCES `professors`(`professor_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `professors`\nCREATE TABLE `professors` (\n  `professor_id` int(11) NOT NULL AUTO_INCREMENT,\n  `first_name` varchar(255) NOT NULL,\n  `last_name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  PRIMARY KEY (`professor_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `courses`\nCREATE TABLE `courses` (\n  `course_id` int(11) NOT NULL AUTO_INCREMENT,\n  `course_name` varchar(255) NOT NULL,\n  `course_level` varchar(255) NOT NULL,\n  `professor_id` int(11) NOT NULL,\n  PRIMARY KEY (`course_id`),\n  FOREIGN KEY (`professor_id`) REFERENCES `professors`(`professor_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `advisor_roles`\nCREATE TABLE `advisor_roles` (\n  `role_id` int(11) NOT NULL AUTO_INCREMENT,\n  `role_name` varchar(255) NOT NULL,\n  PRIMARY KEY (`role_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `student_roles`\nCREATE TABLE `student_roles` (\n  `role_id` int(11) NOT NULL,\n  `student_id` int(11) NOT NULL,\n  PRIMARY KEY (`role_id`, `student_id`),\n  FOREIGN KEY (`role_id`) REFERENCES `advisor_roles`(`role_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`student_id`) REFERENCES `students`(`student_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `course_assignments`\nCREATE TABLE `course_assignments` (\n  `student_id` int(11) NOT NULL,\n  `course_id` int(11) NOT NULL,\n  PRIMARY KEY (`student_id`, `course_id`),\n  FOREIGN KEY (`student_id`) REFERENCES `students`(`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`course_id`) REFERENCES `courses`(`course_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "students",
+      "professors",
+      "courses",
+      "advisor_roles",
+      "student_roles",
+      "course_assignments"
+    ],
+    "columns_by_table": {
+      "students": [],
+      "professors": [],
+      "courses": [],
+      "advisor_roles": [],
+      "student_roles": [],
+      "course_assignments": []
+    }
+  }
+}

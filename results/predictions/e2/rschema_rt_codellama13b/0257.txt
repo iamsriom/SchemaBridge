@@ -1,0 +1,41 @@
+-- Schema for database: rschema_0257
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  `id_number` varchar(50) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flight` (
+  `flight_id` int(11) NOT NULL,
+  `airline_name` varchar(255) NOT NULL,
+  `departure_location` varchar(255) NOT NULL,
+  `destination` varchar(255) NOT NULL,
+  `flight_date` datetime NOT NULL,
+  `flight_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`flight_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flight_booking_record` (
+  `booked_flight_id` int(11) NOT NULL,
+  `booking_record_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `discount_rate` decimal(5,2) DEFAULT NULL,
+  `ticket_order_number` varchar(50) NOT NULL,
+  PRIMARY KEY (`booked_flight_id`, `booking_record_id`),
+  CONSTRAINT `flight_booking_record_ibfk_1` FOREIGN KEY (`booked_flight_id`) REFERENCES `flight` (`flight_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_booking_record_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order` (
+  `customer_id` int(11) NOT NULL,
+  `discount_rate` decimal(5,2) DEFAULT NULL,
+  `order_flight_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `ticket_order_number` varchar(50) NOT NULL,
+  PRIMARY KEY (`customer_id`, `order_id`),
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_ibfk_2` FOREIGN KEY (`order_flight_id`) REFERENCES `flight` (`flight_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

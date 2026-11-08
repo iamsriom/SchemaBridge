@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0355
+
+CREATE TABLE `race` (
+  `race_id` int(11) NOT NULL,
+  `race_name` varchar(255) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  `result` varchar(255) NOT NULL,
+  PRIMARY KEY (`race_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `horse` (
+  `horse_id` int(11) NOT NULL,
+  `horse_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`horse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `better` (
+  `better_id` int(11) NOT NULL,
+  `better_phone` varchar(255) NOT NULL,
+  PRIMARY KEY (`better_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bet` (
+  `bet_id` int(11) NOT NULL,
+  `bet_amount` int(11) NOT NULL,
+  `bet_race_id` int(11) NOT NULL,
+  `bet_horse_id` int(11) NOT NULL,
+  `bet_better_id` int(11) NOT NULL,
+  PRIMARY KEY (`bet_id`),
+  FOREIGN KEY (`bet_race_id`) REFERENCES `race` (`race_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bet_horse_id`) REFERENCES `horse` (`horse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`bet_better_id`) REFERENCES `better` (`better_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `race_result` (
+  `race_result_id` int(11) NOT NULL,
+  `race_result_horse_id` int(11) NOT NULL,
+  `race_result_rank` int(11) NOT NULL,
+  PRIMARY KEY (`race_result_id`),
+  FOREIGN KEY (`race_result_horse_id`) REFERENCES `horse` (`horse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `betting_result` (
+  `betting_result_id` int(11) NOT NULL,
+  `betting_result_bet_id` int(11) NOT NULL,
+  `betting_result_race_result_id` int(11) NOT NULL,
+  PRIMARY KEY (`betting_result_id`),
+  FOREIGN KEY (`betting_result_bet_id`) REFERENCES `bet` (`bet_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`betting_result_race_result_id`) REFERENCES `race_result` (`race_result_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

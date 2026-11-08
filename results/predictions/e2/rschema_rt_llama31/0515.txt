@@ -1,0 +1,55 @@
+-- Schema for database: rschema_0515
+CREATE TABLE `user` (
+  `phone_number` varchar(15) NOT NULL,
+  `credit_status` varchar(50) DEFAULT NULL,
+  `verification_code` char(6) DEFAULT NULL,
+  PRIMARY KEY (`phone_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bike` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `status` varchar(50) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `qr_code` varchar(255) DEFAULT NULL,
+  `unlock_password` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trip` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `bike_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `fee` decimal(10,2) DEFAULT NULL,
+  `payment_status` varchar(50) DEFAULT NULL,
+  `user_phone_number` varchar(15) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `trip_ibfk_1` FOREIGN KEY (`bike_id`) REFERENCES `bike` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trip_ibfk_2` FOREIGN KEY (`user_phone_number`) REFERENCES `user` (`phone_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `malfunction` (
+  `bike_id` int(11) NOT NULL,
+  `user_phone_number` varchar(15) NOT NULL,
+  `description` text DEFAULT NULL,
+  `report_time` datetime NOT NULL,
+  PRIMARY KEY (`bike_id`, `user_phone_number`),
+  CONSTRAINT `malfunction_ibfk_1` FOREIGN KEY (`bike_id`) REFERENCES `bike` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `malfunction_ibfk_2` FOREIGN KEY (`user_phone_number`) REFERENCES `user` (`phone_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_trip` (
+  `user_phone_number` varchar(15) NOT NULL,
+  `trip_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_phone_number`, `trip_id`),
+  CONSTRAINT `user_trip_ibfk_1` FOREIGN KEY (`user_phone_number`) REFERENCES `user` (`phone_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_trip_ibfk_2` FOREIGN KEY (`trip_id`) REFERENCES `trip` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `use_bike` (
+  `bike_id` int(11) NOT NULL,
+  `trip_id` int(11) NOT NULL,
+  PRIMARY KEY (`bike_id`, `trip_id`),
+  CONSTRAINT `use_bike_ibfk_1` FOREIGN KEY (`bike_id`) REFERENCES `bike` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `use_bike_ibfk_2` FOREIGN KEY (`trip_id`) REFERENCES `trip` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

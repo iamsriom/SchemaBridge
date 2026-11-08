@@ -1,0 +1,44 @@
+{
+  "text_number": 183,
+  "id": "SB-183",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0183",
+  "question": "Background / Context\n\nThe project involves developing a database and application system for a record store. This system is designed to facilitate store employees in efficiently locating and managing the records customers are interested in purchasing. The system will store and manage data related to records, artists, songs, genres, and inventory across various store locations.\n\nObjectives\n\n1. Provide a reliable database system to store detailed information about albums, songs, artists, and genres.\n2. Enable employees to easily search and retrieve information to assist customers.\n3. Maintain an accurate and up-to-date inventory of albums available at each store location.\n\nStakeholders & Users\n\n- Store Employees: Primary users who will interact with the system to assist customers and manage inventory.\n- Store Managers: Oversee operations and ensure the inventory is accurate and sufficient.\n- Developers: Responsible for developing and maintaining the system.\n\nFunctional Descriptions\n\n1. Employee Management:\n   - Manage employee records and associate them with specific store locations.\n   \n2. Album and Song Management:\n   - Store detailed information about albums, their release dates, and pricing.\n   - Manage songs, including titles, duration, lyrics, and associated albums.\n   \n3. Genre Management:\n   - Maintain a list of genres and associate them with songs.\n   \n4. Artist Management:\n   - Record details about artists, including stage names, solo/band status, and group memberships.\n   \n5. Inventory Management:\n   - Track the availability of albums at different store locations to ensure stock is maintained.\n\n6. Location Management:\n   - Manage records of store locations with contact information and addresses.\n\nNon-Functional Descriptions\n\n1. Performance:\n   - The system should efficiently handle data operations for multiple locations without user-perceptible delay.\n\n2. Scalability:\n   - Capable of scaling to accommodate additional locations and a growing number of records.\n\n3. Reliability:\n   - Ensure accurate data entry, storage, and retrieval to minimize errors and redundancy.\n\n4. Security:\n   - Protect sensitive information related to employees, inventory, and transactions.",
+  "ddl": "-- Schema for database: schemabench_0183\n\nCREATE TABLE employees (\n  employee_id INT(11) NOT NULL AUTO_INCREMENT,\n  first_name VARCHAR(255) NOT NULL,\n  last_name VARCHAR(255) NOT NULL,\n  email VARCHAR(255) NOT NULL,\n  phone VARCHAR(255) NOT NULL,\n  store_id INT(11) NOT NULL,\n  PRIMARY KEY (employee_id),\n  FOREIGN KEY (store_id) REFERENCES stores (store_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE albums (\n  album_id INT(11) NOT NULL AUTO_INCREMENT,\n  title VARCHAR(255) NOT NULL,\n  release_date DATE NOT NULL,\n  price DECIMAL(10,2) NOT NULL,\n  PRIMARY KEY (album_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE songs (\n  song_id INT(11) NOT NULL AUTO_INCREMENT,\n  title VARCHAR(255) NOT NULL,\n  duration INT(11) NOT NULL,\n  lyrics TEXT NOT NULL,\n  album_id INT(11) NOT NULL,\n  PRIMARY KEY (song_id),\n  FOREIGN KEY (album_id) REFERENCES albums (album_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE genres (\n  genre_id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  PRIMARY KEY (genre_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE artists (\n  artist_id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  stage_name VARCHAR(255) NOT NULL,\n  solo_band_status VARCHAR(255) NOT NULL,\n  group_membership VARCHAR(255) NOT NULL,\n  PRIMARY KEY (artist_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE inventory (\n  inventory_id INT(11) NOT NULL AUTO_INCREMENT,\n  album_id INT(11) NOT NULL,\n  store_id INT(11) NOT NULL,\n  quantity INT(11) NOT NULL,\n  PRIMARY KEY (inventory_id),\n  FOREIGN KEY (album_id) REFERENCES albums (album_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (store_id) REFERENCES stores (store_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE stores (\n  store_id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  address VARCHAR(255) NOT NULL,\n  phone VARCHAR(255) NOT NULL,\n  PRIMARY KEY (store_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE locations (\n  location_id INT(11) NOT NULL AUTO_INCREMENT,\n  store_id INT(11) NOT NULL,\n  address VARCHAR(255) NOT NULL,\n  PRIMARY KEY (location_id),\n  FOREIGN KEY (store_id) REFERENCES stores (store_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE transactions (\n  transaction_id INT(11) NOT NULL AUTO_INCREMENT,\n  employee_id INT(11) NOT NULL,\n  store_id INT(11) NOT NULL,\n  transaction_date DATE NOT NULL,\n  PRIMARY KEY (transaction_id),\n  FOREIGN KEY (employee_id) REFERENCES employees (employee_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (store_id) REFERENCES stores (store_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE transaction_items (\n  transaction_item_id INT(11) NOT NULL AUTO_INCREMENT,\n  transaction_id INT(11) NOT NULL,\n  album_id INT(11) NOT NULL,\n  quantity INT(11) NOT NULL,\n  PRIMARY KEY (transaction_item_id),\n  FOREIGN KEY (transaction_id) REFERENCES transactions (transaction_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (album_id) REFERENCES albums (album_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE genre_songs (\n  genre_id INT(11) NOT NULL,\n  song_id INT(11) NOT NULL,\n  PRIMARY KEY (genre_id, song_id),\n  FOREIGN KEY (genre_id) REFERENCES genres (genre_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (song_id) REFERENCES songs (song_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE artist_songs (\n  artist_id INT(11) NOT NULL,\n  song_id INT(11) NOT NULL,\n  PRIMARY KEY (artist_id, song_id),\n  FOREIGN KEY (artist_id) REFERENCES artists (artist_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (song_id) REFERENCES songs (song_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE inventory_items (\n  inventory_item_id INT(11) NOT NULL AUTO_INCREMENT,\n  inventory_id INT(11) NOT NULL,\n  album_id INT(11) NOT NULL,\n  quantity INT(11) NOT NULL,\n  PRIMARY KEY (inventory_item_id),\n  FOREIGN KEY (inventory_id) REFERENCES inventory (inventory_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (album_id) REFERENCES albums (album_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE location_inventory (\n  location_id INT(11) NOT NULL,\n  inventory_id INT(11) NOT NULL,\n  PRIMARY KEY (location_id, inventory_id),\n  FOREIGN KEY (location_id) REFERENCES locations (location_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (inventory_id) REFERENCES inventory (inventory_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "employees",
+      "albums",
+      "songs",
+      "genres",
+      "artists",
+      "inventory",
+      "stores",
+      "locations",
+      "transactions",
+      "transaction_items",
+      "genre_songs",
+      "artist_songs",
+      "inventory_items",
+      "location_inventory"
+    ],
+    "columns_by_table": {
+      "employees": [],
+      "albums": [],
+      "songs": [],
+      "genres": [],
+      "artists": [],
+      "inventory": [],
+      "stores": [],
+      "locations": [],
+      "transactions": [],
+      "transaction_items": [],
+      "genre_songs": [],
+      "artist_songs": [],
+      "inventory_items": [],
+      "location_inventory": []
+    }
+  }
+}

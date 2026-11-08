@@ -1,0 +1,48 @@
+{
+  "text_number": 141,
+  "id": "SB-141",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0141",
+  "question": "1. Background / Context\n\nWalmart aims to enhance its predictive analytics capabilities by accurately forecasting sales for 111 products that are sensitive to weather conditions, such as umbrellas, bread, and milk. These forecasts are particularly pertinent during major weather events and affect 45 Walmart retail locations.\n\n2. Objectives\n\n- Develop a system to predict sales fluctuations for weather-sensitive products.\n- Improve inventory management and reduce stockouts during critical weather events.\n- Increase overall sales efficiency by aligning stock with anticipated demand influenced by weather changes.\n\n3. Stakeholders & Users\n\n- Stakeholders: Walmart corporate decision-makers, supply chain and inventory managers.\n- Users: Data analysts, store managers, inventory planners, and business intelligence teams.\n\n4. Functional Descriptions\n\n- Data Integration: The system integrates sales data and weather data to analyze correlations and patterns.\n- Sales Prediction: Generate sales forecasts for specific products by analyzing weather data impacts.\n- Reporting: Provide insights and reports for decision-makers to facilitate strategic planning and inventory adjustments.\n- Database Management: Manage relational data involving stores, weather stations, and product sales effectively.\n\n5. Non-Functional Descriptions\n\n- Scalability: The system should handle large datasets from multiple stores and weather stations without performance degradation.\n- Accuracy: Forecasts should maintain a high level of accuracy to ensure effective decision-making.\n- Reliability: The system must be reliable, with consistent uptime during critical weather events.\n- Security: Secure storage and processing of sensitive sales and weather data.",
+  "ddl": "-- Schema for database: schemabench_0141\nCREATE TABLE `stores` (\n`store_id` int(11) NOT NULL,\n`store_name` varchar(255) NOT NULL,\n`location` varchar(255) NOT NULL,\n`weather_station_id` int(11) NOT NULL,\nPRIMARY KEY (`store_id`),\nFOREIGN KEY (`weather_station_id`) REFERENCES `weather_stations` (`weather_station_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `weather_stations` (\n`weather_station_id` int(11) NOT NULL,\n`station_name` varchar(255) NOT NULL,\n`location` varchar(255) NOT NULL,\nPRIMARY KEY (`weather_station_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `products` (\n`product_id` int(11) NOT NULL,\n`product_name` varchar(255) NOT NULL,\n`product_category` varchar(255) NOT NULL,\nPRIMARY KEY (`product_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sales` (\n`sale_id` int(11) NOT NULL,\n`store_id` int(11) NOT NULL,\n`product_id` int(11) NOT NULL,\n`sale_date` datetime NOT NULL,\n`sale_quantity` int(11) NOT NULL,\nPRIMARY KEY (`sale_id`),\nFOREIGN KEY (`store_id`) REFERENCES `stores` (`store_id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `weather_data` (\n`weather_data_id` int(11) NOT NULL,\n`weather_station_id` int(11) NOT NULL,\n`weather_date` datetime NOT NULL,\n`temperature` int(11) NOT NULL,\n`humidity` int(11) NOT NULL,\n`wind_speed` int(11) NOT NULL,\nPRIMARY KEY (`weather_data_id`),\nFOREIGN KEY (`weather_station_id`) REFERENCES `weather_stations` (`weather_station_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sales_forecast` (\n`sale_forecast_id` int(11) NOT NULL,\n`store_id` int(11) NOT NULL,\n`product_id` int(11) NOT NULL,\n`forecast_date` datetime NOT NULL,\n`forecast_quantity` int(11) NOT NULL,\nPRIMARY KEY (`sale_forecast_id`),\nFOREIGN KEY (`store_id`) REFERENCES `stores` (`store_id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `reports` (\n`report_id` int(11) NOT NULL,\n`report_name` varchar(255) NOT NULL,\n`report_date` datetime NOT NULL,\n`report_content` text NOT NULL,\nPRIMARY KEY (`report_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `users` (\n`user_id` int(11) NOT NULL,\n`user_name` varchar(255) NOT NULL,\n`user_email` varchar(255) NOT NULL,\n`user_role` varchar(255) NOT NULL,\nPRIMARY KEY (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_roles` (\n`user_role_id` int(11) NOT NULL,\n`user_role_name` varchar(255) NOT NULL,\nPRIMARY KEY (`user_role_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_permissions` (\n`user_permission_id` int(11) NOT NULL,\n`user_id` int(11) NOT NULL,\n`user_role_id` int(11) NOT NULL,\n`permission_name` varchar(255) NOT NULL,\nPRIMARY KEY (`user_permission_id`),\nFOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`user_role_id`) REFERENCES `user_roles` (`user_role_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_sessions` (\n`user_session_id` int(11) NOT NULL,\n`user_id` int(11) NOT NULL,\n`session_start_time` datetime NOT NULL,\n`session_end_time` datetime NOT NULL,\nPRIMARY KEY (`user_session_id`),\nFOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_activity` (\n`user_activity_id` int(11) NOT NULL,\n`user_id` int(11) NOT NULL,\n`activity_date` datetime NOT NULL,\n`activity_type` varchar(255) NOT NULL,\n`activity_description` text NOT NULL,\nPRIMARY KEY (`user_activity_id`),\nFOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_preferences` (\n`user_preference_id` int(11) NOT NULL,\n`user_id` int(11) NOT NULL,\n`preference_name` varchar(255) NOT NULL,\n`preference_value` varchar(255) NOT NULL,\nPRIMARY KEY (`user_preference_id`),\nFOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_notifications` (\n`user_notification_id` int(11) NOT NULL,\n`user_id` int(11) NOT NULL,\n`notification_date` datetime NOT NULL,\n`notification_type` varchar(255) NOT NULL,\n`notification_message` text NOT NULL,\nPRIMARY KEY (`user_notification_id`),\nFOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_feedback` (\n`user_feedback_id` int(11) NOT NULL,\n`user_id` int(11) NOT NULL,\n`feedback_date` datetime NOT NULL,\n`feedback_type` varchar(255) NOT NULL,\n`feedback_message` text NOT NULL,\nPRIMARY KEY (`user_feedback_id`),\nFOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_reports` (\n`user_report_id` int(11) NOT NULL,\n`user_id`",
+  "metadata": {
+    "database": "schemabench_0141",
+    "tables": [
+      "stores",
+      "weather_stations",
+      "products",
+      "sales",
+      "weather_data",
+      "sales_forecast",
+      "reports",
+      "users",
+      "user_roles",
+      "user_permissions",
+      "user_sessions",
+      "user_activity",
+      "user_preferences",
+      "user_notifications",
+      "user_feedback",
+      "user_reports"
+    ],
+    "columns_by_table": {
+      "stores": [],
+      "weather_stations": [],
+      "products": [],
+      "sales": [],
+      "weather_data": [],
+      "sales_forecast": [],
+      "reports": [],
+      "users": [],
+      "user_roles": [],
+      "user_permissions": [],
+      "user_sessions": [],
+      "user_activity": [],
+      "user_preferences": [],
+      "user_notifications": [],
+      "user_feedback": [],
+      "user_reports": []
+    }
+  }
+}

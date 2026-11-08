@@ -1,0 +1,62 @@
+-- Schema for database: rschema_0518
+CREATE TABLE `maze` (
+  `maze_id` int(11) NOT NULL AUTO_INCREMENT,
+  `maze_file_path` varchar(255) NOT NULL,
+  `maze_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`maze_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `robot` (
+  `robot_id` int(11) NOT NULL AUTO_INCREMENT,
+  `robot_type` varchar(255) NOT NULL,
+  `current_position` varchar(255) NOT NULL,
+  `timer_status` varchar(255) DEFAULT NULL,
+  `maze_id` int(11) NOT NULL,
+  PRIMARY KEY (`robot_id`),
+  CONSTRAINT `robot_ibfk_1` FOREIGN KEY (`maze_id`) REFERENCES `maze` (`maze_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `forward_sensor` (
+  `sensor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `robot_id` int(11) NOT NULL,
+  `front_status` varchar(255) NOT NULL,
+  `left_status` varchar(255) NOT NULL,
+  `right_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`sensor_id`),
+  CONSTRAINT `forward_sensor_ibfk_1` FOREIGN KEY (`robot_id`) REFERENCES `robot` (`robot_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `proximity_sensor` (
+  `sensor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `robot_id` int(11) NOT NULL,
+  `coin_status` varchar(255) NOT NULL,
+  `ghost_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`sensor_id`),
+  CONSTRAINT `proximity_sensor_ibfk_1` FOREIGN KEY (`robot_id`) REFERENCES `robot` (`robot_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `timer` (
+  `timer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `robot_id` int(11) NOT NULL,
+  `timer_event_description` varchar(255) NOT NULL,
+  `timer_event_time` datetime NOT NULL,
+  PRIMARY KEY (`timer_id`),
+  CONSTRAINT `timer_ibfk_1` FOREIGN KEY (`robot_id`) REFERENCES `robot` (`robot_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_robot_operation` (
+  `robot_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `operation_type` varchar(255) NOT NULL,
+  PRIMARY KEY (`robot_id`, `user_id`),
+  CONSTRAINT `user_robot_operation_ibfk_1` FOREIGN KEY (`robot_id`) REFERENCES `robot` (`robot_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_robot_operation_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

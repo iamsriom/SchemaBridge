@@ -1,0 +1,131 @@
+-- Schema for database: schemabench_0002
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `avatar` varchar(255) DEFAULT NULL,
+  `role_id` int(11) DEFAULT NULL,
+  `settings` json DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `display_name_singular` varchar(255) NOT NULL,
+  `display_name_plural` varchar(255) NOT NULL,
+  `icon` varchar(255) DEFAULT NULL,
+  `model_name` varchar(255) DEFAULT NULL,
+  `policy_name` varchar(255) DEFAULT NULL,
+  `controller` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `generate_permissions` tinyint(1) DEFAULT NULL,
+  `server_side` tinyint(1) DEFAULT NULL,
+  `details` json DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `menus` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `menu_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `menu_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `url` varchar(255) DEFAULT NULL,
+  `target` varchar(255) DEFAULT NULL,
+  `icon_class` varchar(255) DEFAULT NULL,
+  `color` varchar(255) DEFAULT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `order` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `route` varchar(255) DEFAULT NULL,
+  `parameters` json DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `menu_items_ibfk_1` FOREIGN KEY (`menu_id`) REFERENCES `menus` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `menu_items_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `menu_items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `display_name` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) NOT NULL,
+  `display_name` varchar(255) NOT NULL,
+  `value` text DEFAULT NULL,
+  `details` json DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `order` int(11) DEFAULT NULL,
+  `group` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) NOT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permission_roles` (
+  `permission_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  PRIMARY KEY (`permission_id`, `role_id`),
+  CONSTRAINT `permission_roles_ibfk_1` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `permission_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `translations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `table_name` varchar(255) NOT NULL,
+  `column_name` varchar(255) NOT NULL,
+  `foreign_key` int(11) DEFAULT NULL,
+  `locale` varchar(10) NOT NULL,
+  `value` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_rows` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `data_type_id` int(11) DEFAULT NULL,
+  `field` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `display_name` varchar(255) NOT NULL,
+  `required` tinyint(1) DEFAULT NULL,
+  `browse` tinyint(1) DEFAULT NULL,
+  `read` tinyint(1) DEFAULT NULL,
+  `edit` tinyint(1) DEFAULT NULL,
+  `add` tinyint(1) DEFAULT NULL,
+  `delete` tinyint(1) DEFAULT NULL,
+  `details` json DEFAULT NULL,
+  `order` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `data_rows_ibfk_1` FOREIGN KEY (`data_type_id`) REFERENCES `data_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_roles` (
+  `user_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`, `role_id`),
+  CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

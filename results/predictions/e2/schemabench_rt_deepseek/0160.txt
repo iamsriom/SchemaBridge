@@ -1,0 +1,87 @@
+-- Schema for database: schemabench_0160
+CREATE TABLE `company_info` (
+  `company_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `established_date` datetime NOT NULL,
+  `details` text DEFAULT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `exchange` (
+  `exchange_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  PRIMARY KEY (`exchange_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `broker_info` (
+  `broker_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_details` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  PRIMARY KEY (`broker_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trader_info` (
+  `trader_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_details` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  PRIMARY KEY (`trader_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `account_info` (
+  `account_id` int(11) NOT NULL AUTO_INCREMENT,
+  `trader_id` int(11) NOT NULL,
+  `broker_id` int(11) NOT NULL,
+  `cash_amount` decimal(15,2) NOT NULL,
+  `security_amount` decimal(15,2) NOT NULL,
+  PRIMARY KEY (`account_id`),
+  CONSTRAINT `account_info_ibfk_1` FOREIGN KEY (`trader_id`) REFERENCES `trader_info` (`trader_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `account_info_ibfk_2` FOREIGN KEY (`broker_id`) REFERENCES `broker_info` (`broker_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `broker_exchange_deals` (
+  `deal_id` int(11) NOT NULL AUTO_INCREMENT,
+  `broker_id` int(11) NOT NULL,
+  `exchange_id` int(11) NOT NULL,
+  `fees` decimal(15,2) NOT NULL,
+  PRIMARY KEY (`deal_id`),
+  CONSTRAINT `broker_exchange_deals_ibfk_1` FOREIGN KEY (`broker_id`) REFERENCES `broker_info` (`broker_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `broker_exchange_deals_ibfk_2` FOREIGN KEY (`exchange_id`) REFERENCES `exchange` (`exchange_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stock_info` (
+  `stock_id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_id` int(11) NOT NULL,
+  `exchange_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `share_number` int(11) NOT NULL,
+  `symbol` varchar(10) NOT NULL,
+  `launch_date` datetime NOT NULL,
+  `price` decimal(15,2) NOT NULL,
+  PRIMARY KEY (`stock_id`),
+  CONSTRAINT `stock_info_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `company_info` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `stock_info_ibfk_2` FOREIGN KEY (`exchange_id`) REFERENCES `exchange` (`exchange_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction_info` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `deal_id` int(11) NOT NULL,
+  `stock_id` int(11) NOT NULL,
+  `broker_id` int(11) NOT NULL,
+  `exchange_id` int(11) NOT NULL,
+  `trader_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `price` decimal(15,2) NOT NULL,
+  `number_of_shares` int(11) NOT NULL,
+  `brokerage_fees` decimal(15,2) NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  CONSTRAINT `transaction_info_ibfk_1` FOREIGN KEY (`deal_id`) REFERENCES `broker_exchange_deals` (`deal_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_info_ibfk_2` FOREIGN KEY (`stock_id`) REFERENCES `stock_info` (`stock_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_info_ibfk_3` FOREIGN KEY (`broker_id`) REFERENCES `broker_info` (`broker_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_info_ibfk_4` FOREIGN KEY (`exchange_id`) REFERENCES `exchange` (`exchange_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_info_ibfk_5` FOREIGN KEY (`trader_id`) REFERENCES `trader_info` (`trader_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_info_ibfk_6` FOREIGN KEY (`account_id`) REFERENCES `account_info` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

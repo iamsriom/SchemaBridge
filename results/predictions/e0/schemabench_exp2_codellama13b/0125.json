@@ -1,0 +1,36 @@
+{
+  "text_number": 125,
+  "id": "SB-125",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0125",
+  "question": "Background / Context\n\nThis project involves the Sakila test database, a fictional and simplified database designed to manage a video rental store. It contains data structures relevant to tracking movies, customers, rentals, and payments in a video rental business context.\n\nObjectives\n\nThe objective is to create a database system that efficiently manages various aspects of a video rental business, including movie information, inventory management, customer records, rental transactions, and related payments.\n\nStakeholders & Users\n\n- Store Managers: Oversee store operations and manage inventory.\n- Staff: Handle customer interactions, process rentals, and manage transactions.\n- Customers: Rent movies and interact with store services.\n\nFunctional Descriptions\n\n1. Movie Management:\n   - Store and manage details about films, including titles, descriptions, release years, languages, ratings, and special features.\n   - Categorize films into different genres using a category system.\n\n2. Inventory Management:\n   - Track inventory of films across different stores.\n\n3. Customer Management:\n   - Maintain records of customer details including addresses, contact information, and rental history.\n   - Manage active status of customers.\n\n4. Rental Processing:\n   - Record rental transactions including rental dates and return dates.\n   - Associate each rental with a customer and store staff member.\n\n5. Payment Processing:\n   - Process payments linked to rental transactions.\n   - Store details of payment amounts and dates.\n\n6. Staff Management:\n   - Manage staff details for operational purposes.\n   - Assign staff members to stores.\n\nNon-Functional Descriptions\n\n- Database Integrity: Ensure referential integrity through the use of foreign keys.\n- User Access Control: Allow different levels of access for managers, staff, and customers.\n- Scalability: Support potential increase in data and user interactions.\n- Data Consistency: Maintain data accuracy with constraints and default values.",
+  "ddl": "-- Schema for database: schemabench_0125\n\nCREATE TABLE movies (\n  movie_id INT(11) NOT NULL AUTO_INCREMENT,\n  title VARCHAR(255) NOT NULL,\n  description TEXT,\n  release_year INT(11),\n  language VARCHAR(255),\n  rating VARCHAR(255),\n  special_features VARCHAR(255),\n  PRIMARY KEY (movie_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE categories (\n  category_id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  PRIMARY KEY (category_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE movie_categories (\n  movie_id INT(11) NOT NULL,\n  category_id INT(11) NOT NULL,\n  PRIMARY KEY (movie_id, category_id),\n  FOREIGN KEY (movie_id) REFERENCES movies (movie_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (category_id) REFERENCES categories (category_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE stores (\n  store_id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  PRIMARY KEY (store_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE inventory (\n  inventory_id INT(11) NOT NULL AUTO_INCREMENT,\n  store_id INT(11) NOT NULL,\n  movie_id INT(11) NOT NULL,\n  quantity INT(11) NOT NULL,\n  PRIMARY KEY (inventory_id),\n  FOREIGN KEY (store_id) REFERENCES stores (store_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (movie_id) REFERENCES movies (movie_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE customers (\n  customer_id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  address VARCHAR(255),\n  phone VARCHAR(255),\n  email VARCHAR(255),\n  PRIMARY KEY (customer_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE rentals (\n  rental_id INT(11) NOT NULL AUTO_INCREMENT,\n  customer_id INT(11) NOT NULL,\n  store_id INT(11) NOT NULL,\n  movie_id INT(11) NOT NULL,\n  rental_date DATETIME NOT NULL,\n  return_date DATETIME,\n  PRIMARY KEY (rental_id),\n  FOREIGN KEY (customer_id) REFERENCES customers (customer_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (store_id) REFERENCES stores (store_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (movie_id) REFERENCES movies (movie_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE payments (\n  payment_id INT(11) NOT NULL AUTO_INCREMENT,\n  rental_id INT(11) NOT NULL,\n  amount DECIMAL(10,2) NOT NULL,\n  payment_date DATETIME NOT NULL,\n  PRIMARY KEY (payment_id),\n  FOREIGN KEY (rental_id) REFERENCES rentals (rental_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE staff (\n  staff_id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  address VARCHAR(255),\n  phone VARCHAR(255),\n  email VARCHAR(255),\n  PRIMARY KEY (staff_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE staff_stores (\n  staff_id INT(11) NOT NULL,\n  store_id INT(11) NOT NULL,\n  PRIMARY KEY (staff_id, store_id),\n  FOREIGN KEY (staff_id) REFERENCES staff (staff_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (store_id) REFERENCES stores (store_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "movies",
+      "categories",
+      "movie_categories",
+      "stores",
+      "inventory",
+      "customers",
+      "rentals",
+      "payments",
+      "staff",
+      "staff_stores"
+    ],
+    "columns_by_table": {
+      "movies": [],
+      "categories": [],
+      "movie_categories": [],
+      "stores": [],
+      "inventory": [],
+      "customers": [],
+      "rentals": [],
+      "payments": [],
+      "staff": [],
+      "staff_stores": []
+    }
+  }
+}

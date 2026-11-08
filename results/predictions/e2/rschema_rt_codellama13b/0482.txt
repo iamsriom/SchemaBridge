@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0482
+CREATE TABLE `Client` (
+  `Client_Contact_Person` varchar(255) DEFAULT NULL,
+  `Client_Name` varchar(255) NOT NULL,
+  `Client_Number` int(11) NOT NULL,
+  `Client_Type` int(11) NOT NULL,
+  `Contact_Phone_Number` varchar(15) DEFAULT NULL,
+  `Discount_Rate` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`Client_Number`),
+  CONSTRAINT `Client_ibfk_1` FOREIGN KEY (`Client_Type`) REFERENCES `Department` (`Department_Number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Vehicle` (
+  `Client_Number` int(11) NOT NULL,
+  `License_Plate_Number` varchar(15) NOT NULL,
+  `Vehicle_Category` varchar(50) DEFAULT NULL,
+  `Vehicle_Color` varchar(30) DEFAULT NULL,
+  `Vehicle_Model` varchar(50) DEFAULT NULL,
+  `Maintenance_Order_Number` int(11) DEFAULT NULL,
+  PRIMARY KEY (`License_Plate_Number`),
+  CONSTRAINT `Vehicle_ibfk_1` FOREIGN KEY (`Client_Number`) REFERENCES `Client` (`Client_Number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Employee` (
+  `Department_Number` int(11) NOT NULL,
+  `Employee_Home_Address` varchar(255) DEFAULT NULL,
+  `Employee_Name` varchar(255) NOT NULL,
+  `Employee_Number` int(11) NOT NULL,
+  `Employee_Phone_Number` varchar(15) DEFAULT NULL,
+  `Employee_Position` varchar(50) DEFAULT NULL,
+  `Maintenance_Order_Number` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Employee_Number`),
+  CONSTRAINT `Employee_ibfk_1` FOREIGN KEY (`Department_Number`) REFERENCES `Department` (`Department_Number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Department` (
+  `Department_Name` varchar(255) NOT NULL,
+  `Department_Number` int(11) NOT NULL,
+  `Department_Phone_Number` varchar(15) DEFAULT NULL,
+  `Supervisor_Employee_Number` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Department_Number`),
+  CONSTRAINT `Department_ibfk_1` FOREIGN KEY (`Supervisor_Employee_Number`) REFERENCES `Employee` (`Employee_Number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Maintenance_Task` (
+  `License_Plate_Number` varchar(15) NOT NULL,
+  `Maintenance_Content` text DEFAULT NULL,
+  `Maintenance_Man-Hours` decimal(5,2) DEFAULT NULL,
+  `Maintenance_Order_Number` int(11) NOT NULL,
+  `Maintenance_Worker_Number` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Maintenance_Order_Number`),
+  CONSTRAINT `Maintenance_Task_ibfk_1` FOREIGN KEY (`License_Plate_Number`) REFERENCES `Vehicle` (`License_Plate_Number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Maintenance_Task_ibfk_2` FOREIGN KEY (`Maintenance_Worker_Number`) REFERENCES `Employee` (`Employee_Number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

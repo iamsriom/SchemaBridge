@@ -1,0 +1,95 @@
+The database schema named 'schemabench_0170' consists of eight tables. The 'customers' table is used to store information about the customers, including their unique ID, name, address, city, country, phone number, and email. The 'items' table stores information about the items, including their unique ID, type, name, width, weight, and HS code. The 'orders' table contains information about the orders, including the unique ID, customer ID, item ID, export ID, import ID, quantity, and price. The 'payment' table records payment information, including the unique ID, order ID, remittance amount, and date. The 'exports' and 'imports' tables contain information about the exports and imports, including the unique ID, date, destination, and freight. The 'production' table stores information about the production, including the unique ID, order ID, factory name, quantity, and price. The 'exchanges' table records exchange rates, including the date and rate. All these tables have foreign keys that reference the primary keys of other tables, ensuring referential integrity. The schema is exhaustive but should be readable and understandable to a non-expert.
+```python
+# This is a sample Python code to create the schema described above
+import sqlite3
+# Connect to SQLite database
+conn = sqlite3.connect('schemabench_0170.db')
+c = conn.cursor()
+# Create 'customers' table
+c.execute('''
+CREATE TABLE customers (
+customer_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+name VARCHAR(50) NOT NULL UNIQUE,
+address VARCHAR(255),
+city VARCHAR(50) NOT NULL,
+country VARCHAR(50) NOT NULL,
+phone VARCHAR(50) UNIQUE,
+email VARCHAR(100) UNIQUE
+)
+''')
+# Create 'items' table
+c.execute('''
+CREATE TABLE items (
+item_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+type VARCHAR(50) NOT NULL,
+name VARCHAR(50) NOT NULL UNIQUE,
+width INTEGER,
+weight INTEGER,
+hs_code INTEGER
+)
+''')
+# Create 'orders' table
+c.execute('''
+CREATE TABLE orders (
+order_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+customer_id INTEGER NOT NULL,
+item_id INTEGER NOT NULL,
+export_id INTEGER NOT NULL,
+import_id INTEGER,
+quantity INTEGER NOT NULL,
+price DECIMAL(15,2) NOT NULL,
+FOREIGN KEY(customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
+FOREIGN KEY(item_id) REFERENCES items(item_id) ON DELETE CASCADE,
+FOREIGN KEY(export_id) REFERENCES exports(export_id) ON DELETE CASCADE,
+FOREIGN KEY(import_id) REFERENCES imports(import_id) ON DELETE CASCADE
+)
+''')
+# Create 'payment' table
+c.execute('''
+CREATE TABLE payment (
+payment_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+order_id INTEGER NOT NULL,
+remittance DECIMAL(15,2) NOT NULL,
+date DATE NOT NULL,
+FOREIGN KEY(order_id) REFERENCES orders(order_id) ON DELETE CASCADE
+)
+''')
+# Create 'exports' table
+c.execute('''
+CREATE TABLE exports (
+export_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+date DATE,
+destination VARCHAR(50) NOT NULL,
+freight INTEGER NOT NULL
+)
+''')
+# Create 'imports' table
+c.execute('''
+CREATE TABLE imports (
+import_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+arrival VARCHAR(50) NOT NULL,
+freight INTEGER NOT NULL
+)
+''')
+# Create 'production' table
+c.execute('''
+CREATE TABLE production (
+production_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+order_id INTEGER NOT NULL,
+factory_name VARCHAR(50) NOT NULL,
+quantity INTEGER NOT NULL,
+price INTEGER NOT NULL,
+FOREIGN KEY(order_id) REFERENCES orders(order_id) ON DELETE CASCADE
+)
+''')
+# Create 'exchanges' table
+c.execute('''
+CREATE TABLE exchanges (
+date DATE NOT NULL UNIQUE,
+rate DECIMAL(6,2) NOT NULL
+)
+''')
+# Commit changes and close connection
+conn.commit()
+conn.close()
+```

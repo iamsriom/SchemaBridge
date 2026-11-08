@@ -1,0 +1,26 @@
+{
+  "text_number": 351,
+  "id": "67552f0a13602ec03b41a91f",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "rschema_0351",
+  "question": "The access control system shall manage access permissions for different types of objects based on users or roles. Each object shall have a corresponding class and unique identifier, and may have a parent object, thereby allowing inheritance of permissions from the parent object. The system shall also record the owner of each object, including their name and contact information, and specify the authorized object in each permission entry, as well as whether to record audit logs for successful or failed access attempts.",
+  "ddl": "--Schemafordatabase:rschema_0351\n--Foreachtable:CREATE TABLE `users` (\n\\t`id` int(11) NOT NULL AUTO_INCREMENT,\n\\t`name` varchar(255) NOT NULL,\n\\t`contact_info` varchar(255) NOT NULL,\n\\t`parent_id` int(11) DEFAULT NULL,\n\\tPRIMARY KEY (`id`),\n\\tKEY `parent_id` (`parent_id`),\n\\tCONSTRAINT `users_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n--Foreachtable:CREATE TABLE `roles` (\n\\t`id` int(11) NOT NULL AUTO_INCREMENT,\n\\t`name` varchar(255) NOT NULL,\n\\t`object_id` int(11) NOT NULL,\n\\tPRIMARY KEY (`id`),\n\\tKEY `object_id` (`object_id`),\n\\tCONSTRAINT `roles_ibfk_1` FOREIGN KEY (`object_id`) REFERENCES `objects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n--Foreachtable:CREATE TABLE `objects` (\n\\t`id` int(11) NOT NULL AUTO_INCREMENT,\n\\t`name` varchar(255) NOT NULL,\n\\t`owner_id` int(11) NOT NULL,\n\\tPRIMARY KEY (`id`),\n\\tKEY `owner_id` (`owner_id`),\n\\tCONSTRAINT `objects_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n--Foreachtable:CREATE TABLE `permissions` (\n\\t`id` int(11) NOT NULL AUTO_INCREMENT,\n\\t`user_id` int(11) NOT NULL,\n\\t`role_id` int(11) NOT NULL,\n\\t`object_id` int(11) NOT NULL,\n\\t`authorized_object_id` int(11) NOT NULL,\n\\tPRIMARY KEY (`id`),\n\\tKEY `user_id` (`user_id`),\n\\tKEY `role_id` (`role_id`),\n\\tKEY `object_id` (`object_id`),\n\\tKEY `authorized_object_id` (`authorized_object_id`),\n\\tCONSTRAINT `permissions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n\\tCONSTRAINT `permissions_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n\\tCONSTRAINT `permissions_ibfk_3` FOREIGN KEY (`object_id`) REFERENCES `objects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n\\tCONSTRAINT `permissions_ibfk_4` FOREIGN KEY (`authorized_object_id`) REFERENCES `objects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n--Foreachtable:CREATE TABLE `audit_logs` (\n\\t`id` int(11) NOT NULL AUTO_INCREMENT,\n\\t`user_id` int(11) NOT NULL,\n\\t`permission_id` int(11) NOT NULL,\n\\t`access_time` datetime NOT NULL,\n\\t`success` tinyint(1) NOT NULL,\n\\tPRIMARY KEY (`id`),\n\\tKEY `user_id` (`user_id`),\n\\tKEY `permission_id` (`permission_id`),\n\\tCONSTRAINT `audit_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n\\tCONSTRAINT `audit_logs_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "roles",
+      "objects",
+      "permissions",
+      "audit_logs"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "roles": [],
+      "objects": [],
+      "permissions": [],
+      "audit_logs": []
+    }
+  }
+}

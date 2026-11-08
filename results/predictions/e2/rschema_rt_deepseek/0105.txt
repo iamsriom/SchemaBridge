@@ -1,0 +1,47 @@
+-- Schema for database: rschema_0105
+CREATE TABLE `User` (
+  `User_ID` int(11) NOT NULL,
+  `Account` varchar(255) DEFAULT NULL,
+  `Birthday` datetime DEFAULT NULL,
+  `Email` varchar(255) DEFAULT NULL,
+  `Gender` varchar(10) DEFAULT NULL,
+  `Nickname` varchar(255) DEFAULT NULL,
+  `Password` varchar(255) DEFAULT NULL,
+  `Phone` varchar(20) DEFAULT NULL,
+  `Registration_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`User_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_dynamic_information` (
+  `Dynamic_ID` int(11) NOT NULL,
+  `Dynamic_content` text DEFAULT NULL,
+  `Number_of_comments` int(11) DEFAULT NULL,
+  `Number_of_favorites` int(11) DEFAULT NULL,
+  `Number_of_likes` int(11) DEFAULT NULL,
+  `Publisher_ID` int(11) NOT NULL,
+  `Publishing_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`Dynamic_ID`),
+  CONSTRAINT `User_dynamic_information_ibfk_1` FOREIGN KEY (`Publisher_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Add_Contact` (
+  `User_ID` int(11) NOT NULL,
+  `Added_User_ID` int(11) NOT NULL,
+  `Adding_time` datetime NOT NULL,
+  `Relationship_Type` varchar(50) DEFAULT NULL,
+  `Remarks` text DEFAULT NULL,
+  PRIMARY KEY (`User_ID`, `Added_User_ID`, `Adding_time`),
+  CONSTRAINT `Add_Contact_ibfk_1` FOREIGN KEY (`Added_User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Social_Activity` (
+  `User_ID` int(11) NOT NULL,
+  `User_Dynamic_ID` int(11) NOT NULL,
+  `Creation_Time` datetime NOT NULL,
+  `Collection` int(11) DEFAULT NULL,
+  `Comment` text DEFAULT NULL,
+  `Like` int(11) DEFAULT NULL,
+  PRIMARY KEY (`User_ID`, `User_Dynamic_ID`, `Creation_Time`),
+  CONSTRAINT `Social_Activity_ibfk_1` FOREIGN KEY (`Dynamic_ID`) REFERENCES `User_dynamic_information` (`Dynamic_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Social_Activity_ibfk_2` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

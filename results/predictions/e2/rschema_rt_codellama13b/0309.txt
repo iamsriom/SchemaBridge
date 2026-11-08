@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0309
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(20) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `marital_status` varchar(20) NOT NULL,
+  `region` varchar(100) NOT NULL,
+  `income_group_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`),
+  KEY `customer_income_group_idx` (`income_group_id`),
+  CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`income_group_id`) REFERENCES `income_group` (`income_group_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `income_group` (
+  `income_group_id` int(11) NOT NULL,
+  `income_group_name` varchar(255) NOT NULL,
+  `income_range` varchar(100) NOT NULL,
+  PRIMARY KEY (`income_group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `insurance` (
+  `insurance_id` int(11) NOT NULL,
+  `insurance_name` varchar(255) NOT NULL,
+  `insurance_type` varchar(100) NOT NULL,
+  `premium` decimal(10,2) NOT NULL,
+  `vehicle_segment` varchar(100) NOT NULL,
+  PRIMARY KEY (`insurance_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_purchases_insurance` (
+  `insurance_id` int(11) NOT NULL,
+  `purchasing_customer` int(11) NOT NULL,
+  `purchase_date` datetime NOT NULL,
+  `expiration_date` datetime NOT NULL,
+  PRIMARY KEY (`insurance_id`, `purchasing_customer`),
+  KEY `customer_purchases_insurance_insurance_idx` (`insurance_id`),
+  KEY `customer_purchases_insurance_customer_idx` (`purchasing_customer`),
+  CONSTRAINT `customer_purchases_insurance_ibfk_1` FOREIGN KEY (`insurance_id`) REFERENCES `insurance` (`insurance_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customer_purchases_insurance_ibfk_2` FOREIGN KEY (`purchasing_customer`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_associated_income_group` (
+  `customer_id` int(11) NOT NULL,
+  `income_group_id` int(11) NOT NULL,
+  PRIMARY KEY (`customer_id`, `income_group_id`),
+  KEY `customer_associated_income_group_customer_idx` (`customer_id`),
+  KEY `customer_associated_income_group_income_group_idx` (`income_group_id`),
+  CONSTRAINT `customer_associated_income_group_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customer_associated_income_group_ibfk_2` FOREIGN KEY (`income_group_id`) REFERENCES `income_group` (`income_group_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

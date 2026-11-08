@@ -1,0 +1,131 @@
+-- Schema for database: schemabench_0220
+CREATE TABLE `hotel` (
+  `hotel_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `rating` int(11) NOT NULL,
+  PRIMARY KEY (`hotel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `room` (
+  `room_id` int(11) NOT NULL AUTO_INCREMENT,
+  `hotel_id` int(11) NOT NULL,
+  `room_number` varchar(10) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `view` varchar(255) DEFAULT NULL,
+  `availability` boolean NOT NULL,
+  PRIMARY KEY (`room_id`),
+  CONSTRAINT `room_ibfk_1` FOREIGN KEY (`hotel_id`) REFERENCES `hotel` (`hotel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reservation` (
+  `reservation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `room_id` int(11) NOT NULL,
+  `reservee_id` int(11) NOT NULL,
+  `board_type` varchar(255) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `duration` int(11) NOT NULL,
+  `paid_amount` decimal(10,2) NOT NULL,
+  `number_of_children` int(11) NOT NULL,
+  PRIMARY KEY (`reservation_id`),
+  CONSTRAINT `reservation_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `room` (`room_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reservation_ibfk_2` FOREIGN KEY (`reservee_id`) REFERENCES `reservee` (`reservee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reservee` (
+  `reservee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `booking_agency_id` int(11) NOT NULL,
+  PRIMARY KEY (`reservee_id`),
+  CONSTRAINT `reservee_ibfk_1` FOREIGN KEY (`booking_agency_id`) REFERENCES `booking_agency` (`booking_agency_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `booking_agency` (
+  `booking_agency_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `discount` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`booking_agency_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `activities` (
+  `activity_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `date` datetime NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`activity_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `offers` (
+  `offer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `hotel_id` int(11) NOT NULL,
+  `activity_id` int(11) NOT NULL,
+  PRIMARY KEY (`offer_id`),
+  CONSTRAINT `offers_ibfk_1` FOREIGN KEY (`hotel_id`) REFERENCES `hotel` (`hotel_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `offers_ibfk_2` FOREIGN KEY (`activity_id`) REFERENCES `activities` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `guest` (
+  `ssn` char(9) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `reservation_id` int(11) NOT NULL,
+  PRIMARY KEY (`ssn`),
+  CONSTRAINT `guest_ibfk_1` FOREIGN KEY (`reservation_id`) REFERENCES `reservation` (`reservation_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `guest_ibfk_2` FOREIGN KEY (`ssn`) REFERENCES `reservee` (`reservee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `participates_in` (
+  `ssn` char(9) NOT NULL,
+  `activity_id` int(11) NOT NULL,
+  PRIMARY KEY (`ssn`, `activity_id`),
+  CONSTRAINT `participates_in_ibfk_1` FOREIGN KEY (`ssn`) REFERENCES `guest` (`ssn`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `participates_in_ibfk_2` FOREIGN KEY (`activity_id`) REFERENCES `activities` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `hotel_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`department_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`hotel_id`) REFERENCES `hotel` (`hotel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `ssn` char(9) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `management_ssn` char(9) DEFAULT NULL,
+  `department_id` int(11) NOT NULL,
+  `hotel_id` int(11) NOT NULL,
+  `salary` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`ssn`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_ibfk_2` FOREIGN KEY (`hotel_id`) REFERENCES `hotel` (`hotel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `gym` (
+  `gym_id` int(11) NOT NULL AUTO_INCREMENT,
+  `hotel_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `working_hours` varchar(255) NOT NULL,
+  PRIMARY KEY (`gym_id`),
+  CONSTRAINT `gym_ibfk_1` FOREIGN KEY (`hotel_id`) REFERENCES `hotel` (`hotel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment` (
+  `equipment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `gym_id` int(11) NOT NULL,
+  `equipment_type` varchar(255) NOT NULL,
+  PRIMARY KEY (`equipment_id`),
+  CONSTRAINT `equipment_ibfk_1` FOREIGN KEY (`gym_id`) REFERENCES `gym` (`gym_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `restaurant` (
+  `restaurant_id` int(11) NOT NULL AUTO_INCREMENT,
+  `hotel_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `rating` int(11) NOT NULL,
+  `price_range` varchar(255) NOT NULL,
+  `food_type` varchar(255) NOT NULL,
+  PRIMARY KEY (`restaurant_id`),
+  CONSTRAINT `restaurant_ibfk_1` FOREIGN KEY (`hotel_id`) REFERENCES `hotel` (`hotel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

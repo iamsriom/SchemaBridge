@@ -1,0 +1,82 @@
+-- Schema for database: schemabench_0018
+CREATE TABLE `service` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_service_type` (
+  `service_id` int(11) NOT NULL,
+  `service_type_id` int(11) NOT NULL,
+  PRIMARY KEY (`service_id`, `service_type_id`),
+  KEY `service_service_type_ibfk_1` (`service_id`),
+  KEY `service_service_type_ibfk_2` (`service_type_id`),
+  CONSTRAINT `service_service_type_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `service_service_type_ibfk_2` FOREIGN KEY (`service_type_id`) REFERENCES `service_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alert` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `threshold` float NOT NULL,
+  `metric` varchar(255) NOT NULL,
+  `status_code` int(11) DEFAULT NULL,
+  `response_content` text DEFAULT NULL,
+  `jenkins_build_status` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `alert_ibfk_1` (`service_id`),
+  CONSTRAINT `alert_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notification` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `alert_id` int(11) NOT NULL,
+  `telephone` varchar(255) DEFAULT NULL,
+  `sms` varchar(255) DEFAULT NULL,
+  `hipchat` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `notification_ibfk_1` (`alert_id`),
+  CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`alert_id`) REFERENCES `alert` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `graphite_metric` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alert_graphite_metric` (
+  `alert_id` int(11) NOT NULL,
+  `graphite_metric_id` int(11) NOT NULL,
+  PRIMARY KEY (`alert_id`, `graphite_metric_id`),
+  KEY `alert_graphite_metric_ibfk_1` (`alert_id`),
+  KEY `alert_graphite_metric_ibfk_2` (`graphite_metric_id`),
+  CONSTRAINT `alert_graphite_metric_ibfk_1` FOREIGN KEY (`alert_id`) REFERENCES `alert` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `alert_graphite_metric_ibfk_2` FOREIGN KEY (`graphite_metric_id`) REFERENCES `graphite_metric` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `on_duty_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `on_duty_user_ibfk_1` (`user_id`),
+  KEY `on_duty_user_ibfk_2` (`service_id`),
+  CONSTRAINT `on_duty_user_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `on_duty_user_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

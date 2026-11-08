@@ -1,0 +1,119 @@
+-- Schema for database: rschema_0445
+CREATE TABLE `personnel` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `contact_phone` varchar(15) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `health_status` varchar(50) DEFAULT NULL,
+  `entry_permission` varchar(50) DEFAULT NULL,
+  `unit_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `personnel_ibfk_1` FOREIGN KEY (`unit_id`) REFERENCES `unit` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `unit` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `administrator_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `unit_ibfk_1` FOREIGN KEY (`administrator_id`) REFERENCES `administrator` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `administrator` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `management_role` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `health_record_entry` (
+  `personnel_id` int(11) NOT NULL,
+  `health_record_id` int(11) NOT NULL,
+  PRIMARY KEY (`personnel_id`, `health_record_id`),
+  CONSTRAINT `health_record_entry_ibfk_1` FOREIGN KEY (`personnel_id`) REFERENCES `personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `health_record_entry_ibfk_2` FOREIGN KEY (`health_record_id`) REFERENCES `health_record` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `access_personnel` (
+  `personnel_id` int(11) NOT NULL,
+  `access_record_id` int(11) NOT NULL,
+  PRIMARY KEY (`personnel_id`, `access_record_id`),
+  CONSTRAINT `access_personnel_ibfk_1` FOREIGN KEY (`personnel_id`) REFERENCES `personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `access_personnel_ibfk_2` FOREIGN KEY (`access_record_id`) REFERENCES `access_record` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `access_point_entry` (
+  `access_record_id` int(11) NOT NULL,
+  `access_control_id` int(11) NOT NULL,
+  PRIMARY KEY (`access_record_id`, `access_control_id`),
+  CONSTRAINT `access_point_entry_ibfk_1` FOREIGN KEY (`access_record_id`) REFERENCES `access_record` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `access_point_entry_ibfk_2` FOREIGN KEY (`access_control_id`) REFERENCES `access_control` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `appointment` (
+  `id` int(11) NOT NULL,
+  `scheduled_entry_time` datetime NOT NULL,
+  `scheduled_exit_time` datetime NOT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `visitor_name` varchar(255) NOT NULL,
+  `personnel_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `appointment_ibfk_1` FOREIGN KEY (`personnel_id`) REFERENCES `personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `health_record` (
+  `id` int(11) NOT NULL,
+  `appointment_id` int(11) NOT NULL,
+  `scheduled_entry_time` datetime NOT NULL,
+  `scheduled_exit_time` datetime NOT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `personnel_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `health_record_ibfk_1` FOREIGN KEY (`appointment_id`) REFERENCES `appointment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `health_record_ibfk_2` FOREIGN KEY (`personnel_id`) REFERENCES `personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `access_record` (
+  `id` int(11) NOT NULL,
+  `entry_time` datetime NOT NULL,
+  `exit_time` datetime NOT NULL,
+  `personnel_id` int(11) NOT NULL,
+  `access_control_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `access_record_ibfk_1` FOREIGN KEY (`personnel_id`) REFERENCES `personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `access_record_ibfk_2` FOREIGN KEY (`access_control_id`) REFERENCES `access_control` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `access_control` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `affiliation` (
+  `personnel_id` int(11) NOT NULL,
+  `unit_id` int(11) NOT NULL,
+  PRIMARY KEY (`personnel_id`, `unit_id`),
+  CONSTRAINT `affiliation_ibfk_1` FOREIGN KEY (`personnel_id`) REFERENCES `personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `affiliation_ibfk_2` FOREIGN KEY (`unit_id`) REFERENCES `unit` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `management` (
+  `administrator_id` int(11) NOT NULL,
+  `unit_id` int(11) NOT NULL,
+  PRIMARY KEY (`administrator_id`, `unit_id`),
+  CONSTRAINT `management_ibfk_1` FOREIGN KEY (`administrator_id`) REFERENCES `administrator` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `management_ibfk_2` FOREIGN KEY (`unit_id`) REFERENCES `unit` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `visit_appointment` (
+  `appointment_id` int(11) NOT NULL,
+  `personnel_id` int(11) NOT NULL,
+  PRIMARY KEY (`appointment_id`, `personnel_id`),
+  CONSTRAINT `visit_appointment_ibfk_1` FOREIGN KEY (`appointment_id`) REFERENCES `appointment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `visit_appointment_ibfk_2` FOREIGN KEY (`personnel_id`) REFERENCES `personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

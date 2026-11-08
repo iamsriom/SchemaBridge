@@ -1,0 +1,41 @@
+--Schemafordatabase:rschema_0358
+--Foreachtable:
+
+CREATE TABLE `scheduled_tasks` (
+  `task_id` int(11) NOT NULL,
+  `task_type` varchar(255) NOT NULL,
+  `lock_info` varchar(255),
+  `execution_instance_id` int(11) NOT NULL,
+  `process_instance_id` int(11) NOT NULL,
+  `process_definition_id` int(11) NOT NULL,
+  `num_retries` int(11) NOT NULL DEFAULT 0,
+  `exception_info` text,
+  `expiration_time` datetime NOT NULL,
+  `repeat_config` varchar(255),
+  `processor_config` varchar(255),
+  `tenant_id` int(11) NOT NULL,
+  PRIMARY KEY (`task_id`),
+  KEY `fk_execution_instance_id` (`execution_instance_id`),
+  KEY `fk_process_instance_id` (`process_instance_id`),
+  KEY `fk_process_definition_id` (`process_definition_id`),
+  KEY `fk_tenant_id` (`tenant_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `execution_instances` (
+  `execution_instance_id` int(11) NOT NULL,
+  `process_instance_id` int(11) NOT NULL,
+  `process_definition_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime,
+  `execution_result` varchar(255),
+  `exception_info` text,
+  PRIMARY KEY (`execution_instance_id`),
+  KEY `fk_process_instance_id` (`process_instance_id`),
+  KEY `fk_process_definition_id` (`process_definition_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+ALTER TABLE `execution_instances`
+  ADD CONSTRAINT `fk_process_instance_id` FOREIGN KEY (`process_instance_id`) REFERENCES `scheduled_tasks` (`process_instance_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `execution_instances`
+  ADD CONSTRAINT `fk_process_definition_id` FOREIGN KEY (`process_definition_id`) REFERENCES `scheduled_tasks` (`process_definition_id`) ON DELETE CASCADE ON UPDATE CASCADE;

@@ -1,0 +1,44 @@
+{
+  "text_number": 402,
+  "id": "67552f0a13602ec03b41a9bc",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0402",
+  "question": "System Description\nDescribes a hospital management system.\n\nMain functions of the system\n1. Doctor management: including basic information of doctors (name, gender, title, date of birth, years of employment, work permit).\n2. Department management: including basic information of departments (department name, personnel, department number, department phone number, department address).\n3. Patient management: including basic information of patients (name, gender, age, contact information, diagnosis description, date of consultation).\n4. Diagnosis and treatment management: including diagnosis and treatment information (case number, diagnosis and treatment content).\n5. Ward management: including basic information of wards (ward number, number of beds, ward level).\n6. Registration category management: including basic information of registration categories (category number, category name).\n7. Drug management: including basic information of drugs (name, quantity, price, barcode).\n8. Drug list management: including basic information of drug lists (drug list number, drug information).",
+  "ddl": "-- Schema for database: rschema_0402\nCREATE TABLE `doctors` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `gender` char(1) NOT NULL,\n  `title` varchar(255) DEFAULT NULL,\n  `date_of_birth` datetime NOT NULL,\n  `years_of_employment` int(11) NOT NULL,\n  `work_permit` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `departments` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `personnel` int(11) NOT NULL,\n  `department_number` varchar(255) NOT NULL,\n  `department_phone_number` varchar(255) NOT NULL,\n  `department_address` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `patients` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `gender` char(1) NOT NULL,\n  `age` int(11) NOT NULL,\n  `contact_information` varchar(255) NOT NULL,\n  `diagnosis_description` varchar(255) NOT NULL,\n  `date_of_consultation` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `diagnoses` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `case_number` varchar(255) NOT NULL,\n  `diagnosis_content` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `treatments` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `case_number` varchar(255) NOT NULL,\n  `treatment_content` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `wards` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `ward_number` varchar(255) NOT NULL,\n  `number_of_beds` int(11) NOT NULL,\n  `ward_level` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `registration_categories` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `category_number` varchar(255) NOT NULL,\n  `category_name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `drugs` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `price` decimal(10,2) NOT NULL,\n  `barcode` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `drug_lists` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `drug_list_number` varchar(255) NOT NULL,\n  `drug_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `drug_ibfk_1` (`drug_id`),\n  CONSTRAINT `drug_ibfk_1` FOREIGN KEY (`drug_id`) REFERENCES `drugs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `diagnosis_treatment` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `case_number` varchar(255) NOT NULL,\n  `diagnosis_id` int(11) NOT NULL,\n  `treatment_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `diagnosis_ibfk_1` (`diagnosis_id`),\n  KEY `treatment_ibfk_1` (`treatment_id`),\n  CONSTRAINT `diagnosis_ibfk_1` FOREIGN KEY (`diagnosis_id`) REFERENCES `diagnoses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `treatment_ibfk_1` FOREIGN KEY (`treatment_id`) REFERENCES `treatments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `ward_patient` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `ward_id` int(11) NOT NULL,\n  `patient_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `ward_ibfk_1` (`ward_id`),\n  KEY `patient_ibfk_1` (`patient_id`),\n  CONSTRAINT `ward_ibfk_1` FOREIGN KEY (`ward_id`) REFERENCES `wards` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `patient_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `doctor_department` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `doctor_id` int(11) NOT NULL,\n  `department_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `doctor_ibfk_1` (`doctor_id`),\n  KEY `department_ibfk_1` (`department_id`),\n  CONSTRAINT `doctor_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `doctor_patient` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `doctor_id` int(11) NOT NULL,\n  `patient_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `doctor_ibfk_2` (`doctor_id`),\n  KEY `patient_ibfk_2` (`patient_id`),\n  CONSTRAINT `doctor_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `patient_ibfk_2` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `registration_category_drug` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `registration_category_id` int(11) NOT NULL,\n  `drug_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `registration_category_ibfk_1` (`registration_category_id`),\n  KEY `drug_ibfk_2` (`drug_id`),\n  CONSTRAINT `registration_category_ibfk_1` FOREIGN KEY (`registration_category_id`) REFERENCES `registration_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `drug_ibfk_2` FOREIGN KEY (`drug_id`) REFERENCES `drugs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "doctors",
+      "departments",
+      "patients",
+      "diagnoses",
+      "treatments",
+      "wards",
+      "registration_categories",
+      "drugs",
+      "drug_lists",
+      "diagnosis_treatment",
+      "ward_patient",
+      "doctor_department",
+      "doctor_patient",
+      "registration_category_drug"
+    ],
+    "columns_by_table": {
+      "doctors": [],
+      "departments": [],
+      "patients": [],
+      "diagnoses": [],
+      "treatments": [],
+      "wards": [],
+      "registration_categories": [],
+      "drugs": [],
+      "drug_lists": [],
+      "diagnosis_treatment": [],
+      "ward_patient": [],
+      "doctor_department": [],
+      "doctor_patient": [],
+      "registration_category_drug": []
+    }
+  }
+}

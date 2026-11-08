@@ -1,0 +1,49 @@
+-- Schema for database: rschema_0478
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `user_phone_number` varchar(15) DEFAULT NULL,
+  `user_name` varchar(255) NOT NULL,
+  `user_credit` decimal(10,2) DEFAULT NULL,
+  `user_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bicycle` (
+  `bicycle_id` int(11) NOT NULL,
+  `bicycle_location` varchar(255) DEFAULT NULL,
+  `bicycle_status` varchar(50) DEFAULT NULL,
+  `bicycle_unlock_code` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`bicycle_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trip_record` (
+  `user_id` int(11) NOT NULL,
+  `bicycle_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `cost` decimal(10,2) DEFAULT NULL,
+  `payment_status` varchar(50) DEFAULT NULL,
+  `rule_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`user_id`, `start_time`, `bicycle_id`),
+  CONSTRAINT `trip_record_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trip_record_ibfk_2` FOREIGN KEY (`bicycle_id`) REFERENCES `bicycle` (`bicycle_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trip_record_ibfk_3` FOREIGN KEY (`rule_id`) REFERENCES `billing_rule` (`rule_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fault_record` (
+  `user_id` int(11) NOT NULL,
+  `bicycle_id` int(11) NOT NULL,
+  `reporting_time` datetime NOT NULL,
+  `fault_description` text DEFAULT NULL,
+  PRIMARY KEY (`user_id`, `reporting_time`, `bicycle_id`),
+  CONSTRAINT `fault_record_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fault_record_ibfk_2` FOREIGN KEY (`bicycle_id`) REFERENCES `bicycle` (`bicycle_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `billing_rule` (
+  `rule_id` int(11) NOT NULL,
+  `billing_method` varchar(255) DEFAULT NULL,
+  `unit_price` decimal(10,2) DEFAULT NULL,
+  `minimum_fee` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`rule_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

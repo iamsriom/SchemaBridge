@@ -1,0 +1,49 @@
+-- Schema for database: rschema_0039
+CREATE TABLE `sales_personnel` (
+  `sales_personnel_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`sales_personnel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_manager` (
+  `project_manager_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`project_manager_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `civil_engineering_project` (
+  `project_id` int(11) NOT NULL,
+  `project_name` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `expected_completion_date` datetime DEFAULT NULL,
+  `actual_completion_date` datetime DEFAULT NULL,
+  `project_manager_id` int(11) NOT NULL,
+  PRIMARY KEY (`project_id`),
+  CONSTRAINT `civil_engineering_project_ibfk_1` FOREIGN KEY (`project_manager_id`) REFERENCES `project_manager` (`project_manager_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `building` (
+  `building_id` int(11) NOT NULL,
+  `area` float DEFAULT NULL,
+  `number_of_floors` int(11) DEFAULT NULL,
+  `price` float DEFAULT NULL,
+  `project_id` int(11) NOT NULL,
+  PRIMARY KEY (`building_id`),
+  CONSTRAINT `building_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `civil_engineering_project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `building_sale` (
+  `building_id` int(11) NOT NULL,
+  `sales_personnel_id` int(11) NOT NULL,
+  `sales_date` datetime NOT NULL,
+  `customer_name` varchar(255) DEFAULT NULL,
+  `customer_contact_information` varchar(255) DEFAULT NULL,
+  `price` float DEFAULT NULL,
+  PRIMARY KEY (`building_id`, `sales_personnel_id`, `sales_date`),
+  CONSTRAINT `building_sale_ibfk_1` FOREIGN KEY (`building_id`) REFERENCES `building` (`building_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `building_sale_ibfk_2` FOREIGN KEY (`sales_personnel_id`) REFERENCES `sales_personnel` (`sales_personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

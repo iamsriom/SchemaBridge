@@ -1,0 +1,134 @@
+-- Schema for database: schemabench_0157
+CREATE TABLE `country` (
+  `id_country` int(11) NOT NULL AUTO_INCREMENT,
+  `country` varchar(255) NOT NULL,
+  PRIMARY KEY (`id_country`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `category` (
+  `id_category` int(11) NOT NULL AUTO_INCREMENT,
+  `category` varchar(255) NOT NULL,
+  PRIMARY KEY (`id_category`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `publisher` (
+  `id_publisher` int(11) NOT NULL AUTO_INCREMENT,
+  `publisher` varchar(255) NOT NULL,
+  PRIMARY KEY (`id_publisher`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `book_language` (
+  `id_book_language` int(11) NOT NULL AUTO_INCREMENT,
+  `book_language` varchar(255) NOT NULL,
+  PRIMARY KEY (`id_book_language`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `book_status` (
+  `id_book_status` int(11) NOT NULL AUTO_INCREMENT,
+  `book_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`id_book_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `customer` (
+  `id_customer` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `dni` varchar(20) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `birth_date` date DEFAULT NULL,
+  PRIMARY KEY (`id_customer`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `book` (
+  `id_book` int(11) NOT NULL AUTO_INCREMENT,
+  `id_publisher` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `book_description` text DEFAULT NULL,
+  `publication_date` date DEFAULT NULL,
+  `id_book_language` int(11) NOT NULL,
+  PRIMARY KEY (`id_book`),
+  CONSTRAINT `book_ibfk_1` FOREIGN KEY (`id_publisher`) REFERENCES `publisher` (`id_publisher`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `book_ibfk_2` FOREIGN KEY (`id_book_language`) REFERENCES `book_language` (`id_book_language`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `book_inventory` (
+  `id_book_inventory` int(11) NOT NULL AUTO_INCREMENT,
+  `id_book` int(11) NOT NULL,
+  `id_book_status` int(11) NOT NULL,
+  PRIMARY KEY (`id_book_inventory`),
+  CONSTRAINT `book_inventory_ibfk_1` FOREIGN KEY (`id_book`) REFERENCES `book` (`id_book`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `book_inventory_ibfk_2` FOREIGN KEY (`id_book_status`) REFERENCES `book_status` (`id_book_status`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `storage_location` (
+  `id_book_inventory` int(11) NOT NULL,
+  `shelf` varchar(255) NOT NULL,
+  `shelf_section` varchar(255) NOT NULL,
+  PRIMARY KEY (`id_book_inventory`),
+  CONSTRAINT `storage_location_ibfk_1` FOREIGN KEY (`id_book_inventory`) REFERENCES `book_inventory` (`id_book_inventory`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `loan` (
+  `id_loan` int(11) NOT NULL AUTO_INCREMENT,
+  `id_customer` int(11) NOT NULL,
+  `id_book_inventory` int(11) NOT NULL,
+  `loan_date` date NOT NULL,
+  `due_date` date NOT NULL,
+  `return_date` date DEFAULT NULL,
+  PRIMARY KEY (`id_loan`),
+  CONSTRAINT `loan_ibfk_1` FOREIGN KEY (`id_customer`) REFERENCES `customer` (`id_customer`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `loan_ibfk_2` FOREIGN KEY (`id_book_inventory`) REFERENCES `book_inventory` (`id_book_inventory`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `author` (
+  `id_author` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `id_country` int(11) NOT NULL,
+  PRIMARY KEY (`id_author`),
+  CONSTRAINT `author_ibfk_1` FOREIGN KEY (`id_country`) REFERENCES `country` (`id_country`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `book_author` (
+  `id_author` int(11) NOT NULL,
+  `id_book` int(11) NOT NULL,
+  PRIMARY KEY (`id_author`, `id_book`),
+  CONSTRAINT `book_author_ibfk_1` FOREIGN KEY (`id_author`) REFERENCES `author` (`id_author`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `book_author_ibfk_2` FOREIGN KEY (`id_book`) REFERENCES `book` (`id_book`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `book_category` (
+  `id_category` int(11) NOT NULL,
+  `id_book` int(11) NOT NULL,
+  PRIMARY KEY (`id_category`, `id_book`),
+  CONSTRAINT `book_category_ibfk_1` FOREIGN KEY (`id_category`) REFERENCES `category` (`id_category`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `book_category_ibfk_2` FOREIGN KEY (`id_book`) REFERENCES `book` (`id_book`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `book_return` (
+  `id_book_return` int(11) NOT NULL AUTO_INCREMENT,
+  `id_loan` int(11) NOT NULL,
+  `return_date` date NOT NULL,
+  `user_running_query` varchar(255) NOT NULL,
+  PRIMARY KEY (`id_book_return`),
+  CONSTRAINT `book_return_ibfk_1` FOREIGN KEY (`id_loan`) REFERENCES `loan` (`id_loan`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `log_statement` (
+  `id_statement` int(11) NOT NULL AUTO_INCREMENT,
+  `statement` text NOT NULL,
+  PRIMARY KEY (`id_statement`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `log_loan` (
+  `id_log` int(11) NOT NULL AUTO_INCREMENT,
+  `id_statement` int(11) NOT NULL,
+  `id_loan` int(11) NOT NULL,
+  `id_customer` int(11) NOT NULL,
+  `id_book_inventory` int(11) NOT NULL,
+  `user_running_query` varchar(255) NOT NULL,
+  `log_date` date NOT NULL,
+  `log_time` time NOT NULL,
+  PRIMARY KEY (`id_log`),
+  CONSTRAINT `log_loan_ibfk_1` FOREIGN KEY (`id_statement`) REFERENCES `log_statement` (`id_statement`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `log_loan_ibfk_2` FOREIGN KEY (`id_loan`) REFERENCES `loan` (`id_loan`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `log_loan_ibfk_3` FOREIGN KEY (`id_customer`) REFERENCES `customer` (`id_customer`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `log_loan_ibfk_4` FOREIGN KEY (`id_book_inventory`) REFERENCES `book_inventory` (`id_book_inventory`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `log_deleted_book_return` (
+  `id_log` int(11) NOT NULL AUTO_INCREMENT,
+  `id_loan` int(11) NOT NULL,
+  `id_book_return` int(11) NOT NULL,
+  `return_date` date NOT NULL,
+  `user_running_query` varchar(255) NOT NULL,
+  `log_date` date NOT NULL,
+  PRIMARY KEY (`id_log`),
+  CONSTRAINT `log_deleted_book_return_ibfk_1` FOREIGN KEY (`id_loan`) REFERENCES `loan` (`id_loan`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `log_deleted_book_return_ibfk_2` FOREIGN KEY (`id_book_return`) REFERENCES `book_return` (`id_book_return`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,24 @@
+{
+  "text_number": 117,
+  "id": "67552f0a13602ec03b41a912",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0117",
+  "question": "The database is a data management system that is mainly used to record user information, data records and their operation history, and track user operations on data (such as creation, update, deletion, etc.). User storage system user information, including the user's basic identity and contact information. Store managed data records, including the record's name, content, creator, and the user information of the most recent operation. Record various operations performed by users on data records, including operation type, time, remarks, and operation content. Track and record each user's operation history on data records, including operation type, time, and operation content.",
+  "ddl": "-- Schema for database: rschema_0117\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `phone` varchar(20) DEFAULT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `data_records` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `content` text NOT NULL,\n  `creator_id` int(11) NOT NULL,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `FK_data_records_users` (`creator_id`),\n  CONSTRAINT `FK_data_records_users` FOREIGN KEY (`creator_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `operations` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `record_id` int(11) NOT NULL,\n  `operation_type` enum('create','update','delete') NOT NULL,\n  `time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `remarks` varchar(255) DEFAULT NULL,\n  `content` text NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `FK_operations_data_records` (`record_id`),\n  CONSTRAINT `FK_operations_data_records` FOREIGN KEY (`record_id`) REFERENCES `data_records` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `operation_history` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `record_id` int(11) NOT NULL,\n  `operation_type` enum('create','update','delete') NOT NULL,\n  `time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `content` text NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `FK_operation_history_users` (`user_id`),\n  KEY `FK_operation_history_data_records` (`record_id`),\n  CONSTRAINT `FK_operation_history_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `FK_operation_history_data_records` FOREIGN KEY (`record_id`) REFERENCES `data_records` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "data_records",
+      "operations",
+      "operation_history"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "data_records": [],
+      "operations": [],
+      "operation_history": []
+    }
+  }
+}

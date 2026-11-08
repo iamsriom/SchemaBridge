@@ -1,0 +1,35 @@
+-- Schema for database: rschema_0258
+CREATE TABLE `donors` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fundraising_events` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `timing` datetime NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `amount_raised` decimal(10,2) DEFAULT NULL,
+  `status` enum('ongoing','concluded') NOT NULL DEFAULT 'ongoing',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `donations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `donor_id` int(11) NOT NULL,
+  `fundraising_event_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `time` datetime NOT NULL,
+  `method` varchar(255) NOT NULL,
+  `message` text,
+  PRIMARY KEY (`id`),
+  KEY `donor_id` (`donor_id`),
+  KEY `fundraising_event_id` (`fundraising_event_id`),
+  CONSTRAINT `donations_ibfk_1` FOREIGN KEY (`donor_id`) REFERENCES `donors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `donations_ibfk_2` FOREIGN KEY (`fundraising_event_id`) REFERENCES `fundraising_events` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

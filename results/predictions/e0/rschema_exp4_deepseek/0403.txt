@@ -1,0 +1,72 @@
+-- Schema for database: `rschema_0403`
+
+-- Table: `students`
+CREATE TABLE `students` (
+    `StudentID` int(11) NOT NULL AUTO_INCREMENT,
+    `Name` varchar(255) NOT NULL,
+    `StudentNumber` varchar(255) NOT NULL,
+    `Grade` int(11) NOT NULL,
+    `Major` varchar(255) NOT NULL,
+    `ContactNumber` varchar(255) NOT NULL,
+    `Email` varchar(255) NOT NULL,
+    PRIMARY KEY (`StudentID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `administrators`
+CREATE TABLE `administrators` (
+    `AdministratorID` int(11) NOT NULL AUTO_INCREMENT,
+    `Name` varchar(255) NOT NULL,
+    `JobNumber` varchar(255) NOT NULL,
+    `ContactNumber` varchar(255) NOT NULL,
+    `Email` varchar(255) NOT NULL,
+    `Position` varchar(255) NOT NULL,
+    PRIMARY KEY (`AdministratorID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `books`
+CREATE TABLE `books` (
+    `BookID` int(11) NOT NULL AUTO_INCREMENT,
+    `Title` varchar(255) NOT NULL,
+    `Author` varchar(255) NOT NULL,
+    `Publisher` varchar(255) NOT NULL,
+    `PublicationDate` date NOT NULL,
+    `Category` varchar(255) NOT NULL,
+    `StockQuantity` int(11) NOT NULL,
+    `BorrowedQuantity` int(11) NOT NULL,
+    PRIMARY KEY (`BookID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `borrowing_records`
+CREATE TABLE `borrowing_records` (
+    `StudentID` int(11) NOT NULL,
+    `BorrowedBookID` int(11) NOT NULL,
+    `BorrowDate` date NOT NULL,
+    `ReturnDate` date NOT NULL,
+    `ReviewStatus` varchar(255) NOT NULL,
+    PRIMARY KEY (`StudentID`, `BorrowedBookID`),
+    FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`BorrowedBookID`) REFERENCES `books` (`BookID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `returning_records`
+CREATE TABLE `returning_records` (
+    `StudentID` int(11) NOT NULL,
+    `BorrowedBookID` int(11) NOT NULL,
+    `ReturnDate` date NOT NULL,
+    `ReviewStatus` varchar(255) NOT NULL,
+    PRIMARY KEY (`StudentID`, `BorrowedBookID`),
+    FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`BorrowedBookID`) REFERENCES `books` (`BookID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `audit_records`
+CREATE TABLE `audit_records` (
+    `AdministratorID` int(11) NOT NULL,
+    `BookID` int(11) NOT NULL,
+    `BorrowingStatus` varchar(255) NOT NULL,
+    `AuditDate` date NOT NULL,
+    `AuditResult` varchar(255) NOT NULL,
+    PRIMARY KEY (`AdministratorID`, `BookID`),
+    FOREIGN KEY (`AdministratorID`) REFERENCES `administrators` (`AdministratorID`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`BookID`) REFERENCES `books` (`BookID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

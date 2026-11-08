@@ -1,0 +1,32 @@
+{
+  "text_number": 55,
+  "id": "SB-055",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0055",
+  "question": "1) Background / Context:\n\nThe project involves developing a decentralized image-sharing platform that functions as a privacy-focused alternative to Instagram. The system is open-source, ad-free, and emphasizes a chronological feed, promoting a refreshing and secure space for sharing photos globally.\n\n2) Objectives:\n\n- Build a decentralized platform for photo sharing.\n- Prioritize user privacy and security.\n- Deliver an ad-free experience.\n- Introduce chronological feeds for better user experience.\n\n3) Stakeholders & Users:\n\n- Users: Individuals who want to share, like, comment on photos, or communicate privately.\n- Administrators: Manage user accounts, system performance, and security.\n- Developers: Contribute to the open-source codebase and maintain the platform.\n\n4) Functional Descriptions:\n\n- Albums: Users can share multiple photos within an album.\n- Comments: Enable threaded comments for discussions on photos.\n- Direct Messages (DMs): Facilitate private conversations between users.\n- Filters: Allow users to apply filters to photos.\n- Likes: Users can like photos to show appreciation.\n- Stories: Support sharing of ephemeral content that disappears after 24 hours.\n  \n5) Non-Functional Descriptions:\n\n- Security: Ensure high privacy standards and user data security.\n- Scalability: Support for decentralized architecture.\n- Performance: Efficient handling of image uploads and sharing.\n- Usability: Intuitive user interface with chronological feeds.\n- Open-Source: Available for community contributions and improvements.",
+  "ddl": "-- Schema for database: schemabench_0055\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `password` char(60) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `username` (`username`),\n  UNIQUE KEY `email` (`email`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `albums` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `title` varchar(255) NOT NULL,\n  `description` text,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `albums_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `photos` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `album_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `image_url` varchar(255) NOT NULL,\n  `caption` text,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `album_id` (`album_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `photos_ibfk_1` FOREIGN KEY (`album_id`) REFERENCES `albums` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `photos_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `comments` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `photo_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `comment` text NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `photo_id` (`photo_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`photo_id`) REFERENCES `photos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `likes` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `photo_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `photo_id` (`photo_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `likes_ibfk_1` FOREIGN KEY (`photo_id`) REFERENCES `photos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `likes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `direct_messages` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `sender_id` int(11) NOT NULL,\n  `receiver_id` int(11) NOT NULL,\n  `message` text NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `sender_id` (`sender_id`),\n  KEY `receiver_id` (`receiver_id`),\n  CONSTRAINT `direct_messages_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `direct_messages_ibfk_2` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `filters` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `photo_id` int(11) NOT NULL,\n  `filter_name` varchar(255) NOT NULL,\n  `filter_description` text,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `photo_id` (`photo_id`),\n  CONSTRAINT `filters_ibfk_1` FOREIGN KEY (`photo_id`) REFERENCES `photos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `stories` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `image_url` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `expires_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `stories_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "albums",
+      "photos",
+      "comments",
+      "likes",
+      "direct_messages",
+      "filters",
+      "stories"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "albums": [],
+      "photos": [],
+      "comments": [],
+      "likes": [],
+      "direct_messages": [],
+      "filters": [],
+      "stories": []
+    }
+  }
+}

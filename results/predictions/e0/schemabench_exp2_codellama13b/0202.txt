@@ -1,0 +1,62 @@
+-- Schema for database: schemabench_0202
+CREATE TABLE employees (
+  employee_id INT(11) NOT NULL AUTO_INCREMENT,
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(255) NOT NULL,
+  address VARCHAR(255) NOT NULL,
+  birth_date DATE NOT NULL,
+  salary DECIMAL(10,2) NOT NULL,
+  hire_date DATE NOT NULL,
+  PRIMARY KEY (employee_id),
+  UNIQUE KEY (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE departments (
+  department_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  manager_id INT(11) NOT NULL,
+  location VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
+  PRIMARY KEY (department_id),
+  FOREIGN KEY (manager_id) REFERENCES employees(employee_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE positions (
+  position_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
+  salary_range DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (position_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE employee_department_history (
+  employee_id INT(11) NOT NULL,
+  department_id INT(11) NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  PRIMARY KEY (employee_id, department_id, start_date),
+  FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE employee_position_history (
+  employee_id INT(11) NOT NULL,
+  position_id INT(11) NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  PRIMARY KEY (employee_id, position_id, start_date),
+  FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (position_id) REFERENCES positions(position_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE employee_manager_history (
+  employee_id INT(11) NOT NULL,
+  manager_id INT(11) NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  PRIMARY KEY (employee_id, manager_id, start_date),
+  FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (manager_id) REFERENCES employees(employee_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

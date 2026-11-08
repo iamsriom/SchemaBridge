@@ -1,0 +1,45 @@
+-- Schema for database: `DataBank`
+
+-- Table: `Customers`
+CREATE TABLE `Customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `balance` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `registration_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`customer_id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `Transactions`
+CREATE TABLE `Transactions` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `type` enum('deposit','withdrawal') NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`transaction_id`),
+  KEY `customer_id` (`customer_id`),
+  CONSTRAINT `Transactions_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `Customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `Nodes`
+CREATE TABLE `Nodes` (
+  `node_id` int(11) NOT NULL AUTO_INCREMENT,
+  `region` varchar(255) NOT NULL,
+  `capacity` int(11) NOT NULL,
+  `current_usage` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`node_id`),
+  UNIQUE KEY `region` (`region`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `Customer_Nodes`
+CREATE TABLE `Customer_Nodes` (
+  `customer_id` int(11) NOT NULL,
+  `node_id` int(11) NOT NULL,
+  PRIMARY KEY (`customer_id`,`node_id`),
+  KEY `node_id` (`node_id`),
+  CONSTRAINT `Customer_Nodes_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `Customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Customer_Nodes_ibfk_2` FOREIGN KEY (`node_id`) REFERENCES `Nodes` (`node_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

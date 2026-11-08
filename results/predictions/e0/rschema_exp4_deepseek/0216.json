@@ -1,0 +1,26 @@
+{
+  "text_number": 216,
+  "id": "67552f0a13602ec03b41a849",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "rschema_0216",
+  "question": "The Credit Card Management System for a credit card company requires managing various types of credit cards and associated transactions:\nThe company issues multiple types of credit cards, each with a unique Card Type Code, Card Type Name, and Annual Fee.\nThe company has several customers, each identified by a unique Customer ID, Name, ID Number, and Contact Number. Each customer can have multiple credit cards.\nEach credit card has a unique Card Number, Card Type Code, Account Opening Date, and Credit Limit. A customer may have several credit cards.\nEvery transaction made using a credit card must record the Amount, Transaction Time, Transaction Location, and Transaction Type.\nThe system also tracks repayments made by customers, including the Repayment Amount and Repayment Time.",
+  "ddl": "--Schemafordatabase:rschema_0216\n\n--Foreachtable:\n\nCREATE TABLE `card_types` (\n    `CardTypeCode` CHAR(3) NOT NULL,\n    `CardTypeName` VARCHAR(255) NOT NULL,\n    `AnnualFee` DECIMAL(10,2) NOT NULL,\n    PRIMARY KEY (`CardTypeCode`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `customers` (\n    `CustomerID` INT(11) NOT NULL AUTO_INCREMENT,\n    `Name` VARCHAR(255) NOT NULL,\n    `IDNumber` CHAR(10) NOT NULL,\n    `ContactNumber` CHAR(10) NOT NULL,\n    PRIMARY KEY (`CustomerID`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `credit_cards` (\n    `CardNumber` CHAR(16) NOT NULL,\n    `CardTypeCode` CHAR(3) NOT NULL,\n    `AccountOpeningDate` DATETIME NOT NULL,\n    `CreditLimit` DECIMAL(10,2) NOT NULL,\n    `CustomerID` INT(11) NOT NULL,\n    PRIMARY KEY (`CardNumber`),\n    FOREIGN KEY (`CardTypeCode`) REFERENCES `card_types` (`CardTypeCode`),\n    FOREIGN KEY (`CustomerID`) REFERENCES `customers` (`CustomerID`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `transactions` (\n    `TransactionID` INT(11) NOT NULL AUTO_INCREMENT,\n    `Amount` DECIMAL(10,2) NOT NULL,\n    `TransactionTime` DATETIME NOT NULL,\n    `TransactionLocation` VARCHAR(255) NOT NULL,\n    `TransactionType` ENUM('debit','credit') NOT NULL,\n    `CardNumber` CHAR(16) NOT NULL,\n    PRIMARY KEY (`TransactionID`),\n    FOREIGN KEY (`CardNumber`) REFERENCES `credit_cards` (`CardNumber`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `repayments` (\n    `RepaymentID` INT(11) NOT NULL AUTO_INCREMENT,\n    `RepaymentAmount` DECIMAL(10,2) NOT NULL,\n    `RepaymentTime` DATETIME NOT NULL,\n    `CardNumber` CHAR(16) NOT NULL,\n    PRIMARY KEY (`RepaymentID`),\n    FOREIGN KEY (`CardNumber`) REFERENCES `credit_cards` (`CardNumber`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "card_types",
+      "customers",
+      "credit_cards",
+      "transactions",
+      "repayments"
+    ],
+    "columns_by_table": {
+      "card_types": [],
+      "customers": [],
+      "credit_cards": [],
+      "transactions": [],
+      "repayments": []
+    }
+  }
+}

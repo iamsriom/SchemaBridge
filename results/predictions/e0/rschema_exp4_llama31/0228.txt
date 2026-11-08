@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0228
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(255) NOT NULL,
+  `customer_address` varchar(255) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `magazines` (
+  `magazine_name` varchar(255) NOT NULL,
+  `publisher` varchar(255) NOT NULL,
+  `theme` varchar(255) DEFAULT NULL,
+  `publication_frequency` varchar(255) DEFAULT NULL,
+  `website` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`magazine_name`, `publisher`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pricing` (
+  `pricing_id` int(11) NOT NULL AUTO_INCREMENT,
+  `magazine_name` varchar(255) NOT NULL,
+  `publisher` varchar(255) NOT NULL,
+  `subscription_package` varchar(255) NOT NULL,
+  `subscription_period` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`pricing_id`),
+  UNIQUE KEY `magazine_publisher_unique` (`magazine_name`, `publisher`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_subscribes_to_magazine` (
+  `customer_id` int(11) NOT NULL,
+  `pricing_id` int(11) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `subscription_start_date` datetime NOT NULL,
+  PRIMARY KEY (`customer_id`, `pricing_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `pricing_id` (`pricing_id`),
+  CONSTRAINT `customer_subscribes_to_magazine_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customer_subscribes_to_magazine_ibfk_2` FOREIGN KEY (`pricing_id`) REFERENCES `pricing` (`pricing_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `magazine_to_pricing` (
+  `pricing_id` int(11) NOT NULL,
+  `magazine_name` varchar(255) NOT NULL,
+  `publisher` varchar(255) NOT NULL,
+  `subscription_package` varchar(255) NOT NULL,
+  `subscription_period` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`pricing_id`),
+  KEY `magazine_name` (`magazine_name`, `publisher`),
+  CONSTRAINT `magazine_to_pricing_ibfk_1` FOREIGN KEY (`pricing_id`) REFERENCES `pricing` (`pricing_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

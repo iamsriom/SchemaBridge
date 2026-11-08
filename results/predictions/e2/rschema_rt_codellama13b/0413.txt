@@ -1,0 +1,41 @@
+-- Schema for database: rschema_0413
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `department` int(11) NOT NULL,
+  `contact_number` varchar(15) DEFAULT NULL,
+  `hire_date` datetime NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `department_manager` int(11) DEFAULT NULL,
+  `department_phone` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`department_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`department_manager`) REFERENCES `employee` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `training_course` (
+  `course_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `duration` int(11) NOT NULL,
+  `instructor` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`course_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_participation` (
+  `employee_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `training_date` datetime NOT NULL,
+  `training_score` decimal(5,2) DEFAULT NULL,
+  `pass_status` varchar(10) NOT NULL,
+  PRIMARY KEY (`employee_id`, `training_date`, `course_id`),
+  CONSTRAINT `course_participation_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_participation_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `training_course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,60 @@
+-- Schema for database: rschema_0504
+CREATE TABLE `cultural_relics` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `year` int(11) NOT NULL,
+  `category` varchar(255) NOT NULL,
+  `excavation_site` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staff` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone_number` varchar(255) NOT NULL,
+  `gender` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cultural_relic_exhibitions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `cultural_relic_id` int(11) NOT NULL,
+  `exhibition_start_time` datetime NOT NULL,
+  `exhibition_end_time` datetime NOT NULL,
+  `exhibition_location` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `cultural_relic_id` (`cultural_relic_id`),
+  CONSTRAINT `cultural_relic_exhibitions_ibfk_1` FOREIGN KEY (`cultural_relic_id`) REFERENCES `cultural_relics` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cultural_relic_repairs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_id` int(11) NOT NULL,
+  `cultural_relic_id` int(11) NOT NULL,
+  `repair_start_time` datetime NOT NULL,
+  `repair_end_time` datetime NOT NULL,
+  `repair_method` varchar(255) NOT NULL,
+  `notes` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `staff_id` (`staff_id`),
+  KEY `cultural_relic_id` (`cultural_relic_id`),
+  CONSTRAINT `cultural_relic_repairs_ibfk_1` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cultural_relic_repairs_ibfk_2` FOREIGN KEY (`cultural_relic_id`) REFERENCES `cultural_relics` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cultural_relic_monitoring_records` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `cultural_relic_id` int(11) NOT NULL,
+  `monitoring_time` datetime NOT NULL,
+  `person_in_charge_id` int(11) NOT NULL,
+  `temperature` float NOT NULL,
+  `humidity` float NOT NULL,
+  `light` float NOT NULL,
+  `air_quality` float NOT NULL,
+  `notes` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `cultural_relic_id` (`cultural_relic_id`),
+  KEY `person_in_charge_id` (`person_in_charge_id`),
+  CONSTRAINT `cultural_relic_monitoring_records_ibfk_1` FOREIGN KEY (`cultural_relic_id`) REFERENCES `cultural_relics` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cultural_relic_monitoring_records_ibfk_2` FOREIGN KEY (`person_in_charge_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

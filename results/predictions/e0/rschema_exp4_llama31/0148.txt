@@ -1,0 +1,55 @@
+-- Schema for database: rschema_0148
+CREATE TABLE `colleges` (
+  `college_id` int(11) NOT NULL,
+  `college_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`college_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `majors` (
+  `major_id` int(11) NOT NULL,
+  `major_name` varchar(255) NOT NULL,
+  `college_id` int(11) NOT NULL,
+  PRIMARY KEY (`major_id`),
+  KEY `majors_ibfk_1` (`college_id`),
+  CONSTRAINT `majors_ibfk_1` FOREIGN KEY (`college_id`) REFERENCES `colleges` (`college_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `students` (
+  `student_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(255) NOT NULL,
+  `major_id` int(11) NOT NULL,
+  `college_id` int(11) NOT NULL,
+  PRIMARY KEY (`student_id`),
+  KEY `students_ibfk_1` (`major_id`),
+  KEY `students_ibfk_2` (`college_id`),
+  CONSTRAINT `students_ibfk_1` FOREIGN KEY (`major_id`) REFERENCES `majors` (`major_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `students_ibfk_2` FOREIGN KEY (`college_id`) REFERENCES `colleges` (`college_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teachers` (
+  `teacher_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(255) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `college_id` int(11) NOT NULL,
+  `hire_date` datetime NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  PRIMARY KEY (`teacher_id`),
+  KEY `teachers_ibfk_1` (`college_id`),
+  CONSTRAINT `teachers_ibfk_1` FOREIGN KEY (`college_id`) REFERENCES `colleges` (`college_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `courses` (
+  `course_id` int(11) NOT NULL,
+  `course_name` varchar(255) NOT NULL,
+  `credit` int(11) NOT NULL,
+  `class_hours` int(11) NOT NULL,
+  `major_id` int(11) NOT NULL,
+  `teacher_id` int(11) NOT NULL,
+  PRIMARY KEY (`course_id`),
+  KEY `courses_ibfk_1` (`major_id`),
+  KEY `courses_ibfk_2` (`teacher_id`),
+  CONSTRAINT `courses_ibfk_1` FOREIGN KEY (`major_id`) REFERENCES `majors` (`major_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `courses_ibfk_2` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`teacher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

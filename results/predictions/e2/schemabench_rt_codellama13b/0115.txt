@@ -1,0 +1,43 @@
+-- Schema for database: schemabench_0115
+CREATE TABLE `legalacts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `court` varchar(255) NOT NULL,
+  `case_kind` varchar(255) NOT NULL,
+  `case_number` varchar(255) NOT NULL,
+  `hash` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `hash_unique` (`hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `people` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `is_jury_member` tinyint(1) NOT NULL DEFAULT 0,
+  `court` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `legalact_link` (
+  `actId1` int(11) NOT NULL,
+  `actId2` int(11) NOT NULL,
+  PRIMARY KEY (`actId1`, `actId2`),
+  CONSTRAINT `legalact_link_ibfk_1` FOREIGN KEY (`actId1`) REFERENCES `legalacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `legalact_link_ibfk_2` FOREIGN KEY (`actId2`) REFERENCES `legalacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `legalact_people` (
+  `peopleId` int(11) NOT NULL,
+  `actId` int(11) NOT NULL,
+  PRIMARY KEY (`peopleId`, `actId`),
+  CONSTRAINT `legalact_people_ibfk_1` FOREIGN KEY (`peopleId`) REFERENCES `people` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `legalact_people_ibfk_2` FOREIGN KEY (`actId`) REFERENCES `legalacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `scrapefix` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` text NOT NULL,
+  `contributor` varchar(255) NOT NULL,
+  `legalact_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `scrapefix_ibfk_1` FOREIGN KEY (`legalact_id`) REFERENCES `legalacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

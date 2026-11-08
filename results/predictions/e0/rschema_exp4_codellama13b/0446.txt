@@ -1,0 +1,111 @@
+-- Schema for database: rschema_0446
+
+CREATE TABLE users (
+  user_id INT(11) NOT NULL AUTO_INCREMENT,
+  username VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(255) NOT NULL,
+  registration_time DATETIME NOT NULL,
+  last_login_time DATETIME NOT NULL,
+  role VARCHAR(255) NOT NULL,
+  PRIMARY KEY (user_id),
+  UNIQUE KEY username (username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE sensor_deployments (
+  deployment_id INT(11) NOT NULL AUTO_INCREMENT,
+  sensor_id INT(11) NOT NULL,
+  location VARCHAR(255) NOT NULL,
+  burial_depth INT(11) NOT NULL,
+  PRIMARY KEY (deployment_id),
+  FOREIGN KEY (sensor_id) REFERENCES sensors (sensor_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE sensors (
+  sensor_id INT(11) NOT NULL AUTO_INCREMENT,
+  sensor_type VARCHAR(255) NOT NULL,
+  location VARCHAR(255) NOT NULL,
+  PRIMARY KEY (sensor_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE meteorology (
+  meteorology_id INT(11) NOT NULL AUTO_INCREMENT,
+  timestamp DATETIME NOT NULL,
+  temperature FLOAT NOT NULL,
+  humidity FLOAT NOT NULL,
+  rainfall FLOAT NOT NULL,
+  wind_speed FLOAT NOT NULL,
+  light_intensity FLOAT NOT NULL,
+  location VARCHAR(255) NOT NULL,
+  PRIMARY KEY (meteorology_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE crops (
+  crop_id INT(11) NOT NULL AUTO_INCREMENT,
+  crop_name VARCHAR(255) NOT NULL,
+  crop_type VARCHAR(255) NOT NULL,
+  growth_model VARCHAR(255) NOT NULL,
+  PRIMARY KEY (crop_id),
+  UNIQUE KEY crop_name (crop_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE growth_models (
+  growth_model_id INT(11) NOT NULL AUTO_INCREMENT,
+  model_name VARCHAR(255) NOT NULL,
+  parameters VARCHAR(255) NOT NULL,
+  creation_time DATETIME NOT NULL,
+  PRIMARY KEY (growth_model_id),
+  UNIQUE KEY model_name (model_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE crop_evaluations (
+  evaluation_id INT(11) NOT NULL AUTO_INCREMENT,
+  crop_id INT(11) NOT NULL,
+  evaluation_metric VARCHAR(255) NOT NULL,
+  evaluation_value FLOAT NOT NULL,
+  location VARCHAR(255) NOT NULL,
+  PRIMARY KEY (evaluation_id),
+  FOREIGN KEY (crop_id) REFERENCES crops (crop_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE user_actions (
+  action_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  action_type VARCHAR(255) NOT NULL,
+  action_details VARCHAR(255) NOT NULL,
+  action_time DATETIME NOT NULL,
+  location VARCHAR(255) NOT NULL,
+  PRIMARY KEY (action_id),
+  FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE water_supplies (
+  supply_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  supply_time DATETIME NOT NULL,
+  location VARCHAR(255) NOT NULL,
+  water_amount FLOAT NOT NULL,
+  PRIMARY KEY (supply_id),
+  FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE fertilizer_supplies (
+  supply_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  supply_time DATETIME NOT NULL,
+  location VARCHAR(255) NOT NULL,
+  fertilizer_amount FLOAT NOT NULL,
+  PRIMARY KEY (supply_id),
+  FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE crop_supplies (
+  supply_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  supply_time DATETIME NOT NULL,
+  location VARCHAR(255) NOT NULL,
+  crop_id INT(11) NOT NULL,
+  PRIMARY KEY (supply_id),
+  FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (crop_id) REFERENCES crops (crop_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

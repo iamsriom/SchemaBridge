@@ -1,0 +1,40 @@
+{
+  "text_number": 328,
+  "id": "67552f0a13602ec03b41a8d9",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0328",
+  "question": "This is an online survey system. For administrator management, the system maintains administrator information including name, phone number, account, and password. Administrators can register, log in to the system, create, edit, delete surveys, and view survey statistics. For survey management, the system supports creating surveys, setting survey title, description, access restrictions, start and end times, access rules (public or password-protected), survey status (created, in progress, ended), survey logo URL and background image URL, anonymity settings, etc. Surveys can be associated with multiple questions. For question management, the system supports creating different types of questions (single choice, multiple choice, text, text area), setting question title, description, required status, validation type, display order, display style, evaluation status, evaluation score, etc. Questions can be associated with multiple options. For option management, the system supports creating options for questions, setting option content, display order, correct answer status, etc. Options can be single or multiple choice type. For answer recording, the system records users' answers to single or multiple choice questions, including option ID, answer type, submission time, respondent information, and also records users' answers to text questions, including question ID, answer content, submission time, and respondent information.",
+  "ddl": "-- Schema for database: rschema_0328\nCREATE TABLE `administrators` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `phone_number` varchar(255) NOT NULL,\n  `account` varchar(255) NOT NULL,\n  `password` char(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `surveys` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `description` text NOT NULL,\n  `access_restriction` varchar(255) NOT NULL,\n  `start_time` datetime NOT NULL,\n  `end_time` datetime NOT NULL,\n  `access_rule` varchar(255) NOT NULL,\n  `status` varchar(255) NOT NULL,\n  `logo_url` varchar(255) NOT NULL,\n  `background_image_url` varchar(255) NOT NULL,\n  `anonymity_setting` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `survey_administrators` (\n  `survey_id` int(11) NOT NULL,\n  `administrator_id` int(11) NOT NULL,\n  PRIMARY KEY (`survey_id`, `administrator_id`),\n  KEY `survey_id` (`survey_id`),\n  KEY `administrator_id` (`administrator_id`),\n  CONSTRAINT `survey_administrators_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `surveys` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `survey_administrators_ibfk_2` FOREIGN KEY (`administrator_id`) REFERENCES `administrators` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `questions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `description` text NOT NULL,\n  `required_status` varchar(255) NOT NULL,\n  `validation_type` varchar(255) NOT NULL,\n  `display_order` int(11) NOT NULL,\n  `display_style` varchar(255) NOT NULL,\n  `evaluation_status` varchar(255) NOT NULL,\n  `evaluation_score` int(11) NOT NULL,\n  `survey_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `survey_id` (`survey_id`),\n  CONSTRAINT `questions_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `surveys` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `question_types` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `type` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `question_questions` (\n  `question_id` int(11) NOT NULL,\n  `question_type_id` int(11) NOT NULL,\n  PRIMARY KEY (`question_id`, `question_type_id`),\n  KEY `question_id` (`question_id`),\n  KEY `question_type_id` (`question_type_id`),\n  CONSTRAINT `question_questions_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `question_questions_ibfk_2` FOREIGN KEY (`question_type_id`) REFERENCES `question_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `options` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `content` varchar(255) NOT NULL,\n  `display_order` int(11) NOT NULL,\n  `correct_answer_status` varchar(255) NOT NULL,\n  `question_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `question_id` (`question_id`),\n  CONSTRAINT `options_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `option_types` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `type` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `option_options` (\n  `option_id` int(11) NOT NULL,\n  `option_type_id` int(11) NOT NULL,\n  PRIMARY KEY (`option_id`, `option_type_id`),\n  KEY `option_id` (`option_id`),\n  KEY `option_type_id` (`option_type_id`),\n  CONSTRAINT `option_options_ibfk_1` FOREIGN KEY (`option_id`) REFERENCES `options` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `option_options_ibfk_2` FOREIGN KEY (`option_type_id`) REFERENCES `option_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `answers` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `option_id` int(11) NOT NULL,\n  `answer_type` varchar(255) NOT NULL,\n  `submission_time` datetime NOT NULL,\n  `respondent_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `option_id` (`option_id`),\n  KEY `respondent_id` (`respondent_id`),\n  CONSTRAINT `answers_ibfk_1` FOREIGN KEY (`option_id`) REFERENCES `options` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `answers_ibfk_2` FOREIGN KEY (`respondent_id`) REFERENCES `respondents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `respondents` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `answer_texts` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `question_id` int(11) NOT NULL,\n  `answer_content` text NOT NULL,\n  `submission_time` datetime NOT NULL,\n  `respondent_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `question_id` (`question_id`),\n  KEY `respondent_id` (`respondent_id`),\n  CONSTRAINT `answer_texts_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `answer_texts_ibfk_2` FOREIGN KEY (`respondent_id`) REFERENCES `respondents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "administrators",
+      "surveys",
+      "survey_administrators",
+      "questions",
+      "question_types",
+      "question_questions",
+      "options",
+      "option_types",
+      "option_options",
+      "answers",
+      "respondents",
+      "answer_texts"
+    ],
+    "columns_by_table": {
+      "administrators": [],
+      "surveys": [],
+      "survey_administrators": [],
+      "questions": [],
+      "question_types": [],
+      "question_questions": [],
+      "options": [],
+      "option_types": [],
+      "option_options": [],
+      "answers": [],
+      "respondents": [],
+      "answer_texts": []
+    }
+  }
+}

@@ -1,0 +1,40 @@
+-- Schema for database: schemabench_0199
+CREATE TABLE `product_hierarchy` (
+  `id` char(6) NOT NULL,
+  `parent_id` char(6) DEFAULT NULL,
+  `level_text` varchar(255) NOT NULL,
+  `level_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `product_hierarchy_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `product_hierarchy` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_prices` (
+  `product_id` char(6) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`product_id`),
+  CONSTRAINT `product_prices_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product_hierarchy` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_details` (
+  `product_id` char(6) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `category_id` char(6) NOT NULL,
+  `segment_id` char(6) NOT NULL,
+  `style_id` char(6) NOT NULL,
+  PRIMARY KEY (`product_id`),
+  CONSTRAINT `product_details_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `product_hierarchy` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `product_details_ibfk_2` FOREIGN KEY (`segment_id`) REFERENCES `product_hierarchy` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `product_details_ibfk_3` FOREIGN KEY (`style_id`) REFERENCES `product_hierarchy` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` char(6) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `discount` decimal(10,2) DEFAULT NULL,
+  `is_member` tinyint(1) NOT NULL,
+  `start_time` datetime NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product_hierarchy` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,43 @@
+-- Schema for database: schemabench_0199
+CREATE TABLE `product_hierarchy` (
+  `id` int(11) NOT NULL,
+  `parent_id` int(11) NOT NULL,
+  `level_text` varchar(255) DEFAULT NULL,
+  `level_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`, `parent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_prices` (
+  `product_id` int(11) NOT NULL,
+  `price` int(11) NOT NULL,
+  PRIMARY KEY (`product_id`),
+  CONSTRAINT `product_prices_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product_details` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_details` (
+  `product_id` int(11) NOT NULL,
+  `price` varchar(255) DEFAULT NULL,
+  `product_name` varchar(255) DEFAULT NULL,
+  `category_id` varchar(255) DEFAULT NULL,
+  `segment_id` varchar(255) DEFAULT NULL,
+  `style_id` varchar(255) DEFAULT NULL,
+  `category_name` varchar(255) DEFAULT NULL,
+  `segment_name` varchar(255) DEFAULT NULL,
+  `style_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales` (
+  `txn_id` int(11) NOT NULL,
+  `prod_id` int(11) NOT NULL,
+  `qty` int(11) NOT NULL,
+  `price` int(11) NOT NULL,
+  `discount` int(11) NOT NULL,
+  `member` tinyint(1) NOT NULL,
+  `start_txn_time` timestamp NOT NULL,
+  PRIMARY KEY (`txn_id`),
+  CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`prod_id`) REFERENCES `product_details` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_ibfk_2` FOREIGN KEY (`prod_id`) REFERENCES `product_prices` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  INDEX `idx_prod_id` (`prod_id`),
+  INDEX `idx_txn_id` (`txn_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

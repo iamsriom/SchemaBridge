@@ -1,0 +1,24 @@
+{
+  "text_number": 32,
+  "id": "SB-032",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0032",
+  "question": "Background / Context\n\nThe project involves developing a security enhancement module for Django-powered websites, called Axes. This module tracks and regulates login attempts to prevent brute force attacks. It is designed as a plugin for Django to monitor suspicious login behavior and enforce access controls.\n\nObjectives\n\nThe primary objective of Axes is to safeguard Django sites by recording login attempts and blocking attackers when they surpass a specified number of failed attempts. This aims to enhance site security by minimizing potential unauthorized access through brute force methods.\n\nStakeholders & Users\n\n- Site Administrators: Configure Axes settings, manage access attempts, and review security logs.\n- Developers: Integrate and maintain the Axes plugin within Django sites.\n- End Users: Interact indirectly with the plugin as their login attempts are monitored to ensure security.\n\nFunctional Descriptions\n\n1. Login Attempt Tracking: Axes records each login attempt, capturing details such as user agent, IP address, username, HTTP headers, and access paths.\n\n2. Brute Force Prevention: Upon reaching the predefined limit of failed login attempts, further attempts are temporarily blocked.\n\n3. Data Persistence: Login attempts can be stored in the database or cached for quick retrieval and analysis, maintaining site performance during high traffic.\n\n4. Configurable Monitoring: Monitoring can be customized based on IP address, username, user agent, or combinations thereof.\n\n5. Access Management: Features include cool-off periods, IP allow/block lists, and user account whitelisting, offering flexible access control.\n\nNon-Functional Descriptions\n\n- Performance: Must efficiently handle high volumes of login attempts without degrading site performance, using lightweight data storage options.\n  \n- Scalability: System should adapt to varying traffic loads, supporting multiple configuration settings for different sites.\n  \n- Security: Data collected from login attempts must be securely stored, complying with best practices to ensure user privacy.\n\n- Reliability: Ensure consistent operation, correctly blocking attempts without false positives or negatives, maintaining high uptime.",
+  "ddl": "-- Schema for database: schemabench_0032\nCREATE TABLE `login_attempts` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `username` varchar(255) NOT NULL,\n  `ip_address` char(39) NOT NULL,\n  `user_agent` text NOT NULL,\n  `http_headers` text NOT NULL,\n  `access_path` varchar(255) NOT NULL,\n  `attempt_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `is_blocked` tinyint(1) NOT NULL DEFAULT 0,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  KEY `ip_address` (`ip_address`),\n  KEY `user_agent` (`user_agent`),\n  KEY `access_path` (`access_path`),\n  KEY `is_blocked` (`is_blocked`),\n  CONSTRAINT `login_attempts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `axes_config` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `site_id` int(11) NOT NULL,\n  `max_attempts` int(11) NOT NULL DEFAULT 5,\n  `cool_off_period` int(11) NOT NULL DEFAULT 300,\n  `ip_allow_list` text NOT NULL,\n  `ip_block_list` text NOT NULL,\n  `user_whitelist` text NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `site_id` (`site_id`),\n  CONSTRAINT `axes_config_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sites` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "login_attempts",
+      "axes_config",
+      "sites",
+      "users"
+    ],
+    "columns_by_table": {
+      "login_attempts": [],
+      "axes_config": [],
+      "sites": [],
+      "users": []
+    }
+  }
+}

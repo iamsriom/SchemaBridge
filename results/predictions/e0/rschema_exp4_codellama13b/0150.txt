@@ -1,0 +1,78 @@
+-- Schema for database: rschema_0150
+
+CREATE TABLE suppliers (
+  supplier_id INT(11) NOT NULL AUTO_INCREMENT,
+  address VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(255) NOT NULL,
+  PRIMARY KEY (supplier_id)
+);
+
+CREATE TABLE warehouses (
+  warehouse_id INT(11) NOT NULL AUTO_INCREMENT,
+  area VARCHAR(255) NOT NULL,
+  person_in_charge VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(255) NOT NULL,
+  PRIMARY KEY (warehouse_id)
+);
+
+CREATE TABLE employees (
+  employee_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  age INT(11) NOT NULL,
+  job_title VARCHAR(255) NOT NULL,
+  work_location VARCHAR(255) NOT NULL,
+  PRIMARY KEY (employee_id)
+);
+
+CREATE TABLE projects (
+  project_id INT(11) NOT NULL AUTO_INCREMENT,
+  budget DECIMAL(10,2) NOT NULL,
+  start_date DATE NOT NULL,
+  PRIMARY KEY (project_id)
+);
+
+CREATE TABLE parts (
+  part_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  specification VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  unit_price DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (part_id)
+);
+
+CREATE TABLE supplier_supplies_project (
+  supplier_id INT(11) NOT NULL,
+  project_id INT(11) NOT NULL,
+  supply_quantity INT(11) NOT NULL,
+  start_time DATETIME NOT NULL,
+  end_time DATETIME NOT NULL,
+  PRIMARY KEY (supplier_id, project_id),
+  FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE warehouse_inventory_parts (
+  warehouse_id INT(11) NOT NULL,
+  part_id INT(11) NOT NULL,
+  inventory_quantity INT(11) NOT NULL,
+  PRIMARY KEY (warehouse_id, part_id),
+  FOREIGN KEY (warehouse_id) REFERENCES warehouses(warehouse_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (part_id) REFERENCES parts(part_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE employee_work_management (
+  employee_id INT(11) NOT NULL,
+  warehouse_id INT(11) NOT NULL,
+  PRIMARY KEY (employee_id, warehouse_id),
+  FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (warehouse_id) REFERENCES warehouses(warehouse_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE project_requires_parts (
+  project_id INT(11) NOT NULL,
+  part_id INT(11) NOT NULL,
+  required_quantity INT(11) NOT NULL,
+  PRIMARY KEY (project_id, part_id),
+  FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (part_id) REFERENCES parts(part_id) ON DELETE CASCADE ON UPDATE CASCADE
+);

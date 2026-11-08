@@ -1,0 +1,26 @@
+{
+  "text_number": 175,
+  "id": "67552f0b13602ec03b41aab3",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0175",
+  "question": "The system shall record alumni personal information, including Alumni ID, Name, Employer, Job Title, Department, Class, Enrollment Year, and ID Number. The donation management module shall record detailed information for each donation, including Donation ID, Donating Alumni, Donation Time, Donation Amount, Donation Type (such as one-time donation or recurring donation), and Donation Usage (such as sponsoring individuals or funding projects). Additionally, the system shall record basic information for each donation project, including Project ID, Project Name, and Start and End Time. Each project involves multiple beneficiary units, recording the benefit percentage for each unit and the specific benefit amount obtained by that unit from the project. Through the management of this information, the system shall effectively track the allocation and usage of alumni donations.",
+  "ddl": "-- Schema for database: rschema_0175\nCREATE TABLE `alumni` (\n  `alumni_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `employer` varchar(255) DEFAULT NULL,\n  `job_title` varchar(255) DEFAULT NULL,\n  `department` varchar(255) DEFAULT NULL,\n  `class` varchar(255) DEFAULT NULL,\n  `enrollment_year` int(11) DEFAULT NULL,\n  `id_number` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`alumni_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `donations` (\n  `donation_id` int(11) NOT NULL AUTO_INCREMENT,\n  `donating_alumni_id` int(11) NOT NULL,\n  `donation_time` datetime NOT NULL,\n  `donation_amount` decimal(10,2) NOT NULL,\n  `donation_type` varchar(255) NOT NULL,\n  `donation_usage` varchar(255) NOT NULL,\n  PRIMARY KEY (`donation_id`),\n  KEY `donating_alumni_id` (`donating_alumni_id`),\n  CONSTRAINT `donations_ibfk_1` FOREIGN KEY (`donating_alumni_id`) REFERENCES `alumni` (`alumni_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `projects` (\n  `project_id` int(11) NOT NULL AUTO_INCREMENT,\n  `project_name` varchar(255) NOT NULL,\n  `start_time` datetime NOT NULL,\n  `end_time` datetime DEFAULT NULL,\n  PRIMARY KEY (`project_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `project_benefits` (\n  `project_id` int(11) NOT NULL,\n  `beneficiary_unit` varchar(255) NOT NULL,\n  `benefit_percentage` decimal(5,2) NOT NULL,\n  `benefit_amount` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`project_id`, `beneficiary_unit`),\n  KEY `project_id` (`project_id`),\n  CONSTRAINT `project_benefits_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `donation_project` (\n  `donation_id` int(11) NOT NULL,\n  `project_id` int(11) NOT NULL,\n  PRIMARY KEY (`donation_id`, `project_id`),\n  KEY `donation_id` (`donation_id`),\n  KEY `project_id` (`project_id`),\n  CONSTRAINT `donation_project_ibfk_1` FOREIGN KEY (`donation_id`) REFERENCES `donations` (`donation_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `donation_project_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "alumni",
+      "donations",
+      "projects",
+      "project_benefits",
+      "donation_project"
+    ],
+    "columns_by_table": {
+      "alumni": [],
+      "donations": [],
+      "projects": [],
+      "project_benefits": [],
+      "donation_project": []
+    }
+  }
+}

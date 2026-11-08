@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0080
+CREATE TABLE `Customer` (
+  `Customer_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Phone_Number` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`Customer_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Repair_Worker` (
+  `Repair_Worker_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Repair_Worker_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Part` (
+  `Part_Serial_Number` varchar(50) NOT NULL,
+  `Description` varchar(255) NOT NULL,
+  `Inventory_Quantity` int(11) NOT NULL,
+  `Price` decimal(10,2) NOT NULL,
+  `Supplier` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Part_Serial_Number`),
+  UNIQUE KEY `Unique_Part_Serial_Number` (`Part_Serial_Number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Repair_Task` (
+  `Repair_Task_ID` int(11) NOT NULL,
+  `Customer_ID` int(11) NOT NULL,
+  `Repair_Worker_ID` int(11) NOT NULL,
+  `Task_Start_Date` datetime NOT NULL,
+  `Task_Completion_Date` datetime DEFAULT NULL,
+  `Task_Status` varchar(50) NOT NULL,
+  `Vehicle_Model` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Repair_Task_ID`),
+  CONSTRAINT `fk_Customer` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_Repair_Worker` FOREIGN KEY (`Repair_Worker_ID`) REFERENCES `Repair_Worker` (`Repair_Worker_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Repair_Worker_Task` (
+  `Repair_Worker_ID` int(11) NOT NULL,
+  `Repair_Task_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Repair_Worker_ID`, `Repair_Task_ID`),
+  CONSTRAINT `fk_Repair_Worker_Task_Repair_Worker` FOREIGN KEY (`Repair_Worker_ID`) REFERENCES `Repair_Worker` (`Repair_Worker_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_Repair_Worker_Task_Repair_Task` FOREIGN KEY (`Repair_Task_ID`) REFERENCES `Repair_Task` (`Repair_Task_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Part_Usage` (
+  `Part_Serial_Number` varchar(50) NOT NULL,
+  `Repair_Task_ID` int(11) NOT NULL,
+  `Usage_Quantity` int(11) NOT NULL,
+  PRIMARY KEY (`Part_Serial_Number`, `Repair_Task_ID`),
+  CONSTRAINT `fk_Part_Usage_Part` FOREIGN KEY (`Part_Serial_Number`) REFERENCES `Part` (`Part_Serial_Number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_Part_Usage_Repair_Task` FOREIGN KEY (`Repair_Task_ID`) REFERENCES `Repair_Task` (`Repair_Task_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

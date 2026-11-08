@@ -1,0 +1,74 @@
+-- Schema for database: rschema_0437
+
+CREATE TABLE `students` (
+  `student_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `class` varchar(255) NOT NULL,
+  `major` varchar(255) NOT NULL,
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tasks` (
+  `task_id` int(11) NOT NULL,
+  `task_title` varchar(255) NOT NULL,
+  `task_description` varchar(255) NOT NULL,
+  `task_start_date` datetime NOT NULL,
+  `task_end_date` datetime NOT NULL,
+  `task_location` varchar(255) NOT NULL,
+  PRIMARY KEY (`task_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `simulation_modules` (
+  `module_id` int(11) NOT NULL,
+  `module_name` varchar(255) NOT NULL,
+  `module_type` varchar(255) NOT NULL,
+  `module_description` varchar(255) NOT NULL,
+  `module_code` varchar(255) NOT NULL,
+  PRIMARY KEY (`module_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `simulation_results` (
+  `student_id` int(11) NOT NULL,
+  `module_id` int(11) NOT NULL,
+  `simulation_result_data` varchar(255) NOT NULL,
+  `result_analysis` varchar(255) NOT NULL,
+  `simulation_date` datetime NOT NULL,
+  PRIMARY KEY (`student_id`, `module_id`),
+  FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`module_id`) REFERENCES `simulation_modules` (`module_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `theses` (
+  `thesis_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `thesis_title` varchar(255) NOT NULL,
+  `thesis_content` varchar(255) NOT NULL,
+  `submission_date` datetime NOT NULL,
+  PRIMARY KEY (`thesis_id`),
+  FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_assignments` (
+  `student_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  PRIMARY KEY (`student_id`, `task_id`),
+  FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`task_id`) REFERENCES `tasks` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `completion_status` (
+  `student_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `completion_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`student_id`, `task_id`),
+  FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`task_id`) REFERENCES `tasks` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reports` (
+  `report_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `report_data` varchar(255) NOT NULL,
+  PRIMARY KEY (`report_id`),
+  FOREIGN KEY (`task_id`) REFERENCES `tasks` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,44 @@
+-- Schema for database: rschema_0483
+CREATE TABLE `Payment_Platform` (
+  `Platform_ID` int(11) NOT NULL,
+  `Platform_Name` varchar(255) DEFAULT NULL,
+  `Platform_Address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Platform_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User` (
+  `User_ID` int(11) NOT NULL,
+  `Name` varchar(255) DEFAULT NULL,
+  `Contact_Information` varchar(255) DEFAULT NULL,
+  `Registration_Method` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`User_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Operation` (
+  `Operation_ID` int(11) NOT NULL,
+  `Operation_Type` varchar(255) DEFAULT NULL,
+  `Operation_Amount` float DEFAULT NULL,
+  `Operation_Time` datetime DEFAULT NULL,
+  `Platform_ID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Operation_ID`),
+  CONSTRAINT `Operation_ibfk_1` FOREIGN KEY (`Platform_ID`) REFERENCES `Payment_Platform` (`Platform_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Intermediary` (
+  `Intermediary_ID` int(11) NOT NULL,
+  `Intermediary_Name` varchar(255) DEFAULT NULL,
+  `Intermediary_Status` varchar(255) DEFAULT NULL,
+  `Operation_ID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Intermediary_ID`),
+  CONSTRAINT `Intermediary_ibfk_1` FOREIGN KEY (`Operation_ID`) REFERENCES `Operation` (`Operation_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Payment_Operation` (
+  `User_ID` int(11) NOT NULL,
+  `Operation_ID` int(11) NOT NULL,
+  `Payment_Status` varchar(255) DEFAULT NULL,
+  `Payment_Time` datetime DEFAULT NULL,
+  PRIMARY KEY (`User_ID`, `Operation_ID`),
+  CONSTRAINT `User_Payment_Operation_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `User_Payment_Operation_ibfk_2` FOREIGN KEY (`Operation_ID`) REFERENCES `Operation` (`Operation_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

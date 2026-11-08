@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0221
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supplier` (
+  `supplier_id` int(11) NOT NULL,
+  `supplier_name` varchar(255) NOT NULL,
+  `responsible_person_name` varchar(255) DEFAULT NULL,
+  `responsible_person_phone` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`supplier_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `stock` float DEFAULT NULL,
+  `supplier_id` int(11) DEFAULT NULL,
+  `unit_price` float DEFAULT NULL,
+  PRIMARY KEY (`product_id`),
+  CONSTRAINT `product_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_purchase` (
+  `supplier_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `purchase_time` datetime NOT NULL,
+  `purchase_price` float DEFAULT NULL,
+  `purchase_quantity` int(11) DEFAULT NULL,
+  `total_purchase_price` float DEFAULT NULL,
+  PRIMARY KEY (`supplier_id`, `product_id`, `purchase_time`),
+  CONSTRAINT `product_purchase_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `product_purchase_ibfk_2` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_record` (
+  `product_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `sale_time` datetime NOT NULL,
+  `sale_price` float DEFAULT NULL,
+  `sale_quantity` int(11) DEFAULT NULL,
+  `total_sale_price` float DEFAULT NULL,
+  PRIMARY KEY (`product_id`, `customer_id`, `sale_time`),
+  CONSTRAINT `sales_record_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_record_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,241 @@
+{
+  "text_number": 200,
+  "id": "67552f0a13602ec03b41a7f7",
+  "llm": "gpt4omini",
+  "model_id": "gpt-4o-mini",
+  "source_schema2text_llm": "deepseek",
+  "database": "rschema_0200",
+  "nl_text": "The database schema named 'rschema_0200' consists of four tables: 'Customer', 'Order', 'Customer_Credit_Rating', and 'Order_Detail'.\nThe 'Customer' table represents a customer entity with attributes such as 'Address', 'Contact_Person', 'Customer_ID', 'Name', and 'Phone_Number'. It has a primary key 'Customer_ID' which is used as a unique identifier for each customer.\nThe 'Order' table represents an order entity with attributes such as 'Customer_ID', 'Order_ID', 'Order_Time', and 'Total_Price'. It has a primary key 'Order_ID' which is used as a unique identifier for each order. The 'Customer_ID' is a foreign key referencing the 'Customer' table, establishing a relationship between the 'Order' and 'Customer' tables.\nThe 'Customer_Credit_Rating' table represents a credit rating entity with attributes such as 'Credit_Rating' and 'Customer_ID'. It has a primary key 'Customer_ID' which is used as a unique identifier for each credit rating record. The 'Customer_ID' is a foreign key referencing the 'Customer' table, establishing a relationship between the 'Customer_Credit_Rating' and 'Customer' tables.\nThe 'Order_Detail' table represents an order detail entity with attributes such as 'Order_Detail_ID', 'Order_ID', 'Product_ID', and 'Quantity'. It has a primary key 'Order_Detail_ID' which is used as a unique identifier for each order detail record. The 'Order_ID' is a foreign key referencing the 'Order' table, establishing a relationship between the 'Order_Detail' and 'Order' tables.\nAll columns allow null values except for 'Customer_ID' in the 'Order' table and 'Order_ID' in the 'Order_Detail' table which do not allow null values. The 'Order_Time' in the 'Order' table has a default value of the current date and time. The 'Total_Price' in the 'Order' table has a default value of 0.0. The 'Credit_Rating' in the 'Customer_Credit_Rating' table has a default value of 5.\nThe primary keys in the 'Customer', 'Order', and 'Customer_Credit_Rating' tables are composite, meaning they consist of multiple columns. The 'Customer_ID' in the 'Order' table and 'Order_ID' in the 'Order_Detail' table are unique constraints. The foreign keys in the 'Order' and 'Order_Detail' tables have on delete cascade and on update cascade rules, meaning if a record in the 'Customer' table is deleted or updated, the corresponding records in the 'Order' and 'Order_Detail' tables will also be deleted or updated.\nThe 'Order_Detail_ID' in the 'Order_Detail' table is an index, which improves the performance of data retrieval operations on large tables.",
+  "gold_question": "Business requirements for wholesaler customer management system: A wholesaler needs to manage its customer information, including customer number, name, address, contact person, and phone number. Every time a customer places an order, the order number, customer number, order time, product number, quantity, and total price need to be recorded. The system also needs to rate the customer's credit, and the rating indicators include the number of historical orders and the order amount (which can be exported based on order records).",
+  "input_json": "/data/RSchema_ExpResults4/Experiment2/schema2text_deepseek/0200.json",
+  "ddl": "-- Schema for database: rschema_0200\nCREATE TABLE `Customer` (\n  `Customer_ID` int(11) NOT NULL,\n  `Name` varchar(255) DEFAULT NULL,\n  `Contact_Person` varchar(255) DEFAULT NULL,\n  `Address` varchar(255) DEFAULT NULL,\n  `Phone_Number` varchar(20) DEFAULT NULL,\n  PRIMARY KEY (`Customer_ID`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Order` (\n  `Order_ID` int(11) NOT NULL,\n  `Customer_ID` int(11) NOT NULL,\n  `Order_Time` datetime DEFAULT CURRENT_TIMESTAMP,\n  `Total_Price` decimal(10,2) DEFAULT 0.00,\n  PRIMARY KEY (`Order_ID`),\n  UNIQUE KEY `unique_customer_id` (`Customer_ID`),\n  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Customer_Credit_Rating` (\n  `Customer_ID` int(11) NOT NULL,\n  `Credit_Rating` int(11) DEFAULT 5,\n  PRIMARY KEY (`Customer_ID`),\n  CONSTRAINT `credit_rating_ibfk_1` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Order_Detail` (\n  `Order_Detail_ID` int(11) NOT NULL,\n  `Order_ID` int(11) NOT NULL,\n  `Product_ID` int(11) DEFAULT NULL,\n  `Quantity` int(11) DEFAULT NULL,\n  PRIMARY KEY (`Order_Detail_ID`),\n  UNIQUE KEY `unique_order_id` (`Order_ID`),\n  CONSTRAINT `order_detail_ibfk_1` FOREIGN KEY (`Order_ID`) REFERENCES `Order` (`Order_ID`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "rschema_0200",
+    "tables": [
+      "Customer",
+      "Order",
+      "Customer_Credit_Rating",
+      "Order_Detail"
+    ],
+    "columns_by_table": {
+      "Customer": [
+        {
+          "COLUMN_NAME": "Customer_ID",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "Name",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "Contact_Person",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "Address",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "Phone_Number",
+          "ORDINAL_POSITION": 5,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 20,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(20)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Order": [
+        {
+          "COLUMN_NAME": "Order_ID",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "Customer_ID",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "UNI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "Order_Time",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": "CURRENT_TIMESTAMP",
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "datetime",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "datetime",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "Total_Price",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": "0.00",
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "decimal",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 2,
+          "COLUMN_TYPE": "decimal(10,2)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Customer_Credit_Rating": [
+        {
+          "COLUMN_NAME": "Customer_ID",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "Credit_Rating",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": "5",
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "Order_Detail": [
+        {
+          "COLUMN_NAME": "Order_Detail_ID",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "Order_ID",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "UNI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "Product_ID",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "Quantity",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ]
+    }
+  }
+}

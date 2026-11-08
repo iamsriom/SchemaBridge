@@ -1,0 +1,82 @@
+-- Schema for database: schemabench_0231
+CREATE TABLE `cities` (
+  `cityname` varchar(50) NOT NULL,
+  `countryname` varchar(50) NOT NULL,
+  PRIMARY KEY (`cityname`, `countryname`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stadiums` (
+  `sid` varchar(10) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `city` varchar(50) NOT NULL,
+  `capacity` int(11) NOT NULL,
+  PRIMARY KEY (`sid`),
+  CONSTRAINT `stadiums_ibfk_1` FOREIGN KEY (`city`) REFERENCES `cities` (`cityname`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teams` (
+  `team_id` varchar(10) NOT NULL,
+  `team_name` varchar(255) NOT NULL,
+  `country` varchar(50) NOT NULL,
+  `stadium` varchar(10) NOT NULL,
+  PRIMARY KEY (`team_id`),
+  CONSTRAINT `teams_ibfk_1` FOREIGN KEY (`stadium`) REFERENCES `stadiums` (`sid`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `players` (
+  `pid` varchar(10) NOT NULL,
+  `first_name` varchar(50) NOT NULL,
+  `last_name` varchar(50) NOT NULL,
+  `nationality` varchar(50) NOT NULL,
+  `dob` datetime NOT NULL,
+  `team_id` varchar(10) NOT NULL,
+  `jy_num` int(11) NOT NULL,
+  `position` varchar(50) NOT NULL,
+  `height` int(11) NOT NULL,
+  `weight` int(11) NOT NULL,
+  `foot` char(1) NOT NULL,
+  PRIMARY KEY (`pid`),
+  CONSTRAINT `players_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `check_foot` CHECK (`foot` IN ('R', 'L'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `managers` (
+  `mid` varchar(10) NOT NULL,
+  `first_name` varchar(50) NOT NULL,
+  `last_name` varchar(50) NOT NULL,
+  `nationality` varchar(50) NOT NULL,
+  `dob` datetime NOT NULL,
+  `team` varchar(10) NOT NULL,
+  PRIMARY KEY (`mid`),
+  CONSTRAINT `managers_ibfk_1` FOREIGN KEY (`team`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `matches` (
+  `mid` varchar(10) NOT NULL,
+  `season` varchar(50) NOT NULL,
+  `date_time` datetime NOT NULL,
+  `home_team` varchar(10) NOT NULL,
+  `away_team` varchar(10) NOT NULL,
+  `stadium` varchar(10) NOT NULL,
+  `ht_score` int(11) NOT NULL,
+  `at_score` int(11) NOT NULL,
+  `pso` int(1) NOT NULL,
+  PRIMARY KEY (`mid`),
+  CONSTRAINT `matches_ibfk_1` FOREIGN KEY (`home_team`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `matches_ibfk_2` FOREIGN KEY (`away_team`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `matches_ibfk_3` FOREIGN KEY (`stadium`) REFERENCES `stadiums` (`sid`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `check_pso` CHECK (`pso` IN (0, 1))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `goals` (
+  `goal_id` varchar(10) NOT NULL,
+  `match_id` varchar(10) NOT NULL,
+  `pid` varchar(10) NOT NULL,
+  `duration` int(11) NOT NULL,
+  `assist` varchar(10) DEFAULT NULL,
+  `goal_desc` varchar(255) NOT NULL,
+  PRIMARY KEY (`goal_id`),
+  CONSTRAINT `goals_ibfk_1` FOREIGN KEY (`match_id`) REFERENCES `matches` (`mid`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `goals_ibfk_2` FOREIGN KEY (`pid`) REFERENCES `players` (`pid`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `goals_ibfk_3` FOREIGN KEY (`assist`) REFERENCES `players` (`pid`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

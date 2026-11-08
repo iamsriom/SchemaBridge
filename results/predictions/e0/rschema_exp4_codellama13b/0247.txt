@@ -1,0 +1,70 @@
+-- Schema for database: rschema_0247
+
+CREATE TABLE users (
+  user_id INT(11) NOT NULL AUTO_INCREMENT,
+  username VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  student_id VARCHAR(255) NOT NULL,
+  role VARCHAR(255) NOT NULL,
+  registration_time DATETIME NOT NULL,
+  last_login_time DATETIME NOT NULL,
+  PRIMARY KEY (user_id),
+  UNIQUE KEY (username),
+  UNIQUE KEY (student_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE sign_in (
+  sign_in_id INT(11) NOT NULL AUTO_INCREMENT,
+  user_id INT(11) NOT NULL,
+  ip_address VARCHAR(255) NOT NULL,
+  sign_in_time DATETIME NOT NULL,
+  PRIMARY KEY (sign_in_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE control_sign_in (
+  control_sign_in_id INT(11) NOT NULL AUTO_INCREMENT,
+  teacher_id INT(11) NOT NULL,
+  sign_in_start_time DATETIME NOT NULL,
+  sign_in_end_time DATETIME NOT NULL,
+  PRIMARY KEY (control_sign_in_id),
+  FOREIGN KEY (teacher_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE student_attendance (
+  student_id INT(11) NOT NULL,
+  sign_in_count INT(11) NOT NULL,
+  PRIMARY KEY (student_id),
+  FOREIGN KEY (student_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE classes (
+  class_id INT(11) NOT NULL AUTO_INCREMENT,
+  class_name VARCHAR(255) NOT NULL,
+  major VARCHAR(255) NOT NULL,
+  grade VARCHAR(255) NOT NULL,
+  PRIMARY KEY (class_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE courses (
+  course_id INT(11) NOT NULL AUTO_INCREMENT,
+  course_name VARCHAR(255) NOT NULL,
+  course_description VARCHAR(255) NOT NULL,
+  PRIMARY KEY (course_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE class_has_student (
+  class_id INT(11) NOT NULL,
+  student_id INT(11) NOT NULL,
+  PRIMARY KEY (class_id, student_id),
+  FOREIGN KEY (class_id) REFERENCES classes(class_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (student_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE course_has_teacher (
+  course_id INT(11) NOT NULL,
+  teacher_id INT(11) NOT NULL,
+  PRIMARY KEY (course_id, teacher_id),
+  FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (teacher_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

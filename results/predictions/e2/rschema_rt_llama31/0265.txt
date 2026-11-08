@@ -1,0 +1,39 @@
+-- Schema for database: rschema_0265
+CREATE TABLE `chessboard` (
+  `chessboard_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`chessboard_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `quality_inspection_model` (
+  `model_id` int(11) NOT NULL AUTO_INCREMENT,
+  `result` varchar(255) NOT NULL,
+  `running_time` int(11) NOT NULL,
+  PRIMARY KEY (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `chess_piece` (
+  `chess_piece_id` int(11) NOT NULL AUTO_INCREMENT,
+  `color` varchar(50) NOT NULL,
+  `position` varchar(50) NOT NULL,
+  `belonging_chessboard` int(11) NOT NULL,
+  PRIMARY KEY (`chess_piece_id`),
+  CONSTRAINT `chess_piece_ibfk_1` FOREIGN KEY (`belonging_chessboard`) REFERENCES `chessboard` (`chessboard_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `quality_inspection` (
+  `inspection_id` int(11) NOT NULL AUTO_INCREMENT,
+  `result` varchar(255) NOT NULL,
+  `time` datetime NOT NULL,
+  `chess_piece_id` int(11) NOT NULL,
+  PRIMARY KEY (`inspection_id`),
+  CONSTRAINT `quality_inspection_ibfk_1` FOREIGN KEY (`chess_piece_id`) REFERENCES `chess_piece` (`chess_piece_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `quality_alert` (
+  `alert_id` int(11) NOT NULL AUTO_INCREMENT,
+  `defect_type` varchar(255) NOT NULL,
+  `inspection_id` int(11) NOT NULL,
+  PRIMARY KEY (`alert_id`),
+  CONSTRAINT `quality_alert_ibfk_1` FOREIGN KEY (`inspection_id`) REFERENCES `quality_inspection` (`inspection_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

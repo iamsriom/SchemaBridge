@@ -1,0 +1,67 @@
+-- Schema for database: `MovieBank`
+
+-- Table: `movies`
+CREATE TABLE `movies` (
+  `movie_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `release_date` date NOT NULL,
+  `duration` int(11) NOT NULL,
+  `genre_id` int(11) NOT NULL,
+  `director_id` int(11) NOT NULL,
+  `description` text NOT NULL,
+  PRIMARY KEY (`movie_id`),
+  KEY `genre_id` (`genre_id`),
+  KEY `director_id` (`director_id`),
+  CONSTRAINT `movies_ibfk_1` FOREIGN KEY (`genre_id`) REFERENCES `genres` (`genre_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `movies_ibfk_2` FOREIGN KEY (`director_id`) REFERENCES `directors` (`director_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `actors`
+CREATE TABLE `actors` (
+  `actor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `birthdate` date NOT NULL,
+  `nationality` varchar(255) NOT NULL,
+  `website` varchar(255) NOT NULL,
+  `biography` text NOT NULL,
+  PRIMARY KEY (`actor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `directors`
+CREATE TABLE `directors` (
+  `director_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `birthdate` date NOT NULL,
+  `nationality` varchar(255) NOT NULL,
+  `website` varchar(255) NOT NULL,
+  `biography` text NOT NULL,
+  PRIMARY KEY (`director_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `genres`
+CREATE TABLE `genres` (
+  `genre_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  PRIMARY KEY (`genre_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `ratings`
+CREATE TABLE `ratings` (
+  `rating_id` int(11) NOT NULL AUTO_INCREMENT,
+  `movie_id` int(11) NOT NULL,
+  `rating` int(11) NOT NULL,
+  PRIMARY KEY (`rating_id`),
+  KEY `movie_id` (`movie_id`),
+  CONSTRAINT `ratings_ibfk_1` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`movie_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `associative_entities`
+CREATE TABLE `associative_entities` (
+  `movie_id` int(11) NOT NULL,
+  `actor_id` int(11) NOT NULL,
+  PRIMARY KEY (`movie_id`,`actor_id`),
+  KEY `actor_id` (`actor_id`),
+  CONSTRAINT `associative_entities_ibfk_1` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`movie_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `associative_entities_ibfk_2` FOREIGN KEY (`actor_id`) REFERENCES `actors` (`actor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

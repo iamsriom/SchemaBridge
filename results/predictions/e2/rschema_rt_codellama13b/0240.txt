@@ -1,0 +1,56 @@
+-- Schema for database: rschema_0240
+CREATE TABLE `Ship` (
+  `ship_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `construction_date` datetime NOT NULL,
+  `service_status` varchar(50) NOT NULL,
+  `fleet_id` int(11) NOT NULL,
+  PRIMARY KEY (`ship_id`),
+  CONSTRAINT `ship_ibfk_1` FOREIGN KEY (`fleet_id`) REFERENCES `Fleet` (`fleet_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Crew_Member` (
+  `crew_member_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(10) NOT NULL,
+  `length_of_service` int(11) NOT NULL,
+  `position` varchar(100) NOT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  `fleet_id` int(11) NOT NULL,
+  PRIMARY KEY (`crew_member_id`),
+  CONSTRAINT `crew_member_ibfk_1` FOREIGN KEY (`fleet_id`) REFERENCES `Fleet` (`fleet_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Fleet` (
+  `fleet_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `base` varchar(255) NOT NULL,
+  `commander_id` int(11) NOT NULL,
+  PRIMARY KEY (`fleet_id`),
+  CONSTRAINT `fleet_ibfk_1` FOREIGN KEY (`commander_id`) REFERENCES `Crew_Member` (`crew_member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Fleet_Mission_Execution` (
+  `execution_id` int(11) NOT NULL,
+  `crew_member_id` int(11) NOT NULL,
+  `fleet_id` int(11) NOT NULL,
+  `execution_time` datetime NOT NULL,
+  `is_primary_responsible` tinyint(1) NOT NULL,
+  `remarks` text DEFAULT NULL,
+  PRIMARY KEY (`execution_id`),
+  CONSTRAINT `fleet_mission_execution_ibfk_1` FOREIGN KEY (`crew_member_id`) REFERENCES `Crew_Member` (`crew_member_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fleet_mission_execution_ibfk_2` FOREIGN KEY (`fleet_id`) REFERENCES `Fleet` (`fleet_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Ship_Supply` (
+  `supply_id` int(11) NOT NULL,
+  `ship_id` int(11) NOT NULL,
+  `responsible_crew_member_id` int(11) NOT NULL,
+  `supply_items` varchar(255) NOT NULL,
+  `supply_quantity` int(11) NOT NULL,
+  `supply_time` datetime NOT NULL,
+  PRIMARY KEY (`supply_id`),
+  CONSTRAINT `ship_supply_ibfk_1` FOREIGN KEY (`ship_id`) REFERENCES `Ship` (`ship_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ship_supply_ibfk_2` FOREIGN KEY (`responsible_crew_member_id`) REFERENCES `Crew_Member` (`crew_member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

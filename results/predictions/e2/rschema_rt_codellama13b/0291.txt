@@ -1,0 +1,38 @@
+-- Schema for database: rschema_0291
+CREATE TABLE `Reagent` (
+  `Reagent_ID` int(11) NOT NULL,
+  `Reagent_Name` varchar(255) NOT NULL,
+  `Reagent_Specifications` text DEFAULT NULL,
+  `Expiration_Date` date DEFAULT NULL,
+  `Inventory_Quantity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Reagent_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Laboratory` (
+  `Laboratory_ID` int(11) NOT NULL,
+  `Laboratory_Name` varchar(255) NOT NULL,
+  `Laboratory_Location` varchar(255) DEFAULT NULL,
+  `Laboratory_Person_in_Charge_ID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Laboratory_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Personnel` (
+  `Personnel_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Age` int(11) DEFAULT NULL,
+  `Gender` varchar(10) DEFAULT NULL,
+  `Affiliated_Laboratory_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Personnel_ID`),
+  CONSTRAINT `Personnel_ibfk_1` FOREIGN KEY (`Affiliated_Laboratory_ID`) REFERENCES `Laboratory` (`Laboratory_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Reagent_Usage_Record` (
+  `Reagent_ID` int(11) NOT NULL,
+  `Usage_Personnel_ID` int(11) NOT NULL,
+  `Usage_Start_Time` datetime NOT NULL,
+  `Usage_Duration` int(11) DEFAULT NULL,
+  `Usage_Quantity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Reagent_ID`, `Usage_Personnel_ID`, `Usage_Start_Time`),
+  CONSTRAINT `Reagent_Usage_Record_ibfk_1` FOREIGN KEY (`Reagent_ID`) REFERENCES `Reagent` (`Reagent_ID`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `Reagent_Usage_Record_ibfk_2` FOREIGN KEY (`Usage_Personnel_ID`) REFERENCES `Personnel` (`Personnel_ID`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

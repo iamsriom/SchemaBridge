@@ -1,0 +1,42 @@
+{
+  "text_number": 41,
+  "id": "SB-041",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0041",
+  "question": "1) Background / Context\n\nHeya is a campaign mailer designed for the Rails framework, similar to ActionMailer, but focused on managing and sending timed email sequences and other communications like text messages. \n\n2) Objectives\n\nThe primary objective of Heya is to enable users to create, manage, and execute communication campaigns by scheduling emails and text messages efficiently. This system aims to streamline the process of sending timed communications within a Rails application.\n\n3) Stakeholders & Users\n\n- Campaign Managers: Individuals responsible for creating and scheduling campaigns.\n- Developers: Integrators and maintainers of the system within Rails applications.\n- End Users: Recipients of the scheduled communications, primarily email and text messages.\n\n4) Functional Descriptions\n\n- Campaign Creation: Users can create new campaigns, specifying the sequence and timing of emails or text messages.\n- Scheduling: Ability to schedule sending times for different communications in each campaign.\n- Membership Management: Track users participating in each campaign, utilizing the `heya_campaign_memberships` table to record user types, IDs, and their campaign involvement.\n- Receipt Tracking: Record when messages are sent through the `heya_campaign_receipts` table, tracking each step and whether notifications have been sent.\n- User Association: Link campaign activities to specific users via foreign keys in the database, ensuring data consistency with user profiles.\n\n5) Non-Functional Descriptions\n\n- Scalability: The system should handle a large number of concurrent email and message sequences.\n- Reliability: Ensure timely delivery of scheduled communications without failure.\n- Performance: Maintain efficient processing of campaigns to avoid delays in message delivery.\n- Security: Protect user data and communication content, adhering to data privacy standards.",
+  "ddl": "-- Schema for database: schemabench_0041\nCREATE TABLE `heya_campaigns` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` text NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `heya_campaign_memberships` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `campaign_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `user_type` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`campaign_id`) REFERENCES `heya_campaigns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `heya_campaign_receipts` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `campaign_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `message_type` varchar(255) NOT NULL,\n  `message_content` text NOT NULL,\n  `sent_at` datetime NOT NULL,\n  `received_at` datetime NOT NULL,\n  `status` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`campaign_id`) REFERENCES `heya_campaigns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `phone` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_profiles` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `gender` varchar(255) NOT NULL,\n  `age` int(11) NOT NULL,\n  `location` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_preferences` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `communication_preference` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_notifications` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `notification_type` varchar(255) NOT NULL,\n  `notification_content` text NOT NULL,\n  `sent_at` datetime NOT NULL,\n  `received_at` datetime NOT NULL,\n  `status` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_logs` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `action` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `heya_campaign_logs` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `campaign_id` int(11) NOT NULL,\n  `action` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`campaign_id`) REFERENCES `heya_campaigns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `heya_campaign_activities` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `campaign_id` int(11) NOT NULL,\n  `activity_type` varchar(255) NOT NULL,\n  `activity_content` text NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`campaign_id`) REFERENCES `heya_campaigns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `heya_campaign_schedules` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `campaign_id` int(11) NOT NULL,\n  `schedule_type` varchar(255) NOT NULL,\n  `schedule_content` text NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`campaign_id`) REFERENCES `heya_campaigns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `heya_campaign_templates` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `campaign_id` int(11) NOT NULL,\n  `template_type` varchar(255) NOT NULL,\n  `template_content` text NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`campaign_id`) REFERENCES `heya_campaigns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `heya_campaign_attachments` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `campaign",
+  "metadata": {
+    "database": "schemabench_0041",
+    "tables": [
+      "heya_campaigns",
+      "heya_campaign_memberships",
+      "heya_campaign_receipts",
+      "users",
+      "user_profiles",
+      "user_preferences",
+      "user_notifications",
+      "user_logs",
+      "heya_campaign_logs",
+      "heya_campaign_activities",
+      "heya_campaign_schedules",
+      "heya_campaign_templates",
+      "heya_campaign_attachments"
+    ],
+    "columns_by_table": {
+      "heya_campaigns": [],
+      "heya_campaign_memberships": [],
+      "heya_campaign_receipts": [],
+      "users": [],
+      "user_profiles": [],
+      "user_preferences": [],
+      "user_notifications": [],
+      "user_logs": [],
+      "heya_campaign_logs": [],
+      "heya_campaign_activities": [],
+      "heya_campaign_schedules": [],
+      "heya_campaign_templates": [],
+      "heya_campaign_attachments": []
+    }
+  }
+}

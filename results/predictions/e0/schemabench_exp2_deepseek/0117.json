@@ -1,0 +1,28 @@
+{
+  "text_number": 117,
+  "id": "SB-117",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "schemabench_0117",
+  "question": "1) Background / Context\n\nThe project involves analyzing the mutagenicity of chemical compounds using data on 230 molecules tested on Salmonella typhimurium. The analysis focuses on identifying properties that influence mutagenicity, utilizing a subset of 188 molecules that are amenable to linear regression analysis, termed the \"regression friendly\" dataset. The remaining subset consists of 42 molecules which require alternative analytical approaches.\n\n2) Objectives\n\n- To evaluate the mutagenic potential of chemical structures.\n- To facilitate predictive modeling using linear regression for a subset of molecules.\n- To explore database-driven methods for organizing chemical structural data.\n\n3) Stakeholders & Users\n\n- Chemists and biologists conducting mutagenicity research.\n- Data scientists and researchers involved in chemical analysis.\n- Software developers maintaining and enhancing the database system.\n\n4) Functional Descriptions\n\n- Store detailed information about atoms, including their elemental type, charge, and type.\n- Manage bonds between atoms, specifying the bond type and linked atoms.\n- Store chemical compounds data with properties such as activity, logP, and LUMO values.\n- Track the active status of compounds for experimental purposes.\n- Represent ring structures within compounds, linking them with associated atoms.\n\n5) Non-Functional Descriptions\n\n- The system should ensure data integrity, maintaining consistent relationships between tables.\n- It should provide efficient querying capabilities for large datasets.\n- The database must support future scalability, accommodating additional compounds and data structures.",
+  "ddl": "-- Schema for database: `chem_db`\n\n-- Table: `molecules`\nCREATE TABLE `molecules` (\n  `molecule_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` text,\n  PRIMARY KEY (`molecule_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `atoms`\nCREATE TABLE `atoms` (\n  `atom_id` int(11) NOT NULL AUTO_INCREMENT,\n  `symbol` char(3) NOT NULL,\n  `element_type` varchar(255) NOT NULL,\n  `charge` int(11) NOT NULL,\n  `type` varchar(255) NOT NULL,\n  PRIMARY KEY (`atom_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `bonds`\nCREATE TABLE `bonds` (\n  `bond_id` int(11) NOT NULL AUTO_INCREMENT,\n  `atom1_id` int(11) NOT NULL,\n  `atom2_id` int(11) NOT NULL,\n  `bond_type` varchar(255) NOT NULL,\n  PRIMARY KEY (`bond_id`),\n  FOREIGN KEY (`atom1_id`) REFERENCES `atoms` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`atom2_id`) REFERENCES `atoms` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `compounds`\nCREATE TABLE `compounds` (\n  `compound_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `activity` float NOT NULL,\n  `logP` float NOT NULL,\n  `LUMO` float NOT NULL,\n  `status` varchar(255) NOT NULL,\n  PRIMARY KEY (`compound_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `compound_molecules`\nCREATE TABLE `compound_molecules` (\n  `compound_id` int(11) NOT NULL,\n  `molecule_id` int(11) NOT NULL,\n  PRIMARY KEY (`compound_id`, `molecule_id`),\n  FOREIGN KEY (`compound_id`) REFERENCES `compounds` (`compound_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`molecule_id`) REFERENCES `molecules` (`molecule_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `compound_atoms`\nCREATE TABLE `compound_atoms` (\n  `compound_id` int(11) NOT NULL,\n  `atom_id` int(11) NOT NULL,\n  PRIMARY KEY (`compound_id`, `atom_id`),\n  FOREIGN KEY (`compound_id`) REFERENCES `compounds` (`compound_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`atom_id`) REFERENCES `atoms` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "molecules",
+      "atoms",
+      "bonds",
+      "compounds",
+      "compound_molecules",
+      "compound_atoms"
+    ],
+    "columns_by_table": {
+      "molecules": [],
+      "atoms": [],
+      "bonds": [],
+      "compounds": [],
+      "compound_molecules": [],
+      "compound_atoms": []
+    }
+  }
+}

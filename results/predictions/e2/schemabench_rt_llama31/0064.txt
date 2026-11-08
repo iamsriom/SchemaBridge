@@ -1,0 +1,198 @@
+-- Schema for database: schemabench_0064
+CREATE TABLE `tracker_agents` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `browser` varchar(255) NOT NULL,
+  `version` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_devices` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `kind` varchar(255) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  `platform` varchar(255) NOT NULL,
+  `platform_version` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_sessions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `device_id` int(11) DEFAULT NULL,
+  `agent_id` int(11) DEFAULT NULL,
+  `client_ip` varchar(45) DEFAULT NULL,
+  `referer_id` int(11) DEFAULT NULL,
+  `cookie_id` int(11) DEFAULT NULL,
+  `geoip_id` int(11) DEFAULT NULL,
+  `language_id` int(11) DEFAULT NULL,
+  `is_robot` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tracker_sessions_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `tracker_devices` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tracker_sessions_ibfk_2` FOREIGN KEY (`agent_id`) REFERENCES `tracker_agents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `session_id` int(11) NOT NULL,
+  `path_id` int(11) NOT NULL,
+  `query_id` int(11) NOT NULL,
+  `method` varchar(10) NOT NULL,
+  `route_path_id` int(11) NOT NULL,
+  `error_id` int(11) DEFAULT NULL,
+  `is_ajax` tinyint(1) NOT NULL DEFAULT 0,
+  `is_secure` tinyint(1) NOT NULL DEFAULT 0,
+  `is_json` tinyint(1) NOT NULL DEFAULT 0,
+  `wants_json` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tracker_log_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `tracker_sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_referers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `domain_id` int(11) NOT NULL,
+  `url` varchar(255) NOT NULL,
+  `host` varchar(255) NOT NULL,
+  `medium` varchar(255) NOT NULL,
+  `source` varchar(255) NOT NULL,
+  `search_terms_hash` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_referers_search_terms` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `referer_id` int(11) NOT NULL,
+  `search_term` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tracker_referers_search_terms_ibfk_1` FOREIGN KEY (`referer_id`) REFERENCES `tracker_referers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_route_paths` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `route_id` int(11) NOT NULL,
+  `path_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_route_path_parameters` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `route_path_id` int(11) NOT NULL,
+  `parameter` varchar(255) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tracker_route_path_parameters_ibfk_1` FOREIGN KEY (`route_path_id`) REFERENCES `tracker_route_paths` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_routes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `action` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_sql_queries` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `sha1_hash` char(40) NOT NULL,
+  `statement` text NOT NULL,
+  `time_taken` float NOT NULL,
+  `connection_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_sql_queries_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `log_id` int(11) NOT NULL,
+  `query_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tracker_sql_queries_log_ibfk_1` FOREIGN KEY (`query_id`) REFERENCES `tracker_sql_queries` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_sql_query_bindings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `query_id` int(11) NOT NULL,
+  `bindings` text NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tracker_sql_query_bindings_ibfk_1` FOREIGN KEY (`query_id`) REFERENCES `tracker_sql_queries` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_sql_query_bindings_parameters` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `binding_id` int(11) NOT NULL,
+  `parameter` varchar(255) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tracker_sql_query_bindings_parameters_ibfk_1` FOREIGN KEY (`binding_id`) REFERENCES `tracker_sql_query_bindings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_system_classes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_errors` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_events` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_events_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_id` int(11) NOT NULL,
+  `log_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tracker_events_log_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `tracker_events` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_geoip` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `latitude` decimal(10,8) NOT NULL,
+  `longitude` decimal(11,8) NOT NULL,
+  `country_code` varchar(5) NOT NULL,
+  `city` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_languages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `preference` varchar(255) NOT NULL,
+  `language_range` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_domains` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_connections` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_cookies` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_paths` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `path` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tracker_queries` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `query` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

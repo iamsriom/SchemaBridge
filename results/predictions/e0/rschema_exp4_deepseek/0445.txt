@@ -1,0 +1,66 @@
+--Schemafordatabase:rschema_0445
+
+--Foreachtable:
+
+CREATE TABLE `personnel_information` (
+    `personnel_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    `personnel_type` ENUM('teacher', 'student', 'third-party personnel', 'visitor') NOT NULL,
+    `contact_phone_number` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`personnel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `unit_information` (
+    `unit_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `unit_name` VARCHAR(255) NOT NULL,
+    `unit_type` ENUM('secondary unit', 'third-party unit') NOT NULL,
+    PRIMARY KEY (`unit_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `administrator_information` (
+    `administrator_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    `management_role` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`administrator_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `health_information` (
+    `personnel_id` INT(11) NOT NULL,
+    `temperature` DECIMAL(5,2) NOT NULL,
+    `symptoms` VARCHAR(255) NOT NULL,
+    `health_code_color` ENUM('green', 'yellow', 'red') NOT NULL,
+    PRIMARY KEY (`personnel_id`),
+    FOREIGN KEY (`personnel_id`) REFERENCES `personnel_information` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `visitor_appointment` (
+    `appointment_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `visitor_id` INT(11) NOT NULL,
+    `personnel_id` INT(11) NOT NULL,
+    `scheduled_entry_time` DATETIME NOT NULL,
+    `scheduled_exit_time` DATETIME NOT NULL,
+    `appointment_status` ENUM('pending review', 'approved', 'rejected') NOT NULL,
+    PRIMARY KEY (`appointment_id`),
+    FOREIGN KEY (`visitor_id`) REFERENCES `personnel_information` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`personnel_id`) REFERENCES `personnel_information` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `access_record` (
+    `access_record_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `personnel_id` INT(11) NOT NULL,
+    `entry_time` DATETIME NOT NULL,
+    `exit_time` DATETIME NOT NULL,
+    `device_id` INT(11) NOT NULL,
+    PRIMARY KEY (`access_record_id`),
+    FOREIGN KEY (`personnel_id`) REFERENCES `personnel_information` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`device_id`) REFERENCES `access_control_device` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `access_control_device` (
+    `device_id` INT(11) NOT NULL AUTO_INCREMENT,
+    `device_name` VARCHAR(255) NOT NULL,
+    `device_location` VARCHAR(255) NOT NULL,
+    `device_status` ENUM('normal', 'fault') NOT NULL,
+    PRIMARY KEY (`device_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

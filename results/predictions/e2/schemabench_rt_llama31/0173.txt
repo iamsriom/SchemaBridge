@@ -1,0 +1,95 @@
+-- Schema for database: schemabench_0173
+CREATE TABLE `blood` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(255) NOT NULL,
+  `compatible_types` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `hospital` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  `services_offered` varchar(255) DEFAULT NULL,
+  `emergency_services` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `private_facility` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  `services_offered` varchar(255) DEFAULT NULL,
+  `emergency_services` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `donor` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `donor_medical` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `donor_id` int(11) NOT NULL,
+  `allergies` varchar(255) DEFAULT NULL,
+  `weight` float DEFAULT NULL,
+  `blood_type` int(11) NOT NULL,
+  `medical_conditions` varchar(255) DEFAULT NULL,
+  `medical_history` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `donor_medical_ibfk_1` FOREIGN KEY (`donor_id`) REFERENCES `donor` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `donor_medical_ibfk_2` FOREIGN KEY (`blood_type`) REFERENCES `blood` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patient` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patient_medical` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `blood_type` int(11) NOT NULL,
+  `allergies` varchar(255) DEFAULT NULL,
+  `medical_conditions` varchar(255) DEFAULT NULL,
+  `medical_history` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `patient_medical_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `patient_medical_ibfk_2` FOREIGN KEY (`blood_type`) REFERENCES `blood` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `blood_transfusion` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `facility_id` int(11) NOT NULL,
+  `admission_date` datetime NOT NULL,
+  `discharge_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `blood_transfusion_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `blood_transfusion_ibfk_2` FOREIGN KEY (`facility_id`) REFERENCES `hospital` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `blood_donations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `donor_id` int(11) NOT NULL,
+  `facility_id` int(11) NOT NULL,
+  `blood_id` int(11) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `component_type` varchar(255) DEFAULT NULL,
+  `quantity` float DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `blood_donations_ibfk_1` FOREIGN KEY (`donor_id`) REFERENCES `donor` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `blood_donations_ibfk_2` FOREIGN KEY (`facility_id`) REFERENCES `hospital` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `blood_donations_ibfk_3` FOREIGN KEY (`blood_id`) REFERENCES `blood` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

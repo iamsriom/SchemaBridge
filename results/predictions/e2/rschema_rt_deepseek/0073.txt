@@ -1,0 +1,46 @@
+-- Schema for database: rschema_0073
+CREATE TABLE `Insurance_Agent` (
+  `Agent_ID` int(11) NOT NULL,
+  `Contact_Phone_Number` varchar(15) DEFAULT NULL,
+  `Hire_Date` datetime DEFAULT NULL,
+  `Name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Agent_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Customer` (
+  `Customer_ID` int(11) NOT NULL,
+  `Contact_Phone_Number` varchar(15) NOT NULL,
+  `ID_Card_Number` varchar(20) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  PRIMARY KEY (`Customer_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Payment_Record` (
+  `Policy_ID` int(11) NOT NULL,
+  `Payment_Amount` decimal(10,2) DEFAULT NULL,
+  `Payment_Method` varchar(50) DEFAULT NULL,
+  `Payment_Time` datetime DEFAULT NULL,
+  PRIMARY KEY (`Policy_ID`),
+  CONSTRAINT `payment_record_ibfk_1` FOREIGN KEY (`Policy_ID`) REFERENCES `Insurance_Policy` (`Policy_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Insurance_Policy` (
+  `Policy_ID` int(11) NOT NULL,
+  `Agent_ID` int(11) NOT NULL,
+  `Customer_ID` int(11) NOT NULL,
+  `Insurance_Term` varchar(50) DEFAULT NULL,
+  `Insurance_Type` varchar(50) DEFAULT NULL,
+  `Insured_Amount` decimal(10,2) DEFAULT NULL,
+  `Premium` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`Policy_ID`),
+  CONSTRAINT `insurance_policy_ibfk_1` FOREIGN KEY (`Agent_ID`) REFERENCES `Insurance_Agent` (`Agent_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `insurance_policy_ibfk_2` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Claim_Record` (
+  `Policy_ID` int(11) NOT NULL,
+  `Claim_Amount` decimal(10,2) DEFAULT NULL,
+  `Claim_Time` datetime DEFAULT NULL,
+  PRIMARY KEY (`Policy_ID`),
+  CONSTRAINT `claim_record_ibfk_1` FOREIGN KEY (`Policy_ID`) REFERENCES `Payment_Record` (`Policy_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

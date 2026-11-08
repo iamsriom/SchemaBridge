@@ -1,0 +1,58 @@
+--Schemafordatabase:rschema_0351
+--Foreachtable:CREATE TABLE `users` (
+\t`id` int(11) NOT NULL AUTO_INCREMENT,
+\t`name` varchar(255) NOT NULL,
+\t`contact_info` varchar(255) NOT NULL,
+\t`parent_id` int(11) DEFAULT NULL,
+\tPRIMARY KEY (`id`),
+\tKEY `parent_id` (`parent_id`),
+\tCONSTRAINT `users_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+--Foreachtable:CREATE TABLE `roles` (
+\t`id` int(11) NOT NULL AUTO_INCREMENT,
+\t`name` varchar(255) NOT NULL,
+\t`object_id` int(11) NOT NULL,
+\tPRIMARY KEY (`id`),
+\tKEY `object_id` (`object_id`),
+\tCONSTRAINT `roles_ibfk_1` FOREIGN KEY (`object_id`) REFERENCES `objects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+--Foreachtable:CREATE TABLE `objects` (
+\t`id` int(11) NOT NULL AUTO_INCREMENT,
+\t`name` varchar(255) NOT NULL,
+\t`owner_id` int(11) NOT NULL,
+\tPRIMARY KEY (`id`),
+\tKEY `owner_id` (`owner_id`),
+\tCONSTRAINT `objects_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+--Foreachtable:CREATE TABLE `permissions` (
+\t`id` int(11) NOT NULL AUTO_INCREMENT,
+\t`user_id` int(11) NOT NULL,
+\t`role_id` int(11) NOT NULL,
+\t`object_id` int(11) NOT NULL,
+\t`authorized_object_id` int(11) NOT NULL,
+\tPRIMARY KEY (`id`),
+\tKEY `user_id` (`user_id`),
+\tKEY `role_id` (`role_id`),
+\tKEY `object_id` (`object_id`),
+\tKEY `authorized_object_id` (`authorized_object_id`),
+\tCONSTRAINT `permissions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+\tCONSTRAINT `permissions_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+\tCONSTRAINT `permissions_ibfk_3` FOREIGN KEY (`object_id`) REFERENCES `objects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+\tCONSTRAINT `permissions_ibfk_4` FOREIGN KEY (`authorized_object_id`) REFERENCES `objects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+--Foreachtable:CREATE TABLE `audit_logs` (
+\t`id` int(11) NOT NULL AUTO_INCREMENT,
+\t`user_id` int(11) NOT NULL,
+\t`permission_id` int(11) NOT NULL,
+\t`access_time` datetime NOT NULL,
+\t`success` tinyint(1) NOT NULL,
+\tPRIMARY KEY (`id`),
+\tKEY `user_id` (`user_id`),
+\tKEY `permission_id` (`permission_id`),
+\tCONSTRAINT `audit_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+\tCONSTRAINT `audit_logs_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

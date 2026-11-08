@@ -1,0 +1,109 @@
+-- Schema for database: rschema_0423
+
+-- Table: course
+CREATE TABLE `course` (
+  `course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_name` varchar(255) NOT NULL,
+  `course_description` text,
+  `number_of_lessons` int(11),
+  `total_duration` int(11),
+  `difficulty_level` varchar(255),
+  PRIMARY KEY (`course_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: course_category
+CREATE TABLE `course_category` (
+  `course_id` int(11) NOT NULL,
+  `course_category` varchar(255) NOT NULL,
+  `target_audience` varchar(255),
+  `recommendation_status` varchar(255),
+  PRIMARY KEY (`course_id`, `course_category`),
+  FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: chapter
+CREATE TABLE `chapter` (
+  `chapter_id` int(11) NOT NULL AUTO_INCREMENT,
+  `chapter_name` varchar(255) NOT NULL,
+  `chapter_description` text,
+  `video_url` varchar(255),
+  `course_materials` text,
+  `duration` int(11),
+  PRIMARY KEY (`chapter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: chapter_sequence
+CREATE TABLE `chapter_sequence` (
+  `chapter_id` int(11) NOT NULL,
+  `previous_chapter` int(11),
+  `next_chapter` int(11),
+  `chapter_hierarchy` int(11),
+  PRIMARY KEY (`chapter_id`),
+  FOREIGN KEY (`chapter_id`) REFERENCES `chapter` (`chapter_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`previous_chapter`) REFERENCES `chapter` (`chapter_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  FOREIGN KEY (`next_chapter`) REFERENCES `chapter` (`chapter_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: instructor
+CREATE TABLE `instructor` (
+  `instructor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `avatar` varchar(255),
+  `teaching_experience` int(11),
+  `professional_field` varchar(255),
+  `personal_profile` text,
+  PRIMARY KEY (`instructor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: instructor_courses
+CREATE TABLE `instructor_courses` (
+  `instructor_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `teaching_list` text,
+  `ratings` int(11),
+  `student_feedback` text,
+  PRIMARY KEY (`instructor_id`, `course_id`),
+  FOREIGN KEY (`instructor_id`) REFERENCES `instructor` (`instructor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: student
+CREATE TABLE `student` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `avatar` varchar(255),
+  `gender` varchar(255),
+  `age` int(11),
+  `contact_information` text,
+  `registration_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `account_status` varchar(255),
+  `membership_level` varchar(255),
+  `points` int(11),
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: student_courses
+CREATE TABLE `student_courses` (
+  `student_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `selected_courses` text,
+  `current_learning_chapter` int(11),
+  `last_learning_time` datetime,
+  PRIMARY KEY (`student_id`, `course_id`),
+  FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: student_progress
+CREATE TABLE `student_progress` (
+  `student_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `viewing_duration_per_lesson` int(11),
+  `number_of_views` int(11),
+  `completion_status` varchar(255),
+  `total_learning_duration` int(11),
+  `course_completion_rate` decimal(5,2),
+  PRIMARY KEY (`student_id`, `course_id`),
+  FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

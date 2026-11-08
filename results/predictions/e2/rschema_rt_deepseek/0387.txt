@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0387
+CREATE TABLE `Customer` (
+  `Customer_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Contact_Details` varchar(255) DEFAULT NULL,
+  `Credit_Card_Number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`Customer_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Airline` (
+  `Airline_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Contact_Information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Airline_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Flight` (
+  `Flight_ID` int(11) NOT NULL,
+  `Flight_Number` varchar(10) NOT NULL,
+  `Airline_ID` int(11) NOT NULL,
+  `Departure_Time` datetime NOT NULL,
+  `Arrival_Time` datetime NOT NULL,
+  `Destination` varchar(255) NOT NULL,
+  PRIMARY KEY (`Flight_ID`),
+  CONSTRAINT `Flight_ibfk_1` FOREIGN KEY (`Airline_ID`) REFERENCES `Airline` (`Airline_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Reservation` (
+  `Reservation_ID` int(11) NOT NULL,
+  `Customer_ID` int(11) NOT NULL,
+  `Flight_ID` int(11) NOT NULL,
+  `Number_of_Tickets` int(11) NOT NULL,
+  `Reservation_Date` datetime NOT NULL,
+  `Reservation_Time` datetime NOT NULL,
+  PRIMARY KEY (`Reservation_ID`),
+  CONSTRAINT `Reservation_ibfk_1` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Reservation_ibfk_2` FOREIGN KEY (`Flight_ID`) REFERENCES `Flight` (`Flight_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Payment_Record` (
+  `Payment_ID` int(11) NOT NULL,
+  `Reservation_ID` int(11) NOT NULL,
+  `Payment_Amount` decimal(10,2) NOT NULL,
+  `Payment_Date` datetime NOT NULL,
+  `Payment_Method` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`Payment_ID`),
+  CONSTRAINT `Payment_Record_ibfk_1` FOREIGN KEY (`Reservation_ID`) REFERENCES `Reservation` (`Reservation_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

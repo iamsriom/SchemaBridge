@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0224
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `avatar_url` varchar(255) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `failed_tasks` int(11) NOT NULL DEFAULT 0,
+  `completed_tasks` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `budget` decimal(10,2) DEFAULT NULL,
+  `deadline` datetime DEFAULT NULL,
+  `category` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`task_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_execution_status` (
+  `status_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`status_id`),
+  CONSTRAINT `task_execution_status_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_execution_status_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_quote` (
+  `quote_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `quote` text NOT NULL,
+  `comments` text DEFAULT NULL,
+  PRIMARY KEY (`quote_id`),
+  CONSTRAINT `user_quote_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_quote_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_evaluation` (
+  `evaluation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `evaluator_id` int(11) NOT NULL,
+  `executor_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `rating` int(11) NOT NULL,
+  PRIMARY KEY (`evaluation_id`),
+  CONSTRAINT `user_evaluation_ibfk_1` FOREIGN KEY (`evaluator_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_evaluation_ibfk_2` FOREIGN KEY (`executor_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_evaluation_ibfk_3` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

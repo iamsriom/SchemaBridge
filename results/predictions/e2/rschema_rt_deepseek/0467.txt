@@ -1,0 +1,66 @@
+-- Schema for database: rschema_0467
+CREATE TABLE `Customer` (
+  `Customer_Contact_Information` varchar(255) DEFAULT NULL,
+  `Customer_ID` int(11) NOT NULL,
+  `Customer_Name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Customer_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `Product` (
+  `Product_ID` int(11) NOT NULL,
+  `Product_Inventory_Quantity` int(11) DEFAULT NULL,
+  `Product_Name` varchar(255) DEFAULT NULL,
+  `Product_Price` float DEFAULT NULL,
+  PRIMARY KEY (`Product_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `Order` (
+  `Order_ID` int(11) NOT NULL,
+  `Order_Status` varchar(255) DEFAULT NULL,
+  `Ordering_Customer_ID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Order_ID`),
+  CONSTRAINT `Order_ibfk_1` FOREIGN KEY (`Ordering_Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `Ordered_Product` (
+  `Order_ID` int(11) NOT NULL,
+  `Ordered_Product_ID` int(11) NOT NULL,
+  `Ordered_Quantity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Order_ID`, `Ordered_Product_ID`),
+  CONSTRAINT `Ordered_Product_ibfk_1` FOREIGN KEY (`Order_ID`) REFERENCES `Order` (`Order_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Ordered_Product_ibfk_2` FOREIGN KEY (`Ordered_Product_ID`) REFERENCES `Product` (`Product_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `Picking_List` (
+  `Order_ID` int(11) DEFAULT NULL,
+  `Picking_List_ID` int(11) NOT NULL,
+  `Picking_Status` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Picking_List_ID`),
+  CONSTRAINT `Picking_List_ibfk_1` FOREIGN KEY (`Order_ID`) REFERENCES `Order` (`Order_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `Delivery_Order` (
+  `Delivery_Order_ID` int(11) NOT NULL,
+  `Delivery_Status` varchar(255) DEFAULT NULL,
+  `Delivery_Time` datetime DEFAULT NULL,
+  PRIMARY KEY (`Delivery_Order_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `Customer_Invoice` (
+  `Customer_Invoice_ID` int(11) NOT NULL,
+  `Invoice_Amount` float DEFAULT NULL,
+  `Invoice_Date` datetime DEFAULT NULL,
+  `Order_ID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Customer_Invoice_ID`),
+  CONSTRAINT `Customer_Invoice_ibfk_1` FOREIGN KEY (`Order_ID`) REFERENCES `Order` (`Order_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `Accounts_Receivable_Report` (
+  `Order_ID` int(11) DEFAULT NULL,
+  `Receivable_Amount` float DEFAULT NULL,
+  `Report_Date` datetime DEFAULT NULL,
+  `Report_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Report_ID`),
+  CONSTRAINT `Accounts_Receivable_Report_ibfk_1` FOREIGN KEY (`Order_ID`) REFERENCES `Order` (`Order_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `Picked_Product` (
+  `Picked_Product_ID` int(11) NOT NULL,
+  `Picked_Product_Quantity` int(11) DEFAULT NULL,
+  `Picking_List_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Picked_Product_ID`, `Picking_List_ID`),
+  CONSTRAINT `Picked_Product_ibfk_1` FOREIGN KEY (`Picked_Product_ID`) REFERENCES `Product` (`Product_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Picked_Product_ibfk_2` FOREIGN KEY (`Picking_List_ID`) REFERENCES `Picking_List` (`Picking_List_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

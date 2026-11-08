@@ -1,0 +1,62 @@
+-- Schema for database: rschema_0447
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(255) NOT NULL,
+  `unit_id` int(11) NOT NULL,
+  `role` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  KEY `unit_id` (`unit_id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`unit_id`) REFERENCES `units` (`unit_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `units` (
+  `unit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `unit_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`unit_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `financial_documents` (
+  `document_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `document_number` varchar(255) NOT NULL,
+  `issuing_unit_id` int(11) NOT NULL,
+  `issue_date` datetime NOT NULL,
+  `document_category` varchar(255) NOT NULL,
+  `document_level` varchar(255) NOT NULL,
+  `validity_status` varchar(255) NOT NULL,
+  `remarks` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `attachment_path` varchar(255) NOT NULL,
+  PRIMARY KEY (`document_id`),
+  KEY `issuing_unit_id` (`issuing_unit_id`),
+  CONSTRAINT `financial_documents_ibfk_1` FOREIGN KEY (`issuing_unit_id`) REFERENCES `units` (`unit_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `document_operations` (
+  `operation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `document_id` int(11) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `operation_type` varchar(255) NOT NULL,
+  PRIMARY KEY (`operation_id`),
+  KEY `document_id` (`document_id`),
+  CONSTRAINT `document_operations_ibfk_1` FOREIGN KEY (`document_id`) REFERENCES `financial_documents` (`document_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notifications` (
+  `notification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `content` text NOT NULL,
+  `issue_date` datetime NOT NULL,
+  `status` varchar(255) NOT NULL,
+  PRIMARY KEY (`notification_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `configurations` (
+  `config_id` int(11) NOT NULL AUTO_INCREMENT,
+  `system_name` varchar(255) NOT NULL,
+  `database_directory` varchar(255) NOT NULL,
+  `data_type` varchar(255) NOT NULL,
+  `file_upload_directory` varchar(255) NOT NULL,
+  PRIMARY KEY (`config_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

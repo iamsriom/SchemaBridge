@@ -1,0 +1,30 @@
+{
+  "text_number": 93,
+  "id": "SB-093",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0093",
+  "question": "Background / Context  \nThe project involves developing a predictive analytics system for a women's basketball database. The key task is to predict whether a team will qualify for the playoffs based on historical and seasonal data.\n\nObjectives  \n- To accurately predict playoff participation for basketball teams.\n- To utilize player, team, and game statistics for predictive modeling.\n- To enhance decision-making for coaches and analysts through data insights.\n\nStakeholders & Users  \n- Basketball Coaches  \n- Team Analysts  \n- Sports Statisticians  \n- Basketball League Officials\n\nFunctional Descriptions  \n1. Data Input and Storage:  \n   - Collect and store player statistics, team performance data, awards, and draft details.\n   - Integrate historical game performance data from the database.\n\n2. Predictive Analytics:  \n   - Analyze team and player statistics to predict playoff outcomes.\n   - Utilize machine learning models for prediction based on current and historical data.\n\n3. Reporting and Visualization:  \n   - Generate reports on team likelihood of playoff participation.\n   - Provide visual analytics dashboards for user-friendly insights.\n\nNon-Functional Descriptions  \n- Performance: Must handle and process data for multiple seasons without performance degradation.\n- Scalability: Support increased data load as more seasons and teams are added.\n- Security: Ensure sensitive data such as player information is securely handled and stored.\n- Usability: Interface should be intuitive for non-technical users such as coaches and sports analysts.",
+  "ddl": "-- Schema for database: schemabench_0093\nCREATE TABLE `seasons` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `year` int(4) NOT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `seasons_year_unique` (`year`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `teams` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `abbreviation` char(3) NOT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `teams_name_unique` (`name`),\n  UNIQUE KEY `teams_abbreviation_unique` (`abbreviation`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `players` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `first_name` varchar(255) NOT NULL,\n  `last_name` varchar(255) NOT NULL,\n  `date_of_birth` date NOT NULL,\n  `team_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `players_team_id_foreign` (`team_id`),\n  CONSTRAINT `players_team_id_foreign` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `games` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `season_id` int(11) NOT NULL,\n  `team_id` int(11) NOT NULL,\n  `opponent_id` int(11) NOT NULL,\n  `game_date` date NOT NULL,\n  `game_result` tinyint(1) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `games_season_id_foreign` (`season_id`),\n  KEY `games_team_id_foreign` (`team_id`),\n  KEY `games_opponent_id_foreign` (`opponent_id`),\n  CONSTRAINT `games_season_id_foreign` FOREIGN KEY (`season_id`) REFERENCES `seasons` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `games_team_id_foreign` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `games_opponent_id_foreign` FOREIGN KEY (`opponent_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `player_stats` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `player_id` int(11) NOT NULL,\n  `game_id` int(11) NOT NULL,\n  `points` int(11) NOT NULL,\n  `rebounds` int(11) NOT NULL,\n  `assists` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `player_stats_player_id_foreign` (`player_id`),\n  KEY `player_stats_game_id_foreign` (`game_id`),\n  CONSTRAINT `player_stats_player_id_foreign` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `player_stats_game_id_foreign` FOREIGN KEY (`game_id`) REFERENCES `games` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `awards` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `player_id` int(11) NOT NULL,\n  `award_name` varchar(255) NOT NULL,\n  `season_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `awards_player_id_foreign` (`player_id`),\n  KEY `awards_season_id_foreign` (`season_id`),\n  CONSTRAINT `awards_player_id_foreign` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `awards_season_id_foreign` FOREIGN KEY (`season_id`) REFERENCES `seasons` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `drafts` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `player_id` int(11) NOT NULL,\n  `draft_year` int(4) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `drafts_player_id_foreign` (`player_id`),\n  CONSTRAINT `drafts_player_id_foreign` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "seasons",
+      "teams",
+      "players",
+      "games",
+      "player_stats",
+      "awards",
+      "drafts"
+    ],
+    "columns_by_table": {
+      "seasons": [],
+      "teams": [],
+      "players": [],
+      "games": [],
+      "player_stats": [],
+      "awards": [],
+      "drafts": []
+    }
+  }
+}

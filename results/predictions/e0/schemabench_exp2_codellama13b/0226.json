@@ -1,0 +1,34 @@
+{
+  "text_number": 226,
+  "id": "SB-226",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0226",
+  "question": "1) Background / Context\n\nThe project aims to develop a basic social media platform with a backend database integrated seamlessly with a frontend interface. The platform is designed to support multiple user interactions typical of social networking sites.\n\n2) Objectives\n\nThe primary objective is to create a scalable and efficient backend system that manages user data, their interactions, and media content such as photos and videos. The project emphasizes clarity and practicality in data storage, including the use of URLs for media content.\n\n3) Stakeholders & Users\n\n- End Users: Individuals who register to use the social media platform.\n- Administrators: Individuals responsible for managing and maintaining the system's functionality and security.\n- Developers: Engineers designing and integrating the frontend and backend systems.\n\n4) Functional Descriptions\n\n- User Management: Users can register with a unique username and email. They can also update their profile with a photo and bio.\n- Media Management: Users can add photos and videos to their posts, with size restrictions for efficient storage.\n- Social Interactions: \n  - Users can follow others and hashtags.\n  - Users can like posts and comments.\n  - Commenting functionality is available for further engagement.\n- Content Management: Users can create posts with captions and locations, and bookmark posts for future reference.\n- Hashtag Management: Users can follow hashtags and associate them with posts.\n- Login Tracking: User logins are recorded to track IP addresses and login times for security purposes.\n\n5) Non-Functional Descriptions\n\n- Scalability: The system should handle a growing number of users and interactions efficiently.\n- Performance: Media content access should be swift due to URL-based storage.\n- Security: Provides secure login mechanisms and tracks user activities to mitigate unauthorized access.\n- Usability: The system should offer a seamless interface for interactions, focusing on ease of use and accessibility.\n- Data Integrity: All data operations should maintain integrity through defined foreign key relationships and constraints.",
+  "ddl": "-- Schema for database: schemabench_0226\n\nCREATE TABLE users (\n  user_id INT(11) NOT NULL AUTO_INCREMENT,\n  username VARCHAR(255) NOT NULL,\n  email VARCHAR(255) NOT NULL,\n  password VARCHAR(255) NOT NULL,\n  photo VARCHAR(255) DEFAULT NULL,\n  bio TEXT DEFAULT NULL,\n  PRIMARY KEY (user_id),\n  UNIQUE KEY (username),\n  UNIQUE KEY (email)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE media (\n  media_id INT(11) NOT NULL AUTO_INCREMENT,\n  user_id INT(11) NOT NULL,\n  media_type ENUM('photo', 'video') NOT NULL,\n  media_url VARCHAR(255) NOT NULL,\n  media_size INT(11) NOT NULL,\n  PRIMARY KEY (media_id),\n  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE posts (\n  post_id INT(11) NOT NULL AUTO_INCREMENT,\n  user_id INT(11) NOT NULL,\n  post_type ENUM('text', 'photo', 'video') NOT NULL,\n  post_content TEXT DEFAULT NULL,\n  post_location VARCHAR(255) DEFAULT NULL,\n  PRIMARY KEY (post_id),\n  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE comments (\n  comment_id INT(11) NOT NULL AUTO_INCREMENT,\n  post_id INT(11) NOT NULL,\n  user_id INT(11) NOT NULL,\n  comment_content TEXT DEFAULT NULL,\n  PRIMARY KEY (comment_id),\n  FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE likes (\n  like_id INT(11) NOT NULL AUTO_INCREMENT,\n  user_id INT(11) NOT NULL,\n  post_id INT(11) NOT NULL,\n  PRIMARY KEY (like_id),\n  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE follows (\n  follow_id INT(11) NOT NULL AUTO_INCREMENT,\n  user_id INT(11) NOT NULL,\n  follower_id INT(11) NOT NULL,\n  PRIMARY KEY (follow_id),\n  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (follower_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE hashtags (\n  hashtag_id INT(11) NOT NULL AUTO_INCREMENT,\n  hashtag VARCHAR(255) NOT NULL,\n  PRIMARY KEY (hashtag_id),\n  UNIQUE KEY (hashtag)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE post_hashtags (\n  post_hashtag_id INT(11) NOT NULL AUTO_INCREMENT,\n  post_id INT(11) NOT NULL,\n  hashtag_id INT(11) NOT NULL,\n  PRIMARY KEY (post_hashtag_id),\n  FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (hashtag_id) REFERENCES hashtags(hashtag_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE login_tracking (\n  login_id INT(11) NOT NULL AUTO_INCREMENT,\n  user_id INT(11) NOT NULL,\n  login_time DATETIME NOT NULL,\n  ip_address VARCHAR(255) NOT NULL,\n  PRIMARY KEY (login_id),\n  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "media",
+      "posts",
+      "comments",
+      "likes",
+      "follows",
+      "hashtags",
+      "post_hashtags",
+      "login_tracking"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "media": [],
+      "posts": [],
+      "comments": [],
+      "likes": [],
+      "follows": [],
+      "hashtags": [],
+      "post_hashtags": [],
+      "login_tracking": []
+    }
+  }
+}

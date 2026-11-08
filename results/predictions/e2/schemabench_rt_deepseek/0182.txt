@@ -1,0 +1,59 @@
+-- Schema for database: schemabench_0182
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `current_booking` int(11) DEFAULT NULL,
+  `phone_number` varchar(15) NOT NULL,
+  PRIMARY KEY (`customer_id`),
+  CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`current_booking`) REFERENCES `booking` (`booking_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `car` (
+  `car_id` int(11) NOT NULL AUTO_INCREMENT,
+  `brand` varchar(255) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  `registration_number` varchar(50) NOT NULL UNIQUE,
+  `capacity` int(11) NOT NULL,
+  `price_per_km` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`car_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `driver` (
+  `driver_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `current_booking` int(11) DEFAULT NULL,
+  `phone_number` varchar(15) NOT NULL,
+  `car_id` int(11) DEFAULT NULL,
+  `current_location` varchar(255) NOT NULL,
+  PRIMARY KEY (`driver_id`),
+  CONSTRAINT `driver_ibfk_1` FOREIGN KEY (`car_id`) REFERENCES `car` (`car_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `driver_ibfk_2` FOREIGN KEY (`current_booking`) REFERENCES `booking` (`booking_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `payment_type` varchar(50) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`transaction_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `booking` (
+  `booking_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pickup_location` varchar(255) NOT NULL,
+  `destination` varchar(255) NOT NULL,
+  `number_of_people` int(11) NOT NULL,
+  `pickup_time` datetime NOT NULL,
+  `booking_status` enum('pending', 'confirmed', 'cancelled', 'completed') NOT NULL,
+  `transaction_id` int(11) DEFAULT NULL,
+  `sharing` boolean NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `driver_id` int(11) DEFAULT NULL,
+  `car_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`booking_id`),
+  CONSTRAINT `booking_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `booking_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `booking_ibfk_3` FOREIGN KEY (`driver_id`) REFERENCES `driver` (`driver_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `booking_ibfk_4` FOREIGN KEY (`car_id`) REFERENCES `car` (`car_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,62 @@
+-- Schema for database: rschema_0011
+
+CREATE TABLE `equipment` (
+  `equipment_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  `purchase_date` datetime NOT NULL,
+  `usage_status` varchar(255) NOT NULL,
+  `maintenance_record` varchar(255) NOT NULL,
+  `operator` varchar(255) NOT NULL,
+  PRIMARY KEY (`equipment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `farm` (
+  `farm_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `contact_information` varchar(255) NOT NULL,
+  PRIMARY KEY (`farm_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_record` (
+  `maintenance_record_id` int(11) NOT NULL,
+  `equipment_id` int(11) NOT NULL,
+  `maintenance_date` datetime NOT NULL,
+  `maintenance_type` varchar(255) NOT NULL,
+  `operator` varchar(255) NOT NULL,
+  `maintenance_result` varchar(255) NOT NULL,
+  PRIMARY KEY (`maintenance_record_id`),
+  FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `operator` (
+  `operator_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `phone_number` varchar(255) NOT NULL,
+  PRIMARY KEY (`operator_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment_farm` (
+  `equipment_id` int(11) NOT NULL,
+  `farm_id` int(11) NOT NULL,
+  PRIMARY KEY (`equipment_id`, `farm_id`),
+  FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`farm_id`) REFERENCES `farm` (`farm_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_record_equipment` (
+  `maintenance_record_id` int(11) NOT NULL,
+  `equipment_id` int(11) NOT NULL,
+  PRIMARY KEY (`maintenance_record_id`, `equipment_id`),
+  FOREIGN KEY (`maintenance_record_id`) REFERENCES `maintenance_record` (`maintenance_record_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `operator_maintenance_record` (
+  `operator_id` int(11) NOT NULL,
+  `maintenance_record_id` int(11) NOT NULL,
+  PRIMARY KEY (`operator_id`, `maintenance_record_id`),
+  FOREIGN KEY (`operator_id`) REFERENCES `operator` (`operator_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`maintenance_record_id`) REFERENCES `maintenance_record` (`maintenance_record_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

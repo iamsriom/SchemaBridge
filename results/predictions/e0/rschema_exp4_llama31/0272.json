@@ -1,0 +1,38 @@
+{
+  "text_number": 272,
+  "id": "67552f0a13602ec03b41a7b2",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0272",
+  "question": "The business requirements description of the animal husbandry management information system are as follows:  \n\nMultiple ranches need to be managed, each with a ranch ID, name, and address, and each ranch can manage multiple types of livestock.  \nEach type of livestock has a name, species, livestock ID, and ranch ID.  \n\nThe ranch needs to record the health status of the livestock (including recording time, health status, health status ID, and livestock ID),  \nvaccination status (including vaccination measures, vaccination time, vaccination status ID, and livestock ID),  \nfeed consumption (including consumption time, feed type, consumption amount, feed consumption ID, and livestock ID),  \nand entry/exit records (including time, entry/exit type, entry/exit record ID, and livestock ID).",
+  "ddl": "-- Schema for database: rschema_0272\nCREATE TABLE `ranches` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `address` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `livestock_types` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `species` varchar(255) NOT NULL,\n  `ranch_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `livestock_types_ibfk_1` (`ranch_id`),\n  CONSTRAINT `livestock_types_ibfk_1` FOREIGN KEY (`ranch_id`) REFERENCES `ranches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `health_status` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `status` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `health_records` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `record_time` datetime NOT NULL,\n  `status_id` int(11) NOT NULL,\n  `livestock_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `health_records_ibfk_1` (`livestock_id`),\n  KEY `health_records_ibfk_2` (`status_id`),\n  CONSTRAINT `health_records_ibfk_1` FOREIGN KEY (`livestock_id`) REFERENCES `livestock` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `health_records_ibfk_2` FOREIGN KEY (`status_id`) REFERENCES `health_status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `vaccination_status` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `vaccination_measures` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `vaccination_records` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `record_time` datetime NOT NULL,\n  `status_id` int(11) NOT NULL,\n  `livestock_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `vaccination_records_ibfk_1` (`livestock_id`),\n  KEY `vaccination_records_ibfk_2` (`status_id`),\n  CONSTRAINT `vaccination_records_ibfk_1` FOREIGN KEY (`livestock_id`) REFERENCES `livestock` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `vaccination_records_ibfk_2` FOREIGN KEY (`status_id`) REFERENCES `vaccination_status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `feed_types` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `type` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `feed_consumptions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `record_time` datetime NOT NULL,\n  `type_id` int(11) NOT NULL,\n  `amount` decimal(10,2) NOT NULL,\n  `livestock_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `feed_consumptions_ibfk_1` (`livestock_id`),\n  KEY `feed_consumptions_ibfk_2` (`type_id`),\n  CONSTRAINT `feed_consumptions_ibfk_1` FOREIGN KEY (`livestock_id`) REFERENCES `livestock` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `feed_consumptions_ibfk_2` FOREIGN KEY (`type_id`) REFERENCES `feed_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `entry_exit_types` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `type` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `entry_exit_records` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `record_time` datetime NOT NULL,\n  `type_id` int(11) NOT NULL,\n  `livestock_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `entry_exit_records_ibfk_1` (`livestock_id`),\n  KEY `entry_exit_records_ibfk_2` (`type_id`),\n  CONSTRAINT `entry_exit_records_ibfk_1` FOREIGN KEY (`livestock_id`) REFERENCES `livestock` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `entry_exit_records_ibfk_2` FOREIGN KEY (`type_id`) REFERENCES `entry_exit_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `livestock` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `livestock_type_id` int(11) NOT NULL,\n  `ranch_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `livestock_ibfk_1` (`livestock_type_id`),\n  KEY `livestock_ibfk_2` (`ranch_id`),\n  CONSTRAINT `livestock_ibfk_1` FOREIGN KEY (`livestock_type_id`) REFERENCES `livestock_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `livestock_ibfk_2` FOREIGN KEY (`ranch_id`) REFERENCES `ranches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "ranches",
+      "livestock_types",
+      "health_status",
+      "health_records",
+      "vaccination_status",
+      "vaccination_records",
+      "feed_types",
+      "feed_consumptions",
+      "entry_exit_types",
+      "entry_exit_records",
+      "livestock"
+    ],
+    "columns_by_table": {
+      "ranches": [],
+      "livestock_types": [],
+      "health_status": [],
+      "health_records": [],
+      "vaccination_status": [],
+      "vaccination_records": [],
+      "feed_types": [],
+      "feed_consumptions": [],
+      "entry_exit_types": [],
+      "entry_exit_records": [],
+      "livestock": []
+    }
+  }
+}

@@ -1,0 +1,52 @@
+-- Schema for database: schemabench_0031
+CREATE TABLE `auth_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `login_history` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth2_provider_application` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` varchar(255) NOT NULL,
+  `client_secret` varchar(255) NOT NULL,
+  `redirect_uris` text DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth2_provider_accesstoken` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `token` varchar(255) NOT NULL,
+  `expires` datetime NOT NULL,
+  `scope` varchar(255) DEFAULT NULL,
+  `user_id` int(11) NOT NULL,
+  `application_id` int(11) NOT NULL,
+  `refresh_token_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `oauth2_provider_accesstoken_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `oauth2_provider_accesstoken_ibfk_2` FOREIGN KEY (`application_id`) REFERENCES `oauth2_provider_application` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `oauth2_provider_accesstoken_ibfk_3` FOREIGN KEY (`refresh_token_id`) REFERENCES `oauth2_provider_refreshtoken` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth2_provider_grant` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `token` varchar(255) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `application_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `oauth2_provider_grant_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `oauth2_provider_grant_ibfk_2` FOREIGN KEY (`application_id`) REFERENCES `oauth2_provider_application` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth2_provider_refreshtoken` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `token` varchar(255) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `application_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `oauth2_provider_refreshtoken_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `oauth2_provider_refreshtoken_ibfk_2` FOREIGN KEY (`application_id`) REFERENCES `oauth2_provider_application` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

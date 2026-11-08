@@ -1,0 +1,69 @@
+-- Schema for database: rschema_0340
+CREATE TABLE `applications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `countries` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `iso_code` char(2) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `languages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `iso_code` char(2) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `regions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `language_id` int(11) NOT NULL,
+  `country_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `regions_ibfk_1` (`language_id`),
+  KEY `regions_ibfk_2` (`country_id`),
+  CONSTRAINT `regions_ibfk_1` FOREIGN KEY (`language_id`) REFERENCES `languages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `regions_ibfk_2` FOREIGN KEY (`country_id`) REFERENCES `countries` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resource_files` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `path` varchar(255) NOT NULL,
+  `base_name` varchar(255) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `region_id` int(11) NOT NULL,
+  `version` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `resource_files_ibfk_1` (`language_id`),
+  KEY `resource_files_ibfk_2` (`region_id`),
+  CONSTRAINT `resource_files_ibfk_1` FOREIGN KEY (`language_id`) REFERENCES `languages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `resource_files_ibfk_2` FOREIGN KEY (`region_id`) REFERENCES `regions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resource_keys` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `version` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resource_values` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content` text NOT NULL,
+  `version` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resource_key_values` (
+  `resource_key_id` int(11) NOT NULL,
+  `resource_value_id` int(11) NOT NULL,
+  PRIMARY KEY (`resource_key_id`, `resource_value_id`),
+  KEY `resource_key_values_ibfk_1` (`resource_key_id`),
+  KEY `resource_key_values_ibfk_2` (`resource_value_id`),
+  CONSTRAINT `resource_key_values_ibfk_1` FOREIGN KEY (`resource_key_id`) REFERENCES `resource_keys` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `resource_key_values_ibfk_2` FOREIGN KEY (`resource_value_id`) REFERENCES `resource_values` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

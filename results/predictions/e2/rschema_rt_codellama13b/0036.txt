@@ -1,0 +1,40 @@
+-- Schema for database: rschema_0036
+CREATE TABLE `Project` (
+  `Project_Number` int(11) NOT NULL,
+  `Project_Name` varchar(255) DEFAULT NULL,
+  `Location` varchar(255) DEFAULT NULL,
+  `Start_Date` datetime DEFAULT NULL,
+  `Expected_Completion_Date` datetime DEFAULT NULL,
+  `Actual_Completion_Date` datetime DEFAULT NULL,
+  `Budget` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`Project_Number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Contract` (
+  `Contract_Number` int(11) NOT NULL,
+  `Contract_Name` varchar(255) DEFAULT NULL,
+  `Contract_Amount` decimal(10,2) DEFAULT NULL,
+  `Contract_Status` varchar(50) DEFAULT NULL,
+  `Project_Number` int(11) NOT NULL,
+  `Signing_Date` datetime DEFAULT NULL,
+  PRIMARY KEY (`Contract_Number`),
+  CONSTRAINT `contract_ibfk_1` FOREIGN KEY (`Project_Number`) REFERENCES `Project` (`Project_Number`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Project_Includes_Contract` (
+  `Project_Number` int(11) NOT NULL,
+  `Contract_Number` int(11) NOT NULL,
+  PRIMARY KEY (`Project_Number`, `Contract_Number`),
+  CONSTRAINT `project_includes_contract_ibfk_1` FOREIGN KEY (`Project_Number`) REFERENCES `Project` (`Project_Number`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `project_includes_contract_ibfk_2` FOREIGN KEY (`Contract_Number`) REFERENCES `Contract` (`Contract_Number`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Contract_Change_Record` (
+  `Change_Number` int(11) NOT NULL,
+  `Change_Amount` decimal(10,2) DEFAULT NULL,
+  `Change_Content` text DEFAULT NULL,
+  `Change_Date` datetime DEFAULT NULL,
+  `Contract_Number` int(11) NOT NULL,
+  PRIMARY KEY (`Change_Number`),
+  CONSTRAINT `contract_change_record_ibfk_1` FOREIGN KEY (`Contract_Number`) REFERENCES `Contract` (`Contract_Number`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

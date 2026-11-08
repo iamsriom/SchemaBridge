@@ -1,0 +1,39 @@
+-- Schema for database: rschema_0110
+CREATE TABLE `User` (
+  `User_ID` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  `avatar_path` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`User_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Update` (
+  `Update_ID` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `content_type` varchar(50) NOT NULL,
+  `posted_at` datetime NOT NULL,
+  PRIMARY KEY (`Update_ID`),
+  CONSTRAINT `update_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Follow_Relationship` (
+  `Follower_ID` int(11) NOT NULL,
+  `Followed_ID` int(11) NOT NULL,
+  `established_at` datetime NOT NULL,
+  PRIMARY KEY (`Follower_ID`, `Followed_ID`),
+  CONSTRAINT `follow_relationship_ibfk_1` FOREIGN KEY (`Follower_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `follow_relationship_ibfk_2` FOREIGN KEY (`Followed_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Comment` (
+  `Comment_ID` int(11) NOT NULL AUTO_INCREMENT,
+  `update_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `commented_at` datetime NOT NULL,
+  PRIMARY KEY (`Comment_ID`),
+  CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`update_id`) REFERENCES `Update` (`Update_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

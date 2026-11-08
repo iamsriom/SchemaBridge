@@ -1,0 +1,26 @@
+{
+  "text_number": 117,
+  "id": "SB-117",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0117",
+  "question": "1) Background / Context\n\nThe project involves analyzing the mutagenicity of chemical compounds using data on 230 molecules tested on Salmonella typhimurium. The analysis focuses on identifying properties that influence mutagenicity, utilizing a subset of 188 molecules that are amenable to linear regression analysis, termed the \"regression friendly\" dataset. The remaining subset consists of 42 molecules which require alternative analytical approaches.\n\n2) Objectives\n\n- To evaluate the mutagenic potential of chemical structures.\n- To facilitate predictive modeling using linear regression for a subset of molecules.\n- To explore database-driven methods for organizing chemical structural data.\n\n3) Stakeholders & Users\n\n- Chemists and biologists conducting mutagenicity research.\n- Data scientists and researchers involved in chemical analysis.\n- Software developers maintaining and enhancing the database system.\n\n4) Functional Descriptions\n\n- Store detailed information about atoms, including their elemental type, charge, and type.\n- Manage bonds between atoms, specifying the bond type and linked atoms.\n- Store chemical compounds data with properties such as activity, logP, and LUMO values.\n- Track the active status of compounds for experimental purposes.\n- Represent ring structures within compounds, linking them with associated atoms.\n\n5) Non-Functional Descriptions\n\n- The system should ensure data integrity, maintaining consistent relationships between tables.\n- It should provide efficient querying capabilities for large datasets.\n- The database must support future scalability, accommodating additional compounds and data structures.",
+  "ddl": "-- Schema for database: schemabench_0117\nCREATE TABLE `atoms` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `elemental_type` varchar(255) NOT NULL,\n  `charge` int(11) DEFAULT NULL,\n  `type` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `bonds` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `atom_id_1` int(11) NOT NULL,\n  `atom_id_2` int(11) NOT NULL,\n  `bond_type` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `bonds_ibfk_1` (`atom_id_1`),\n  KEY `bonds_ibfk_2` (`atom_id_2`),\n  CONSTRAINT `bonds_ibfk_1` FOREIGN KEY (`atom_id_1`) REFERENCES `atoms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `bonds_ibfk_2` FOREIGN KEY (`atom_id_2`) REFERENCES `atoms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `compounds` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `activity` float DEFAULT NULL,\n  `logP` float DEFAULT NULL,\n  `LUMO` float DEFAULT NULL,\n  `active` tinyint(1) NOT NULL DEFAULT 1,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `ring_structures` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `compound_id` int(11) NOT NULL,\n  `atom_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `ring_structures_ibfk_1` (`compound_id`),\n  KEY `ring_structures_ibfk_2` (`atom_id`),\n  CONSTRAINT `ring_structures_ibfk_1` FOREIGN KEY (`compound_id`) REFERENCES `compounds` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `ring_structures_ibfk_2` FOREIGN KEY (`atom_id`) REFERENCES `atoms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `regression_data` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `compound_id` int(11) NOT NULL,\n  `mutagenicity` float DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  KEY `regression_data_ibfk_1` (`compound_id`),\n  CONSTRAINT `regression_data_ibfk_1` FOREIGN KEY (`compound_id`) REFERENCES `compounds` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "atoms",
+      "bonds",
+      "compounds",
+      "ring_structures",
+      "regression_data"
+    ],
+    "columns_by_table": {
+      "atoms": [],
+      "bonds": [],
+      "compounds": [],
+      "ring_structures": [],
+      "regression_data": []
+    }
+  }
+}

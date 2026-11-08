@@ -1,0 +1,35 @@
+-- Schema for database: schemabench_0078
+CREATE TABLE `pay_charges` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `amount` decimal(10,2) NOT NULL,
+  `processor` varchar(255) NOT NULL,
+  `processor_id` varchar(255) NOT NULL,
+  `card_details` varchar(255) DEFAULT NULL,
+  `billable_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_processor` (`processor`, `processor_id`),
+  CONSTRAINT `pay_charges_ibfk_1` FOREIGN KEY (`billable_id`) REFERENCES `billable` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pay_subscriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `processor` varchar(255) NOT NULL,
+  `processor_id` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `billable_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_processor` (`processor`, `processor_id`),
+  CONSTRAINT `pay_subscriptions_ibfk_1` FOREIGN KEY (`billable_id`) REFERENCES `billable` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `billable` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `processor` varchar(255) NOT NULL,
+  `processor_id` varchar(255) NOT NULL,
+  `card_details` varchar(255) DEFAULT NULL,
+  `pay_charge_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_processor` (`processor`, `processor_id`),
+  CONSTRAINT `billable_ibfk_1` FOREIGN KEY (`pay_charge_id`) REFERENCES `pay_charges` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

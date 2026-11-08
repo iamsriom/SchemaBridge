@@ -1,0 +1,74 @@
+-- Schema for database: rschema_0417
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `user_name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `avatar_link` varchar(255) DEFAULT NULL,
+  `registration_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `post` (
+  `post_id` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `category_belonging` int(11) DEFAULT NULL,
+  `posting_user` int(11) DEFAULT NULL,
+  `posting_time` datetime DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `reply_count` int(11) DEFAULT NULL,
+  `like_count` int(11) DEFAULT NULL,
+  `favorite_count` int(11) DEFAULT NULL,
+  PRIMARY KEY (`post_id`),
+  CONSTRAINT `post_ibfk_1` FOREIGN KEY (`posting_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `post_ibfk_2` FOREIGN KEY (`category_belonging`) REFERENCES `category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comment` (
+  `comment_id` int(11) NOT NULL,
+  `comment_content` text DEFAULT NULL,
+  `posting_user` int(11) DEFAULT NULL,
+  `like_count` int(11) DEFAULT NULL,
+  `reply_count` int(11) DEFAULT NULL,
+  `posting_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`comment_id`),
+  CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`posting_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `category` (
+  `category_id` int(11) NOT NULL,
+  `category_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notification_information` (
+  `message_number` int(11) NOT NULL,
+  `notification_content` text DEFAULT NULL,
+  PRIMARY KEY (`message_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comment_reply` (
+  `comment_id` int(11) NOT NULL,
+  `reply_comment_id` int(11) NOT NULL,
+  PRIMARY KEY (`comment_id`, `reply_comment_id`),
+  CONSTRAINT `comment_reply_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `comment` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comment_reply_ibfk_2` FOREIGN KEY (`reply_comment_id`) REFERENCES `comment` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comment_post` (
+  `comment_id` int(11) NOT NULL,
+  `post_id` int(11) NOT NULL,
+  PRIMARY KEY (`comment_id`, `post_id`),
+  CONSTRAINT `comment_post_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `comment` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comment_post_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `post` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notification_distribution` (
+  `notification_message_number` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `read_status` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`notification_message_number`, `user_id`),
+  CONSTRAINT `notification_distribution_ibfk_1` FOREIGN KEY (`notification_message_number`) REFERENCES `notification_information` (`message_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `notification_distribution_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

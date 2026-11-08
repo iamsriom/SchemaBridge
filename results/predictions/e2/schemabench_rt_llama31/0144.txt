@@ -1,0 +1,53 @@
+-- Schema for database: schemabench_0144
+CREATE TABLE `employees` (
+  `employee_number` int(11) NOT NULL,
+  `birth_date` date DEFAULT NULL,
+  `first_name` varchar(255) DEFAULT NULL,
+  `last_name` varchar(255) DEFAULT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `hire_date` date DEFAULT NULL,
+  PRIMARY KEY (`employee_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `salaries` (
+  `employee_number` int(11) NOT NULL,
+  `salary_amount` decimal(10,2) NOT NULL DEFAULT '13.21',
+  `pay_date` date NOT NULL,
+  PRIMARY KEY (`employee_number`, `pay_date`),
+  CONSTRAINT `salaries_ibfk_1` FOREIGN KEY (`employee_number`) REFERENCES `employees` (`employee_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `titles` (
+  `employee_number` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date DEFAULT NULL,
+  PRIMARY KEY (`employee_number`, `start_date`),
+  CONSTRAINT `titles_ibfk_1` FOREIGN KEY (`employee_number`) REFERENCES `employees` (`employee_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `departments` (
+  `dept_code` char(4) NOT NULL,
+  `dept_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`dept_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dept_manager` (
+  `employee_number` int(11) NOT NULL,
+  `dept_code` char(4) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date DEFAULT NULL,
+  PRIMARY KEY (`employee_number`, `dept_code`),
+  CONSTRAINT `dept_manager_ibfk_1` FOREIGN KEY (`employee_number`) REFERENCES `employees` (`employee_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `dept_manager_ibfk_2` FOREIGN KEY (`dept_code`) REFERENCES `departments` (`dept_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dept_emp` (
+  `employee_number` int(11) NOT NULL,
+  `dept_code` char(4) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date DEFAULT NULL,
+  PRIMARY KEY (`employee_number`, `dept_code`),
+  CONSTRAINT `dept_emp_ibfk_1` FOREIGN KEY (`employee_number`) REFERENCES `employees` (`employee_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `dept_emp_ibfk_2` FOREIGN KEY (`dept_code`) REFERENCES `departments` (`dept_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

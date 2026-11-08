@@ -1,0 +1,59 @@
+-- Schema for database: rschema_0187
+CREATE TABLE `farms` (
+  `farm_id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_name` varchar(255) NOT NULL,
+  `owner_type` enum('company','individual') NOT NULL,
+  `owner_contact` varchar(255) DEFAULT NULL,
+  `owner_address` varchar(255) NOT NULL,
+  PRIMARY KEY (`farm_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `plots` (
+  `plot_id` int(11) NOT NULL AUTO_INCREMENT,
+  `farm_id` int(11) NOT NULL,
+  `area` decimal(10,2) NOT NULL,
+  `soil_type` varchar(255) NOT NULL,
+  `crop_id` int(11) DEFAULT NULL,
+  `status` varchar(255) NOT NULL,
+  PRIMARY KEY (`plot_id`),
+  KEY `plots_ibfk_1` (`farm_id`),
+  CONSTRAINT `plots_ibfk_1` FOREIGN KEY (`farm_id`) REFERENCES `farms` (`farm_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `crops` (
+  `crop_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `growth_cycle` int(11) NOT NULL,
+  `suitable_soil_type` varchar(255) NOT NULL,
+  `suitable_climate` varchar(255) NOT NULL,
+  PRIMARY KEY (`crop_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `plantings` (
+  `planting_id` int(11) NOT NULL AUTO_INCREMENT,
+  `plot_id` int(11) NOT NULL,
+  `crop_id` int(11) NOT NULL,
+  `planting_time` datetime NOT NULL,
+  `expected_harvest_time` datetime NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `operator` varchar(255) NOT NULL,
+  PRIMARY KEY (`planting_id`),
+  KEY `plantings_ibfk_1` (`plot_id`),
+  KEY `plantings_ibfk_2` (`crop_id`),
+  CONSTRAINT `plantings_ibfk_1` FOREIGN KEY (`plot_id`) REFERENCES `plots` (`plot_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `plantings_ibfk_2` FOREIGN KEY (`crop_id`) REFERENCES `crops` (`crop_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `harvests` (
+  `harvest_id` int(11) NOT NULL AUTO_INCREMENT,
+  `plot_id` int(11) NOT NULL,
+  `crop_id` int(11) NOT NULL,
+  `harvest_time` datetime NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `operator` varchar(255) NOT NULL,
+  PRIMARY KEY (`harvest_id`),
+  KEY `harvests_ibfk_1` (`plot_id`),
+  KEY `harvests_ibfk_2` (`crop_id`),
+  CONSTRAINT `harvests_ibfk_1` FOREIGN KEY (`plot_id`) REFERENCES `plots` (`plot_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `harvests_ibfk_2` FOREIGN KEY (`crop_id`) REFERENCES `crops` (`crop_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

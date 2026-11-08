@@ -1,0 +1,90 @@
+-- Schema for database: rschema_0436
+CREATE TABLE `administrator` (
+  `administrator_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `update_time` datetime NOT NULL,
+  PRIMARY KEY (`administrator_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `news_article` (
+  `article_id` int(11) NOT NULL,
+  `article_title` varchar(255) NOT NULL,
+  `article_content` text NOT NULL,
+  `article_author` int(11) NOT NULL,
+  `publish_time` datetime NOT NULL,
+  `article_category` varchar(255) NOT NULL,
+  `article_tags` varchar(255) DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  `update_time` datetime NOT NULL,
+  PRIMARY KEY (`article_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `website_information` (
+  `website_id` int(11) NOT NULL,
+  `website_name` varchar(255) NOT NULL,
+  `website_logo` varchar(255) DEFAULT NULL,
+  `copyright_information` varchar(255) DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  `update_time` datetime NOT NULL,
+  PRIMARY KEY (`website_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `member` (
+  `member_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `registration_time` datetime NOT NULL,
+  `update_time` datetime NOT NULL,
+  PRIMARY KEY (`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `advertisement` (
+  `advertisement_id` int(11) NOT NULL,
+  `advertisement_title` varchar(255) NOT NULL,
+  `advertisement_content` text NOT NULL,
+  `advertisement_publish_time` datetime NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `update_time` datetime NOT NULL,
+  PRIMARY KEY (`advertisement_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `message` (
+  `message_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `article_id` int(11) NOT NULL,
+  `message_content` text NOT NULL,
+  `message_time` datetime NOT NULL,
+  `reply_content` text DEFAULT NULL,
+  `reply_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`message_id`),
+  CONSTRAINT `message_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `message_ibfk_2` FOREIGN KEY (`article_id`) REFERENCES `news_article` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `administrator_publish_news` (
+  `administrator_id` int(11) NOT NULL,
+  `article_id` int(11) NOT NULL,
+  PRIMARY KEY (`administrator_id`, `article_id`),
+  CONSTRAINT `administrator_publish_news_ibfk_1` FOREIGN KEY (`administrator_id`) REFERENCES `administrator` (`administrator_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `administrator_publish_news_ibfk_2` FOREIGN KEY (`article_id`) REFERENCES `news_article` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `administrator_manage_advertisement` (
+  `administrator_id` int(11) NOT NULL,
+  `advertisement_id` int(11) NOT NULL,
+  PRIMARY KEY (`administrator_id`, `advertisement_id`),
+  CONSTRAINT `administrator_manage_advertisement_ibfk_1` FOREIGN KEY (`administrator_id`) REFERENCES `administrator` (`administrator_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `administrator_manage_advertisement_ibfk_2` FOREIGN KEY (`advertisement_id`) REFERENCES `advertisement` (`advertisement_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_message` (
+  `member_id` int(11) NOT NULL,
+  `message_id` int(11) NOT NULL,
+  PRIMARY KEY (`member_id`, `message_id`),
+  CONSTRAINT `user_message_ibfk_1` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_message_ibfk_2` FOREIGN KEY (`message_id`) REFERENCES `message` (`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,56 @@
+-- Schema for database: schemabench_0062
+CREATE TABLE `reaction_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `reaction_types_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reaction_weights` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `reaction_type_id` int(11) NOT NULL,
+  `weight` float NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `reaction_weights_reaction_type_id_foreign` (`reaction_type_id`),
+  CONSTRAINT `reaction_weights_reaction_type_id_foreign` FOREIGN KEY (`reaction_type_id`) REFERENCES `reaction_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reaction_models` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `reaction_models_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reaction_model_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `reaction_model_id` int(11) NOT NULL,
+  `reaction_type_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `reaction_model_types_reaction_model_id_foreign` (`reaction_model_id`),
+  KEY `reaction_model_types_reaction_type_id_foreign` (`reaction_type_id`),
+  CONSTRAINT `reaction_model_types_reaction_model_id_foreign` FOREIGN KEY (`reaction_model_id`) REFERENCES `reaction_models` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reaction_model_types_reaction_type_id_foreign` FOREIGN KEY (`reaction_type_id`) REFERENCES `reaction_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reactions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `reaction_model_id` int(11) NOT NULL,
+  `reaction_model_type_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `value` float DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `reactions_reaction_model_id_foreign` (`reaction_model_id`),
+  KEY `reactions_reaction_model_type_id_foreign` (`reaction_model_type_id`),
+  KEY `reactions_user_id_foreign` (`user_id`),
+  CONSTRAINT `reactions_reaction_model_id_foreign` FOREIGN KEY (`reaction_model_id`) REFERENCES `reaction_models` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reactions_reaction_model_type_id_foreign` FOREIGN KEY (`reaction_model_type_id`) REFERENCES `reaction_model_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reactions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,90 @@
+-- Schema for database: schemabench_0184
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `first_name` varchar(50) NOT NULL,
+  `middle_name` varchar(50) DEFAULT NULL,
+  `last_name` varchar(50) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `address` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `food` (
+  `item_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `availability` varchar(50) DEFAULT NULL,
+  `rating` float NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`item_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `restaurant` (
+  `restaurant_id` int(11) NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `founding_date` date NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `rating` float NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`restaurant_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_service` (
+  `cs_id` int(11) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `inquiry` text NOT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `submission_date` datetime NOT NULL,
+  PRIMARY KEY (`cs_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_history` (
+  `order_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `total_price` decimal(10,2) NOT NULL,
+  `order_date` datetime NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `order_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `product` varchar(100) NOT NULL,
+  PRIMARY KEY (`product_id`),
+  CONSTRAINT `products_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `products_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `order_history` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `interacts` (
+  `interact_id` int(11) NOT NULL,
+  `cs_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`interact_id`),
+  CONSTRAINT `interacts_ibfk_1` FOREIGN KEY (`cs_id`) REFERENCES `customer_service` (`cs_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `interacts_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `buys` (
+  `buys_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `food_id` int(11) NOT NULL,
+  PRIMARY KEY (`buys_id`),
+  CONSTRAINT `buys_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `buys_ibfk_2` FOREIGN KEY (`food_id`) REFERENCES `food` (`item_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sells` (
+  `sells_id` int(11) NOT NULL,
+  `restaurant_id` int(11) NOT NULL,
+  `food_id` int(11) NOT NULL,
+  PRIMARY KEY (`sells_id`),
+  CONSTRAINT `sells_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurant` (`restaurant_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sells_ibfk_2` FOREIGN KEY (`food_id`) REFERENCES `food` (`item_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

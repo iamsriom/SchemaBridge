@@ -1,0 +1,197 @@
+-- Schema for database: schemabench_0178
+CREATE TABLE `employees` (
+  `employee_id` int(11) NOT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `job_title` varchar(255) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `division_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employees_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employees_ibfk_2` FOREIGN KEY (`division_id`) REFERENCES `divisions` (`division_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `job` (
+  `job_id` int(11) NOT NULL,
+  `job_title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `salary_range` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`job_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `job_candidates` (
+  `candidate_id` int(11) NOT NULL,
+  `resume` text DEFAULT NULL,
+  `cover_letter` text DEFAULT NULL,
+  PRIMARY KEY (`candidate_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `job_offers` (
+  `offer_id` int(11) NOT NULL,
+  `candidate_id` int(11) NOT NULL,
+  `job_id` int(11) NOT NULL,
+  `offer_date` datetime NOT NULL,
+  PRIMARY KEY (`offer_id`),
+  CONSTRAINT `job_offers_ibfk_1` FOREIGN KEY (`candidate_id`) REFERENCES `job_candidates` (`candidate_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `job_offers_ibfk_2` FOREIGN KEY (`job_id`) REFERENCES `job` (`job_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `appraisal_types` (
+  `appraisal_type_id` int(11) NOT NULL,
+  `type_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`appraisal_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `appraisal_period_types` (
+  `period_type_id` int(11) NOT NULL,
+  `period_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`period_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `appraisal` (
+  `appraisal_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `appraisal_type_id` int(11) NOT NULL,
+  `period_type_id` int(11) NOT NULL,
+  `overall_evaluation` varchar(255) DEFAULT NULL,
+  `comments` text DEFAULT NULL,
+  PRIMARY KEY (`appraisal_id`),
+  CONSTRAINT `appraisal_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `appraisal_ibfk_2` FOREIGN KEY (`appraisal_type_id`) REFERENCES `appraisal_types` (`appraisal_type_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `appraisal_ibfk_3` FOREIGN KEY (`period_type_id`) REFERENCES `appraisal_period_types` (`period_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `absence_types` (
+  `absence_type_id` int(11) NOT NULL,
+  `type_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`absence_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `absences` (
+  `absence_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `absence_type_id` int(11) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  PRIMARY KEY (`absence_id`),
+  CONSTRAINT `absences_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `absences_ibfk_2` FOREIGN KEY (`absence_type_id`) REFERENCES `absence_types` (`absence_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `absence_totals` (
+  `total_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `total_days_absent` int(11) NOT NULL,
+  PRIMARY KEY (`total_id`),
+  CONSTRAINT `absence_totals_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `bonus_distribution` (
+  `distribution_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `currency_id` int(11) NOT NULL,
+  PRIMARY KEY (`distribution_id`),
+  CONSTRAINT `bonus_distribution_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bonus_distribution_ibfk_2` FOREIGN KEY (`currency_id`) REFERENCES `currencies` (`currency_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `bonuses` (
+  `bonus_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `date_granted` datetime NOT NULL,
+  PRIMARY KEY (`bonus_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `currencies` (
+  `currency_id` int(11) NOT NULL,
+  `symbol` varchar(10) NOT NULL,
+  `fraction` int(11) NOT NULL,
+  PRIMARY KEY (`currency_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `curr_rates` (
+  `rate_id` int(11) NOT NULL,
+  `from_currency_id` int(11) NOT NULL,
+  `to_currency_id` int(11) NOT NULL,
+  `exchange_rate` decimal(10,4) NOT NULL,
+  PRIMARY KEY (`rate_id`),
+  CONSTRAINT `curr_rates_ibfk_1` FOREIGN KEY (`from_currency_id`) REFERENCES `currencies` (`currency_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `curr_rates_ibfk_2` FOREIGN KEY (`to_currency_id`) REFERENCES `currencies` (`currency_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `departments` (
+  `department_id` int(11) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
+  `manager_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`department_id`),
+  CONSTRAINT `departments_ibfk_1` FOREIGN KEY (`manager_id`) REFERENCES `employees` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `division_change` (
+  `change_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `change_date` datetime NOT NULL,
+  `reason` text DEFAULT NULL,
+  PRIMARY KEY (`change_id`),
+  CONSTRAINT `division_change_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `divisions` (
+  `division_id` int(11) NOT NULL,
+  `division_name` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`division_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `job_history` (
+  `history_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `job_title` varchar(255) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`history_id`),
+  CONSTRAINT `job_history_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `locations` (
+  `location_id` int(11) NOT NULL,
+  `location_name` varchar(255) NOT NULL,
+  `country` varchar(255) NOT NULL,
+  PRIMARY KEY (`location_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `memos` (
+  `memo_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `memo_date` datetime NOT NULL,
+  `memo_type` varchar(255) NOT NULL,
+  PRIMARY KEY (`memo_id`),
+  CONSTRAINT `memos_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `person_relation_types` (
+  `relation_type_id` int(11) NOT NULL,
+  `relation_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`relation_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `person_relations` (
+  `relation_id` int(11) NOT NULL,
+  `person_id_1` int(11) NOT NULL,
+  `person_id_2` int(11) NOT NULL,
+  `relation_type_id` int(11) NOT NULL,
+  `start_date` datetime NOT NULL,
+  PRIMARY KEY (`relation_id`),
+  CONSTRAINT `person_relations_ibfk_1` FOREIGN KEY (`person_id_1`) REFERENCES `persons` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `person_relations_ibfk_2` FOREIGN KEY (`person_id_2`) REFERENCES `persons` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `person_relations_ibfk_3` FOREIGN KEY (`relation_type_id`) REFERENCES `person_relation_types` (`relation_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `persons` (
+  `person_id` int(11) NOT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `contact_info` text DEFAULT NULL,
+  PRIMARY KEY (`person_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `regions` (
+  `region_id` int(11) NOT NULL,
+  `region_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`region_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `sal_history` (
+  `salary_history_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `salary_amount` decimal(10,2) NOT NULL,
+  `currency_id` int(11) NOT NULL,
+  PRIMARY KEY (`salary_history_id`),
+  CONSTRAINT `sal_history_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sal_history_ibfk_2` FOREIGN KEY (`currency_id`) REFERENCES `currencies` (`currency_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `team_change` (
+  `change_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `change_date` datetime NOT NULL,
+  `reason` text DEFAULT NULL,
+  PRIMARY KEY (`change_id`),
+  CONSTRAINT `team_change_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

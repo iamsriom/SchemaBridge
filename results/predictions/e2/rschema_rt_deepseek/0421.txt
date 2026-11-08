@@ -1,0 +1,41 @@
+-- Schema for database: rschema_0421
+CREATE TABLE `User` (
+  `User_ID` int(11) NOT NULL,
+  `Account_Creation_Time` datetime NOT NULL,
+  `Account_Update_Time` datetime DEFAULT NULL,
+  `Email` varchar(255) NOT NULL,
+  `Password` varchar(255) NOT NULL,
+  `Phone_Number` varchar(15) DEFAULT NULL,
+  `Role` varchar(50) NOT NULL,
+  PRIMARY KEY (`User_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Property` (
+  `Property_ID` int(11) NOT NULL,
+  `Owner` int(11) NOT NULL,
+  `Property_Title` varchar(255) NOT NULL,
+  `Property_Description` text DEFAULT NULL,
+  `Property_Area` float DEFAULT NULL,
+  `Property_Location` varchar(255) DEFAULT NULL,
+  `Images` text DEFAULT NULL,
+  `Rent` decimal(10,2) NOT NULL,
+  `Status` varchar(50) NOT NULL,
+  `Property_Creation_Time` datetime NOT NULL,
+  `Property_Update_Time` datetime DEFAULT NULL,
+  PRIMARY KEY (`Property_ID`),
+  CONSTRAINT `property_ibfk_1` FOREIGN KEY (`Owner`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Rental_Transaction_Record` (
+  `User_ID` int(11) NOT NULL,
+  `Property_ID` int(11) NOT NULL,
+  `Lease_Start_Date` datetime NOT NULL,
+  `Lease_End_Date` datetime NOT NULL,
+  `Total_Rent` decimal(10,2) NOT NULL,
+  `Transaction_Creation_Time` datetime NOT NULL,
+  `Transaction_Update_Time` datetime DEFAULT NULL,
+  `Transaction_Status` varchar(50) NOT NULL,
+  PRIMARY KEY (`User_ID`, `Property_ID`, `Lease_Start_Date`),
+  CONSTRAINT `rental_transaction_record_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `rental_transaction_record_ibfk_2` FOREIGN KEY (`Property_ID`) REFERENCES `Property` (`Property_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

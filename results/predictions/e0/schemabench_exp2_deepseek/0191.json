@@ -1,0 +1,28 @@
+{
+  "text_number": 191,
+  "id": "SB-191",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "schemabench_0191",
+  "question": "Background / Context\nLittle Lemon is developing a restaurant management system that efficiently handles various operations, including table bookings, order management, menu offerings, and staff details. The system aims to streamline operations by centralizing data management and facilitating accessible, real-time information.\n\n Objectives\n1. Enable efficient management of table bookings and customer information.\n2. Streamline order processing, including tracking delivery status.\n3. Centralize menu management to include various categories of items.\n4. Maintain comprehensive staff records including roles and contact information.\n\n Stakeholders & Users\n- Restaurant Managers: Oversee overall operations and staff management.\n- Staff: Utilize the system for managing bookings, orders, and customer interactions.\n- Customers: Indirectly interact with the system through table bookings and order placements.\n- System Administrators: Maintain the database and ensure system integrity.\n\n Functional Descriptions\n1. Bookings Management: Store and manage information regarding table bookings, including booking ID, date, table number, customer details, and the staff responsible for the booking.\n\n2. Order Management: Capture and maintain details related to customer orders, including order date, quantity, and total cost. Support tracking and updating the delivery status for each order.\n\n3. Menu Management: Store comprehensive details about the menu offerings, including item name, category (cuisines, starters, courses, drinks, desserts), and pricing.\n\n4. Customer Management: Maintain a database of customer details, including full name and contact information.\n\n5. Staff Management: Record staff information such as name, role, salary, address, contact number, and email.\n\n Non-Functional Descriptions\n- The system should ensure secure and efficient data handling, prioritizing accuracy and privacy, especially for customer and staff information.\n- The database should support scalability, allowing for the addition of new items, staff, and increased customer interactions.\n- Ensure data integrity through foreign key constraints and maintain accessibility for authorized personnel.",
+  "ddl": "-- Schema for database: `schemabench_0191`\n\n-- Table: `bookings`\n\nCREATE TABLE `bookings` (\n  `booking_id` int(11) NOT NULL AUTO_INCREMENT,\n  `date` datetime NOT NULL,\n  `table_number` int(11) NOT NULL,\n  `customer_details` varchar(255) NOT NULL,\n  `staff_id` int(11) NOT NULL,\n  PRIMARY KEY (`booking_id`),\n  KEY `staff_id` (`staff_id`),\n  CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `orders`\n\nCREATE TABLE `orders` (\n  `order_id` int(11) NOT NULL AUTO_INCREMENT,\n  `order_date` datetime NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `total_cost` decimal(10,2) NOT NULL,\n  `delivery_status` varchar(255) NOT NULL DEFAULT 'Not delivered',\n  `booking_id` int(11) NOT NULL,\n  PRIMARY KEY (`order_id`),\n  KEY `booking_id` (`booking_id`),\n  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`booking_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `menu`\n\nCREATE TABLE `menu` (\n  `item_id` int(11) NOT NULL AUTO_INCREMENT,\n  `item_name` varchar(255) NOT NULL,\n  `category` varchar(255) NOT NULL,\n  `price` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`item_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `order_items`\n\nCREATE TABLE `order_items` (\n  `order_id` int(11) NOT NULL,\n  `item_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  PRIMARY KEY (`order_id`,`item_id`),\n  KEY `item_id` (`item_id`),\n  CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `menu` (`item_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `staff`\n\nCREATE TABLE `staff` (\n  `staff_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `role` varchar(255) NOT NULL,\n  `salary` decimal(10,2) NOT NULL,\n  `address` varchar(255) NOT NULL,\n  `contact_number` varchar(20) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  PRIMARY KEY (`staff_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `customer`\n\nCREATE TABLE `customer` (\n  `customer_id` int(11) NOT NULL AUTO_INCREMENT,\n  `full_name` varchar(255) NOT NULL,\n  `contact_information` varchar(255) NOT NULL,\n  PRIMARY KEY (`customer_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "bookings",
+      "orders",
+      "menu",
+      "order_items",
+      "staff",
+      "customer"
+    ],
+    "columns_by_table": {
+      "bookings": [],
+      "orders": [],
+      "menu": [],
+      "order_items": [],
+      "staff": [],
+      "customer": []
+    }
+  }
+}

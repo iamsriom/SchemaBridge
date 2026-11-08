@@ -1,0 +1,217 @@
+-- Schema for database: schemabench_0038
+CREATE TABLE `accounts_customuser` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `is_superuser` tinyint(1) NOT NULL DEFAULT 0,
+  `is_staff` tinyint(1) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `accounts_customuser_groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customuser_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `accounts_customuser_groups_ibfk_1` FOREIGN KEY (`customuser_id`) REFERENCES `accounts_customuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `accounts_customuser_groups_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `accounts_customuser_user_permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customuser_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `accounts_customuser_user_permissions_ibfk_1` FOREIGN KEY (`customuser_id`) REFERENCES `accounts_customuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `accounts_customuser_user_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `auth_permission` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `accounts_emailverification` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `verification_code` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `accounts_emailverification_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `accounts_customuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `accounts_invitation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `invited_email_address` varchar(255) NOT NULL,
+  `invite_code` varchar(255) NOT NULL,
+  `inviting_user_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `accounts_invitation_ibfk_1` FOREIGN KEY (`inviting_user_id`) REFERENCES `accounts_customuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `accounts_passwordresetrequest` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `verification_code` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `accounts_passwordresetrequest_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `accounts_customuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `auth_group` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `auth_group_permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `auth_group_permissions_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `auth_group_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `auth_permission` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `auth_permission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `content_type_id` int(11) NOT NULL,
+  `codename` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `auth_permission_ibfk_1` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `django_admin_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `action_time` datetime NOT NULL,
+  `object_id` varchar(255) NOT NULL,
+  `object_repr` varchar(255) NOT NULL,
+  `action_flag` tinyint(1) NOT NULL,
+  `change_message` text DEFAULT NULL,
+  `content_type_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `django_admin_log_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `accounts_customuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `django_admin_log_ibfk_2` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `django_content_type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `app_label` varchar(255) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `django_migrations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `app` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `applied` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `django_session` (
+  `session_key` varchar(255) NOT NULL,
+  `session_data` text NOT NULL,
+  `expire_date` datetime NOT NULL,
+  PRIMARY KEY (`session_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `emaildigest_anonymoussubscription` (
+  `subscription_ptr_id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `verified` tinyint(1) NOT NULL DEFAULT 0,
+  `verified_at` datetime DEFAULT NULL,
+  `verification_code` varchar(255) NOT NULL,
+  PRIMARY KEY (`subscription_ptr_id`),
+  CONSTRAINT `emaildigest_anonymoussubscription_ibfk_1` FOREIGN KEY (`subscription_ptr_id`) REFERENCES `accounts_customuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `emaildigest_emaildigest` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `frequency` varchar(255) NOT NULL,
+  `weekly_weekday` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `emaildigest_emaildigest_stories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `emaildigest_id` int(11) NOT NULL,
+  `story_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `emaildigest_emaildigest_stories_ibfk_1` FOREIGN KEY (`emaildigest_id`) REFERENCES `emaildigest_emaildigest` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `emaildigest_emaildigest_stories_ibfk_2` FOREIGN KEY (`story_id`) REFERENCES `news_story` (`item_ptr_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `emaildigest_subscription` (
+  `subscription_ptr_id` int(11) NOT NULL,
+  `frequency` varchar(255) NOT NULL,
+  `weekly_weekday` int(11) NOT NULL,
+  `verified_email` varchar(255) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`subscription_ptr_id`),
+  CONSTRAINT `emaildigest_subscription_ibfk_1` FOREIGN KEY (`subscription_ptr_id`) REFERENCES `accounts_customuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `emaildigest_unsubscription` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `from_digest_id` int(11) NOT NULL,
+  `subscription_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `emaildigest_unsubscription_ibfk_1` FOREIGN KEY (`from_digest_id`) REFERENCES `emaildigest_emaildigest` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `emaildigest_unsubscription_ibfk_2` FOREIGN KEY (`subscription_id`) REFERENCES `emaildigest_subscription` (`subscription_ptr_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `emaildigest_usersubscription` (
+  `subscription_ptr_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`subscription_ptr_id`),
+  CONSTRAINT `emaildigest_usersubscription_ibfk_1` FOREIGN KEY (`subscription_ptr_id`) REFERENCES `accounts_customuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `emaildigest_usersubscription_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `accounts_customuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `news_comment` (
+  `item_ptr_id` int(11) NOT NULL AUTO_INCREMENT,
+  `text` text NOT NULL,
+  `to_story_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`item_ptr_id`),
+  CONSTRAINT `news_comment_ibfk_1` FOREIGN KEY (`to_story_id`) REFERENCES `news_story` (`item_ptr_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `news_comment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `accounts_customuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `news_item` (
+  `item_ptr_id` int(11) NOT NULL AUTO_INCREMENT,
+  `upvotes` int(11) NOT NULL DEFAULT 0,
+  `downvotes` int(11) NOT NULL DEFAULT 0,
+  `points` int(11) NOT NULL DEFAULT 0,
+  `num_comments` int(11) NOT NULL DEFAULT 0,
+  `lft` int(11) NOT NULL,
+  `rght` int(11) NOT NULL,
+  `tree_id` int(11) NOT NULL,
+  `level` int(11) NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `user_id` int(11) NOT NULL,
+  `is_ask` tinyint(1) NOT NULL DEFAULT 0,
+  `is_show` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`item_ptr_id`),
+  CONSTRAINT `news_item_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `accounts_customuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `news_story` (
+  `item_ptr_id` int(11) NOT NULL AUTO_INCREMENT,
+  `url` varchar(255) NOT NULL,
+  `text` text NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `duplicate_of_id` int(11) DEFAULT NULL,
+  `domain` varchar(255) NOT NULL,
+  PRIMARY KEY (`item_ptr_id`),
+  CONSTRAINT `news_story_ibfk_1` FOREIGN KEY (`duplicate_of_id`) REFERENCES `news_story` (`item_ptr_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `news_vote` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `item_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `vote` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `news_vote_ibfk_1` FOREIGN KEY (`item_id`) REFERENCES `news_item` (`item_ptr_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `news_vote_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `accounts_customuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

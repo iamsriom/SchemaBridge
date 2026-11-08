@@ -1,0 +1,36 @@
+{
+  "text_number": 448,
+  "id": "67552f0b13602ec03b41aa5c",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0448",
+  "question": "Business Requirements Description:\n1.User Management:\nManage user information, including user roles (Student, Teacher, Laboratory Administrator, Experimental Center Director Administrator, System Administrator), username, password, phone number, and associated unit.\n2.Experimental Equipment Management:\nEnter and manage the basic information of laboratory equipment, such as equipment name, model, category, manufacturer, status (inactive, in use, active), and acquisition time.\nUsage Records Management: Record the usage of equipment, including usage time, user, and purpose of use.\nCourse Association Management: Associate equipment with specific experimental courses for easier scheduling and management of the equipment.\n3.Laboratory Consumables Management:\nConsumables Management: Perform operations such as archiving, modifying, and querying consumables information. Manage the purchasing, storage, issuance, and return of consumables.\nRecord consumable name, category, inventory quantity, and status. Users can purchase consumables and record the purchase time.\n4.Hazardous Chemicals Management:\nArchive, modify, and query hazardous chemicals information. Manage the purchasing, storage, issuance, and return of hazardous chemicals to ensure safety.\nRecord chemical name, inventory quantity, issuance time, and status.\n5.Experimental Course Management:\nView and manage information for regular experimental courses, including course name, class time, and class location. Each course can have multiple students registered, and each course is assigned a corresponding teacher.",
+  "ddl": "-- Schema for database: rschema_0448\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `phone_number` varchar(255) DEFAULT NULL,\n  `role` enum('Student','Teacher','Laboratory Administrator','Experimental Center Director Administrator','System Administrator') NOT NULL,\n  `unit_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `users_ibfk_1` (`unit_id`),\n  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`unit_id`) REFERENCES `units` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `units` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `equipment` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `model` varchar(255) DEFAULT NULL,\n  `category` varchar(255) NOT NULL,\n  `manufacturer` varchar(255) NOT NULL,\n  `status` enum('inactive','in use','active') NOT NULL,\n  `acquisition_time` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `usage_records` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `equipment_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `usage_time` datetime NOT NULL,\n  `purpose` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `usage_records_ibfk_1` (`equipment_id`),\n  KEY `usage_records_ibfk_2` (`user_id`),\n  CONSTRAINT `usage_records_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `usage_records_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `course_equipment` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `course_id` int(11) NOT NULL,\n  `equipment_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `course_equipment_ibfk_1` (`course_id`),\n  KEY `course_equipment_ibfk_2` (`equipment_id`),\n  CONSTRAINT `course_equipment_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `course_equipment_ibfk_2` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `courses` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `class_time` varchar(255) NOT NULL,\n  `class_location` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `consumables` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `category` varchar(255) NOT NULL,\n  `inventory_quantity` int(11) NOT NULL,\n  `status` enum('active','inactive') NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `consumable_purchases` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `consumable_id` int(11) NOT NULL,\n  `purchase_time` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `consumable_purchases_ibfk_1` (`consumable_id`),\n  CONSTRAINT `consumable_purchases_ibfk_1` FOREIGN KEY (`consumable_id`) REFERENCES `consumables` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `hazardous_chemicals` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `inventory_quantity` int(11) NOT NULL,\n  `issuance_time` datetime NOT NULL,\n  `status` enum('active','inactive') NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `hazardous_chemical_purchases` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `hazardous_chemical_id` int(11) NOT NULL,\n  `purchase_time` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `hazardous_chemical_purchases_ibfk_1` (`hazardous_chemical_id`),\n  CONSTRAINT `hazardous_chemical_purchases_ibfk_1` FOREIGN KEY (`hazardous_chemical_id`) REFERENCES `hazardous_chemicals` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "units",
+      "equipment",
+      "usage_records",
+      "course_equipment",
+      "courses",
+      "consumables",
+      "consumable_purchases",
+      "hazardous_chemicals",
+      "hazardous_chemical_purchases"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "units": [],
+      "equipment": [],
+      "usage_records": [],
+      "course_equipment": [],
+      "courses": [],
+      "consumables": [],
+      "consumable_purchases": [],
+      "hazardous_chemicals": [],
+      "hazardous_chemical_purchases": []
+    }
+  }
+}

@@ -1,0 +1,94 @@
+-- Schema for database: `rschema_0164`
+
+-- Table: `warehouse`
+
+CREATE TABLE `warehouse` (
+  `WarehouseID` int(11) NOT NULL AUTO_INCREMENT,
+  `WarehouseName` varchar(255) NOT NULL,
+  `WarehouseLocation` varchar(255) NOT NULL,
+  `WarehouseType` varchar(255) NOT NULL,
+  `WarehouseImagePath` varchar(255) NOT NULL,
+  `WarehouseDescription` text,
+  `CreationTime` datetime NOT NULL,
+  `CreationDate` date NOT NULL,
+  `UpdateDate` date NOT NULL,
+  PRIMARY KEY (`WarehouseID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `stack_position`
+
+CREATE TABLE `stack_position` (
+  `StackPositionID` int(11) NOT NULL AUTO_INCREMENT,
+  `StackPositionName` varchar(255) NOT NULL,
+  `StackPositionType` varchar(255) NOT NULL,
+  `StackPositionImagePath` varchar(255) NOT NULL,
+  `StackPositionDescription` text,
+  `CreationTime` datetime NOT NULL,
+  `CreationDate` date NOT NULL,
+  `UpdateDate` date NOT NULL,
+  `WarehouseID` int(11) NOT NULL,
+  PRIMARY KEY (`StackPositionID`),
+  KEY `fk_stack_position_warehouse` (`WarehouseID`),
+  CONSTRAINT `fk_stack_position_warehouse` FOREIGN KEY (`WarehouseID`) REFERENCES `warehouse` (`WarehouseID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `sensor`
+
+CREATE TABLE `sensor` (
+  `SensorID` int(11) NOT NULL AUTO_INCREMENT,
+  `SensorType` varchar(255) NOT NULL,
+  `CollectedDataValue` float NOT NULL,
+  `CollectionTime` datetime NOT NULL,
+  `DataStatus` varchar(255) NOT NULL,
+  `DataDescription` text,
+  `StackPositionID` int(11) NOT NULL,
+  PRIMARY KEY (`SensorID`),
+  KEY `fk_sensor_stack_position` (`StackPositionID`),
+  CONSTRAINT `fk_sensor_stack_position` FOREIGN KEY (`StackPositionID`) REFERENCES `stack_position` (`StackPositionID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `user`
+
+CREATE TABLE `user` (
+  `UserID` int(11) NOT NULL AUTO_INCREMENT,
+  `Username` varchar(255) NOT NULL,
+  `UserRole` varchar(255) NOT NULL,
+  `UserPassword` varchar(255) NOT NULL,
+  `UserPhone` varchar(255) NOT NULL,
+  `UserEmail` varchar(255) NOT NULL,
+  `CreationTime` datetime NOT NULL,
+  `CreationDate` date NOT NULL,
+  `UpdateDate` date NOT NULL,
+  PRIMARY KEY (`UserID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `operation_record`
+
+CREATE TABLE `operation_record` (
+  `OperationRecordID` int(11) NOT NULL AUTO_INCREMENT,
+  `OperationType` varchar(255) NOT NULL,
+  `OperationTime` datetime NOT NULL,
+  `OperationDescription` text,
+  `UserID` int(11) NOT NULL,
+  `StackPositionID` int(11) NOT NULL,
+  PRIMARY KEY (`OperationRecordID`),
+  KEY `fk_operation_record_user` (`UserID`),
+  KEY `fk_operation_record_stack_position` (`StackPositionID`),
+  CONSTRAINT `fk_operation_record_user` FOREIGN KEY (`UserID`) REFERENCES `user` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_operation_record_stack_position` FOREIGN KEY (`StackPositionID`) REFERENCES `stack_position` (`StackPositionID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `alert_record`
+
+CREATE TABLE `alert_record` (
+  `AlertRecordID` int(11) NOT NULL AUTO_INCREMENT,
+  `AlertType` varchar(255) NOT NULL,
+  `AlertTime` datetime NOT NULL,
+  `AlertLevel` varchar(255) NOT NULL,
+  `AlertDescription` text,
+  `AlertStatus` varchar(255) NOT NULL,
+  `OperationRecordID` int(11) NOT NULL,
+  PRIMARY KEY (`AlertRecordID`),
+  KEY `fk_alert_record_operation_record` (`OperationRecordID`),
+  CONSTRAINT `fk_alert_record_operation_record` FOREIGN KEY (`OperationRecordID`) REFERENCES `operation_record` (`OperationRecordID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

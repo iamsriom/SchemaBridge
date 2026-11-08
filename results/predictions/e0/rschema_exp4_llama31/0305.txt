@@ -1,0 +1,46 @@
+-- Schema for database: rschema_0305
+CREATE TABLE `accounts` (
+  `account_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` char(60) NOT NULL,
+  `verification_status` enum('pending','verified') NOT NULL DEFAULT 'pending',
+  `account_status` enum('active','inactive') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`account_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `follows` (
+  `follower_account_id` int(11) NOT NULL,
+  `followee_account_id` int(11) NOT NULL,
+  PRIMARY KEY (`follower_account_id`, `followee_account_id`),
+  KEY `followee_account_id` (`followee_account_id`),
+  CONSTRAINT `follows_ibfk_1` FOREIGN KEY (`follower_account_id`) REFERENCES `accounts` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `follows_ibfk_2` FOREIGN KEY (`followee_account_id`) REFERENCES `accounts` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `posts` (
+  `post_id` int(11) NOT NULL AUTO_INCREMENT,
+  `publisher_account_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `publish_time` datetime NOT NULL,
+  `attachment_link` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`post_id`),
+  KEY `publisher_account_id` (`publisher_account_id`),
+  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`publisher_account_id`) REFERENCES `accounts` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notifications` (
+  `notification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `notification_type` enum('post','follow','message') NOT NULL,
+  `recipient_account_id` int(11) NOT NULL,
+  `related_post_id` int(11) DEFAULT NULL,
+  `related_account_id` int(11) DEFAULT NULL,
+  `notification_time` datetime NOT NULL,
+  PRIMARY KEY (`notification_id`),
+  KEY `recipient_account_id` (`recipient_account_id`),
+  KEY `related_post_id` (`related_post_id`),
+  KEY `related_account_id` (`related_account_id`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`recipient_account_id`) REFERENCES `accounts` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`related_post_id`) REFERENCES `posts` (`post_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `notifications_ibfk_3` FOREIGN KEY (`related_account_id`) REFERENCES `accounts` (`account_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

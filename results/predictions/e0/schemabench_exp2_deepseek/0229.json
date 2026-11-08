@@ -1,0 +1,26 @@
+{
+  "text_number": 229,
+  "id": "SB-229",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "schemabench_0229",
+  "question": "Background / Context\n\nScrallWall is a mobile application integrating geolocation, user-generated content, and open city data to promote urban exploration and community-driven beautification. The application enables users to share and discover street art through a collaborative platform that allows for community engagement and management of urban artifacts.\n\nObjectives\n\nThe primary objective of ScrallWall is to empower local communities to take charge of their aesthetic environment by facilitating discovery and sharing of street art, encouraging community feedback, and coordinating with city authorities for artifact management. \n\nStakeholders & Users\n\n- Users: Individuals interested in urban art, community members, tourists, and street art enthusiasts.\n- Community: Local residents and neighborhoods who can vote on artifacts.\n- City Authorities: Municipal bodies informed of artifacts needing removal based on community reports.\n\nFunctional Descriptions\n\n1. Geotagging and Sharing:\n   - Users can upload and geotag pictures of street art.\n   - Artifacts are displayed on a map for ease of discovery.\n\n2. Community Voting:\n   - Users can vote on whether a piece of street art is beneficial to the community.\n   - Artifacts receiving negative votes are flagged for city review.\n\n3. Artifact Discovery:\n   - Browse artifacts by location and tags through an interactive map interface.\n\n4. Notification to City:\n   - Automatic notification to city authorities if an art piece is reported by the community.\n\nNon-Functional Descriptions\n\n- Scalability: The system should handle a significant amount of geotagged data and simultaneous users smoothly.\n- Usability: The interface should be intuitive for both casual users and active community participants.\n- Security: Safeguard user data and ensure reliable reporting to city authorities.\n- Interoperability: Seamlessly interact with city APIs and databases for real-time updates and reports.",
+  "ddl": "--Schemafordatabase:scrall_wallis\n\n--Foreachtable:\n\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `artefacts` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `location` varchar(255) NOT NULL,\n  `image` varchar(255) NOT NULL,\n  `description` text NOT NULL,\n  `votes` int(11) NOT NULL DEFAULT '0',\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `artefacts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `votes` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `artefact_id` int(11) NOT NULL,\n  `vote` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  KEY `artefact_id` (`artefact_id`),\n  CONSTRAINT `votes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `votes_ibfk_2` FOREIGN KEY (`artefact_id`) REFERENCES `artefacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `reports` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `artefact_id` int(11) NOT NULL,\n  `report` text NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  KEY `artefact_id` (`artefact_id`),\n  CONSTRAINT `reports_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `reports_ibfk_2` FOREIGN KEY (`artefact_id`) REFERENCES `artefacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `notifications` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `message` text NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "artefacts",
+      "votes",
+      "reports",
+      "notifications"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "artefacts": [],
+      "votes": [],
+      "reports": [],
+      "notifications": []
+    }
+  }
+}

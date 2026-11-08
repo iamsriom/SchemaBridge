@@ -1,0 +1,48 @@
+{
+  "text_number": 436,
+  "id": "67552f0b13602ec03b41aa41",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "rschema_0436",
+  "question": "Functional description of news management system\n\nAdministrator functions:\n1. News article entry: Administrators can enter new news articles, including title, content, author, release time, etc.\n2. News article management: Administrators can edit, delete, classify, label, and other operations on published news articles.\n3. Website information settings: Administrators can set basic information of the website, such as name, logo, copyright information, etc.\n4. Member information management: Administrators can manage the website's member information, including adding, deleting, modifying, and checking member information.\n5. Advertising management: Administrators can publish, edit, and delete advertisements.\n6. Message management: Administrators can view, reply to, and delete users' messages under news articles.\n\nUser functions:\n1. Registration and login: Users can access the website through the registration and login functions.\n2. News information query: Users can query and view news information on the website.\n3. Post comments: Users can post comments under news articles.\n4. Search function: Users can search for specific news articles through the search function.",
+  "ddl": "-- Schema for database: rschema_0436\nCREATE TABLE `administrators` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`username` varchar(255) NOT NULL,\n`password` varchar(255) NOT NULL,\n`email` varchar(255) NOT NULL,\n`role` varchar(255) NOT NULL,\nPRIMARY KEY (`id`),\nUNIQUE KEY `username` (`username`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `news_articles` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`title` varchar(255) NOT NULL,\n`content` text NOT NULL,\n`author` varchar(255) NOT NULL,\n`release_time` datetime NOT NULL,\n`category` varchar(255) NOT NULL,\n`label` varchar(255) NOT NULL,\n`views` int(11) NOT NULL DEFAULT '0',\n`comments` int(11) NOT NULL DEFAULT '0',\nPRIMARY KEY (`id`),\nUNIQUE KEY `title` (`title`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `website_information` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`name` varchar(255) NOT NULL,\n`logo` varchar(255) NOT NULL,\n`copyright` varchar(255) NOT NULL,\nPRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `members` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`username` varchar(255) NOT NULL,\n`password` varchar(255) NOT NULL,\n`email` varchar(255) NOT NULL,\n`role` varchar(255) NOT NULL,\nPRIMARY KEY (`id`),\nUNIQUE KEY `username` (`username`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `advertisements` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`title` varchar(255) NOT NULL,\n`content` text NOT NULL,\n`release_time` datetime NOT NULL,\n`views` int(11) NOT NULL DEFAULT '0',\nPRIMARY KEY (`id`),\nUNIQUE KEY `title` (`title`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `comments` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`content` text NOT NULL,\n`author` varchar(255) NOT NULL,\n`article_id` int(11) NOT NULL,\n`release_time` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`article_id`) REFERENCES `news_articles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `messages` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`content` text NOT NULL,\n`author` varchar(255) NOT NULL,\n`article_id` int(11) NOT NULL,\n`release_time` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`article_id`) REFERENCES `news_articles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_accounts` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`username` varchar(255) NOT NULL,\n`password` varchar(255) NOT NULL,\n`email` varchar(255) NOT NULL,\n`role` varchar(255) NOT NULL,\nPRIMARY KEY (`id`),\nUNIQUE KEY `username` (`username`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_sessions` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`user_id` int(11) NOT NULL,\n`session_id` varchar(255) NOT NULL,\n`login_time` datetime NOT NULL,\n`logout_time` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`user_id`) REFERENCES `user_accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `search_history` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`user_id` int(11) NOT NULL,\n`search_query` varchar(255) NOT NULL,\n`search_time` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`user_id`) REFERENCES `user_accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `news_article_comments` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`article_id` int(11) NOT NULL,\n`comment_id` int(11) NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`article_id`) REFERENCES `news_articles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `news_article_views` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`article_id` int(11) NOT NULL,\n`user_id` int(11) NOT NULL,\n`view_time` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`article_id`) REFERENCES `news_articles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`user_id`) REFERENCES `user_accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `news_article_labels` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`article_id` int(11) NOT NULL,\n`label` varchar(255) NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`article_id`) REFERENCES `news_articles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `news_article_categories` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`article_id` int(11) NOT NULL,\n`category` varchar(255) NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`article_id`) REFERENCES `news_articles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `advertisement_views` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`advertisement_id` int(11) NOT NULL,\n`user_id` int(11) NOT NULL,\n`view_time` datetime NOT NULL,\nPRIMARY KEY (`id`),\nFOREIGN KEY (`advertisement_id`) REFERENCES `advertisements` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\nFOREIGN KEY (`user_id`) REFERENCES `user_accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `advertisement_clicks` (\n`id` int(11) NOT NULL AUTO_INCREMENT,\n`advertisement_id` int(11)",
+  "metadata": {
+    "database": "rschema_0436",
+    "tables": [
+      "administrators",
+      "news_articles",
+      "website_information",
+      "members",
+      "advertisements",
+      "comments",
+      "messages",
+      "user_accounts",
+      "user_sessions",
+      "search_history",
+      "news_article_comments",
+      "news_article_views",
+      "news_article_labels",
+      "news_article_categories",
+      "advertisement_views",
+      "advertisement_clicks"
+    ],
+    "columns_by_table": {
+      "administrators": [],
+      "news_articles": [],
+      "website_information": [],
+      "members": [],
+      "advertisements": [],
+      "comments": [],
+      "messages": [],
+      "user_accounts": [],
+      "user_sessions": [],
+      "search_history": [],
+      "news_article_comments": [],
+      "news_article_views": [],
+      "news_article_labels": [],
+      "news_article_categories": [],
+      "advertisement_views": [],
+      "advertisement_clicks": []
+    }
+  }
+}

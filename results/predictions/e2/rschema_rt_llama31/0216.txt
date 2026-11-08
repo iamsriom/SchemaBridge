@@ -1,0 +1,46 @@
+-- Schema for database: rschema_0216
+CREATE TABLE `Credit_Card_Type` (
+  `code` varchar(10) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Customer` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_number` varchar(15) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Credit_Card` (
+  `card_number` varchar(20) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `card_type` varchar(10) NOT NULL,
+  `opening_date` datetime NOT NULL,
+  `credit_limit` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`card_number`),
+  CONSTRAINT `Credit_Card_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `Customer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Credit_Card_ibfk_2` FOREIGN KEY (`card_type`) REFERENCES `Credit_Card_Type` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Transaction` (
+  `customer_id` int(11) NOT NULL,
+  `card_number` varchar(20) NOT NULL,
+  `transaction_time` datetime NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `transaction_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`customer_id`, `card_number`, `transaction_time`),
+  CONSTRAINT `Transaction_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `Customer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Transaction_ibfk_2` FOREIGN KEY (`card_number`) REFERENCES `Credit_Card` (`card_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Repayment` (
+  `customer_id` int(11) NOT NULL,
+  `card_number` varchar(20) NOT NULL,
+  `repayment_time` datetime NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`customer_id`, `card_number`, `repayment_time`),
+  CONSTRAINT `Repayment_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `Customer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Repayment_ibfk_2` FOREIGN KEY (`card_number`) REFERENCES `Credit_Card` (`card_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,102 @@
+-- Schema for database: rschema_0446
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `registration_time` datetime NOT NULL,
+  `last_login_time` datetime DEFAULT NULL,
+  `role` varchar(50) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sensor` (
+  `sensor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `data_collection_time` datetime NOT NULL,
+  `soil_moisture` float DEFAULT NULL,
+  `temperature` float DEFAULT NULL,
+  `rainfall` float DEFAULT NULL,
+  `light_intensity` float DEFAULT NULL,
+  `sensor_location` varchar(255) NOT NULL,
+  `burial_depth` float DEFAULT NULL,
+  `meteorology_id` int(11) NOT NULL,
+  PRIMARY KEY (`sensor_id`),
+  CONSTRAINT `sensor_ibfk_1` FOREIGN KEY (`meteorology_id`) REFERENCES `meteorology` (`meteorology_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `meteorology` (
+  `meteorology_id` int(11) NOT NULL AUTO_INCREMENT,
+  `timestamp` datetime NOT NULL,
+  `temperature` float DEFAULT NULL,
+  `humidity` float DEFAULT NULL,
+  `rainfall` float DEFAULT NULL,
+  `wind_speed` float DEFAULT NULL,
+  `light_intensity` float DEFAULT NULL,
+  PRIMARY KEY (`meteorology_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `crop` (
+  `crop_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `growth_model_id` int(11) NOT NULL,
+  PRIMARY KEY (`crop_id`),
+  CONSTRAINT `crop_ibfk_1` FOREIGN KEY (`growth_model_id`) REFERENCES `growth_model` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `crop_ibfk_2` FOREIGN KEY (`meteorology_id`) REFERENCES `meteorology` (`meteorology_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `growth_model` (
+  `model_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `parameters` text DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_water_and_fertilizer_supply` (
+  `admin_id` int(11) NOT NULL,
+  `crop_type` varchar(100) NOT NULL,
+  `supply_time` datetime NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `water_supply` float DEFAULT NULL,
+  `fertilizer_supply` float DEFAULT NULL,
+  `sensor_id` int(11) NOT NULL,
+  PRIMARY KEY (`admin_id`, `sensor_id`),
+  CONSTRAINT `user_water_and_fertilizer_supply_ibfk_1` FOREIGN KEY (`sensor_id`) REFERENCES `sensor` (`sensor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_water_and_fertilizer_supply_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_operation` (
+  `admin_id` int(11) NOT NULL,
+  `crop_id` int(11) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `details` text DEFAULT NULL,
+  PRIMARY KEY (`admin_id`, `crop_id`),
+  CONSTRAINT `user_operation_ibfk_1` FOREIGN KEY (`crop_id`) REFERENCES `crop` (`crop_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_operation_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `system_performance_evaluation` (
+  `admin_id` int(11) NOT NULL,
+  `crop_id` int(11) NOT NULL,
+  `evaluation_time` datetime NOT NULL,
+  `metric_name` varchar(100) NOT NULL,
+  `value` float DEFAULT NULL,
+  `location` varchar(255) NOT NULL,
+  PRIMARY KEY (`admin_id`, `crop_id`),
+  CONSTRAINT `system_performance_evaluation_ibfk_1` FOREIGN KEY (`crop_id`) REFERENCES `crop` (`crop_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `system_performance_evaluation_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `model_performance_evaluation` (
+  `model_id` int(11) NOT NULL,
+  `crop_id` int(11) NOT NULL,
+  `evaluation_metric_name` varchar(100) NOT NULL,
+  `value` float DEFAULT NULL,
+  `location` varchar(255) NOT NULL,
+  PRIMARY KEY (`model_id`, `crop_id`),
+  CONSTRAINT `model_performance_evaluation_ibfk_1` FOREIGN KEY (`crop_id`) REFERENCES `crop` (`crop_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `model_performance_evaluation_ibfk_2` FOREIGN KEY (`model_id`) REFERENCES `growth_model` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

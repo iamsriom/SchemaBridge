@@ -1,0 +1,50 @@
+-- Schema for database: `fifa_worldcup_simulation`
+
+-- Table: `players`
+
+CREATE TABLE `players` (
+    `player_id` INT NOT NULL PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL,
+    `age` INT NOT NULL,
+    `team_id` INT NOT NULL,
+    `injury_status` VARCHAR(255) DEFAULT NULL,
+    FOREIGN KEY (`team_id`) REFERENCES `teams`(`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `teams`
+
+CREATE TABLE `teams` (
+    `team_id` INT NOT NULL PRIMARY KEY,
+    `team_name` VARCHAR(255) NOT NULL,
+    `manager_id` INT NOT NULL,
+    `captain_id` INT NOT NULL,
+    FOREIGN KEY (`manager_id`) REFERENCES `players`(`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`captain_id`) REFERENCES `players`(`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `matches`
+
+CREATE TABLE `matches` (
+    `match_id` INT NOT NULL PRIMARY KEY,
+    `team1_id` INT NOT NULL,
+    `team2_id` INT NOT NULL,
+    `venue_id` INT NOT NULL,
+    `officiating_crew_id` INT NOT NULL,
+    `match_score` VARCHAR(255) NOT NULL,
+    `man_of_the_match` INT NOT NULL,
+    `team_captain_id` INT NOT NULL,
+    FOREIGN KEY (`team1_id`) REFERENCES `teams`(`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`team2_id`) REFERENCES `teams`(`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`venue_id`) REFERENCES `stadiums`(`stadium_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`officiating_crew_id`) REFERENCES `teams`(`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`man_of_the_match`) REFERENCES `players`(`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`team_captain_id`) REFERENCES `players`(`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `stadiums`
+
+CREATE TABLE `stadiums` (
+    `stadium_id` INT NOT NULL PRIMARY KEY,
+    `capacity` INT NOT NULL,
+    `current_condition` VARCHAR(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,73 @@
+-- Schema for database: rschema_0373
+CREATE TABLE `project` (
+  `project_id` int(11) NOT NULL,
+  `project_name` varchar(255) DEFAULT NULL,
+  `project_description` text DEFAULT NULL,
+  `project_code` varchar(50) DEFAULT NULL,
+  `budget_level` decimal(10,2) DEFAULT NULL,
+  `creation_time` datetime DEFAULT NULL,
+  `project_leader` int(11) DEFAULT NULL,
+  PRIMARY KEY (`project_id`),
+  CONSTRAINT `project_ibfk_1` FOREIGN KEY (`project_leader`) REFERENCES `user_project_application` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fund` (
+  `fund_id` int(11) NOT NULL,
+  `fund_name` varchar(255) DEFAULT NULL,
+  `fund_description` text DEFAULT NULL,
+  `total_fund` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`fund_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL,
+  `department_name` varchar(255) DEFAULT NULL,
+  `department_leader` int(11) DEFAULT NULL,
+  PRIMARY KEY (`department_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`department_leader`) REFERENCES `user_project_application` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_project_application` (
+  `user_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `application_time` datetime DEFAULT NULL,
+  `application_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`user_id`, `project_id`),
+  CONSTRAINT `user_project_application_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_project_application_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_fund_application_for_project` (
+  `user_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `application_amount` decimal(10,2) DEFAULT NULL,
+  `application_time` datetime DEFAULT NULL,
+  `application_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`user_id`, `project_id`),
+  CONSTRAINT `user_fund_application_for_project_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_project_application` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_fund_application_for_project_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `user_project_application` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_held_activity` (
+  `activity_leader` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `activity_name` varchar(255) DEFAULT NULL,
+  `event_time` datetime DEFAULT NULL,
+  `event_location` varchar(255) DEFAULT NULL,
+  `budget_amount` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`activity_leader`, `project_id`),
+  CONSTRAINT `user_held_activity_ibfk_1` FOREIGN KEY (`activity_leader`) REFERENCES `user_project_application` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_held_activity_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `user_role` varchar(50) DEFAULT NULL,
+  `department` int(11) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`department`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,66 @@
+#--Schemafordatabase:rschema_0163
+
+--Foreachtable:
+
+CREATE TABLE `plot_management` (
+  `plot_id` int(11) NOT NULL,
+  `region` varchar(255) NOT NULL,
+  `area` int(11) NOT NULL,
+  `soil_type` varchar(255) NOT NULL,
+  `person_in_charge_id` int(11) NOT NULL,
+  `soil_pH` float NOT NULL,
+  `organic_matter_content` float NOT NULL,
+  PRIMARY KEY (`plot_id`),
+  KEY `person_in_charge_id` (`person_in_charge_id`),
+  CONSTRAINT `plot_management_ibfk_1` FOREIGN KEY (`person_in_charge_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sugarcane_variety` (
+  `variety_id` int(11) NOT NULL AUTO_INCREMENT,
+  `variety_name` varchar(255) NOT NULL,
+  `suitable_climate` varchar(255) NOT NULL,
+  `maturity_cycle` int(11) NOT NULL,
+  `suitable_soil` varchar(255) NOT NULL,
+  PRIMARY KEY (`variety_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `working_hours` int(11) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `planting_record` (
+  `planting_id` int(11) NOT NULL AUTO_INCREMENT,
+  `plot_id` int(11) NOT NULL,
+  `variety_id` int(11) NOT NULL,
+  `planting_time` datetime NOT NULL,
+  `planting_quantity` int(11) NOT NULL,
+  `planting_method` varchar(255) NOT NULL,
+  `planter_id` int(11) NOT NULL,
+  PRIMARY KEY (`planting_id`),
+  KEY `plot_id` (`plot_id`,`variety_id`),
+  KEY `planter_id` (`planter_id`),
+  CONSTRAINT `planting_record_ibfk_1` FOREIGN KEY (`plot_id`) REFERENCES `plot_management` (`plot_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `planting_record_ibfk_2` FOREIGN KEY (`variety_id`) REFERENCES `sugarcane_variety` (`variety_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `planting_record_ibfk_3` FOREIGN KEY (`planter_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fertilization_record` (
+  `fertilization_id` int(11) NOT NULL AUTO_INCREMENT,
+  `plot_id` int(11) NOT NULL,
+  `fertilization_time` datetime NOT NULL,
+  `fertilization_type` varchar(255) NOT NULL,
+  `fertilization_amount` int(11) NOT NULL,
+  `fertilization_method` varchar(255) NOT NULL,
+  `remarks` text,
+  `person_in_charge_id` int(11) NOT NULL,
+  PRIMARY KEY (`fertilization_id`),
+  KEY `plot_id` (`plot_id`),
+  KEY `person_in_charge_id` (`person_in_charge_id`),
+  CONSTRAINT `fertilization_record_ibfk_1` FOREIGN KEY (`plot_id`) REFERENCES `plot_management` (`plot_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fertilization_record_ibfk_2` FOREIGN KEY (`person_in_charge_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

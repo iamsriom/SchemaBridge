@@ -1,0 +1,131 @@
+-- Schema for database: schemabench_0189
+CREATE TABLE `acoustic_features` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `song_id` int(11) NOT NULL,
+  `duration` int(11) NOT NULL,
+  `key` int(11) NOT NULL,
+  `mode` int(11) NOT NULL,
+  `time_signature` int(11) NOT NULL,
+  `acousticness` float DEFAULT NULL,
+  `danceability` float DEFAULT NULL,
+  `energy` float DEFAULT NULL,
+  `instrumentalness` float DEFAULT NULL,
+  `liveness` float DEFAULT NULL,
+  `loudness` float DEFAULT NULL,
+  `speechiness` float DEFAULT NULL,
+  `valence` float DEFAULT NULL,
+  `tempo` float DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `acoustic_features_ibfk_1` FOREIGN KEY (`song_id`) REFERENCES `songs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `albums` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `billboard_rank` int(11) DEFAULT NULL,
+  `artist_id` int(11) NOT NULL,
+  `popularity` float DEFAULT NULL,
+  `total_tracks` int(11) NOT NULL,
+  `album_type` varchar(50) NOT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `albums_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `album_chart` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `album_id` int(11) NOT NULL,
+  `rank_score` int(11) NOT NULL,
+  `peak_position` int(11) NOT NULL,
+  `weeks_on_chart` int(11) NOT NULL,
+  `week_of_entry` date NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `album_chart_ibfk_1` FOREIGN KEY (`album_id`) REFERENCES `albums` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `album_pop` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `album_id` int(11) NOT NULL,
+  `popularity_score` float DEFAULT NULL,
+  `is_popular` boolean NOT NULL,
+  `year` int(4) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `album_pop_ibfk_1` FOREIGN KEY (`album_id`) REFERENCES `albums` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `artists` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `followers` int(11) DEFAULT NULL,
+  `popularity` float DEFAULT NULL,
+  `artist_type` varchar(50) NOT NULL,
+  `main_genre` varchar(100) NOT NULL,
+  `genres` varchar(255) DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `artist_chart` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `artist_id` int(11) NOT NULL,
+  `rank_score` int(11) NOT NULL,
+  `peak_position` int(11) NOT NULL,
+  `weeks_on_chart` int(11) NOT NULL,
+  `week_of_entry` date NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `artist_chart_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `artist_pop` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `artist_id` int(11) NOT NULL,
+  `popularity_score` float DEFAULT NULL,
+  `is_popular` boolean NOT NULL,
+  `year` int(4) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `artist_pop_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `releases` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `artist_id` int(11) NOT NULL,
+  `album_id` int(11) NOT NULL,
+  `release_date` date NOT NULL,
+  `precision` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `releases_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `releases_ibfk_2` FOREIGN KEY (`album_id`) REFERENCES `albums` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `songs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `billboard_rank` int(11) DEFAULT NULL,
+  `artist_id` int(11) NOT NULL,
+  `popularity` float DEFAULT NULL,
+  `explicit` boolean NOT NULL,
+  `song_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `songs_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `song_chart` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `song_id` int(11) NOT NULL,
+  `rank_score` int(11) NOT NULL,
+  `peak_position` int(11) NOT NULL,
+  `weeks_on_chart` int(11) NOT NULL,
+  `week_of_entry` date NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `song_chart_ibfk_1` FOREIGN KEY (`song_id`) REFERENCES `songs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `song_pop` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `song_id` int(11) NOT NULL,
+  `popularity_score` float DEFAULT NULL,
+  `is_popular` boolean NOT NULL,
+  `year` int(4) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `song_pop_ibfk_1` FOREIGN KEY (`song_id`) REFERENCES `songs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `tracks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `song_id` int(11) NOT NULL,
+  `album_id` int(11) NOT NULL,
+  `track_number` int(11) NOT NULL,
+  `release_date` date NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tracks_ibfk_1` FOREIGN KEY (`song_id`) REFERENCES `songs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tracks_ibfk_2` FOREIGN KEY (`album_id`) REFERENCES `albums` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

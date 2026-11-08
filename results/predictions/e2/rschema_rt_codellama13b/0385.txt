@@ -1,0 +1,32 @@
+-- Schema for database: rschema_0385
+CREATE TABLE `currency_type` (
+  `currency_code` varchar(255) NOT NULL,
+  `currency_name` varchar(255) DEFAULT NULL,
+  `symbol` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`currency_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bank_account` (
+  `account_balance` float DEFAULT NULL,
+  `account_number` varchar(255) NOT NULL,
+  `currency_code` varchar(255) NOT NULL,
+  `frozen_amount` float DEFAULT NULL,
+  `user_information` varchar(255) DEFAULT NULL,
+  `user_number` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`account_number`),
+  CONSTRAINT `bank_account_ibfk_1` FOREIGN KEY (`currency_code`) REFERENCES `currency_type` (`currency_code`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `account_transfer` (
+  `error_information` varchar(255) DEFAULT NULL,
+  `initiating_account_number` varchar(255) NOT NULL,
+  `initiation_time` datetime DEFAULT NULL,
+  `receiving_account_number` varchar(255) NOT NULL,
+  `transaction_amount` float DEFAULT NULL,
+  `transaction_currency` varchar(255) DEFAULT NULL,
+  `transaction_status` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`initiating_account_number`, `receiving_account_number`),
+  CONSTRAINT `account_transfer_ibfk_1` FOREIGN KEY (`initiating_account_number`) REFERENCES `bank_account` (`account_number`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `account_transfer_ibfk_2` FOREIGN KEY (`receiving_account_number`) REFERENCES `bank_account` (`account_number`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `account_transfer_ibfk_3` FOREIGN KEY (`transaction_currency`) REFERENCES `currency_type` (`currency_code`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

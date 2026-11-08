@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0167
+CREATE TABLE `natural_disaster_data` (
+  `data_id` int(11) NOT NULL AUTO_INCREMENT,
+  `data_type` varchar(255) NOT NULL,
+  `source` varchar(255) NOT NULL,
+  `upload_time` datetime NOT NULL,
+  `content` text NOT NULL,
+  `format` varchar(50) NOT NULL,
+  `layer_type` varchar(50) NOT NULL,
+  `region_id` int(11) NOT NULL,
+  PRIMARY KEY (`data_id`),
+  CONSTRAINT `natural_disaster_data_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region_information` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `region_information` (
+  `region_id` int(11) NOT NULL AUTO_INCREMENT,
+  `region_name` varchar(255) NOT NULL,
+  `administrative_division` varchar(255) NOT NULL,
+  `latitude` decimal(10,8) NOT NULL,
+  `longitude` decimal(11,8) NOT NULL,
+  `area` decimal(10,2) NOT NULL,
+  `disaster_risk_level` varchar(50) NOT NULL,
+  PRIMARY KEY (`region_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `person_in_charge` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  `functional_scope` text NOT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `role` varchar(50) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  `permissions` text NOT NULL,
+  `department_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `region_and_department` (
+  `region_id` int(11) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `division_scope` varchar(255) NOT NULL,
+  PRIMARY KEY (`region_id`, `department_id`),
+  CONSTRAINT `region_and_department_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region_information` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `region_and_department_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

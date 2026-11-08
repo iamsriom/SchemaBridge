@@ -1,0 +1,65 @@
+-- Schema for database: rschema_0467
+
+CREATE TABLE customers (
+  customer_id int(11) NOT NULL,
+  name varchar(255) NOT NULL,
+  contact_info varchar(255) NOT NULL,
+  PRIMARY KEY (customer_id)
+);
+
+CREATE TABLE products (
+  product_id int(11) NOT NULL,
+  product_name varchar(255) NOT NULL,
+  price decimal(10,2) NOT NULL,
+  inventory_quantity int(11) NOT NULL,
+  PRIMARY KEY (product_id)
+);
+
+CREATE TABLE orders (
+  order_id int(11) NOT NULL,
+  product_id int(11) NOT NULL,
+  customer_id int(11) NOT NULL,
+  order_quantity int(11) NOT NULL,
+  order_status varchar(255) NOT NULL,
+  PRIMARY KEY (order_id),
+  FOREIGN KEY (product_id) REFERENCES products (product_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (customer_id) REFERENCES customers (customer_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE picking_lists (
+  picking_list_id int(11) NOT NULL,
+  order_id int(11) NOT NULL,
+  product_id int(11) NOT NULL,
+  picking_quantity int(11) NOT NULL,
+  picking_status varchar(255) NOT NULL,
+  PRIMARY KEY (picking_list_id),
+  FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (product_id) REFERENCES products (product_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE delivery_orders (
+  delivery_order_id int(11) NOT NULL,
+  order_id int(11) NOT NULL,
+  delivery_time datetime NOT NULL,
+  delivery_status varchar(255) NOT NULL,
+  PRIMARY KEY (delivery_order_id),
+  FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE invoices (
+  invoice_id int(11) NOT NULL,
+  order_id int(11) NOT NULL,
+  invoice_amount decimal(10,2) NOT NULL,
+  invoice_date datetime NOT NULL,
+  PRIMARY KEY (invoice_id),
+  FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE accounts_receivable_reports (
+  report_id int(11) NOT NULL,
+  order_id int(11) NOT NULL,
+  receivable_amount decimal(10,2) NOT NULL,
+  report_date datetime NOT NULL,
+  PRIMARY KEY (report_id),
+  FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE ON UPDATE CASCADE
+);

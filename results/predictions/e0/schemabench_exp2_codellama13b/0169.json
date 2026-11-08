@@ -1,0 +1,50 @@
+{
+  "text_number": 169,
+  "id": "SB-169",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0169",
+  "question": "Background / Context\n\nLiber is an online bookstore platform developed using PHP, designed to allow users to browse, search, and order books online. The system integrates various functionalities for both customers and bookstore staff to enhance the browsing, purchasing, and management of books.\n\n Objectives\n\nThe primary goal of the Liber system is to provide a user-friendly online environment for book enthusiasts to discover and purchase books while offering management capabilities for bookstore staff. The platform aims to improve accessibility to books and streamline the sales and inventory processes.\n\n Stakeholders & Users\n\n- Customers: Individuals who will browse the bookstore, search for books, and place orders.\n- Bookstore Staff: Employees responsible for managing book inventories and generating sales reports.\n- Publishers: Entities collaborating with the bookstore for publication and distribution agreements.\n\n Functional Descriptions\n\n1. Browsing & Searching:  \n   - Customers can browse available books.\n   - Users can search books by title, ISBN, author name, and genre.\n\n2. Ordering:\n   - Customers can add books to a cart and place orders for home delivery.\n   - Orders include tracking features with statuses like 'PENDING', 'SHIPPED', and 'ARRIVED'.\n\n3. Inventory Management:  \n   - Staff can modify book details including stock updates.\n   - System allows management of inventory levels and alerts at thresholds.\n\n4. Sales Reporting:\n   - Generate sales reports based on monthly and yearly data.\n\n5. Payment Processing:\n   - Supports transactions through client bank accounts securely.\n\n6. Publisher Management:\n   - Handle publisher relationships and account information.\n\n Non-Functional Descriptions\n\n- Scalability: Support a growing inventory of books and user base efficiently.\n- Security: Ensure secure handling of customer data and payment processing.\n- Usability: Provide an intuitive user interface for easy navigation and operation by both customers and staff.\n- Data Integrity: Maintain consistent and accurate data across all tables and operations, ensuring robust relational integrity.",
+  "ddl": "-- Schema for database: schemabench_0169\nCREATE TABLE customers (\n  customer_id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  email VARCHAR(255) NOT NULL,\n  phone VARCHAR(255) NOT NULL,\n  PRIMARY KEY (customer_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE books (\n  book_id INT(11) NOT NULL AUTO_INCREMENT,\n  title VARCHAR(255) NOT NULL,\n  author VARCHAR(255) NOT NULL,\n  genre VARCHAR(255) NOT NULL,\n  isbn VARCHAR(255) NOT NULL,\n  publisher_id INT(11) NOT NULL,\n  PRIMARY KEY (book_id),\n  FOREIGN KEY (publisher_id) REFERENCES publishers(publisher_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE orders (\n  order_id INT(11) NOT NULL AUTO_INCREMENT,\n  customer_id INT(11) NOT NULL,\n  book_id INT(11) NOT NULL,\n  order_date DATETIME NOT NULL,\n  status VARCHAR(255) NOT NULL,\n  PRIMARY KEY (order_id),\n  FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE order_items (\n  order_item_id INT(11) NOT NULL AUTO_INCREMENT,\n  order_id INT(11) NOT NULL,\n  book_id INT(11) NOT NULL,\n  quantity INT(11) NOT NULL,\n  PRIMARY KEY (order_item_id),\n  FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE publishers (\n  publisher_id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  PRIMARY KEY (publisher_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE sales_reports (\n  report_id INT(11) NOT NULL AUTO_INCREMENT,\n  report_date DATETIME NOT NULL,\n  sales_amount DECIMAL(10,2) NOT NULL,\n  PRIMARY KEY (report_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE payment_transactions (\n  transaction_id INT(11) NOT NULL AUTO_INCREMENT,\n  order_id INT(11) NOT NULL,\n  payment_date DATETIME NOT NULL,\n  payment_amount DECIMAL(10,2) NOT NULL,\n  PRIMARY KEY (transaction_id),\n  FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE user_accounts (\n  user_id INT(11) NOT NULL AUTO_INCREMENT,\n  username VARCHAR(255) NOT NULL,\n  password VARCHAR(255) NOT NULL,\n  PRIMARY KEY (user_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE user_roles (\n  role_id INT(11) NOT NULL AUTO_INCREMENT,\n  role_name VARCHAR(255) NOT NULL,\n  PRIMARY KEY (role_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE user_role_assignments (\n  user_id INT(11) NOT NULL,\n  role_id INT(11) NOT NULL,\n  PRIMARY KEY (user_id, role_id),\n  FOREIGN KEY (user_id) REFERENCES user_accounts(user_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (role_id) REFERENCES user_roles(role_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE book_inventory (\n  book_id INT(11) NOT NULL,\n  quantity INT(11) NOT NULL,\n  PRIMARY KEY (book_id),\n  FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE book_reviews (\n  review_id INT(11) NOT NULL AUTO_INCREMENT,\n  book_id INT(11) NOT NULL,\n  customer_id INT(11) NOT NULL,\n  review_text TEXT NOT NULL,\n  review_date DATETIME NOT NULL,\n  PRIMARY KEY (review_id),\n  FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE book_ratings (\n  rating_id INT(11) NOT NULL AUTO_INCREMENT,\n  book_id INT(11) NOT NULL,\n  customer_id INT(11) NOT NULL,\n  rating INT(11) NOT NULL,\n  PRIMARY KEY (rating_id),\n  FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE book_categories (\n  category_id INT(11) NOT NULL AUTO_INCREMENT,\n  category_name VARCHAR(255) NOT NULL,\n  PRIMARY KEY (category_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE book_category_assignments (\n  book_id INT(11) NOT NULL,\n  category_id INT(11) NOT NULL,\n  PRIMARY KEY (book_id, category_id),\n  FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (category_id) REFERENCES book_categories(category_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE book_genres (\n  genre_id INT(11) NOT NULL AUTO_INCREMENT,\n  genre_name VARCHAR(255) NOT NULL,\n  PRIMARY KEY (genre_id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE book_genre_assignments (\n  book_id INT(11) NOT NULL,\n  genre_id INT(11) NOT NULL,\n  PRIMARY KEY (book_id, genre_id),\n  FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (genre_id) REFERENCES book_genres(genre_id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "schemabench_0169",
+    "tables": [
+      "customers",
+      "books",
+      "orders",
+      "order_items",
+      "publishers",
+      "sales_reports",
+      "payment_transactions",
+      "user_accounts",
+      "user_roles",
+      "user_role_assignments",
+      "book_inventory",
+      "book_reviews",
+      "book_ratings",
+      "book_categories",
+      "book_category_assignments",
+      "book_genres",
+      "book_genre_assignments"
+    ],
+    "columns_by_table": {
+      "customers": [],
+      "books": [],
+      "orders": [],
+      "order_items": [],
+      "publishers": [],
+      "sales_reports": [],
+      "payment_transactions": [],
+      "user_accounts": [],
+      "user_roles": [],
+      "user_role_assignments": [],
+      "book_inventory": [],
+      "book_reviews": [],
+      "book_ratings": [],
+      "book_categories": [],
+      "book_category_assignments": [],
+      "book_genres": [],
+      "book_genre_assignments": []
+    }
+  }
+}

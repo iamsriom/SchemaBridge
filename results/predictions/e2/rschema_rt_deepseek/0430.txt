@@ -1,0 +1,74 @@
+-- Schema for database: rschema_0430
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `full_name` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `qq_number` varchar(20) DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  `user_name` varchar(255) DEFAULT NULL,
+  `wechat_open_id` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attraction` (
+  `attraction_id` int(11) NOT NULL,
+  `attraction_name` varchar(255) DEFAULT NULL,
+  `details` text DEFAULT NULL,
+  `era` varchar(100) DEFAULT NULL,
+  `images` text DEFAULT NULL,
+  `reference_price` decimal(10,2) DEFAULT NULL,
+  `region` varchar(100) DEFAULT NULL,
+  `type` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`attraction_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `message` (
+  `id` int(11) NOT NULL,
+  `content` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `message_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticket_booking` (
+  `user_id` int(11) NOT NULL,
+  `attraction_id` int(11) NOT NULL,
+  `booking_date` datetime DEFAULT NULL,
+  `order_created_at` datetime DEFAULT NULL,
+  `order_status` varchar(50) DEFAULT NULL,
+  `order_updated_at` datetime NOT NULL,
+  `remarks` text DEFAULT NULL,
+  `ticket_quantity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`user_id`, `attraction_id`, `order_updated_at`),
+  CONSTRAINT `ticket_booking_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticket_booking_ibfk_2` FOREIGN KEY (`attraction_id`) REFERENCES `attraction` (`attraction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attraction_comment` (
+  `user_id` int(11) NOT NULL,
+  `attraction_id` int(11) NOT NULL,
+  `comment_content` text DEFAULT NULL,
+  `comment_created_at` datetime NOT NULL,
+  `comment_updated_at` datetime DEFAULT NULL,
+  `review_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`user_id`, `attraction_id`, `comment_created_at`),
+  CONSTRAINT `attraction_comment_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `attraction_comment_ibfk_2` FOREIGN KEY (`attraction_id`) REFERENCES `attraction` (`attraction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attraction_favorite` (
+  `user_id` int(11) NOT NULL,
+  `attraction_id` int(11) NOT NULL,
+  `favorite_created_at` datetime NOT NULL,
+  `favorite_updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`, `attraction_id`, `favorite_created_at`),
+  CONSTRAINT `attraction_favorite_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `attraction_favorite_ibfk_2` FOREIGN KEY (`attraction_id`) REFERENCES `attraction` (`attraction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

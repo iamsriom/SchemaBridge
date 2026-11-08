@@ -1,0 +1,44 @@
+-- Schema for database: schemabench_0211
+CREATE TABLE `company_dim` (
+  `company_id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_name` varchar(255) NOT NULL,
+  `website_link` varchar(255) DEFAULT NULL,
+  `google_profile_link` varchar(255) DEFAULT NULL,
+  `thumbnail_image` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `skills_dim` (
+  `skill_id` int(11) NOT NULL AUTO_INCREMENT,
+  `skill_name` varchar(255) NOT NULL,
+  `skill_type` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`skill_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `job_postings_fact` (
+  `job_id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_id` int(11) NOT NULL,
+  `job_title` varchar(255) NOT NULL,
+  `job_location` varchar(255) NOT NULL,
+  `job_source` varchar(255) DEFAULT NULL,
+  `job_schedule_type` varchar(255) DEFAULT NULL,
+  `allows_remote` tinyint(1) DEFAULT NULL,
+  `posted_location` varchar(255) DEFAULT NULL,
+  `date_posted` datetime DEFAULT NULL,
+  `requires_degree` tinyint(1) DEFAULT NULL,
+  `provides_health_insurance` tinyint(1) DEFAULT NULL,
+  `country` varchar(255) DEFAULT NULL,
+  `salary_rate` decimal(10,2) DEFAULT NULL,
+  `average_yearly_salary` decimal(10,2) DEFAULT NULL,
+  `average_hourly_salary` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`job_id`),
+  CONSTRAINT `job_postings_fact_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `company_dim` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `skills_job_dim` (
+  `job_id` int(11) NOT NULL,
+  `skill_id` int(11) NOT NULL,
+  PRIMARY KEY (`job_id`, `skill_id`),
+  CONSTRAINT `skills_job_dim_ibfk_1` FOREIGN KEY (`job_id`) REFERENCES `job_postings_fact` (`job_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `skills_job_dim_ibfk_2` FOREIGN KEY (`skill_id`) REFERENCES `skills_dim` (`skill_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

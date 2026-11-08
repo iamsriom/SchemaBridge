@@ -1,0 +1,36 @@
+{
+  "text_number": 132,
+  "id": "SB-132",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "schemabench_0132",
+  "question": "Background / Context\n\nThe project involves creating a decision support system using the TPC-D benchmark. This system is intended to simulate a broad range of decision support applications that require complex and long-running queries against extensive and intricate data structures.\n\n Objectives\n\nThe primary objective is to enable efficient querying and reporting on the stored data for decision-making purposes. The system should be optimized for handling large datasets and performing complex queries related to customer orders, suppliers, and products.\n\n Stakeholders & Users\n\n- Stakeholders: \n  - Database Administrators: Manage and maintain the database.\n  - Data Analysts: Utilize the data for generating insights and reports.\n  - Business Decision Makers: Use the insights for strategic planning.\n\n- Users: \n  - Analysts performing complex queries.\n  - Management consuming reports generated from the data.\n\n Functional Descriptions\n\n1. Customer Management:\n   - Store customer details, including name, address, phone, account balance, and market segment.\n   - Link customers to their respective national identification.\n\n2. Order Processing:\n   - Manage orders including tracking order status, total price, order date, and customer link.\n   - Ensure orders are sortable by priority and clerical information.\n\n3. Line Items:\n   - Handle details of items within an order, such as quantity, pricing, discounts, and shipping information.\n   - Maintain relationships between order items, parts, and suppliers.\n\n4. Product Management:\n   - Store product specifications such as name, manufacturer, brand, type, size, and retail price.\n\n5. Supplier Management:\n   - Maintain supplier information with links to supplied parts and national identification.\n\n6. Geographical Information:\n   - Manage information related to nations and regions, ensuring that each entity's details are stored and mapped appropriately.\n\n Non-Functional Descriptions\n\n- Performance: \n  - The system should support efficient querying for large volumes of data, with optimization for complex and long-running query execution.\n\n- Scalability: \n  - The architecture must accommodate increasing data volumes without degradation in performance.\n\n- Data Integrity: \n  - Ensure referential integrity between tables to maintain consistent and accurate data.\n\n- Security:\n  - Implement role-based access controls to secure sensitive data against unauthorized access.\n\n- Usability: \n  - Provide user-friendly interfaces for querying and reporting features used by analysts and decision-makers.",
+  "ddl": "-- Schema for database: `schemabench_0132`\n\n-- For table: `customer`\n\nCREATE TABLE `customer` (\n  `customer_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `address` varchar(255) NOT NULL,\n  `phone` varchar(255) NOT NULL,\n  `account_balance` decimal(10,2) NOT NULL,\n  `market_segment` varchar(255) NOT NULL,\n  PRIMARY KEY (`customer_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `customer_national_id`\n\nCREATE TABLE `customer_national_id` (\n  `customer_id` int(11) NOT NULL,\n  `national_id` varchar(255) NOT NULL,\n  PRIMARY KEY (`customer_id`),\n  FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `order`\n\nCREATE TABLE `order` (\n  `order_id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_id` int(11) NOT NULL,\n  `order_status` varchar(255) NOT NULL,\n  `total_price` decimal(10,2) NOT NULL,\n  `order_date` datetime NOT NULL,\n  PRIMARY KEY (`order_id`),\n  FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `order_item`\n\nCREATE TABLE `order_item` (\n  `order_id` int(11) NOT NULL,\n  `item_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `price` decimal(10,2) NOT NULL,\n  `discount` decimal(10,2) NOT NULL,\n  `shipping_info` varchar(255) NOT NULL,\n  PRIMARY KEY (`order_id`,`item_id`),\n  FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `product`\n\nCREATE TABLE `product` (\n  `product_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `manufacturer` varchar(255) NOT NULL,\n  `brand` varchar(255) NOT NULL,\n  `type` varchar(255) NOT NULL,\n  `size` varchar(255) NOT NULL,\n  `retail_price` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`product_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `supplier`\n\nCREATE TABLE `supplier` (\n  `supplier_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `address` varchar(255) NOT NULL,\n  `phone` varchar(255) NOT NULL,\n  PRIMARY KEY (`supplier_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `supplier_part`\n\nCREATE TABLE `supplier_part` (\n  `supplier_id` int(11) NOT NULL,\n  `product_id` int(11) NOT NULL,\n  PRIMARY KEY (`supplier_id`,`product_id`),\n  FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `region`\n\nCREATE TABLE `region` (\n  `region_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`region_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `nation`\n\nCREATE TABLE `nation` (\n  `nation_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `region_id` int(11) NOT NULL,\n  PRIMARY KEY (`nation_id`),\n  FOREIGN KEY (`region_id`) REFERENCES `region` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- For table: `customer_nation`\n\nCREATE TABLE `customer_nation` (\n  `customer_id` int(11) NOT NULL,\n  `nation_id` int(11) NOT NULL,\n  PRIMARY KEY (`customer_id`,`nation_id`),\n  FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`nation_id`) REFERENCES `nation` (`nation_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "customer",
+      "customer_national_id",
+      "order",
+      "order_item",
+      "product",
+      "supplier",
+      "supplier_part",
+      "region",
+      "nation",
+      "customer_nation"
+    ],
+    "columns_by_table": {
+      "customer": [],
+      "customer_national_id": [],
+      "order": [],
+      "order_item": [],
+      "product": [],
+      "supplier": [],
+      "supplier_part": [],
+      "region": [],
+      "nation": [],
+      "customer_nation": []
+    }
+  }
+}

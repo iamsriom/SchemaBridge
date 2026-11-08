@@ -1,0 +1,24 @@
+{
+  "text_number": 81,
+  "id": "67552f0a13602ec03b41a864",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "rschema_0081",
+  "question": "The operational details of a certain API management system are as follows: The system contains multiple user groups, with user group information including User Group ID, Name, and Description. The user information in the system includes User ID, Username, Password, Email, One-time Password, Password Reset Key, Associated User Group, Activation Status, User Creation Time, Creator, Last Updated Time, and Updater. Each user is assigned an API key, with API key information including Key ID, Associated User ID, Key Content, Permission Level, Whether to Ignore Call Limits, Whether it is a Private Key, Allowed IP Address List, and Key Creation Time. The system records all API call logs, with log information including Log ID, Called API Resource Path, HTTP Request Method, Request Parameters, Used API Key, Client's IP Address, Call Time, Response Time, Authorization Status of the Call, and API Response Status Code. When users call APIs using API keys, the system performs authorization verification based on the key’s permission level and IP address restrictions, and records detailed information of each call for subsequent analysis and auditing.",
+  "ddl": "-- Schema for database: rschema_0081\n\n-- Table: user_group\nCREATE TABLE `user_group` (\n  `UserGroupID` int(11) NOT NULL,\n  `Name` varchar(255) NOT NULL,\n  `Description` text,\n  PRIMARY KEY (`UserGroupID`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: user\nCREATE TABLE `user` (\n  `UserID` int(11) NOT NULL AUTO_INCREMENT,\n  `Username` varchar(255) NOT NULL,\n  `Password` varchar(255) NOT NULL,\n  `Email` varchar(255) NOT NULL,\n  `OneTimePassword` varchar(255),\n  `PasswordResetKey` varchar(255),\n  `AssociatedUserGroup` int(11) NOT NULL,\n  `ActivationStatus` enum('Active','Inactive') NOT NULL DEFAULT 'Inactive',\n  `UserCreationTime` datetime NOT NULL,\n  `Creator` varchar(255) NOT NULL,\n  `LastUpdatedTime` datetime,\n  `Updater` varchar(255),\n  PRIMARY KEY (`UserID`),\n  FOREIGN KEY (`AssociatedUserGroup`) REFERENCES `user_group` (`UserGroupID`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: api_key\nCREATE TABLE `api_key` (\n  `KeyID` int(11) NOT NULL AUTO_INCREMENT,\n  `AssociatedUserID` int(11) NOT NULL,\n  `KeyContent` text NOT NULL,\n  `PermissionLevel` int(11) NOT NULL,\n  `IgnoreCallLimits` tinyint(1) NOT NULL DEFAULT '0',\n  `IsPrivateKey` tinyint(1) NOT NULL DEFAULT '0',\n  `AllowedIPAddressList` text,\n  `KeyCreationTime` datetime NOT NULL,\n  PRIMARY KEY (`KeyID`),\n  FOREIGN KEY (`AssociatedUserID`) REFERENCES `user` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: api_call_log\nCREATE TABLE `api_call_log` (\n  `LogID` int(11) NOT NULL AUTO_INCREMENT,\n  `CalledAPIResourcePath` varchar(255) NOT NULL,\n  `HTTPRequestMethod` varchar(255) NOT NULL,\n  `RequestParameters` text,\n  `UsedAPIKey` int(11) NOT NULL,\n  `ClientIPAddress` varchar(255) NOT NULL,\n  `CallTime` datetime NOT NULL,\n  `ResponseTime` datetime,\n  `AuthorizationStatus` enum('Authorized','Unauthorized') NOT NULL DEFAULT 'Unauthorized',\n  `APIResponseStatusCode` int(11) NOT NULL,\n  PRIMARY KEY (`LogID`),\n  FOREIGN KEY (`UsedAPIKey`) REFERENCES `api_key` (`KeyID`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "user_group",
+      "user",
+      "api_key",
+      "api_call_log"
+    ],
+    "columns_by_table": {
+      "user_group": [],
+      "user": [],
+      "api_key": [],
+      "api_call_log": []
+    }
+  }
+}

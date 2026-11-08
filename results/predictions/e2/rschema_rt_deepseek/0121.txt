@@ -1,0 +1,93 @@
+-- Schema for database: rschema_0121
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `full_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `registration_date` datetime NOT NULL,
+  `last_login_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `authenticated_user` (
+  `user_id` int(11) NOT NULL,
+  `authentication_level` varchar(255) NOT NULL,
+  `signature` varchar(255) NOT NULL,
+  `issuer` varchar(255) NOT NULL,
+  `authentication_time` datetime NOT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `authenticated_user_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service` (
+  `service_id` int(11) NOT NULL,
+  `service_name` varchar(255) NOT NULL,
+  `service_type` varchar(255) NOT NULL,
+  `service_url` varchar(255) NOT NULL,
+  `configuration_data` text DEFAULT NULL,
+  `last_heartbeat_time` datetime DEFAULT NULL,
+  `monitoring_status` varchar(255) NOT NULL,
+  `signature` varchar(255) NOT NULL,
+  `issuer` varchar(255) NOT NULL,
+  PRIMARY KEY (`service_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `worker_node` (
+  `node_id` int(11) NOT NULL,
+  `node_name` varchar(255) NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  `operating_system` varchar(255) NOT NULL,
+  `architecture` varchar(255) NOT NULL,
+  `last_heartbeat_time` datetime DEFAULT NULL,
+  `signature` varchar(255) NOT NULL,
+  `issuer` varchar(255) NOT NULL,
+  PRIMARY KEY (`node_id`),
+  CONSTRAINT `worker_node_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `service` (`service_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `authenticated_consumer` (
+  `consumer_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `type` varchar(255) NOT NULL,
+  `configuration_data` text DEFAULT NULL,
+  `permissions` text DEFAULT NULL,
+  `signature` varchar(255) NOT NULL,
+  `issuer` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`, `consumer_id`),
+  CONSTRAINT `authenticated_consumer_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_migration` (
+  `migration_id` int(11) NOT NULL,
+  `old_user_id` int(11) NOT NULL,
+  `new_user_id` int(11) NOT NULL,
+  `migration_time` datetime NOT NULL,
+  PRIMARY KEY (`migration_id`),
+  CONSTRAINT `user_migration_ibfk_1` FOREIGN KEY (`old_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_migration_ibfk_2` FOREIGN KEY (`new_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `session` (
+  `session_id` int(11) NOT NULL,
+  `consumer_id` int(11) NOT NULL,
+  `expiration_time` datetime NOT NULL,
+  `mfa_status` varchar(255) NOT NULL,
+  `signature` varchar(255) NOT NULL,
+  `issuer` varchar(255) NOT NULL,
+  PRIMARY KEY (`session_id`),
+  CONSTRAINT `session_ibfk_1` FOREIGN KEY (`consumer_id`) REFERENCES `authenticated_consumer` (`consumer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `encrypted_data_test` (
+  `data_id` int(11) NOT NULL,
+  `regular_data` text NOT NULL,
+  `sensitive_data_1` text NOT NULL,
+  `sensitive_data_2` text NOT NULL,
+  `signature` varchar(255) NOT NULL,
+  `issuer` varchar(255) NOT NULL,
+  PRIMARY KEY (`data_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

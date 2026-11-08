@@ -1,0 +1,40 @@
+-- Schema for database: rschema_0464
+CREATE TABLE `employees` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `salary` decimal(10,2) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `education_level` varchar(255) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `departments` (
+  `department_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `manager_employee_id` int(11),
+  PRIMARY KEY (`department_id`),
+  KEY `departments_ibfk_1` (`manager_employee_id`),
+  CONSTRAINT `departments_ibfk_1` FOREIGN KEY (`manager_employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `projects` (
+  `project_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `manager_employee_id` int(11) NOT NULL,
+  PRIMARY KEY (`project_id`),
+  KEY `projects_ibfk_1` (`department_id`),
+  KEY `projects_ibfk_2` (`manager_employee_id`),
+  CONSTRAINT `projects_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `projects_ibfk_2` FOREIGN KEY (`manager_employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_projects` (
+  `employee_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`, `project_id`),
+  KEY `employee_projects_ibfk_1` (`employee_id`),
+  KEY `employee_projects_ibfk_2` (`project_id`),
+  CONSTRAINT `employee_projects_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_projects_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

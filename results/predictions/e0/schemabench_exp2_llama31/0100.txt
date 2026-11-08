@@ -1,0 +1,43 @@
+-- Schema for database: schemabench_0100
+CREATE TABLE `households` (
+  `household_id` int(11) NOT NULL AUTO_INCREMENT,
+  `year` int(11) NOT NULL,
+  `state` char(2) NOT NULL,
+  `city` varchar(255) NOT NULL,
+  `income` decimal(10,2) NOT NULL,
+  `size` int(11) NOT NULL,
+  PRIMARY KEY (`household_id`),
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `expenditures` (
+  `expenditure_id` int(11) NOT NULL AUTO_INCREMENT,
+  `household_id` int(11) NOT NULL,
+  `year` int(11) NOT NULL,
+  `category` varchar(255) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`expenditure_id`),
+  KEY `household_ibfk_1` (`household_id`),
+  CONSTRAINT `household_ibfk_1` FOREIGN KEY (`household_id`) REFERENCES `households` (`household_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `demographics` (
+  `demographic_id` int(11) NOT NULL AUTO_INCREMENT,
+  `household_id` int(11) NOT NULL,
+  `age` int(11) NOT NULL,
+  `sex` char(1) NOT NULL,
+  `education` varchar(255) NOT NULL,
+  PRIMARY KEY (`demographic_id`),
+  KEY `household_ibfk_2` (`household_id`),
+  CONSTRAINT `household_ibfk_2` FOREIGN KEY (`household_id`) REFERENCES `households` (`household_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `anonymization` (
+  `anonymization_id` int(11) NOT NULL AUTO_INCREMENT,
+  `household_id` int(11) NOT NULL,
+  `expenditure_id` int(11) NOT NULL,
+  PRIMARY KEY (`anonymization_id`),
+  KEY `household_ibfk_3` (`household_id`),
+  KEY `expenditure_ibfk_1` (`expenditure_id`),
+  CONSTRAINT `household_ibfk_3` FOREIGN KEY (`household_id`) REFERENCES `households` (`household_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `expenditure_ibfk_1` FOREIGN KEY (`expenditure_id`) REFERENCES `expenditures` (`expenditure_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

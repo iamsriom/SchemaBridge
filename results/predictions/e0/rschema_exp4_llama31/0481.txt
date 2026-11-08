@@ -1,0 +1,47 @@
+-- Schema for database: rschema_0481
+CREATE TABLE `crops` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `environments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `crop_id` int(11) NOT NULL,
+  `temperature` float NOT NULL,
+  `rainfall` float NOT NULL,
+  `light_intensity` float NOT NULL,
+  `location` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `environment_ibfk_1` (`crop_id`),
+  CONSTRAINT `environment_ibfk_1` FOREIGN KEY (`crop_id`) REFERENCES `crops` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `monitoring_rules` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `crop_id` int(11) NOT NULL,
+  `environment_id` int(11) NOT NULL,
+  `data_type` varchar(255) NOT NULL,
+  `collection_time` datetime NOT NULL,
+  `data_value` float NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `monitoring_rule_ibfk_1` (`crop_id`),
+  KEY `monitoring_rule_ibfk_2` (`environment_id`),
+  CONSTRAINT `monitoring_rule_ibfk_1` FOREIGN KEY (`crop_id`) REFERENCES `crops` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `monitoring_rule_ibfk_2` FOREIGN KEY (`environment_id`) REFERENCES `environments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `predictions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `crop_id` int(11) NOT NULL,
+  `environment_id` int(11) NOT NULL,
+  `data_type` varchar(255) NOT NULL,
+  `collection_time` datetime NOT NULL,
+  `data_value` float NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `prediction_ibfk_1` (`crop_id`),
+  KEY `prediction_ibfk_2` (`environment_id`),
+  CONSTRAINT `prediction_ibfk_1` FOREIGN KEY (`crop_id`) REFERENCES `crops` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `prediction_ibfk_2` FOREIGN KEY (`environment_id`) REFERENCES `environments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

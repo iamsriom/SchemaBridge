@@ -1,0 +1,127 @@
+-- Schema for database: schemabench_0114
+CREATE TABLE `baseball_leagues` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `start_year` int(11) NOT NULL,
+  `end_year` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `league_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `league_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `team_league` (`league_id`),
+  CONSTRAINT `team_league_ibfk_1` FOREIGN KEY (`league_id`) REFERENCES `baseball_leagues` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `players` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `birth_date` date NOT NULL,
+  `death_date` date DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `player_teams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `player_id` int(11) NOT NULL,
+  `team_id` int(11) NOT NULL,
+  `start_year` int(11) NOT NULL,
+  `end_year` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `player_team` (`player_id`),
+  KEY `team_player` (`team_id`),
+  CONSTRAINT `player_team_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `team_player_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `games` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date` date NOT NULL,
+  `team_id_home` int(11) NOT NULL,
+  `team_id_away` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `game_team_home` (`team_id_home`),
+  KEY `game_team_away` (`team_id_away`),
+  CONSTRAINT `game_team_home_ibfk_1` FOREIGN KEY (`team_id_home`) REFERENCES `teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `game_team_away_ibfk_1` FOREIGN KEY (`team_id_away`) REFERENCES `teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pitchers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `player_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `pitcher_player` (`player_id`),
+  CONSTRAINT `pitcher_player_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `batters` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `player_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `batter_player` (`player_id`),
+  CONSTRAINT `batter_player_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pitching_stats` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pitcher_id` int(11) NOT NULL,
+  `game_id` int(11) NOT NULL,
+  `inning` int(11) NOT NULL,
+  `outs` int(11) NOT NULL,
+  `runs` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `pitching_game` (`game_id`),
+  KEY `pitching_pitcher` (`pitcher_id`),
+  CONSTRAINT `pitching_game_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `games` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pitching_pitcher_ibfk_1` FOREIGN KEY (`pitcher_id`) REFERENCES `pitchers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `batting_stats` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `batter_id` int(11) NOT NULL,
+  `game_id` int(11) NOT NULL,
+  `inning` int(11) NOT NULL,
+  `at_bats` int(11) NOT NULL,
+  `hits` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `batting_game` (`game_id`),
+  KEY `batting_batter` (`batter_id`),
+  CONSTRAINT `batting_game_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `games` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `batting_batter_ibfk_1` FOREIGN KEY (`batter_id`) REFERENCES `batters` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `managers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `player_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `manager_player` (`player_id`),
+  CONSTRAINT `manager_player_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `team_standings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_id` int(11) NOT NULL,
+  `year` int(11) NOT NULL,
+  `wins` int(11) NOT NULL,
+  `losses` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `team_standings_team` (`team_id`),
+  CONSTRAINT `team_standings_team_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `postseason` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `game_id` int(11) NOT NULL,
+  `team_id` int(11) NOT NULL,
+  `series` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `postseason_game` (`game_id`),
+  KEY `postseason_team` (`team_id`),
+  CONSTRAINT `postseason_game_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `games` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `postseason_team_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

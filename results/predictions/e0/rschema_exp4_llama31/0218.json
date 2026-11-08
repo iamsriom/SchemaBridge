@@ -1,0 +1,26 @@
+{
+  "text_number": 218,
+  "id": "67552f0a13602ec03b41a857",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0218",
+  "question": "This is a printer device management system. First, it needs to maintain basic information of printer manufacturers (name, person in charge). Each model belongs to a specific manufacturer and includes standard driver configurations for that printer model. For each specific printer device, the system needs to record which model it is, where it is installed, and its network hostname. Some printers may need personalized driver settings in addition to the standard driver configuration.",
+  "ddl": "-- Schema for database: rschema_0218\nCREATE TABLE `manufacturer` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `person_in_charge` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `model` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `manufacturer_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `model_ibfk_1` (`manufacturer_id`),\n  CONSTRAINT `model_ibfk_1` FOREIGN KEY (`manufacturer_id`) REFERENCES `manufacturer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `printer` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `model_id` int(11) NOT NULL,\n  `installation_location` varchar(255) NOT NULL,\n  `hostname` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `printer_ibfk_1` (`model_id`),\n  CONSTRAINT `printer_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `model` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `driver_config` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `model_id` int(11) NOT NULL,\n  `standard_config` text NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `driver_config_ibfk_1` (`model_id`),\n  CONSTRAINT `driver_config_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `model` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `custom_driver_setting` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `printer_id` int(11) NOT NULL,\n  `setting_name` varchar(255) NOT NULL,\n  `setting_value` text NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `custom_driver_setting_ibfk_1` (`printer_id`),\n  CONSTRAINT `custom_driver_setting_ibfk_1` FOREIGN KEY (`printer_id`) REFERENCES `printer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "manufacturer",
+      "model",
+      "printer",
+      "driver_config",
+      "custom_driver_setting"
+    ],
+    "columns_by_table": {
+      "manufacturer": [],
+      "model": [],
+      "printer": [],
+      "driver_config": [],
+      "custom_driver_setting": []
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "text_number": 209,
+  "id": "SB-209",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "schemabench_0209",
+  "question": "Background / Context\n\nThe project is focused on developing a comprehensive database system for managing student records and associated academic activities. This database, known as `StudentManagement`, is designed to handle various aspects of student data, including courses, grades, attendance, and departmental affiliations.\n\nObjectives\n\nThe primary objective is to implement a robust database framework that facilitates efficient management of student information, course enrollments, grading systems, and attendance tracking. The system should provide functionalities for student registration, record maintenance, and academic performance evaluation.\n\nStakeholders & Users\n\n- Students: Access their personal and academic information.\n- Teachers: Manage class schedules, assignments, and record student performance.\n- Administrators: Oversee the database, manage student enrollments, and ensure data integrity.\n- Departments: Monitor departmental data and student affiliations.\n\nFunctional Descriptions\n\n1. Student Registration: \n   - Functions to add, update, and manage student personal and contact information.\n   - Linking students to their respective departments.\n\n2. Course Management:\n   - Creation and management of courses, including course schedules and room assignments.\n\n3. Enrollment Management:\n   - Enroll students in courses and maintain enrollment records.\n\n4. Grade Tracking:\n   - Record student grades and calculate their academic performance based on obtained marks.\n\n5. Attendance Tracking:\n   - Maintain attendance records for students in each class.\n\n6. Teaching Assignments:\n   - Manage teacher assignments to classes and provide relevant class information.\n\nNon-Functional Descriptions\n\n- Scalability: Support a growing number of student records and courses without degradation in performance.\n- Data Integrity: Ensure consistency and accuracy of student and academic records.\n- Security: Protect sensitive student data from unauthorized access.\n- Availability: The system should be available for access by students, teachers, and administrators at all required times.",
+  "ddl": "-- Schema for database: `StudentManagement`\n\n-- Table: `students`\nCREATE TABLE `students` (\n  `student_id` int(11) NOT NULL AUTO_INCREMENT,\n  `first_name` varchar(255) NOT NULL,\n  `last_name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `phone_number` varchar(255) NOT NULL,\n  `department_id` int(11) NOT NULL,\n  PRIMARY KEY (`student_id`),\n  KEY `department_id` (`department_id`),\n  CONSTRAINT `students_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `departments`\nCREATE TABLE `departments` (\n  `department_id` int(11) NOT NULL AUTO_INCREMENT,\n  `department_name` varchar(255) NOT NULL,\n  PRIMARY KEY (`department_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `courses`\nCREATE TABLE `courses` (\n  `course_id` int(11) NOT NULL AUTO_INCREMENT,\n  `course_name` varchar(255) NOT NULL,\n  `department_id` int(11) NOT NULL,\n  PRIMARY KEY (`course_id`),\n  KEY `department_id` (`department_id`),\n  CONSTRAINT `courses_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `enrollments`\nCREATE TABLE `enrollments` (\n  `student_id` int(11) NOT NULL,\n  `course_id` int(11) NOT NULL,\n  PRIMARY KEY (`student_id`,`course_id`),\n  KEY `course_id` (`course_id`),\n  CONSTRAINT `enrollments_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `enrollments_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `grades`\nCREATE TABLE `grades` (\n  `student_id` int(11) NOT NULL,\n  `course_id` int(11) NOT NULL,\n  `grade` varchar(255) NOT NULL,\n  PRIMARY KEY (`student_id`,`course_id`),\n  KEY `course_id` (`course_id`),\n  CONSTRAINT `grades_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `grades_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `attendance`\nCREATE TABLE `attendance` (\n  `student_id` int(11) NOT NULL,\n  `course_id` int(11) NOT NULL,\n  `date` date NOT NULL,\n  `status` varchar(255) NOT NULL,\n  PRIMARY KEY (`student_id`,`course_id`,`date`),\n  KEY `course_id` (`course_id`),\n  CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `assignments`\nCREATE TABLE `assignments` (\n  `assignment_id` int(11) NOT NULL AUTO_INCREMENT,\n  `course_id` int(11) NOT NULL,\n  `assignment_name` varchar(255) NOT NULL,\n  `due_date` date NOT NULL,\n  PRIMARY KEY (`assignment_id`),\n  KEY `course_id` (`course_id`),\n  CONSTRAINT `assignments_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "students",
+      "departments",
+      "courses",
+      "enrollments",
+      "grades",
+      "attendance",
+      "assignments"
+    ],
+    "columns_by_table": {
+      "students": [],
+      "departments": [],
+      "courses": [],
+      "enrollments": [],
+      "grades": [],
+      "attendance": [],
+      "assignments": []
+    }
+  }
+}

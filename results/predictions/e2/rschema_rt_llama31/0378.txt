@@ -1,0 +1,45 @@
+-- Schema for database: rschema_0378
+CREATE TABLE `User` (
+  `User_ID` int(11) NOT NULL,
+  `Email` varchar(255) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  PRIMARY KEY (`User_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Article` (
+  `Article_ID` int(11) NOT NULL,
+  `Title` varchar(255) NOT NULL,
+  `Summary` text DEFAULT NULL,
+  `Body_Content` text NOT NULL,
+  `Creation_Time` datetime NOT NULL,
+  `Author_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Article_ID`),
+  CONSTRAINT `Article_ibfk_1` FOREIGN KEY (`Author_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Comment` (
+  `User_ID` int(11) NOT NULL,
+  `Article_ID` int(11) NOT NULL,
+  `Creation_Time` datetime NOT NULL,
+  `Comment_Content` text NOT NULL,
+  PRIMARY KEY (`User_ID`, `Article_ID`, `Creation_Time`),
+  CONSTRAINT `Comment_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Comment_ibfk_2` FOREIGN KEY (`Article_ID`) REFERENCES `Article` (`Article_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Operation_Record` (
+  `Operation_ID` int(11) NOT NULL AUTO_INCREMENT,
+  `Article_ID` int(11) NOT NULL,
+  `Operation_Type` varchar(255) NOT NULL,
+  `Timestamp` datetime NOT NULL,
+  PRIMARY KEY (`Operation_ID`),
+  CONSTRAINT `Operation_Record_ibfk_1` FOREIGN KEY (`Article_ID`) REFERENCES `Article` (`Article_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Manage_Article` (
+  `User_ID` int(11) NOT NULL,
+  `Article_ID` int(11) NOT NULL,
+  PRIMARY KEY (`User_ID`, `Article_ID`),
+  CONSTRAINT `User_Manage_Article_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `User_Manage_Article_ibfk_2` FOREIGN KEY (`Article_ID`) REFERENCES `Article` (`Article_ID`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

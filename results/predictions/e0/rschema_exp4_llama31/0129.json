@@ -1,0 +1,24 @@
+{
+  "text_number": 129,
+  "id": "67552f0a13602ec03b41a96a",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0129",
+  "question": "The following is a description of the database requirements for a certain chat management system:\n\nThe database system is an instant messaging platform that manages multiple chat rooms and message interactions between users. Each room can accommodate multiple users, and users can send and view messages in different rooms. Each message is associated with a room, a user, and the creation and update timestamps. The system manages rooms through the Room table, records message content and associates it with specific users and rooms through the Message table. The _RoomToUser table ensures the many-to-many relationship between users and rooms, allowing users to join multiple rooms and ensuring that each user combination within a room is unique. The system supports users joining and leaving rooms, and provides permission-based message viewing and manipulation functions, such as only allowing the sender of a message to update or delete their own messages. In addition, the timestamp recording mechanism provides tracking and auditing capabilities for each room and message, thus supporting more detailed operations and management of historical data.",
+  "ddl": "-- Schema for database: rschema_0129\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `rooms` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `room_to_user` (\n  `room_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  PRIMARY KEY (`room_id`, `user_id`),\n  KEY `room_id` (`room_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `room_to_user_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `room_to_user_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `messages` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `room_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `content` text NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `room_id` (`room_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `messages_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "rooms",
+      "room_to_user",
+      "messages"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "rooms": [],
+      "room_to_user": [],
+      "messages": []
+    }
+  }
+}

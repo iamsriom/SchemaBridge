@@ -1,0 +1,83 @@
+-- Schema for database: schemabench_0188
+CREATE TABLE `departments` (
+  `dept_id` int(11) NOT NULL,
+  `available_rooms` int(11) DEFAULT 0,
+  `location` varchar(255) NOT NULL,
+  `num_employees` int(11) DEFAULT NULL,
+  PRIMARY KEY (`dept_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employees` (
+  `fname` varchar(255) DEFAULT NULL,
+  `minit` char(1) DEFAULT NULL,
+  `lname` varchar(255) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `salary` decimal(10,2) DEFAULT NULL,
+  `emp_id` int(11) NOT NULL,
+  `dept_id` int(11) NOT NULL,
+  PRIMARY KEY (`emp_id`, `dept_id`),
+  CONSTRAINT `employees_ibfk_1` FOREIGN KEY (`dept_id`) REFERENCES `departments` (`dept_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `schedules` (
+  `shift_id` int(11) NOT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `emp_id` int(11) NOT NULL,
+  `date` date DEFAULT NULL,
+  PRIMARY KEY (`emp_id`, `shift_id`),
+  CONSTRAINT `schedules_ibfk_1` FOREIGN KEY (`emp_id`) REFERENCES `employees` (`emp_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `hospital_resources` (
+  `supply_name` varchar(255) NOT NULL,
+  `supply_type` varchar(255) DEFAULT NULL,
+  `supply_count` int(11) DEFAULT NULL,
+  `dept_id` int(11) NOT NULL,
+  PRIMARY KEY (`supply_name`, `dept_id`),
+  CONSTRAINT `hospital_resources_ibfk_1` FOREIGN KEY (`dept_id`) REFERENCES `departments` (`dept_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patients` (
+  `fname` varchar(255) DEFAULT NULL,
+  `minit` char(1) DEFAULT NULL,
+  `lname` varchar(255) DEFAULT NULL,
+  `ssn` char(9) NOT NULL,
+  `patient_id` int(11) NOT NULL UNIQUE,
+  `dob` date DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `insurance` varchar(255) DEFAULT NULL,
+  `policy_id` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ssn`, `patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cases` (
+  `case_id` int(11) NOT NULL,
+  `room_num` varchar(255) DEFAULT NULL,
+  `admitted_by` int(11) DEFAULT NULL,
+  `prescriptions` text DEFAULT NULL,
+  `patient_id` int(11) NOT NULL,
+  `admit_date` datetime DEFAULT NULL,
+  `discharge_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`case_id`, `patient_id`),
+  CONSTRAINT `cases_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `handles` (
+  `emp_id` int(11) NOT NULL,
+  `case_id` int(11) NOT NULL,
+  PRIMARY KEY (`emp_id`, `case_id`),
+  CONSTRAINT `handles_ibfk_1` FOREIGN KEY (`emp_id`) REFERENCES `employees` (`emp_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `handles_ibfk_2` FOREIGN KEY (`case_id`) REFERENCES `cases` (`case_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `housed_under` (
+  `patient_id` int(11) NOT NULL,
+  `dept_id` int(11) NOT NULL,
+  `case_id` int(11) NOT NULL,
+  PRIMARY KEY (`patient_id`, `dept_id`, `case_id`),
+  CONSTRAINT `housed_under_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `housed_under_ibfk_2` FOREIGN KEY (`dept_id`) REFERENCES `departments` (`dept_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `housed_under_ibfk_3` FOREIGN KEY (`case_id`) REFERENCES `cases` (`case_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,67 @@
+"""SchemaBridge core library: DDL parsing, normalisation, metrics and pair evaluation."""
+
+from .evaluator import (
+    aggregate_schemas,
+    evaluate_ddl_pair,
+    evaluate_predictions_dir,
+    evaluate_schema_pair,
+    five_element_counts,
+    gold_answer_to_metadata_and_ddl,
+    gold_record_to_metadata_and_ddl,
+)
+from .metrics import (
+    ELEMENTS,
+    f1_score,
+    hallucination_rate,
+    micro_aggregate,
+    micro_f1,
+    micro_prf,
+    normalized_graph_edit_distance,
+    set_prf,
+)
+from .normalization import (
+    normalize_ddl,
+    normalize_identifier,
+    normalize_rschema_name,
+    type_family,
+)
+from .schema_parser import (
+    Schema,
+    ensure_prediction_metadata,
+    iter_ddl_table_bodies,
+    metadata_from_ddl,
+    parse_ddl,
+    parse_ddl_fks,
+    parse_ddl_primary_unique,
+    schema_to_dict,
+)
+
+__all__ = [
+    "ELEMENTS",
+    "Schema",
+    "aggregate_schemas",
+    "ensure_prediction_metadata",
+    "evaluate_ddl_pair",
+    "evaluate_predictions_dir",
+    "evaluate_schema_pair",
+    "f1_score",
+    "five_element_counts",
+    "gold_answer_to_metadata_and_ddl",
+    "gold_record_to_metadata_and_ddl",
+    "hallucination_rate",
+    "iter_ddl_table_bodies",
+    "metadata_from_ddl",
+    "micro_aggregate",
+    "micro_f1",
+    "micro_prf",
+    "normalize_ddl",
+    "normalize_identifier",
+    "normalize_rschema_name",
+    "normalized_graph_edit_distance",
+    "parse_ddl",
+    "parse_ddl_fks",
+    "parse_ddl_primary_unique",
+    "schema_to_dict",
+    "set_prf",
+    "type_family",
+]

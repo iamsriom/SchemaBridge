@@ -1,0 +1,121 @@
+-- Schema for database: rschema_0255
+CREATE TABLE `production_report` (
+  `report_id` int(11) NOT NULL,
+  `report_type` varchar(255) NOT NULL,
+  `report_date` datetime NOT NULL,
+  `production_data` text NOT NULL,
+  `indicators` text NOT NULL,
+  `completion_status` varchar(50) NOT NULL,
+  `metal_recovery_rate` decimal(5,2) NOT NULL,
+  `grade` varchar(50) NOT NULL,
+  PRIMARY KEY (`report_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment` (
+  `equipment_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  `category` varchar(100) NOT NULL,
+  `subcategory` varchar(100) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `operation_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`equipment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment_inspection` (
+  `inspection_id` int(11) NOT NULL,
+  `equipment_id` int(11) NOT NULL,
+  `inspector_id` int(11) NOT NULL,
+  `inspection_plan` text NOT NULL,
+  `execution_progress` varchar(50) NOT NULL,
+  PRIMARY KEY (`inspection_id`),
+  CONSTRAINT `equipment_inspection_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `equipment_inspection_ibfk_2` FOREIGN KEY (`inspector_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment_failure_reporting` (
+  `failure_id` int(11) NOT NULL,
+  `equipment_id` int(11) NOT NULL,
+  `failure_reporter_id` int(11) NOT NULL,
+  `failure_type` varchar(255) NOT NULL,
+  `failure_time` datetime NOT NULL,
+  `processing_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`failure_id`),
+  CONSTRAINT `equipment_failure_reporting_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `equipment_failure_reporting_ibfk_2` FOREIGN KEY (`failure_reporter_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment_repair` (
+  `repair_id` int(11) NOT NULL,
+  `equipment_id` int(11) NOT NULL,
+  `repair_person_id` int(11) NOT NULL,
+  `repair_progress` varchar(50) NOT NULL,
+  `repair_time` datetime NOT NULL,
+  PRIMARY KEY (`repair_id`),
+  CONSTRAINT `equipment_repair_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `equipment_repair_ibfk_2` FOREIGN KEY (`repair_person_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `quality_report` (
+  `report_id` int(11) NOT NULL,
+  `metal_recovery_rate` decimal(5,2) NOT NULL,
+  `warehouse_sample` varchar(255) NOT NULL,
+  `metal_grade` varchar(50) NOT NULL,
+  `recovery_rate_daily_report` decimal(5,2) NOT NULL,
+  `grade_daily_report` varchar(50) NOT NULL,
+  PRIMARY KEY (`report_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment_monitoring` (
+  `monitoring_id` int(11) NOT NULL,
+  `equipment_id` int(11) NOT NULL,
+  `equipment_type` varchar(100) NOT NULL,
+  `collected_data` text NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `monitoring_data` text NOT NULL,
+  `fault_alarm` varchar(50) NOT NULL,
+  `data_visualization` text NOT NULL,
+  `administrator_id` int(11) NOT NULL,
+  PRIMARY KEY (`monitoring_id`),
+  CONSTRAINT `equipment_monitoring_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `equipment_monitoring_ibfk_2` FOREIGN KEY (`administrator_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `announcement` (
+  `announcement_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `release_time` datetime NOT NULL,
+  `publisher_id` int(11) NOT NULL,
+  `announcement_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`announcement_id`),
+  CONSTRAINT `announcement_ibfk_1` FOREIGN KEY (`publisher_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `job_position` (
+  `job_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `responsibilities` text NOT NULL,
+  `requirements` text NOT NULL,
+  PRIMARY KEY (`job_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `role` varchar(100) NOT NULL,
+  `permissions` text NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `operation_history` text NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_job_application` (
+  `application_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `job_id` int(11) NOT NULL,
+  `job_match_rate` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`application_id`),
+  CONSTRAINT `user_job_application_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_job_application_ibfk_2` FOREIGN KEY (`job_id`) REFERENCES `job_position` (`job_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

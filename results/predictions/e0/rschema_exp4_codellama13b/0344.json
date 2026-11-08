@@ -1,0 +1,30 @@
+{
+  "text_number": 344,
+  "id": "67552f0a13602ec03b41a900",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "rschema_0344",
+  "question": "Business Requirements Description:\nThis system is designed for managing and monitoring web services in various applications. Key requirements include:\nEach user has a unique username, email, and role. User roles are associated with specific permissions. Users can be assigned different roles and permissions that are linked to particular applications.\nEach application has a unique ID, code, name, and type.\nEach web service has a unique ID, name, description, and creation date. It records error information, including error codes, descriptions, timestamps, and return status.\nMonitors the invocation of web services, recording details like invocation time, return status, delay time, and other performance metrics.\nTracks statistics such as success rate and call count over a specific time period.\nTracks which users are authorized to access which applications.\nLinks error data with monitoring data to enable detailed analysis and reporting.",
+  "ddl": "-- Schema for database: rschema_0344\n\nCREATE TABLE users (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  username VARCHAR(255) NOT NULL,\n  email VARCHAR(255) NOT NULL,\n  role VARCHAR(255) NOT NULL,\n  PRIMARY KEY (id),\n  UNIQUE KEY username (username),\n  UNIQUE KEY email (email)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE applications (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  code VARCHAR(255) NOT NULL,\n  name VARCHAR(255) NOT NULL,\n  type VARCHAR(255) NOT NULL,\n  PRIMARY KEY (id),\n  UNIQUE KEY code (code)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE web_services (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  name VARCHAR(255) NOT NULL,\n  description VARCHAR(255) NOT NULL,\n  creation_date DATETIME NOT NULL,\n  PRIMARY KEY (id),\n  UNIQUE KEY name (name)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE error_data (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  error_code VARCHAR(255) NOT NULL,\n  error_description VARCHAR(255) NOT NULL,\n  timestamp DATETIME NOT NULL,\n  return_status VARCHAR(255) NOT NULL,\n  delay_time INT(11) NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (web_service_id) REFERENCES web_services (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE monitoring_data (\n  id INT(11) NOT NULL AUTO_INCREMENT,\n  invocation_time DATETIME NOT NULL,\n  return_status VARCHAR(255) NOT NULL,\n  delay_time INT(11) NOT NULL,\n  success_rate DECIMAL(10, 2) NOT NULL,\n  call_count INT(11) NOT NULL,\n  PRIMARY KEY (id),\n  FOREIGN KEY (web_service_id) REFERENCES web_services (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE user_application_permissions (\n  user_id INT(11) NOT NULL,\n  application_id INT(11) NOT NULL,\n  PRIMARY KEY (user_id, application_id),\n  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (application_id) REFERENCES applications (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE error_monitoring_data (\n  error_data_id INT(11) NOT NULL,\n  monitoring_data_id INT(11) NOT NULL,\n  PRIMARY KEY (error_data_id, monitoring_data_id),\n  FOREIGN KEY (error_data_id) REFERENCES error_data (id) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (monitoring_data_id) REFERENCES monitoring_data (id) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "applications",
+      "web_services",
+      "error_data",
+      "monitoring_data",
+      "user_application_permissions",
+      "error_monitoring_data"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "applications": [],
+      "web_services": [],
+      "error_data": [],
+      "monitoring_data": [],
+      "user_application_permissions": [],
+      "error_monitoring_data": []
+    }
+  }
+}

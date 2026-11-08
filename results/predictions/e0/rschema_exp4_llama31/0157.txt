@@ -1,0 +1,86 @@
+-- Schema for database: rschema_0157
+CREATE TABLE `users` (
+  `student_number` int(11) NOT NULL,
+  `student_name` varchar(255) NOT NULL,
+  `student_gender` varchar(255) DEFAULT NULL,
+  `student_class` varchar(255) NOT NULL,
+  `student_branch` varchar(255) NOT NULL,
+  `student_dormitory` varchar(255) NOT NULL,
+  PRIMARY KEY (`student_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `schools` (
+  `school_number` int(11) NOT NULL,
+  `school_name` varchar(255) NOT NULL,
+  `school_introduction` text,
+  `school_facilities` text,
+  PRIMARY KEY (`school_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `branches` (
+  `branch_number` int(11) NOT NULL,
+  `branch_name` varchar(255) NOT NULL,
+  `branch_introduction` text,
+  PRIMARY KEY (`branch_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `classes` (
+  `class_number` int(11) NOT NULL,
+  `class_name` varchar(255) NOT NULL,
+  `class_introduction` text,
+  PRIMARY KEY (`class_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teachers` (
+  `teacher_number` int(11) NOT NULL,
+  `teacher_name` varchar(255) NOT NULL,
+  `teacher_title` varchar(255) NOT NULL,
+  `teacher_profile` text,
+  PRIMARY KEY (`teacher_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `courses` (
+  `course_number` int(11) NOT NULL,
+  `course_name` varchar(255) NOT NULL,
+  `course_description` text,
+  `course_credits` int(11) NOT NULL,
+  PRIMARY KEY (`course_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dormitories` (
+  `dormitory_number` int(11) NOT NULL,
+  `dormitory_building` varchar(255) NOT NULL,
+  `dormitory_room_number` varchar(255) NOT NULL,
+  `dormitory_beds` int(11) NOT NULL,
+  PRIMARY KEY (`dormitory_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_schedules` (
+  `student_number` int(11) NOT NULL,
+  `course_number` int(11) NOT NULL,
+  PRIMARY KEY (`student_number`, `course_number`),
+  KEY `course_schedules_ibfk_1` (`student_number`),
+  KEY `course_schedules_ibfk_2` (`course_number`),
+  CONSTRAINT `course_schedules_ibfk_1` FOREIGN KEY (`student_number`) REFERENCES `users` (`student_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_schedules_ibfk_2` FOREIGN KEY (`course_number`) REFERENCES `courses` (`course_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `class_teachers` (
+  `class_number` int(11) NOT NULL,
+  `teacher_number` int(11) NOT NULL,
+  PRIMARY KEY (`class_number`, `teacher_number`),
+  KEY `class_teachers_ibfk_1` (`class_number`),
+  KEY `class_teachers_ibfk_2` (`teacher_number`),
+  CONSTRAINT `class_teachers_ibfk_1` FOREIGN KEY (`class_number`) REFERENCES `classes` (`class_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `class_teachers_ibfk_2` FOREIGN KEY (`teacher_number`) REFERENCES `teachers` (`teacher_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `class_students` (
+  `class_number` int(11) NOT NULL,
+  `student_number` int(11) NOT NULL,
+  PRIMARY KEY (`class_number`, `student_number`),
+  KEY `class_students_ibfk_1` (`class_number`),
+  KEY `class_students_ibfk_2` (`student_number`),
+  CONSTRAINT `class_students_ibfk_1` FOREIGN KEY (`class_number`) REFERENCES `classes` (`class_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `class_students_ibfk_2` FOREIGN KEY (`student_number`) REFERENCES `users` (`student_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

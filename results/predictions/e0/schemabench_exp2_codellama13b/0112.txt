@@ -1,0 +1,131 @@
+-- Schema for database: schemabench_0112
+CREATE TABLE `master` (
+`player_id` int(11) NOT NULL,
+`first_name` varchar(255) NOT NULL,
+`last_name` varchar(255) NOT NULL,
+`birth_date` datetime NOT NULL,
+`birth_place` varchar(255) NOT NULL,
+`nationality` varchar(255) NOT NULL,
+`height` varchar(255) NOT NULL,
+`weight` varchar(255) NOT NULL,
+`position` varchar(255) NOT NULL,
+`active` varchar(255) NOT NULL,
+`retired` varchar(255) NOT NULL,
+`primary key` (`player_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `goals` (
+`player_id` int(11) NOT NULL,
+`season` int(11) NOT NULL,
+`league` varchar(255) NOT NULL,
+`team` varchar(255) NOT NULL,
+`games_played` int(11) NOT NULL,
+`goals` int(11) NOT NULL,
+`assists` int(11) NOT NULL,
+`points` int(11) NOT NULL,
+`primary key` (`player_id`, `season`, `league`, `team`),
+CONSTRAINT `fk_player_id` FOREIGN KEY (`player_id`) REFERENCES `master` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `scoring` (
+`player_id` int(11) NOT NULL,
+`season` int(11) NOT NULL,
+`league` varchar(255) NOT NULL,
+`team` varchar(255) NOT NULL,
+`games_played` int(11) NOT NULL,
+`goals` int(11) NOT NULL,
+`assists` int(11) NOT NULL,
+`points` int(11) NOT NULL,
+`primary key` (`player_id`, `season`, `league`, `team`),
+CONSTRAINT `fk_player_id` FOREIGN KEY (`player_id`) REFERENCES `master` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `coaches` (
+`coach_id` int(11) NOT NULL,
+`first_name` varchar(255) NOT NULL,
+`last_name` varchar(255) NOT NULL,
+`birth_date` datetime NOT NULL,
+`birth_place` varchar(255) NOT NULL,
+`nationality` varchar(255) NOT NULL,
+`height` varchar(255) NOT NULL,
+`weight` varchar(255) NOT NULL,
+`position` varchar(255) NOT NULL,
+`active` varchar(255) NOT NULL,
+`retired` varchar(255) NOT NULL,
+`primary key` (`coach_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `awards_players` (
+`player_id` int(11) NOT NULL,
+`season` int(11) NOT NULL,
+`league` varchar(255) NOT NULL,
+`team` varchar(255) NOT NULL,
+`award` varchar(255) NOT NULL,
+`primary key` (`player_id`, `season`, `league`, `team`, `award`),
+CONSTRAINT `fk_player_id` FOREIGN KEY (`player_id`) REFERENCES `master` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `awards_coaches` (
+`coach_id` int(11) NOT NULL,
+`season` int(11) NOT NULL,
+`league` varchar(255) NOT NULL,
+`team` varchar(255) NOT NULL,
+`award` varchar(255) NOT NULL,
+`primary key` (`coach_id`, `season`, `league`, `team`, `award`),
+CONSTRAINT `fk_coach_id` FOREIGN KEY (`coach_id`) REFERENCES `coaches` (`coach_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teams` (
+`team_id` int(11) NOT NULL,
+`name` varchar(255) NOT NULL,
+`league` varchar(255) NOT NULL,
+`season` int(11) NOT NULL,
+`games_played` int(11) NOT NULL,
+`wins` int(11) NOT NULL,
+`losses` int(11) NOT NULL,
+`ot_losses` int(11) NOT NULL,
+`points` int(11) NOT NULL,
+`primary key` (`team_id`, `league`, `season`),
+CONSTRAINT `fk_team_id` FOREIGN KEY (`team_id`) REFERENCES `master` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teams_half` (
+`team_id` int(11) NOT NULL,
+`league` varchar(255) NOT NULL,
+`season` int(11) NOT NULL,
+`games_played` int(11) NOT NULL,
+`wins` int(11) NOT NULL,
+`losses` int(11) NOT NULL,
+`ot_losses` int(11) NOT NULL,
+`points` int(11) NOT NULL,
+`primary key` (`team_id`, `league`, `season`),
+CONSTRAINT `fk_team_id` FOREIGN KEY (`team_id`) REFERENCES `master` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teams_post` (
+`team_id` int(11) NOT NULL,
+`league` varchar(255) NOT NULL,
+`season` int(11) NOT NULL,
+`games_played` int(11) NOT NULL,
+`wins` int(11) NOT NULL,
+`losses` int(11) NOT NULL,
+`ot_losses` int(11) NOT NULL,
+`points` int(11) NOT NULL,
+`primary key` (`team_id`, `league`, `season`),
+CONSTRAINT `fk_team_id` FOREIGN KEY (`team_id`) REFERENCES `master` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `players_teams` (
+`player_id` int(11) NOT NULL,
+`team_id` int(11) NOT NULL,
+`season` int(11) NOT NULL,
+`league` varchar(255) NOT NULL,
+`primary key` (`player_id`, `team_id`, `season`, `league`),
+CONSTRAINT `fk_player_id` FOREIGN KEY (`player_id`) REFERENCES `master` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT `fk_team_id` FOREIGN KEY (`team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `coaches_teams` (
+`coach_id` int(11) NOT NULL,
+`team_id` int(11) NOT NULL,
+`season` int(11) NOT NULL,

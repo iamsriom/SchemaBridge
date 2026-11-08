@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0432
+CREATE TABLE `student` (
+  `student_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `enrollment_year` int(11) NOT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `belonging_department` int(11) NOT NULL,
+  PRIMARY KEY (`student_id`),
+  CONSTRAINT `student_ibfk_1` FOREIGN KEY (`belonging_department`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `professor` (
+  `professor_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `office_number` varchar(50) DEFAULT NULL,
+  `office_start_time` time DEFAULT NULL,
+  `belonging_department` int(11) NOT NULL,
+  PRIMARY KEY (`professor_id`),
+  CONSTRAINT `professor_ibfk_1` FOREIGN KEY (`belonging_department`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course` (
+  `course_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `semester` varchar(50) NOT NULL,
+  `year` int(11) NOT NULL,
+  `teaching_professor_id` int(11) NOT NULL,
+  `class_day` varchar(50) DEFAULT NULL,
+  `course_duration` int(11) DEFAULT NULL,
+  `course_belonging_department` int(11) NOT NULL,
+  PRIMARY KEY (`course_id`),
+  CONSTRAINT `course_ibfk_1` FOREIGN KEY (`teaching_professor_id`) REFERENCES `professor` (`professor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_ibfk_2` FOREIGN KEY (`course_belonging_department`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_registration` (
+  `student_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `registration_time` datetime NOT NULL,
+  PRIMARY KEY (`student_id`, `registration_time`, `course_id`),
+  CONSTRAINT `course_registration_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_registration_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

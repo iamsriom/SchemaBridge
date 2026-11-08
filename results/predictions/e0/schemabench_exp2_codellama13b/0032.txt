@@ -1,0 +1,44 @@
+-- Schema for database: schemabench_0032
+CREATE TABLE `axes_login_attempts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `ip_address` varchar(255) NOT NULL,
+  `user_agent` varchar(255) NOT NULL,
+  `http_headers` text NOT NULL,
+  `access_path` varchar(255) NOT NULL,
+  `attempt_count` int(11) NOT NULL,
+  `blocked` tinyint(1) NOT NULL DEFAULT 0,
+  `blocked_until` datetime NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `axes_config` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `site_id` int(11) NOT NULL,
+  `max_attempts` int(11) NOT NULL,
+  `cool_off_period` int(11) NOT NULL,
+  `ip_allow_list` text NOT NULL,
+  `ip_block_list` text NOT NULL,
+  `user_agent_allow_list` text NOT NULL,
+  `user_agent_block_list` text NOT NULL,
+  `username_allow_list` text NOT NULL,
+  `username_block_list` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `axes_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `login_attempt_id` int(11) NOT NULL,
+  `message` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`login_attempt_id`) REFERENCES `axes_login_attempts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

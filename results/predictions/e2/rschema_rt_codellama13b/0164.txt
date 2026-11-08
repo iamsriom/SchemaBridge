@@ -1,0 +1,59 @@
+-- Schema for database: rschema_0164
+CREATE TABLE `warehouse` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `role` varchar(50) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stack_position` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `warehouse_id` int(11) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `stack_position_ibfk_1` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sensor` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `stack_position_id` int(11) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `data_collected` text DEFAULT NULL,
+  `status` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `sensor_ibfk_1` FOREIGN KEY (`stack_position_id`) REFERENCES `stack_position` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_operation_stack_position` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `stack_position_id` int(11) NOT NULL,
+  `operation_type` varchar(50) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `user_operation_stack_position_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_operation_stack_position_ibfk_2` FOREIGN KEY (`stack_position_id`) REFERENCES `stack_position` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stack_position_alert` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `sensor_id` int(11) NOT NULL,
+  `alert_type` varchar(50) NOT NULL,
+  `alert_level` varchar(50) NOT NULL,
+  `alert_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `stack_position_alert_ibfk_1` FOREIGN KEY (`sensor_id`) REFERENCES `sensor` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

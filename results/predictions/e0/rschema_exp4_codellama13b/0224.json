@@ -1,0 +1,30 @@
+{
+  "text_number": 224,
+  "id": "67552f0a13602ec03b41a896",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "rschema_0224",
+  "question": "The online task publishing and management system shall allow users to register and maintain personal information, including avatars and contact details. Users shall be able to publish tasks in the system, specifying the task title, description, budget, and deadline, and assigning the task to a specific category, city, or location. Other users shall be able to respond to published tasks, providing quotes and additional comments. After the task publisher selects an executor, both parties shall be able to communicate through messages within the system, exchange relevant files, and track task progress. Upon task completion, the publisher shall be able to evaluate the executor and provide ratings. The system shall also support managing basic user statistics, such as the number of completed tasks and failed tasks, to help other users better understand the reliability of executors. By associating cities, locations, categories, and tasks, the system shall effectively help users match suitable tasks with executors, improving task completion efficiency.",
+  "ddl": "-- Schema for database: rschema_0224\n\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `avatar` varchar(255) DEFAULT NULL,\n  `contact_details` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `username` (`username`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tasks` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `description` varchar(255) NOT NULL,\n  `budget` int(11) NOT NULL,\n  `deadline` datetime NOT NULL,\n  `category` varchar(255) NOT NULL,\n  `city` varchar(255) NOT NULL,\n  `location` varchar(255) NOT NULL,\n  `publisher_id` int(11) NOT NULL,\n  `executor_id` int(11) DEFAULT NULL,\n  `status` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`publisher_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`executor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `task_responses` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `task_id` int(11) NOT NULL,\n  `executor_id` int(11) NOT NULL,\n  `quote` int(11) NOT NULL,\n  `comment` varchar(255) DEFAULT NULL,\n  `status` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`executor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `messages` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `task_id` int(11) NOT NULL,\n  `sender_id` int(11) NOT NULL,\n  `receiver_id` int(11) NOT NULL,\n  `message` varchar(255) NOT NULL,\n  `timestamp` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`receiver_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `files` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `task_id` int(11) NOT NULL,\n  `file_name` varchar(255) NOT NULL,\n  `file_type` varchar(255) NOT NULL,\n  `file_size` int(11) NOT NULL,\n  `upload_date` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `task_evaluations` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `task_id` int(11) NOT NULL,\n  `publisher_id` int(11) NOT NULL,\n  `executor_id` int(11) NOT NULL,\n  `rating` int(11) NOT NULL,\n  `comment` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`publisher_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`executor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_statistics` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `completed_tasks` int(11) NOT NULL,\n  `failed_tasks` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "tasks",
+      "task_responses",
+      "messages",
+      "files",
+      "task_evaluations",
+      "user_statistics"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "tasks": [],
+      "task_responses": [],
+      "messages": [],
+      "files": [],
+      "task_evaluations": [],
+      "user_statistics": []
+    }
+  }
+}

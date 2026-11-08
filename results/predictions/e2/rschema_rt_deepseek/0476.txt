@@ -1,0 +1,95 @@
+-- Schema for database: rschema_0476
+CREATE TABLE `Customer` (
+  `Customer_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Address` varchar(255) DEFAULT NULL,
+  `Contact_Number` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`Customer_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Raw_Material` (
+  `Raw_Material_ID` int(11) NOT NULL,
+  `Raw_Material_Name` varchar(255) NOT NULL,
+  `Specification` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Raw_Material_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Financial_Record` (
+  `Transaction_ID` int(11) NOT NULL,
+  `Amount` decimal(10,2) NOT NULL,
+  `Date` datetime NOT NULL,
+  `Status` varchar(50) DEFAULT NULL,
+  `Transaction_Type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`Transaction_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Supplier` (
+  `Supplier_ID` int(11) NOT NULL,
+  `Supplier_Name` varchar(255) NOT NULL,
+  `Contact_Information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`Supplier_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Pizza_Recipe` (
+  `Recipe_ID` int(11) NOT NULL,
+  `Raw_Material_ID` int(11) NOT NULL,
+  `Usage_Amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`Recipe_ID`, `Raw_Material_ID`),
+  CONSTRAINT `pizza_recipe_ibfk_1` FOREIGN KEY (`Raw_Material_ID`) REFERENCES `Raw_Material` (`Raw_Material_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Sales_Order` (
+  `Order_ID` int(11) NOT NULL,
+  `Customer_ID` int(11) NOT NULL,
+  `Expected_Delivery_Date` datetime DEFAULT NULL,
+  `Order_Status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`Order_ID`),
+  CONSTRAINT `sales_order_ibfk_1` FOREIGN KEY (`Customer_ID`) REFERENCES `Customer` (`Customer_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Purchase_Order` (
+  `Purchase_Order_ID` int(11) NOT NULL,
+  `Order_Quantity` int(11) NOT NULL,
+  `Supplied_Quantity` int(11) DEFAULT NULL,
+  `Order_Status` varchar(50) DEFAULT NULL,
+  `Raw_Material_ID` int(11) NOT NULL,
+  `Supplier_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Purchase_Order_ID`),
+  CONSTRAINT `purchase_order_ibfk_1` FOREIGN KEY (`Raw_Material_ID`) REFERENCES `Raw_Material` (`Raw_Material_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchase_order_ibfk_2` FOREIGN KEY (`Supplier_ID`) REFERENCES `Supplier` (`Supplier_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Product` (
+  `Product_ID` int(11) NOT NULL,
+  `Product_Name` varchar(255) NOT NULL,
+  `Recipe_ID` int(11) NOT NULL,
+  PRIMARY KEY (`Product_ID`),
+  CONSTRAINT `product_ibfk_1` FOREIGN KEY (`Recipe_ID`) REFERENCES `Pizza_Recipe` (`Recipe_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Production_Plan` (
+  `Production_Plan_ID` int(11) NOT NULL,
+  `Order_ID` int(11) NOT NULL,
+  `Production_Status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`Production_Plan_ID`),
+  CONSTRAINT `production_plan_ibfk_1` FOREIGN KEY (`Order_ID`) REFERENCES `Sales_Order` (`Order_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Delivery_Record` (
+  `Delivery_Record_ID` int(11) NOT NULL,
+  `Order_ID` int(11) NOT NULL,
+  `Delivery_Location` varchar(255) DEFAULT NULL,
+  `Delivery_Time` datetime DEFAULT NULL,
+  `Status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`Delivery_Record_ID`),
+  CONSTRAINT `delivery_record_ibfk_1` FOREIGN KEY (`Order_ID`) REFERENCES `Sales_Order` (`Order_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Inventory_Management` (
+  `Inventory_ID` int(11) NOT NULL,
+  `Product_ID` int(11) NOT NULL,
+  `Quantity` int(11) NOT NULL,
+  `Status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`Inventory_ID`),
+  CONSTRAINT `inventory_management_ibfk_1` FOREIGN KEY (`Product_ID`) REFERENCES `Product` (`Product_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

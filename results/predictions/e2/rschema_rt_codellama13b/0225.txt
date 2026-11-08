@@ -1,0 +1,45 @@
+-- Schema for database: rschema_0225
+CREATE TABLE `company` (
+  `company_id` int(11) NOT NULL,
+  `company_name` varchar(255) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `modification_time` datetime DEFAULT NULL,
+  `authorization_token` varchar(255) DEFAULT NULL,
+  `token_hash_value` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `user_name` varchar(255) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `modification_time` datetime DEFAULT NULL,
+  `password_hash_value` varchar(255) DEFAULT NULL,
+  `password_salt_value` varchar(255) DEFAULT NULL,
+  `permission_level` int(11) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `company` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `request_log` (
+  `request_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `request_data` text DEFAULT NULL,
+  `compression_result` varchar(255) DEFAULT NULL,
+  `probe_information` varchar(255) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `timestamp` datetime NOT NULL,
+  PRIMARY KEY (`request_id`),
+  CONSTRAINT `request_log_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_feedback` (
+  `feedback_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `comment` text DEFAULT NULL,
+  `rating` int(11) DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`feedback_id`),
+  CONSTRAINT `user_feedback_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

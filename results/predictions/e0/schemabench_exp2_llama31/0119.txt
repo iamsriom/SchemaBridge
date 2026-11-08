@@ -1,0 +1,59 @@
+-- Schema for database: schemabench_0119
+CREATE TABLE `games` (
+  `game_id` int(11) NOT NULL AUTO_INCREMENT,
+  `season_id` int(11) NOT NULL,
+  `game_date` date NOT NULL,
+  `home_team_id` int(11) NOT NULL,
+  `away_team_id` int(11) NOT NULL,
+  `home_score` int(11) DEFAULT NULL,
+  `away_score` int(11) DEFAULT NULL,
+  PRIMARY KEY (`game_id`),
+  KEY `games_ibfk_1` (`season_id`),
+  KEY `games_ibfk_2` (`home_team_id`),
+  KEY `games_ibfk_3` (`away_team_id`),
+  CONSTRAINT `games_ibfk_1` FOREIGN KEY (`season_id`) REFERENCES `seasons` (`season_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `games_ibfk_2` FOREIGN KEY (`home_team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `games_ibfk_3` FOREIGN KEY (`away_team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `seasons` (
+  `season_id` int(11) NOT NULL AUTO_INCREMENT,
+  `season_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`season_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teams` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `players` (
+  `player_id` int(11) NOT NULL AUTO_INCREMENT,
+  `player_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`player_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `game_actions` (
+  `action_id` int(11) NOT NULL AUTO_INCREMENT,
+  `game_id` int(11) NOT NULL,
+  `player_id` int(11) NOT NULL,
+  `minutes_played` int(11) DEFAULT NULL,
+  `points` int(11) DEFAULT NULL,
+  `rebounds` int(11) DEFAULT NULL,
+  `assists` int(11) DEFAULT NULL,
+  PRIMARY KEY (`action_id`),
+  KEY `game_actions_ibfk_1` (`game_id`),
+  KEY `game_actions_ibfk_2` (`player_id`),
+  CONSTRAINT `game_actions_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `games` (`game_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `game_actions_ibfk_2` FOREIGN KEY (`player_id`) REFERENCES `players` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `game_links` (
+  `link_id` int(11) NOT NULL AUTO_INCREMENT,
+  `game_id` int(11) NOT NULL,
+  `link_url` varchar(255) NOT NULL,
+  PRIMARY KEY (`link_id`),
+  KEY `game_links_ibfk_1` (`game_id`),
+  CONSTRAINT `game_links_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `games` (`game_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

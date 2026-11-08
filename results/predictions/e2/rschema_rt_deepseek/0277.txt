@@ -1,0 +1,59 @@
+-- Schema for database: rschema_0277
+CREATE TABLE `service_team` (
+  `team_id` int(11) NOT NULL,
+  `team_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `customer_name` varchar(255) DEFAULT NULL,
+  `customer_phone` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_evaluation` (
+  `evaluation_id` int(11) NOT NULL,
+  `customer_evaluation` varchar(255) DEFAULT NULL,
+  `service_effectiveness` boolean DEFAULT NULL,
+  PRIMARY KEY (`evaluation_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `housekeeper` (
+  `staff_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `contact_number` varchar(255) DEFAULT NULL,
+  `professional_skills` varchar(255) DEFAULT NULL,
+  `service_type` varchar(255) DEFAULT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  `years_of_experience` int(11) DEFAULT NULL,
+  PRIMARY KEY (`staff_id`),
+  CONSTRAINT `housekeeper_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `service_team` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_task` (
+  `task_id` int(11) NOT NULL,
+  `evaluation_id` int(11) DEFAULT NULL,
+  `service_address` varchar(255) DEFAULT NULL,
+  `service_date` datetime DEFAULT NULL,
+  `service_duration` float DEFAULT NULL,
+  `service_type` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  CONSTRAINT `service_task_ibfk_1` FOREIGN KEY (`evaluation_id`) REFERENCES `service_evaluation` (`evaluation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staff_task` (
+  `staff_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  PRIMARY KEY (`staff_id`, `task_id`),
+  CONSTRAINT `staff_task_ibfk_1` FOREIGN KEY (`staff_id`) REFERENCES `housekeeper` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `staff_task_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `service_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_task` (
+  `customer_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  PRIMARY KEY (`customer_id`, `task_id`),
+  CONSTRAINT `customer_task_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customer_task_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `service_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

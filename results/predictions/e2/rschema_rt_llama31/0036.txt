@@ -1,0 +1,38 @@
+-- Schema for database: rschema_0036
+CREATE TABLE `project` (
+  `project_number` int(11) NOT NULL,
+  `project_name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `budget` decimal(10,2) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `expected_completion_date` datetime NOT NULL,
+  `actual_completion_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`project_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `contract` (
+  `contract_number` int(11) NOT NULL,
+  `contract_name` varchar(255) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `signing_date` datetime NOT NULL,
+  PRIMARY KEY (`contract_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_includes_contract` (
+  `project_number` int(11) NOT NULL,
+  `contract_number` int(11) NOT NULL,
+  PRIMARY KEY (`project_number`, `contract_number`),
+  CONSTRAINT `project_includes_contract_ibfk_1` FOREIGN KEY (`project_number`) REFERENCES `project` (`project_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_includes_contract_ibfk_2` FOREIGN KEY (`contract_number`) REFERENCES `contract` (`contract_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `contract_change_record` (
+  `change_number` int(11) NOT NULL,
+  `contract_number` int(11) NOT NULL,
+  `change_amount` decimal(10,2) NOT NULL,
+  `change_content` text NOT NULL,
+  `change_date` datetime NOT NULL,
+  PRIMARY KEY (`change_number`),
+  CONSTRAINT `contract_change_record_ibfk_1` FOREIGN KEY (`contract_number`) REFERENCES `contract` (`contract_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

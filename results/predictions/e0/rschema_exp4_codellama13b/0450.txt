@@ -1,0 +1,56 @@
+-- Schema for database: rschema_0450
+
+CREATE TABLE departments (
+  department_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  PRIMARY KEY (department_id)
+);
+
+CREATE TABLE users (
+  user_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  department_id INT(11) NOT NULL,
+  PRIMARY KEY (user_id),
+  FOREIGN KEY (department_id) REFERENCES departments (department_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE asset_categories (
+  type_id INT(11) NOT NULL AUTO_INCREMENT,
+  category_name VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  PRIMARY KEY (type_id)
+);
+
+CREATE TABLE assets (
+  asset_id INT(11) NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  type_id INT(11) NOT NULL,
+  department_id INT(11) NOT NULL,
+  status VARCHAR(255) NOT NULL,
+  scrapping_indicator VARCHAR(255) NOT NULL,
+  PRIMARY KEY (asset_id),
+  FOREIGN KEY (type_id) REFERENCES asset_categories (type_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (department_id) REFERENCES departments (department_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE asset_circulation_records (
+  asset_id INT(11) NOT NULL,
+  user_id INT(11) NOT NULL,
+  circulation_status VARCHAR(255) NOT NULL,
+  PRIMARY KEY (asset_id, user_id),
+  FOREIGN KEY (asset_id) REFERENCES assets (asset_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE asset_creation_updates (
+  asset_id INT(11) NOT NULL,
+  creator_id INT(11) NOT NULL,
+  creation_time DATETIME NOT NULL,
+  updater_id INT(11) NOT NULL,
+  update_time DATETIME NOT NULL,
+  PRIMARY KEY (asset_id),
+  FOREIGN KEY (asset_id) REFERENCES assets (asset_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (creator_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (updater_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE
+);

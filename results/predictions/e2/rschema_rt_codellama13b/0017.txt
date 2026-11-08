@@ -1,0 +1,61 @@
+-- Schema for database: rschema_0017
+CREATE TABLE `worker` (
+  `worker_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact_number` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`worker_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `workshop` (
+  `workshop_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`workshop_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `raw_material` (
+  `raw_material_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`raw_material_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `workshop_raw_material_management` (
+  `workshop_id` int(11) NOT NULL,
+  `raw_material_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`workshop_id`, `raw_material_id`),
+  CONSTRAINT `workshop_raw_material_management_ibfk_1` FOREIGN KEY (`workshop_id`) REFERENCES `workshop` (`workshop_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `workshop_raw_material_management_ibfk_2` FOREIGN KEY (`raw_material_id`) REFERENCES `raw_material` (`raw_material_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_processing_task` (
+  `task_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `processing_time` int(11) NOT NULL,
+  `quality_rating` int(11) NOT NULL,
+  `production_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`task_id`),
+  CONSTRAINT `product_processing_task_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `worker_processing_product` (
+  `worker_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  PRIMARY KEY (`worker_id`, `task_id`),
+  CONSTRAINT `worker_processing_product_ibfk_1` FOREIGN KEY (`worker_id`) REFERENCES `worker` (`worker_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `worker_processing_product_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `product_processing_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `raw_materials_involved_in_product_processing` (
+  `task_id` int(11) NOT NULL,
+  `raw_material_id` int(11) NOT NULL,
+  PRIMARY KEY (`task_id`, `raw_material_id`),
+  CONSTRAINT `raw_materials_involved_in_product_processing_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `product_processing_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `raw_materials_involved_in_product_processing_ibfk_2` FOREIGN KEY (`raw_material_id`) REFERENCES `raw_material` (`raw_material_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

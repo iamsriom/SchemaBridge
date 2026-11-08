@@ -1,0 +1,40 @@
+-- Schema for database: schemabench_0211
+CREATE TABLE `company_dim` (
+  `company_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `website_link` varchar(255) DEFAULT NULL,
+  `google_page_link` varchar(255) DEFAULT NULL,
+  `thumbnail_image` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `skills_dim` (
+  `skill_id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  PRIMARY KEY (`skill_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `job_postings_fact` (
+  `job_posting_id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_id` int(11) NOT NULL,
+  `job_title` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `job_schedule_type` varchar(100) DEFAULT NULL,
+  `remote_work` tinyint(1) DEFAULT NULL,
+  `requires_degree` tinyint(1) DEFAULT NULL,
+  `requires_health_insurance` tinyint(1) DEFAULT NULL,
+  `date_posted` datetime NOT NULL,
+  `average_salary_rate` decimal(10,2) DEFAULT NULL,
+  `average_salary_per_hour` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`job_posting_id`),
+  CONSTRAINT `job_postings_fact_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `company_dim` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `skills_job_dim` (
+  `job_posting_id` int(11) NOT NULL,
+  `skill_id` int(11) NOT NULL,
+  PRIMARY KEY (`job_posting_id`, `skill_id`),
+  CONSTRAINT `skills_job_dim_ibfk_1` FOREIGN KEY (`job_posting_id`) REFERENCES `job_postings_fact` (`job_posting_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `skills_job_dim_ibfk_2` FOREIGN KEY (`skill_id`) REFERENCES `skills_dim` (`skill_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

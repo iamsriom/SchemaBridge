@@ -1,0 +1,46 @@
+-- Schema for database: rschema_0330
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `version` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `display_name` varchar(255) DEFAULT NULL,
+  `locale` varchar(10) DEFAULT NULL,
+  `time_zone` varchar(50) DEFAULT NULL,
+  `date_format` varchar(50) DEFAULT NULL,
+  `datetime_format` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_identity_key` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `scheme` varchar(255) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_and_identity_key_association` (
+  `user_id` int(11) NOT NULL,
+  `identity_key_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`, `identity_key_id`),
+  CONSTRAINT `user_and_identity_key_association_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_and_identity_key_association_ibfk_2` FOREIGN KEY (`identity_key_id`) REFERENCES `user_identity_key` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `version` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role_and_role_association` (
+  `user_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`, `role_id`),
+  CONSTRAINT `role_and_role_association_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `role_and_role_association_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

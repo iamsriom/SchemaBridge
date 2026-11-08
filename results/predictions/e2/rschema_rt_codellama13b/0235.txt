@@ -1,0 +1,78 @@
+-- Schema for database: rschema_0235
+CREATE TABLE `User` (
+  `User_ID` int(11) NOT NULL,
+  `Email` varchar(255) NOT NULL,
+  `Phone_Number` varchar(20) DEFAULT NULL,
+  `Platform` varchar(50) DEFAULT NULL,
+  `Registration_Time` datetime NOT NULL,
+  `Update_Time` datetime DEFAULT NULL,
+  `Username` varchar(100) NOT NULL,
+  PRIMARY KEY (`User_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Product` (
+  `Product_ID` int(11) NOT NULL,
+  `Product_Name` varchar(255) NOT NULL,
+  `Description` text DEFAULT NULL,
+  `Price` decimal(10,2) NOT NULL,
+  `Currency` varchar(10) NOT NULL,
+  `Inventory_Unit` int(11) NOT NULL,
+  `Platform` varchar(50) DEFAULT NULL,
+  `Creation_Time` datetime NOT NULL,
+  `Update_Time` datetime DEFAULT NULL,
+  PRIMARY KEY (`Product_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Receipt` (
+  `Receipt_ID` int(11) NOT NULL,
+  `Hash_Value` varchar(255) NOT NULL,
+  `Receipt_Data` text DEFAULT NULL,
+  `Creation_Time` datetime NOT NULL,
+  PRIMARY KEY (`Receipt_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Subscribed_Products` (
+  `User_ID` int(11) NOT NULL,
+  `Product_ID` int(11) NOT NULL,
+  `Subscription_Time` datetime NOT NULL,
+  `Start_Date` datetime NOT NULL,
+  `End_Date` datetime DEFAULT NULL,
+  `Promotional_Period` int(11) DEFAULT NULL,
+  `Trial_Period` int(11) DEFAULT NULL,
+  `Renewal_Status` varchar(20) DEFAULT NULL,
+  `Subscription_Status` varchar(20) DEFAULT NULL,
+  `Validity_Type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`User_ID`, `Product_ID`, `Subscription_Time`),
+  CONSTRAINT `User_Subscribed_Products_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `User_Subscribed_Products_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `Product` (`Product_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Refunded_Products` (
+  `User_ID` int(11) NOT NULL,
+  `Product_ID` int(11) NOT NULL,
+  `Refund_Amount` decimal(10,2) NOT NULL,
+  `Refund_Date` datetime NOT NULL,
+  `Refund_Status` varchar(20) DEFAULT NULL,
+  `Refund_Time` datetime NOT NULL,
+  PRIMARY KEY (`User_ID`, `Product_ID`, `Refund_Time`),
+  CONSTRAINT `User_Refunded_Products_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `User_Refunded_Products_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `Product` (`Product_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `User_Purchased_Products` (
+  `User_ID` int(11) NOT NULL,
+  `Product_ID` int(11) NOT NULL,
+  `Receipt_ID` int(11) NOT NULL,
+  `Purchase_Time` datetime NOT NULL,
+  `Purchase_Price` decimal(10,2) NOT NULL,
+  `Currency` varchar(10) NOT NULL,
+  `Hash_Value` varchar(255) DEFAULT NULL,
+  `Order_Number` varchar(50) DEFAULT NULL,
+  `Purchase_Platform` varchar(50) DEFAULT NULL,
+  `Refund_Status` varchar(20) DEFAULT NULL,
+  `Subscription_Status` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`User_ID`, `Product_ID`, `Receipt_ID`, `Purchase_Time`),
+  CONSTRAINT `User_Purchased_Products_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `User_Purchased_Products_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `Product` (`Product_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `User_Purchased_Products_ibfk_3` FOREIGN KEY (`Receipt_ID`) REFERENCES `Receipt` (`Receipt_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

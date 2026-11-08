@@ -1,0 +1,145 @@
+-- Schema for database: schemabench_0166
+CREATE TABLE `brand` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `color` (
+  `code` char(6) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `category` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `size` (
+  `code` char(2) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `gender` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `type_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `brand_id` int(11) NOT NULL,
+  `gender_id` int(11) NOT NULL,
+  `color_code` char(6) NOT NULL,
+  `size_code` char(2) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `product_ibfk_1` FOREIGN KEY (`brand_id`) REFERENCES `brand` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `product_ibfk_2` FOREIGN KEY (`gender_id`) REFERENCES `gender` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `product_ibfk_3` FOREIGN KEY (`color_code`) REFERENCES `color` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `product_ibfk_4` FOREIGN KEY (`size_code`) REFERENCES `size` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `dob` date NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `dob` date NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ccpayment_state` (
+  `code` char(1) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ccpayment` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `payment_type` char(2) NOT NULL,
+  `expected_amount` decimal(10,2) NOT NULL,
+  `approved_amount` decimal(10,2) DEFAULT NULL,
+  `actual_amount` decimal(10,2) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `expires_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ccpayment_type` (
+  `code` char(2) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ccentry_method` (
+  `code` char(1) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  PRIMARY KEY (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ccpayment_card` (
+  `payment_id` int(11) NOT NULL,
+  `payment_type` char(2) NOT NULL,
+  `encryption_status` varchar(255) NOT NULL,
+  `card_number` varchar(255) NOT NULL,
+  `bank_name` varchar(255) NOT NULL,
+  `expiration_date` date NOT NULL,
+  `entry_method` char(1) NOT NULL,
+  PRIMARY KEY (`payment_id`),
+  CONSTRAINT `ccpayment_card_ibfk_1` FOREIGN KEY (`payment_id`) REFERENCES `ccpayment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ccpayment_card_ibfk_2` FOREIGN KEY (`payment_type`) REFERENCES `ccpayment_type` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ccpayment_card_ibfk_3` FOREIGN KEY (`entry_method`) REFERENCES `ccentry_method` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticket` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `total_product` decimal(10,2) NOT NULL,
+  `tax` decimal(10,2) NOT NULL,
+  `order_amount` decimal(10,2) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `payment_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `ticket_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticket_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticket_ibfk_3` FOREIGN KEY (`payment_id`) REFERENCES `ccpayment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticket_item` (
+  `ticket_id` int(11) NOT NULL,
+  `sequence_number` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `tax_amount` decimal(10,2) NOT NULL,
+  `product_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`ticket_id`, `sequence_number`),
+  CONSTRAINT `ticket_item_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `ticket` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticket_item_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,26 @@
+{
+  "text_number": 114,
+  "id": "67552f0a13602ec03b41a904",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0114",
+  "question": "The following is a description of the business requirements for a blog system, including user management, article management, and comment management functions. User information includes username, password, email address, and creation time. Each user can choose whether to make their email address public. Users can publish articles, which have a title, body, type (public, private, or draft), and timestamp. Each article can be commented on by other users. Comments include the comment content, timestamp, and the user who posted it. Comments can also be liked, with each user being able to like each comment only once. Each comment stores the user who made the comment, the article it belongs to, the timestamp, and the content. All operations such as publishing articles, commenting, and liking are recorded in logs. Logs are associated with users and store the user's operations, including the specific operation content and timestamp.",
+  "ddl": "-- Schema for database: rschema_0114\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `password` char(60) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `email_public` tinyint(1) NOT NULL DEFAULT 0,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `username` (`username`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `articles` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `body` text NOT NULL,\n  `type` enum('public','private','draft') NOT NULL DEFAULT 'draft',\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `published_at` datetime DEFAULT NULL,\n  `user_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `articles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `comments` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `content` text NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `user_id` int(11) NOT NULL,\n  `article_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  KEY `article_id` (`article_id`),\n  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `likes` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `comment_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  KEY `comment_id` (`comment_id`),\n  CONSTRAINT `likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `likes_ibfk_2` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `logs` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `operation` varchar(255) NOT NULL,\n  `content` text NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "articles",
+      "comments",
+      "likes",
+      "logs"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "articles": [],
+      "comments": [],
+      "likes": [],
+      "logs": []
+    }
+  }
+}

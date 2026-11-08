@@ -1,0 +1,57 @@
+-- Schema for database: rschema_0081
+
+-- Table: user_group
+CREATE TABLE `user_group` (
+  `UserGroupID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Description` text,
+  PRIMARY KEY (`UserGroupID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: user
+CREATE TABLE `user` (
+  `UserID` int(11) NOT NULL AUTO_INCREMENT,
+  `Username` varchar(255) NOT NULL,
+  `Password` varchar(255) NOT NULL,
+  `Email` varchar(255) NOT NULL,
+  `OneTimePassword` varchar(255),
+  `PasswordResetKey` varchar(255),
+  `AssociatedUserGroup` int(11) NOT NULL,
+  `ActivationStatus` enum('Active','Inactive') NOT NULL DEFAULT 'Inactive',
+  `UserCreationTime` datetime NOT NULL,
+  `Creator` varchar(255) NOT NULL,
+  `LastUpdatedTime` datetime,
+  `Updater` varchar(255),
+  PRIMARY KEY (`UserID`),
+  FOREIGN KEY (`AssociatedUserGroup`) REFERENCES `user_group` (`UserGroupID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: api_key
+CREATE TABLE `api_key` (
+  `KeyID` int(11) NOT NULL AUTO_INCREMENT,
+  `AssociatedUserID` int(11) NOT NULL,
+  `KeyContent` text NOT NULL,
+  `PermissionLevel` int(11) NOT NULL,
+  `IgnoreCallLimits` tinyint(1) NOT NULL DEFAULT '0',
+  `IsPrivateKey` tinyint(1) NOT NULL DEFAULT '0',
+  `AllowedIPAddressList` text,
+  `KeyCreationTime` datetime NOT NULL,
+  PRIMARY KEY (`KeyID`),
+  FOREIGN KEY (`AssociatedUserID`) REFERENCES `user` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: api_call_log
+CREATE TABLE `api_call_log` (
+  `LogID` int(11) NOT NULL AUTO_INCREMENT,
+  `CalledAPIResourcePath` varchar(255) NOT NULL,
+  `HTTPRequestMethod` varchar(255) NOT NULL,
+  `RequestParameters` text,
+  `UsedAPIKey` int(11) NOT NULL,
+  `ClientIPAddress` varchar(255) NOT NULL,
+  `CallTime` datetime NOT NULL,
+  `ResponseTime` datetime,
+  `AuthorizationStatus` enum('Authorized','Unauthorized') NOT NULL DEFAULT 'Unauthorized',
+  `APIResponseStatusCode` int(11) NOT NULL,
+  PRIMARY KEY (`LogID`),
+  FOREIGN KEY (`UsedAPIKey`) REFERENCES `api_key` (`KeyID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

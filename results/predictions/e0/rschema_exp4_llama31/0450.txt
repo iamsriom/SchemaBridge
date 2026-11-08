@@ -1,0 +1,52 @@
+-- Schema for database: rschema_0450
+CREATE TABLE `departments` (
+  `department_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  KEY `users_ibfk_1` (`department_id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `asset_categories` (
+  `type_id` int(11) NOT NULL,
+  `category_name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `assets` (
+  `asset_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type_id` int(11) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `scrapping_indicator` tinyint(1) NOT NULL DEFAULT 0,
+  `creator` varchar(255) NOT NULL,
+  `creation_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updater` varchar(255) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`asset_id`),
+  KEY `assets_ibfk_1` (`type_id`),
+  KEY `assets_ibfk_2` (`department_id`),
+  CONSTRAINT `assets_ibfk_1` FOREIGN KEY (`type_id`) REFERENCES `asset_categories` (`type_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `assets_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `asset_circulations` (
+  `asset_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `circulation_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`asset_id`, `user_id`),
+  KEY `asset_circulations_ibfk_1` (`asset_id`),
+  KEY `asset_circulations_ibfk_2` (`user_id`),
+  CONSTRAINT `asset_circulations_ibfk_1` FOREIGN KEY (`asset_id`) REFERENCES `assets` (`asset_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `asset_circulations_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

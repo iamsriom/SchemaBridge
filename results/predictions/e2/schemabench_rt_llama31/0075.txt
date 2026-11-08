@@ -1,0 +1,32 @@
+-- Schema for database: schemabench_0075
+CREATE TABLE `auth_user` (
+  `id` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organizations_organization` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL UNIQUE,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organizations_organizationowner` (
+  `organization_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`organization_id`, `user_id`),
+  CONSTRAINT `organizations_organizationowner_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations_organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organizations_organizationowner_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organizations_organizationuser` (
+  `organization_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `is_admin` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`organization_id`, `user_id`),
+  CONSTRAINT `organizations_organizationuser_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations_organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organizations_organizationuser_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,130 @@
+-- Schema for database: schemabench_0200
+CREATE TABLE clients (
+  client_id INT(11) NOT NULL AUTO_INCREMENT,
+  client_name VARCHAR(255) NOT NULL,
+  PRIMARY KEY (client_id)
+);
+
+CREATE TABLE client_interests (
+  client_id INT(11) NOT NULL,
+  interest_id INT(11) NOT NULL,
+  PRIMARY KEY (client_id, interest_id),
+  FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE interests (
+  interest_id INT(11) NOT NULL AUTO_INCREMENT,
+  interest_name VARCHAR(255) NOT NULL,
+  PRIMARY KEY (interest_id)
+);
+
+CREATE TABLE interest_metrics (
+  client_id INT(11) NOT NULL,
+  interest_id INT(11) NOT NULL,
+  metric_type VARCHAR(255) NOT NULL,
+  metric_value INT(11) NOT NULL,
+  PRIMARY KEY (client_id, interest_id, metric_type),
+  FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE interest_rankings (
+  client_id INT(11) NOT NULL,
+  interest_id INT(11) NOT NULL,
+  ranking INT(11) NOT NULL,
+  PRIMARY KEY (client_id, interest_id, ranking),
+  FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE insights (
+  insight_id INT(11) NOT NULL AUTO_INCREMENT,
+  client_id INT(11) NOT NULL,
+  insight_type VARCHAR(255) NOT NULL,
+  insight_description TEXT NOT NULL,
+  PRIMARY KEY (insight_id),
+  FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE interest_map (
+  interest_id INT(11) NOT NULL,
+  related_interest_id INT(11) NOT NULL,
+  PRIMARY KEY (interest_id, related_interest_id),
+  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (related_interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE interest_map_weights (
+  interest_id INT(11) NOT NULL,
+  related_interest_id INT(11) NOT NULL,
+  weight DECIMAL(10, 2) NOT NULL,
+  PRIMARY KEY (interest_id, related_interest_id),
+  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (related_interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE interest_map_rankings (
+  interest_id INT(11) NOT NULL,
+  related_interest_id INT(11) NOT NULL,
+  ranking INT(11) NOT NULL,
+  PRIMARY KEY (interest_id, related_interest_id, ranking),
+  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (related_interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE interest_map_weights_rankings (
+  interest_id INT(11) NOT NULL,
+  related_interest_id INT(11) NOT NULL,
+  weight DECIMAL(10, 2) NOT NULL,
+  ranking INT(11) NOT NULL,
+  PRIMARY KEY (interest_id, related_interest_id, weight, ranking),
+  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (related_interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE interest_map_weights_rankings_monthly (
+  interest_id INT(11) NOT NULL,
+  related_interest_id INT(11) NOT NULL,
+  weight DECIMAL(10, 2) NOT NULL,
+  ranking INT(11) NOT NULL,
+  month INT(11) NOT NULL,
+  PRIMARY KEY (interest_id, related_interest_id, weight, ranking, month),
+  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (related_interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE interest_map_weights_rankings_monthly_client (
+  client_id INT(11) NOT NULL,
+  interest_id INT(11) NOT NULL,
+  related_interest_id INT(11) NOT NULL,
+  weight DECIMAL(10, 2) NOT NULL,
+  ranking INT(11) NOT NULL,
+  month INT(11) NOT NULL,
+  PRIMARY KEY (client_id, interest_id, related_interest_id, weight, ranking, month),
+  FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (related_interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE interest_map_weights_rankings_monthly_client_interest (
+  client_id INT(11) NOT NULL,
+  interest_id INT(11) NOT NULL,
+  related_interest_id INT(11) NOT NULL,
+  weight DECIMAL(10, 2) NOT NULL,
+  ranking INT(11) NOT NULL,
+  month INT(11) NOT NULL,
+  PRIMARY KEY (client_id, interest_id, related_interest_id, weight, ranking, month),
+  FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (related_interest_id) REFERENCES interests(interest_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE interest_map_weights_rankings_monthly_client_interest_type (
+  client_id INT(11) NOT NULL,
+  interest_id INT(11) NOT NULL,
+  related_interest_id INT(11) NOT NULL,
+  weight DECIMAL(10, 2) NOT NULL,
+  ranking INT(11) NOT NULL,
+  month INT(11) NOT NULL,
+  PRIMARY KEY (

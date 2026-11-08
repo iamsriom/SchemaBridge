@@ -1,0 +1,84 @@
+-- Schema for database: schemabench_0090
+CREATE TABLE `airports` (
+  `airport_id` int(11) NOT NULL AUTO_INCREMENT,
+  `airport_code` char(3) NOT NULL,
+  `airport_name` varchar(255) NOT NULL,
+  `city` varchar(255) NOT NULL,
+  `state` char(2) NOT NULL,
+  PRIMARY KEY (`airport_id`),
+  UNIQUE KEY `airport_code` (`airport_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `airlines` (
+  `airline_id` int(11) NOT NULL AUTO_INCREMENT,
+  `airline_code` char(2) NOT NULL,
+  `airline_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`airline_id`),
+  UNIQUE KEY `airline_code` (`airline_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `delay_reasons` (
+  `delay_reason_id` int(11) NOT NULL AUTO_INCREMENT,
+  `delay_reason_code` char(3) NOT NULL,
+  `delay_reason_description` varchar(255) NOT NULL,
+  PRIMARY KEY (`delay_reason_id`),
+  UNIQUE KEY `delay_reason_code` (`delay_reason_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flights` (
+  `flight_id` int(11) NOT NULL AUTO_INCREMENT,
+  `flight_number` varchar(255) NOT NULL,
+  `airline_id` int(11) NOT NULL,
+  `departure_airport_id` int(11) NOT NULL,
+  `arrival_airport_id` int(11) NOT NULL,
+  `scheduled_departure_time` datetime NOT NULL,
+  `scheduled_arrival_time` datetime NOT NULL,
+  `actual_departure_time` datetime DEFAULT NULL,
+  `actual_arrival_time` datetime DEFAULT NULL,
+  `departure_delay` int(11) DEFAULT NULL,
+  `arrival_delay` int(11) DEFAULT NULL,
+  `cancellation_code` char(1) DEFAULT NULL,
+  `diversion_code` char(1) DEFAULT NULL,
+  PRIMARY KEY (`flight_id`),
+  KEY `fk_flights_airlines` (`airline_id`),
+  KEY `fk_flights_departure_airport` (`departure_airport_id`),
+  KEY `fk_flights_arrival_airport` (`arrival_airport_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flight_delays` (
+  `delay_id` int(11) NOT NULL AUTO_INCREMENT,
+  `flight_id` int(11) NOT NULL,
+  `delay_reason_id` int(11) NOT NULL,
+  `delay_time` int(11) NOT NULL,
+  PRIMARY KEY (`delay_id`),
+  KEY `fk_flight_delays_flights` (`flight_id`),
+  KEY `fk_flight_delays_delay_reasons` (`delay_reason_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cancellations` (
+  `cancellation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `flight_id` int(11) NOT NULL,
+  `cancellation_reason_id` int(11) NOT NULL,
+  PRIMARY KEY (`cancellation_id`),
+  KEY `fk_cancellations_flights` (`flight_id`),
+  KEY `fk_cancellations_delay_reasons` (`cancellation_reason_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `diversions` (
+  `diversion_id` int(11) NOT NULL AUTO_INCREMENT,
+  `flight_id` int(11) NOT NULL,
+  `diversion_reason_id` int(11) NOT NULL,
+  PRIMARY KEY (`diversion_id`),
+  KEY `fk_diversions_flights` (`flight_id`),
+  KEY `fk_diversions_delay_reasons` (`diversion_reason_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+ALTER TABLE `flights` ADD CONSTRAINT `fk_flights_airlines` FOREIGN KEY (`airline_id`) REFERENCES `airlines` (`airline_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `flights` ADD CONSTRAINT `fk_flights_departure_airport` FOREIGN KEY (`departure_airport_id`) REFERENCES `airports` (`airport_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `flights` ADD CONSTRAINT `fk_flights_arrival_airport` FOREIGN KEY (`arrival_airport_id`) REFERENCES `airports` (`airport_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `flight_delays` ADD CONSTRAINT `fk_flight_delays_flights` FOREIGN KEY (`flight_id`) REFERENCES `flights` (`flight_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `flight_delays` ADD CONSTRAINT `fk_flight_delays_delay_reasons` FOREIGN KEY (`delay_reason_id`) REFERENCES `delay_reasons` (`delay_reason_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `cancellations` ADD CONSTRAINT `fk_cancellations_flights` FOREIGN KEY (`flight_id`) REFERENCES `flights` (`flight_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `cancellations` ADD CONSTRAINT `fk_cancellations_delay_reasons` FOREIGN KEY (`cancellation_reason_id`) REFERENCES `delay_reasons` (`delay_reason_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `diversions` ADD CONSTRAINT `fk_diversions_flights` FOREIGN KEY (`flight_id`) REFERENCES `flights` (`flight_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `diversions` ADD CONSTRAINT `fk_diversions_delay_reasons` FOREIGN KEY (`diversion_reason_id`) REFERENCES `delay_reasons` (`delay_reason_id`) ON DELETE CASCADE ON UPDATE CASCADE;

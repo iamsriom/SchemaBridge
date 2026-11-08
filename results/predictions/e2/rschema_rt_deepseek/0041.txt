@@ -1,0 +1,74 @@
+-- Schema for database: rschema_0041
+CREATE TABLE `property_manager` (
+  `property_manager_id` int(11) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`property_manager_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `repair_staff` (
+  `repair_staff_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`repair_staff_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `community` (
+  `community_id` int(11) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `property_manager_id` int(11) NOT NULL,
+  PRIMARY KEY (`community_id`),
+  CONSTRAINT `community_ibfk_1` FOREIGN KEY (`property_manager_id`) REFERENCES `property_manager` (`property_manager_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resident` (
+  `resident_id` int(11) NOT NULL,
+  `building_id` int(11) DEFAULT NULL,
+  `community_id` int(11) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`resident_id`),
+  CONSTRAINT `resident_ibfk_1` FOREIGN KEY (`community_id`) REFERENCES `community` (`community_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `management` (
+  `community_id` int(11) NOT NULL,
+  `property_manager_id` int(11) NOT NULL,
+  PRIMARY KEY (`community_id`, `property_manager_id`),
+  CONSTRAINT `management_ibfk_1` FOREIGN KEY (`community_id`) REFERENCES `community` (`community_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `management_ibfk_2` FOREIGN KEY (`property_manager_id`) REFERENCES `property_manager` (`property_manager_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `repair_order` (
+  `repair_order_id` int(11) NOT NULL,
+  `community_id` int(11) DEFAULT NULL,
+  `repair_content` varchar(255) DEFAULT NULL,
+  `repair_cost` float DEFAULT NULL,
+  `repair_date` datetime DEFAULT NULL,
+  `repair_staff_id` int(11) DEFAULT NULL,
+  `resident_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`repair_order_id`),
+  CONSTRAINT `repair_order_ibfk_1` FOREIGN KEY (`repair_staff_id`) REFERENCES `repair_staff` (`repair_staff_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `repair_order_ibfk_2` FOREIGN KEY (`resident_id`) REFERENCES `resident` (`resident_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `repair_order_ibfk_3` FOREIGN KEY (`community_id`) REFERENCES `community` (`community_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `residence` (
+  `building_id` int(11) DEFAULT NULL,
+  `community_id` int(11) NOT NULL,
+  `resident_id` int(11) NOT NULL,
+  PRIMARY KEY (`community_id`, `resident_id`),
+  CONSTRAINT `residence_ibfk_1` FOREIGN KEY (`community_id`) REFERENCES `community` (`community_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `residence_ibfk_2` FOREIGN KEY (`resident_id`) REFERENCES `resident` (`resident_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `execution` (
+  `repair_order_id` int(11) NOT NULL,
+  `repair_staff_id` int(11) NOT NULL,
+  PRIMARY KEY (`repair_order_id`, `repair_staff_id`),
+  CONSTRAINT `execution_ibfk_1` FOREIGN KEY (`repair_order_id`) REFERENCES `repair_order` (`repair_order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `execution_ibfk_2` FOREIGN KEY (`repair_staff_id`) REFERENCES `repair_staff` (`repair_staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

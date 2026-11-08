@@ -1,0 +1,38 @@
+{
+  "text_number": 10,
+  "id": "SB-010",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "schemabench_0010",
+  "question": "Background / Context\n\nCachet is an open-source, self-hosted status page system built using Laravel. It is designed to enhance communication regarding system statuses, particularly for applications experiencing downtime, maintenance, or outages. The system is responsive, ensuring consistent performance across various devices, and is suitable for businesses and organizations of all sizes. Status pages are a critical component of an organization's communication strategy, helping keep users, teams, and stakeholders informed during incidents.\n\n Objectives\n\nThe primary objective of Cachet is to provide a platform that enables organizations to effectively communicate system statuses to their users and stakeholders. This includes communicating ongoing and resolved incidents, scheduled maintenance, and general system performance updates. The aim is to promote transparency and trust between the organization and its user base.\n\n Stakeholders & Users\n\n- Businesses and Organizations: Any size organization looking to maintain transparency with users.\n- System Administrators: Individuals who manage the status pages and update system information.\n- End Users: Customers, teams, shareholders, and other stakeholders relying on system status information.\n\n Functional Descriptions\n\n1. Status Communication:\n   - Display current system status and historical data.\n   - Notify users of incidents and maintenance schedules.\n   - Provide detailed descriptions and updates on incidents and components.\n   \n2. Incident Management:\n   - Create, update, and manage incidents.\n   - Associate incidents with specific components.\n   - Use incident templates for efficient reporting.\n\n3. Component Management:\n   - Organize services into components and component groups.\n   - Track and display component status.\n\n4. Subscriber Management:\n   - Users can subscribe to status updates via email or Slack.\n   - Manage subscriber information and notification preferences.\n\n5. Metrics and Analytics:\n   - Define metrics to track performance.\n   - Display metrics with charts and set thresholds for alerts.\n\n6. Notification System:\n   - Configure notifications for various user preferences.\n   - Manage and store notifications with timestamps and read status.\n\n Non-Functional Descriptions\n\n- Scalability: Support a growing number of users and components without degradation in performance.\n- Security: Ensure data protection and secure handling of user information and API keys.\n- Usability: Provide an intuitive user interface that is easy for administrators and users to navigate.\n- Customization: Allow customization of the status page interface and notification settings to fit organizational needs.\n- Responsiveness: Deliver consistent and optimal performance across desktops, tablets, and mobile devices.",
+  "ddl": "-- Schema for database: schemabench_0010\nCREATE TABLE `statuses` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `status` varchar(255) NOT NULL,\n  `description` text NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `incidents` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `status` varchar(255) NOT NULL,\n  `description` text NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `components` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` text NOT NULL,\n  `status` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `component_groups` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` text NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `subscribers` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `email` varchar(255) NOT NULL,\n  `slack_webhook` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `metrics` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` text NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `notifications` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `status` varchar(255) NOT NULL,\n  `description` text NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `incident_components` (\n  `incident_id` int(11) NOT NULL,\n  `component_id` int(11) NOT NULL,\n  PRIMARY KEY (`incident_id`, `component_id`),\n  CONSTRAINT `incident_components_ibfk_1` FOREIGN KEY (`incident_id`) REFERENCES `incidents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `incident_components_ibfk_2` FOREIGN KEY (`component_id`) REFERENCES `components` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `component_groups_components` (\n  `component_group_id` int(11) NOT NULL,\n  `component_id` int(11) NOT NULL,\n  PRIMARY KEY (`component_group_id`, `component_id`),\n  CONSTRAINT `component_groups_components_ibfk_1` FOREIGN KEY (`component_group_id`) REFERENCES `component_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `component_groups_components_ibfk_2` FOREIGN KEY (`component_id`) REFERENCES `components` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `subscriber_notifications` (\n  `subscriber_id` int(11) NOT NULL,\n  `notification_id` int(11) NOT NULL,\n  PRIMARY KEY (`subscriber_id`, `notification_id`),\n  CONSTRAINT `subscriber_notifications_ibfk_1` FOREIGN KEY (`subscriber_id`) REFERENCES `subscribers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `subscriber_notifications_ibfk_2` FOREIGN KEY (`notification_id`) REFERENCES `notifications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `metric_notifications` (\n  `metric_id` int(11) NOT NULL,\n  `notification_id` int(11) NOT NULL,\n  PRIMARY KEY (`metric_id`, `notification_id`),\n  CONSTRAINT `metric_notifications_ibfk_1` FOREIGN KEY (`metric_id`) REFERENCES `metrics` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `metric_notifications_ibfk_2` FOREIGN KEY (`notification_id`) REFERENCES `notifications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "schemabench_0010",
+    "tables": [
+      "statuses",
+      "incidents",
+      "components",
+      "component_groups",
+      "subscribers",
+      "metrics",
+      "notifications",
+      "incident_components",
+      "component_groups_components",
+      "subscriber_notifications",
+      "metric_notifications"
+    ],
+    "columns_by_table": {
+      "statuses": [],
+      "incidents": [],
+      "components": [],
+      "component_groups": [],
+      "subscribers": [],
+      "metrics": [],
+      "notifications": [],
+      "incident_components": [],
+      "component_groups_components": [],
+      "subscriber_notifications": [],
+      "metric_notifications": []
+    }
+  }
+}

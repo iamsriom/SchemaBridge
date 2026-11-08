@@ -1,0 +1,103 @@
+-- Schema for database: schemabench_0006
+CREATE TABLE `refinery_authentication_devise_roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `refinery_authentication_devise_users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `sign_in_count` int(11) DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `refinery_authentication_devise_roles_users` (
+  `user_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`, `role_id`),
+  CONSTRAINT `refinery_authentication_devise_roles_users_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `refinery_authentication_devise_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `refinery_authentication_devise_roles_users_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `refinery_authentication_devise_roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `refinery_authentication_devise_user_plugins` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `position` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `refinery_authentication_devise_user_plugins_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `refinery_authentication_devise_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `refinery_images` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `mime_type` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `size` int(11) NOT NULL,
+  `width` int(11) NOT NULL,
+  `height` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `refinery_image_translations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `image_id` int(11) NOT NULL,
+  `alt` varchar(255) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `refinery_image_translations_ibfk_1` FOREIGN KEY (`image_id`) REFERENCES `refinery_images` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `refinery_pages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent_id` int(11) DEFAULT NULL,
+  `path` varchar(255) NOT NULL,
+  `menu` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `refinery_pages_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `refinery_pages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `refinery_page_parts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_id` int(11) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `position` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `refinery_page_parts_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `refinery_pages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `refinery_page_part_translations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_part_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `refinery_page_part_translations_ibfk_1` FOREIGN KEY (`page_part_id`) REFERENCES `refinery_page_parts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `refinery_page_translations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `refinery_page_translations_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `refinery_pages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `refinery_resources` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `file_type` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `size` int(11) NOT NULL,
+  `extension` varchar(10) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `refinery_resource_translations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `resource_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `refinery_resource_translations_ibfk_1` FOREIGN KEY (`resource_id`) REFERENCES `refinery_resources` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

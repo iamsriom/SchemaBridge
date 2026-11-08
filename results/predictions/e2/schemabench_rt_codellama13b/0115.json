@@ -1,0 +1,272 @@
+{
+  "text_number": 115,
+  "id": "SB-115",
+  "llm": "gpt4omini",
+  "model_id": "gpt-4o-mini",
+  "source_schema2text_llm": "codellama13b",
+  "database": "schemabench_0115",
+  "nl_text": "The schemabench_0115 database contains five tables, each with its own unique purpose. The legalact_link table is used to store relationships between legal acts, with each row representing a link between two acts. The legalact_people table is used to store information about the people involved in legal acts, with each row representing a person and the legal act they are associated with. The legalacts table is used to store information about the legal acts themselves, with each row representing a single act and containing various attributes such as the court, case kind, case number, and more. The people table is used to store information about the people involved in legal acts, with each row representing a single person and containing their name, whether they are a jury member, and the court they are associated with. The scrapefix table is used to store information about fixes made to the legal acts, with each row representing a fix and containing the description of the fix, the contributor, and the legal act it is associated with.\nEach table has its own set of columns, with each column representing a specific piece of information. For example, the legalacts table has columns for the court, case kind, case number, and more, while the people table has columns for the person's name, whether they are a jury member, and the court they are associated with. Each column has its own data type, such as int, varchar, and date, and may also have constraints such as primary keys, foreign keys, and defaults.\nThe primary keys in each table are used to uniquely identify each row, while the foreign keys are used to establish relationships between tables. For example, the legalact_link table has a primary key composed of the actId1 and actId2 columns, while the legalact_people table has a primary key composed of the peopleId and actId columns. The foreign keys in each table reference the primary keys in other tables, such as the legalacts table, to establish the relationships between the tables.\nIn addition to the primary and foreign keys, each table also has other constraints such as unique and composite constraints. The legalacts table has a unique constraint on the hash column, while the legalact_link table has a composite constraint on the actId1 and actId2 columns. The legalact_people table has a composite constraint on the peopleId and actId columns.\nOverall, the schemabench_0115 database schema is designed to store and manage information about legal acts, the people involved in them, and the fixes made to the acts. The schema is well-organized and easy to understand, with clear relationships between the tables and consistent naming conventions.",
+  "gold_question": "Background / Context\n\nThe project involves creating a system to manage and analyze metadata for Bulgarian court decisions. This system will store, link, and update legal documents and associated data within a structured database to facilitate efficient querying and reporting.\n\n Objectives\n\nThe main objective is to develop a robust database system to manage metadata related to Bulgarian court decisions. The system should allow for efficient storage, retrieval, and linking of legal act information, including relationships between court decisions and involved parties.\n\n Stakeholders & Users\n\n- Legal Professionals: Judges, lawyers, and court clerks who require access to detailed court decision data.\n- Database Administrators: Personnel responsible for managing and maintaining the database.\n- Researchers/Analysts: Individuals analyzing legal trends and outcomes from the Bulgarian court system.\n\n Functional Descriptions\n\n1. Legal Act Management: Ability to store detailed information about legal acts including court names, case numbers, judges, and decision dates.\n\n2. Linking Mechanism: Functionality to link related legal acts to each other and to involved parties using `legalact_link` and `legalact_people` tables.\n\n3. Metadata Updates: Automatic updates of metadata timestamps to reflect the latest changes in the legal acts.\n\n4. Data Integrity: Ensuring data consistency by defining foreign key constraints between legal acts, linked acts, and associated people.\n\n5. Scrape Fix Log: Management of a log that records fixes and contributions made to legal act entries by contributors, supported by the `scrapefix` table.\n\n Non-Functional Descriptions\n\n1. Performance: The system must efficiently handle queries and updates to ensure minimal delay in data retrieval.\n\n2. Scalability: Designed to support increasing data loads as more legal acts are recorded over time.\n\n3. Security: Implement data protection mechanisms, especially concerning sensitive legal information.\n\n4. Data Consistency: Maintain the integrity of relationships between entities, ensuring all references are valid and updated across related records.",
+  "input_json": "/data/SchemaBench/Experiment/schema2text_codellama13b/0115.json",
+  "ddl": "-- Schema for database: schemabench_0115\nCREATE TABLE `legalacts` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `court` varchar(255) NOT NULL,\n  `case_kind` varchar(255) NOT NULL,\n  `case_number` varchar(255) NOT NULL,\n  `hash` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `hash_unique` (`hash`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `people` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `is_jury_member` tinyint(1) NOT NULL DEFAULT 0,\n  `court` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `legalact_link` (\n  `actId1` int(11) NOT NULL,\n  `actId2` int(11) NOT NULL,\n  PRIMARY KEY (`actId1`, `actId2`),\n  CONSTRAINT `legalact_link_ibfk_1` FOREIGN KEY (`actId1`) REFERENCES `legalacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `legalact_link_ibfk_2` FOREIGN KEY (`actId2`) REFERENCES `legalacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `legalact_people` (\n  `peopleId` int(11) NOT NULL,\n  `actId` int(11) NOT NULL,\n  PRIMARY KEY (`peopleId`, `actId`),\n  CONSTRAINT `legalact_people_ibfk_1` FOREIGN KEY (`peopleId`) REFERENCES `people` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `legalact_people_ibfk_2` FOREIGN KEY (`actId`) REFERENCES `legalacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `scrapefix` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `description` text NOT NULL,\n  `contributor` varchar(255) NOT NULL,\n  `legalact_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `scrapefix_ibfk_1` FOREIGN KEY (`legalact_id`) REFERENCES `legalacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "schemabench_0115",
+    "tables": [
+      "legalacts",
+      "people",
+      "legalact_link",
+      "legalact_people",
+      "scrapefix"
+    ],
+    "columns_by_table": {
+      "legalacts": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "auto_increment",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "court",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "case_kind",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "case_number",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "hash",
+          "ORDINAL_POSITION": 5,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "UNI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "people": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "auto_increment",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "name",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "is_jury_member",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": "0",
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "tinyint",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 1,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "tinyint(1)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "court",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "legalact_link": [
+        {
+          "COLUMN_NAME": "actId1",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "actId2",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "legalact_people": [
+        {
+          "COLUMN_NAME": "peopleId",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "actId",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "scrapefix": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "auto_increment",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "description",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "text",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "text",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "contributor",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "legalact_id",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 11,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ]
+    }
+  }
+}

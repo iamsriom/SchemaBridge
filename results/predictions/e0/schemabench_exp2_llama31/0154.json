@@ -1,0 +1,32 @@
+{
+  "text_number": 154,
+  "id": "SB-154",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0154",
+  "question": "Warehouse Management System \n\n1) Background / Context\n\nThe project involves developing a database system to efficiently manage the operations of a warehouse. The system will focus on handling data related to customers, warehouse shelves and products, orders, and the robots utilized for item transportation within the warehouse. The primary aim is to streamline the management of inventory and the processes involved in moving goods from the shelves to the administration area.\n\n2) Objectives\n\n- Develop a comprehensive database for tracking customer information, product inventory, and shelf details.\n- Facilitate efficient order processing, from placement to delivery.\n- Automate and optimize the movement of goods within the warehouse using robots.\n\n3) Stakeholders & Users\n\n- Warehouse Administrators: Manage overall operations, including inventory and sales data.\n- Warehouse Staff: Interact with the system for processing orders and managing shelves.\n- Customers: Place orders and potentially interact with customer service.\n- Technical Staff: Maintain and update the system.\n\n4) Functional Descriptions\n\n- Customer Management: Store customer details, including contact information and preferences.\n- Product Inventory: Maintain records of products, including stock levels and shelf locations.\n- Shelf Management: Track shelf locations and the products displayed there; interface with robotic systems for product retrieval.\n- Order Processing: Manage orders from initial placement through completion, including payment processing.\n- Robotics Integration: Automate the retrieval and delivery of products using warehouse robots.\n- Wishlist: Allow customers to maintain a list of desired products.\n- Customer Service: Handle customer inquiries and feedback.\n- Notifications: Send updates about orders and other relevant information to customers.\n\n5) Non-Functional Descriptions\n\n- Efficiency: The system should facilitate swift data retrieval and updates to ensure smooth warehouse operations.\n- Scalability: Support for increasing data volumes as warehouse operations expand.\n- Security: Protect sensitive customer data and ensure secure handling of order and payment information.\n- Reliability: Ensure minimal downtime and robust performance to maintain continuous warehouse operations.\n- Automation: Optimize the movement of goods using state-of-the-art robotics.",
+  "ddl": "-- Schema for database: schemabench_0154\nCREATE TABLE `customers` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `phone` varchar(20) DEFAULT NULL,\n  `address` text,\n  `wishlist_id` int(11) DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  KEY `customers_ibfk_1` (`wishlist_id`),\n  CONSTRAINT `customers_ibfk_1` FOREIGN KEY (`wishlist_id`) REFERENCES `wishlists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `orders` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_id` int(11) NOT NULL,\n  `order_date` datetime NOT NULL,\n  `total` decimal(10,2) NOT NULL,\n  `status` enum('pending','shipped','delivered') NOT NULL DEFAULT 'pending',\n  PRIMARY KEY (`id`),\n  KEY `orders_ibfk_1` (`customer_id`),\n  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `order_items` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `order_id` int(11) NOT NULL,\n  `product_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `order_items_ibfk_1` (`order_id`),\n  KEY `order_items_ibfk_2` (`product_id`),\n  CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `products` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` text,\n  `price` decimal(10,2) NOT NULL,\n  `stock_level` int(11) NOT NULL,\n  `shelf_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `products_ibfk_1` (`shelf_id`),\n  CONSTRAINT `products_ibfk_1` FOREIGN KEY (`shelf_id`) REFERENCES `shelves` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `robots` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `model` varchar(255) NOT NULL,\n  `status` enum('available','in_use') NOT NULL DEFAULT 'available',\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `robot_assignments` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `robot_id` int(11) NOT NULL,\n  `order_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `robot_assignments_ibfk_1` (`robot_id`),\n  KEY `robot_assignments_ibfk_2` (`order_id`),\n  CONSTRAINT `robot_assignments_ibfk_1` FOREIGN KEY (`robot_id`) REFERENCES `robots` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `robot_assignments_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `shelves` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `location` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `wishlists` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `wishlists_ibfk_1` (`customer_id`),\n  CONSTRAINT `wishlists_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "customers",
+      "orders",
+      "order_items",
+      "products",
+      "robots",
+      "robot_assignments",
+      "shelves",
+      "wishlists"
+    ],
+    "columns_by_table": {
+      "customers": [],
+      "orders": [],
+      "order_items": [],
+      "products": [],
+      "robots": [],
+      "robot_assignments": [],
+      "shelves": [],
+      "wishlists": []
+    }
+  }
+}

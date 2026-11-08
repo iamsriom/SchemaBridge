@@ -1,0 +1,39 @@
+-- Schema for database: rschema_0408
+CREATE TABLE `courses` (
+  `course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`course_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `chapters` (
+  `chapter_id` int(11) NOT NULL AUTO_INCREMENT,
+  `chapter_name` varchar(255) NOT NULL,
+  `chapter_content` text,
+  `associated_course_id` int(11) NOT NULL,
+  PRIMARY KEY (`chapter_id`),
+  KEY `chapters_ibfk_1` (`associated_course_id`),
+  CONSTRAINT `chapters_ibfk_1` FOREIGN KEY (`associated_course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `question_types` (
+  `question_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `question_type_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`question_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `questions` (
+  `question_id` int(11) NOT NULL AUTO_INCREMENT,
+  `question_content` text NOT NULL,
+  `question_type_id` int(11) NOT NULL,
+  `chapter_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `correct_answer` varchar(255) NOT NULL,
+  `alternative_answers` text,
+  PRIMARY KEY (`question_id`),
+  KEY `questions_ibfk_1` (`question_type_id`),
+  KEY `questions_ibfk_2` (`chapter_id`),
+  KEY `questions_ibfk_3` (`course_id`),
+  CONSTRAINT `questions_ibfk_1` FOREIGN KEY (`question_type_id`) REFERENCES `question_types` (`question_type_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `questions_ibfk_2` FOREIGN KEY (`chapter_id`) REFERENCES `chapters` (`chapter_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `questions_ibfk_3` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

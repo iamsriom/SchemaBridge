@@ -1,0 +1,90 @@
+-- Schema for database: rschema_0344
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `users_ibfk_1` (`role_id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `permissions` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `applications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `web_services` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text,
+  `creation_date` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `errors` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `web_service_id` int(11) NOT NULL,
+  `error_code` varchar(255) NOT NULL,
+  `description` text,
+  `timestamp` datetime NOT NULL,
+  `return_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `errors_ibfk_1` (`web_service_id`),
+  CONSTRAINT `errors_ibfk_1` FOREIGN KEY (`web_service_id`) REFERENCES `web_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `invocations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `web_service_id` int(11) NOT NULL,
+  `invocation_time` datetime NOT NULL,
+  `return_status` varchar(255) NOT NULL,
+  `delay_time` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `invocations_ibfk_1` (`web_service_id`),
+  CONSTRAINT `invocations_ibfk_1` FOREIGN KEY (`web_service_id`) REFERENCES `web_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `statistics` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `web_service_id` int(11) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  `success_rate` decimal(10,2) NOT NULL,
+  `call_count` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `statistics_ibfk_1` (`web_service_id`),
+  CONSTRAINT `statistics_ibfk_1` FOREIGN KEY (`web_service_id`) REFERENCES `web_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_applications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `application_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_applications_ibfk_1` (`user_id`),
+  KEY `user_applications_ibfk_2` (`application_id`),
+  CONSTRAINT `user_applications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_applications_ibfk_2` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `error_invocations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `error_id` int(11) NOT NULL,
+  `invocation_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `error_invocations_ibfk_1` (`error_id`),
+  KEY `error_invocations_ibfk_2` (`invocation_id`),
+  CONSTRAINT `error_invocations_ibfk_1` FOREIGN KEY (`error_id`) REFERENCES `errors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `error_invocations_ibfk_2` FOREIGN KEY (`invocation_id`) REFERENCES `invocations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

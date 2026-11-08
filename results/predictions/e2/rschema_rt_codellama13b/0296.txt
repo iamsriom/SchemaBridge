@@ -1,0 +1,57 @@
+-- Schema for database: rschema_0296
+CREATE TABLE `Financial_Advisor` (
+  `Advisor_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Contact_Number` varchar(15) DEFAULT NULL,
+  `Hire_Date` datetime DEFAULT NULL,
+  PRIMARY KEY (`Advisor_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Client` (
+  `Client_ID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Contact_Number` varchar(15) DEFAULT NULL,
+  `ID_Number` varchar(50) DEFAULT NULL,
+  `Risk_Preference` varchar(50) DEFAULT NULL,
+  `Total_Assets` decimal(15,2) DEFAULT NULL,
+  PRIMARY KEY (`Client_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Financial_Product` (
+  `Product_Code` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Type` varchar(50) DEFAULT NULL,
+  `Value` decimal(15,2) DEFAULT NULL,
+  PRIMARY KEY (`Product_Code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Client_Inquiry_Advisor` (
+  `Advisor_ID` int(11) NOT NULL,
+  `Client_ID` int(11) NOT NULL,
+  `Inquiry_Content` text DEFAULT NULL,
+  `Inquiry_Time` datetime NOT NULL,
+  PRIMARY KEY (`Advisor_ID`, `Client_ID`, `Inquiry_Time`),
+  CONSTRAINT `client_inquiry_advisor_ibfk_1` FOREIGN KEY (`Advisor_ID`) REFERENCES `Financial_Advisor` (`Advisor_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `client_inquiry_advisor_ibfk_2` FOREIGN KEY (`Client_ID`) REFERENCES `Client` (`Client_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Client_Holds_Financial_Products` (
+  `Client_ID` int(11) NOT NULL,
+  `Product_Code` int(11) NOT NULL,
+  `Quantity_Held` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Client_ID`, `Product_Code`),
+  CONSTRAINT `client_holds_financial_products_ibfk_1` FOREIGN KEY (`Client_ID`) REFERENCES `Client` (`Client_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `client_holds_financial_products_ibfk_2` FOREIGN KEY (`Product_Code`) REFERENCES `Financial_Product` (`Product_Code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Client_Transactions_Products` (
+  `Client_ID` int(11) NOT NULL,
+  `Product_Code` int(11) NOT NULL,
+  `Transaction_Price` decimal(15,2) DEFAULT NULL,
+  `Transaction_Quantity` int(11) DEFAULT NULL,
+  `Transaction_Time` datetime NOT NULL,
+  `Transaction_Type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`Client_ID`, `Product_Code`, `Transaction_Time`),
+  CONSTRAINT `client_transactions_products_ibfk_1` FOREIGN KEY (`Client_ID`) REFERENCES `Client` (`Client_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `client_transactions_products_ibfk_2` FOREIGN KEY (`Product_Code`) REFERENCES `Financial_Product` (`Product_Code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

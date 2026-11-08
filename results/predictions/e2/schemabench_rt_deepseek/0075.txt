@@ -1,0 +1,38 @@
+-- Schema for database: schemabench_0075
+CREATE TABLE `auth_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organizations_organization` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `is_active` tinyint(1) NOT NULL,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organizations_organizationowner` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL,
+  `organization_id` int(11) NOT NULL,
+  `organization_user_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `organizations_organizationowner_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations_organization` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `organizations_organizationowner_ibfk_2` FOREIGN KEY (`organization_user_id`) REFERENCES `auth_user` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organizations_organizationuser` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL,
+  `is_admin` tinyint(1) NOT NULL,
+  `organization_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `organizations_organizationuser_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations_organization` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `organizations_organizationuser_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

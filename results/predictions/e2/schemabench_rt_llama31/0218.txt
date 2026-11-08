@@ -1,0 +1,64 @@
+-- Schema for database: schemabench_0218
+CREATE TABLE `GRAM_PANCHAYAT` (
+  `panchayat_id` int(11) NOT NULL,
+  `total_wards` int(11) NOT NULL,
+  `total_villages` int(11) NOT NULL,
+  PRIMARY KEY (`panchayat_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `WARD` (
+  `ward_no` int(11) NOT NULL,
+  `ward_name` varchar(255) NOT NULL UNIQUE,
+  PRIMARY KEY (`ward_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `FARMER` (
+  `aadhaar_no` char(12) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`aadhaar_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `VILLAGES` (
+  `panchayat_id` int(11) NOT NULL,
+  `village_name` varchar(255) NOT NULL,
+  `ward_no` int(11) NOT NULL,
+  `aadhaar_no` char(12) NOT NULL,
+  PRIMARY KEY (`panchayat_id`, `village_name`, `ward_no`, `aadhaar_no`),
+  CONSTRAINT `villages_ibfk_1` FOREIGN KEY (`panchayat_id`) REFERENCES `GRAM_PANCHAYAT` (`panchayat_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `villages_ibfk_2` FOREIGN KEY (`ward_no`) REFERENCES `WARD` (`ward_no`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `villages_ibfk_3` FOREIGN KEY (`aadhaar_no`) REFERENCES `FARMER` (`aadhaar_no`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `MEMBERS` (
+  `member_id` int(11) NOT NULL,
+  `ward_no` int(11) NOT NULL,
+  PRIMARY KEY (`member_id`),
+  CONSTRAINT `members_ibfk_1` FOREIGN KEY (`ward_no`) REFERENCES `WARD` (`ward_no`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `MACHINES` (
+  `machine_id` int(11) NOT NULL,
+  `member_id` int(11) NOT NULL,
+  `ward_no` int(11) NOT NULL,
+  PRIMARY KEY (`machine_id`),
+  CONSTRAINT `machines_ibfk_1` FOREIGN KEY (`member_id`) REFERENCES `MEMBERS` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `machines_ibfk_2` FOREIGN KEY (`ward_no`) REFERENCES `WARD` (`ward_no`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `RENT` (
+  `machine_id` int(11) NOT NULL,
+  `aadhaar_no` char(12) NOT NULL,
+  PRIMARY KEY (`machine_id`, `aadhaar_no`),
+  CONSTRAINT `rent_ibfk_1` FOREIGN KEY (`machine_id`) REFERENCES `MACHINES` (`machine_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `rent_ibfk_2` FOREIGN KEY (`aadhaar_no`) REFERENCES `FARMER` (`aadhaar_no`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `BILL` (
+  `bill_id` int(11) NOT NULL,
+  `aadhaar_no` char(12) NOT NULL,
+  `payment_method` varchar(255) NOT NULL,
+  `date` datetime NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`bill_id`),
+  CONSTRAINT `bill_ibfk_1` FOREIGN KEY (`aadhaar_no`) REFERENCES `FARMER` (`aadhaar_no`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

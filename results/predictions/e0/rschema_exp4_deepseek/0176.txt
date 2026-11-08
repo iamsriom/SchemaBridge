@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0176
+
+-- Table: flights
+CREATE TABLE `flights` (
+  `FlightID` int(11) NOT NULL,
+  `Airline` varchar(255) NOT NULL,
+  `DepartureCity` varchar(255) NOT NULL,
+  `DepartureTime` datetime NOT NULL,
+  `Destination` varchar(255) NOT NULL,
+  `ArrivalTime` datetime NOT NULL,
+  `TicketPrice` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`FlightID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: discounts
+CREATE TABLE `discounts` (
+  `FlightID` int(11) NOT NULL,
+  `DiscountStartDate` date NOT NULL,
+  `DiscountEndDate` date NOT NULL,
+  `DiscountRate` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`FlightID`),
+  CONSTRAINT `fk_discounts_flights` FOREIGN KEY (`FlightID`) REFERENCES `flights` (`FlightID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: passengers
+CREATE TABLE `passengers` (
+  `PassengerID` int(11) NOT NULL,
+  `PassengerName` varchar(255) NOT NULL,
+  `PassengerGender` char(1) NOT NULL,
+  `PassengerDateofBirth` date NOT NULL,
+  `PassengerPhone` varchar(20) NOT NULL,
+  `VIPDiscount` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`PassengerID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: tickets
+CREATE TABLE `tickets` (
+  `TicketOrderNumber` int(11) NOT NULL AUTO_INCREMENT,
+  `PassengerID` int(11) NOT NULL,
+  `FlightID` int(11) NOT NULL,
+  `TravelDate` date NOT NULL,
+  `PurchaseAmount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`TicketOrderNumber`),
+  KEY `fk_tickets_passengers` (`PassengerID`),
+  KEY `fk_tickets_flights` (`FlightID`),
+  CONSTRAINT `fk_tickets_passengers` FOREIGN KEY (`PassengerID`) REFERENCES `passengers` (`PassengerID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_tickets_flights` FOREIGN KEY (`FlightID`) REFERENCES `flights` (`FlightID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

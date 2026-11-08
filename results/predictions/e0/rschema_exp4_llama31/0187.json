@@ -1,0 +1,26 @@
+{
+  "text_number": 187,
+  "id": "67552f0a13602ec03b41a7a8",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "rschema_0187",
+  "question": "Business requirements description for a Farmland Management Information System: The system needs to manage multiple farms, with each farm recording farm ID, farm owner name, owner type (company or individual), owner contact information, and address. Each farm can have multiple plots of land. Each plot has a plot ID, area, soil type, crops, and current status (such as \"sowing\", \"growing\", \"harvesting\", etc.). Each crop has an ID, name, growth cycle, suitable soil type, and suitable climate conditions. For each planting operation, the system needs to record plot ID, crop, planting time, expected harvest time, planting quantity, and operator. For each harvesting operation, the system needs to record plot ID, crop, harvest time, harvest quantity, and operator.",
+  "ddl": "-- Schema for database: rschema_0187\nCREATE TABLE `farms` (\n  `farm_id` int(11) NOT NULL AUTO_INCREMENT,\n  `owner_name` varchar(255) NOT NULL,\n  `owner_type` enum('company','individual') NOT NULL,\n  `owner_contact` varchar(255) DEFAULT NULL,\n  `owner_address` varchar(255) NOT NULL,\n  PRIMARY KEY (`farm_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `plots` (\n  `plot_id` int(11) NOT NULL AUTO_INCREMENT,\n  `farm_id` int(11) NOT NULL,\n  `area` decimal(10,2) NOT NULL,\n  `soil_type` varchar(255) NOT NULL,\n  `crop_id` int(11) DEFAULT NULL,\n  `status` varchar(255) NOT NULL,\n  PRIMARY KEY (`plot_id`),\n  KEY `plots_ibfk_1` (`farm_id`),\n  CONSTRAINT `plots_ibfk_1` FOREIGN KEY (`farm_id`) REFERENCES `farms` (`farm_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `crops` (\n  `crop_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `growth_cycle` int(11) NOT NULL,\n  `suitable_soil_type` varchar(255) NOT NULL,\n  `suitable_climate` varchar(255) NOT NULL,\n  PRIMARY KEY (`crop_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `plantings` (\n  `planting_id` int(11) NOT NULL AUTO_INCREMENT,\n  `plot_id` int(11) NOT NULL,\n  `crop_id` int(11) NOT NULL,\n  `planting_time` datetime NOT NULL,\n  `expected_harvest_time` datetime NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `operator` varchar(255) NOT NULL,\n  PRIMARY KEY (`planting_id`),\n  KEY `plantings_ibfk_1` (`plot_id`),\n  KEY `plantings_ibfk_2` (`crop_id`),\n  CONSTRAINT `plantings_ibfk_1` FOREIGN KEY (`plot_id`) REFERENCES `plots` (`plot_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `plantings_ibfk_2` FOREIGN KEY (`crop_id`) REFERENCES `crops` (`crop_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `harvests` (\n  `harvest_id` int(11) NOT NULL AUTO_INCREMENT,\n  `plot_id` int(11) NOT NULL,\n  `crop_id` int(11) NOT NULL,\n  `harvest_time` datetime NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `operator` varchar(255) NOT NULL,\n  PRIMARY KEY (`harvest_id`),\n  KEY `harvests_ibfk_1` (`plot_id`),\n  KEY `harvests_ibfk_2` (`crop_id`),\n  CONSTRAINT `harvests_ibfk_1` FOREIGN KEY (`plot_id`) REFERENCES `plots` (`plot_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `harvests_ibfk_2` FOREIGN KEY (`crop_id`) REFERENCES `crops` (`crop_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "farms",
+      "plots",
+      "crops",
+      "plantings",
+      "harvests"
+    ],
+    "columns_by_table": {
+      "farms": [],
+      "plots": [],
+      "crops": [],
+      "plantings": [],
+      "harvests": []
+    }
+  }
+}

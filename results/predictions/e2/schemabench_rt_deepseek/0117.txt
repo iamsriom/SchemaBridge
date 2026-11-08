@@ -1,0 +1,53 @@
+-- Schema for database: schemabench_0117
+CREATE TABLE `drugs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ind1` varchar(255) DEFAULT NULL,
+  `inda` varchar(255) DEFAULT NULL,
+  `act` varchar(255) DEFAULT NULL,
+  `logp` float DEFAULT NULL,
+  `lumo` float DEFAULT NULL,
+  `active` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `atoms` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `drug_id` int(11) NOT NULL,
+  `element_symbol` char(2) NOT NULL,
+  `atom_type` varchar(255) NOT NULL,
+  `charge` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `atoms_ibfk_1` FOREIGN KEY (`drug_id`) REFERENCES `drugs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bonds` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `atom_id_1` int(11) NOT NULL,
+  `atom_id_2` int(11) NOT NULL,
+  `bond_type` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `bonds_ibfk_1` FOREIGN KEY (`atom_id_1`) REFERENCES `atoms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bonds_ibfk_2` FOREIGN KEY (`atom_id_2`) REFERENCES `atoms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `rings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ring_structure_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `rings_ibfk_1` FOREIGN KEY (`ring_structure_id`) REFERENCES `ring_strucs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ring_strucs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ring_atom` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `atom_id` int(11) NOT NULL,
+  `ring_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `ring_atom_ibfk_1` FOREIGN KEY (`atom_id`) REFERENCES `atoms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ring_atom_ibfk_2` FOREIGN KEY (`ring_id`) REFERENCES `rings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

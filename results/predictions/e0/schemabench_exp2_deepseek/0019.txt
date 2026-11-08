@@ -1,0 +1,64 @@
+-- Schema for database: `cron_monitoring_tool`
+
+-- For table: `user_profile`
+CREATE TABLE `user_profile` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `username` varchar(255) NOT NULL,
+    `email` varchar(255) NOT NULL,
+    `api_key` char(6) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `project`
+CREATE TABLE `project` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `api_key` char(6) NOT NULL,
+    `user_id` int(11) NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`user_id`) REFERENCES `user_profile` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `check`
+CREATE TABLE `check` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `cron_expression` varchar(255) NOT NULL,
+    `period` int(11) NOT NULL,
+    `grace_time` int(11) NOT NULL,
+    `project_id` int(11) NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`project_id`) REFERENCES `project` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `notification_channel`
+CREATE TABLE `notification_channel` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `config` text NOT NULL,
+    `user_id` int(11) NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`user_id`) REFERENCES `user_profile` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `check_status`
+CREATE TABLE `check_status` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `status` varchar(255) NOT NULL,
+    `timestamp` datetime NOT NULL,
+    `check_id` int(11) NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`check_id`) REFERENCES `check` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `notification`
+CREATE TABLE `notification` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `message` text NOT NULL,
+    `timestamp` datetime NOT NULL,
+    `channel_id` int(11) NOT NULL,
+    `check_id` int(11) NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`channel_id`) REFERENCES `notification_channel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`check_id`) REFERENCES `check` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

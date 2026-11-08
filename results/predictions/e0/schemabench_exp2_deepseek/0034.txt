@@ -1,0 +1,91 @@
+-- Schema for database: `django_filer`
+
+-- For table: `filer_folder`
+
+CREATE TABLE `filer_folder` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `parent_id` int(11) DEFAULT NULL,
+    `owner_id` int(11) NOT NULL,
+    `path` varchar(255) NOT NULL,
+    `depth` int(11) NOT NULL,
+    `numchild` int(11) NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `filer_folder_parent_id_5f3f4f4c` (`parent_id`),
+    KEY `filer_folder_owner_id_5f3f4f4c` (`owner_id`),
+    CONSTRAINT `filer_folder_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `filer_folder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `filer_folder_ibfk_2` FOREIGN KEY (`owner_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `filer_file`
+
+CREATE TABLE `filer_file` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `file` varchar(255) NOT NULL,
+    `folder_id` int(11) NOT NULL,
+    `owner_id` int(11) NOT NULL,
+    `uploaded_at` datetime NOT NULL,
+    `is_public` tinyint(1) NOT NULL,
+    `file_size` int(11) NOT NULL,
+    `file_type` varchar(255) NOT NULL,
+    `_file_checksum` varchar(255) NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `filer_file_folder_id_5f3f4f4c` (`folder_id`),
+    KEY `filer_file_owner_id_5f3f4f4c` (`owner_id`),
+    CONSTRAINT `filer_file_ibfk_1` FOREIGN KEY (`folder_id`) REFERENCES `filer_folder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `filer_file_ibfk_2` FOREIGN KEY (`owner_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `filer_image`
+
+CREATE TABLE `filer_image` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `file` varchar(255) NOT NULL,
+    `folder_id` int(11) NOT NULL,
+    `owner_id` int(11) NOT NULL,
+    `uploaded_at` datetime NOT NULL,
+    `is_public` tinyint(1) NOT NULL,
+    `file_size` int(11) NOT NULL,
+    `file_type` varchar(255) NOT NULL,
+    `_file_checksum` varchar(255) NOT NULL,
+    `width` int(11) NOT NULL,
+    `height` int(11) NOT NULL,
+    `alt_text` varchar(255) NOT NULL,
+    `caption` varchar(255) NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `filer_image_folder_id_5f3f4f4c` (`folder_id`),
+    KEY `filer_image_owner_id_5f3f4f4c` (`owner_id`),
+    CONSTRAINT `filer_image_ibfk_1` FOREIGN KEY (`folder_id`) REFERENCES `filer_folder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `filer_image_ibfk_2` FOREIGN KEY (`owner_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `filer_clipboard`
+
+CREATE TABLE `filer_clipboard` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `user_id` int(11) NOT NULL,
+    `file_id` int(11) NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `filer_clipboard_user_id_5f3f4f4c` (`user_id`),
+    KEY `filer_clipboard_file_id_5f3f4f4c` (`file_id`),
+    CONSTRAINT `filer_clipboard_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `filer_clipboard_ibfk_2` FOREIGN KEY (`file_id`) REFERENCES `filer_file` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- For table: `filer_permission`
+
+CREATE TABLE `filer_permission` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `user_id` int(11) NOT NULL,
+    `folder_id` int(11) NOT NULL,
+    `can_read` tinyint(1) NOT NULL,
+    `can_write` tinyint(1) NOT NULL,
+    `can_add_children` tinyint(1) NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `filer_permission_user_id_5f3f4f4c` (`user_id`),
+    KEY `filer_permission_folder_id_5f3f4f4c` (`folder_id`),
+    CONSTRAINT `filer_permission_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `filer_permission_ibfk_2` FOREIGN KEY (`folder_id`) REFERENCES `filer_folder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

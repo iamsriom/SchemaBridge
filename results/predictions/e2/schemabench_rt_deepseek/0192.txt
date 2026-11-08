@@ -1,0 +1,190 @@
+-- Schema for database: schemabench_0192
+CREATE TABLE `author` (
+  `name` varchar(80) NOT NULL,
+  `picture` varchar(2047) DEFAULT NULL,
+  `summary` varchar(2047) DEFAULT NULL,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `book` (
+  `product_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(2047) DEFAULT NULL,
+  `price` decimal(14,2) NOT NULL,
+  `publisher_price` decimal(8,2) NOT NULL,
+  `sold_count` int(11) DEFAULT NULL,
+  `isbn` varchar(10) DEFAULT NULL,
+  `series` varchar(255) DEFAULT NULL,
+  `format` varchar(255) DEFAULT NULL,
+  `pages` int(11) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `coupon` (
+  `coupon_code` varchar(80) NOT NULL,
+  `is_percent` tinyint(1) NOT NULL,
+  `savings` decimal(8,2) NOT NULL,
+  `valid_from` timestamp NOT NULL,
+  `valid_to` timestamp NOT NULL,
+  PRIMARY KEY (`coupon_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `storeuser` (
+  `username` varchar(255) NOT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `picture` varchar(255) DEFAULT NULL,
+  `time_created` timestamp NOT NULL,
+  `time_last_login` timestamp DEFAULT NULL,
+  PRIMARY KEY (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(2047) DEFAULT NULL,
+  `price` decimal(14,2) NOT NULL,
+  `publisher_price` decimal(8,2) NOT NULL,
+  `sold_count` int(11) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `publisher` (
+  `name` varchar(80) NOT NULL,
+  `address` varchar(2047) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` bigint NOT NULL,
+  `institution_number` smallint(6) DEFAULT NULL,
+  `branch_number` int(11) DEFAULT NULL,
+  `account_number` bigint NOT NULL,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role` (
+  `role_id` int(11) NOT NULL,
+  `name` varchar(25) NOT NULL,
+  `description` varchar(2047) DEFAULT NULL,
+  PRIMARY KEY (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `warehouse` (
+  `warehouse_name` varchar(80) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone` bigint NOT NULL,
+  `area_sqft` int(11) DEFAULT NULL,
+  PRIMARY KEY (`warehouse_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `storeorder` (
+  `order_number` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `status` varchar(80) DEFAULT NULL,
+  `billed_to` varchar(2047) DEFAULT NULL,
+  `shipped_to` varchar(2047) DEFAULT NULL,
+  `time_placed` timestamp NOT NULL,
+  `delivery_fee` decimal(8,2) DEFAULT NULL,
+  PRIMARY KEY (`order_number`),
+  FOREIGN KEY (`username`) REFERENCES `storeuser` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cart` (
+  `username` varchar(255) NOT NULL,
+  `last_edited` timestamp NOT NULL,
+  PRIMARY KEY (`username`),
+  FOREIGN KEY (`username`) REFERENCES `storeuser` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `book_genre` (
+  `product_id` int(11) NOT NULL,
+  `genre` varchar(80) NOT NULL,
+  PRIMARY KEY (`product_id`, `genre`),
+  FOREIGN KEY (`product_id`) REFERENCES `book` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_image` (
+  `product_id` int(11) NOT NULL,
+  `image` varchar(2047) NOT NULL,
+  PRIMARY KEY (`product_id`, `image`),
+  FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_tag` (
+  `product_id` int(11) NOT NULL,
+  `tag` varchar(80) NOT NULL,
+  PRIMARY KEY (`product_id`, `tag`),
+  FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cart_coupon` (
+  `username` varchar(255) NOT NULL,
+  `coupon_code` varchar(80) NOT NULL,
+  PRIMARY KEY (`username`, `coupon_code`),
+  FOREIGN KEY (`username`) REFERENCES `cart` (`username`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`coupon_code`) REFERENCES `coupon` (`coupon_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cart_product` (
+  `username` varchar(255) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`username`, `product_id`),
+  FOREIGN KEY (`username`) REFERENCES `cart` (`username`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_coupon` (
+  `order_number` int(11) NOT NULL,
+  `coupon_code` varchar(80) NOT NULL,
+  PRIMARY KEY (`order_number`, `coupon_code`),
+  FOREIGN KEY (`order_number`) REFERENCES `storeorder` (`order_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`coupon_code`) REFERENCES `coupon` (`coupon_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_product` (
+  `order_number` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `price` decimal(14,2) NOT NULL,
+  PRIMARY KEY (`order_number`, `product_id`),
+  FOREIGN KEY (`order_number`) REFERENCES `storeorder` (`order_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `publishes` (
+  `product_id` int(11) NOT NULL,
+  `publisher_name` varchar(80) NOT NULL,
+  `year_published` smallint(6) DEFAULT NULL,
+  `reorder_threshold` int(11) DEFAULT NULL,
+  `commission_percent` decimal(5,3) DEFAULT NULL,
+  PRIMARY KEY (`product_id`, `publisher_name`),
+  FOREIGN KEY (`product_id`) REFERENCES `book` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`publisher_name`) REFERENCES `publisher` (`name`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stored_in` (
+  `product_id` int(11) NOT NULL,
+  `warehouse_name` varchar(80) NOT NULL,
+  `stock` int(11) DEFAULT NULL,
+  `aisle` int(11) DEFAULT NULL,
+  PRIMARY KEY (`product_id`, `warehouse_name`),
+  FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`warehouse_name`) REFERENCES `warehouse` (`warehouse_name`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_role` (
+  `username` varchar(255) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  PRIMARY KEY (`username`, `role_id`),
+  FOREIGN KEY (`username`) REFERENCES `storeuser` (`username`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `writes` (
+  `product_id` int(11) NOT NULL,
+  `author_name` varchar(80) NOT NULL,
+  PRIMARY KEY (`product_id`, `author_name`),
+  FOREIGN KEY (`product_id`) REFERENCES `book` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`author_name`) REFERENCES `author` (`name`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,55 @@
+--Schemafordatabase:rschema_0088
+--Foreachtable:
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `email_account` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `emails` (
+  `email_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sender_id` int(11) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `body` text NOT NULL,
+  `status` enum('sent','draft') NOT NULL,
+  `sending_time` datetime DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`email_id`),
+  KEY `sender_id` (`sender_id`),
+  CONSTRAINT `emails_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `recipients` (
+  `recipient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `email_id` int(11) NOT NULL,
+  `delivery_status` enum('success','failed') NOT NULL,
+  `read_status` enum('read','unread') NOT NULL,
+  PRIMARY KEY (`recipient_id`),
+  KEY `email_id` (`email_id`),
+  CONSTRAINT `recipients_ibfk_1` FOREIGN KEY (`email_id`) REFERENCES `emails` (`email_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attachments` (
+  `attachment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `email_id` int(11) NOT NULL,
+  `filename` varchar(255) NOT NULL,
+  `size` int(11) NOT NULL,
+  `storage_path` varchar(255) NOT NULL,
+  PRIMARY KEY (`attachment_id`),
+  KEY `email_id` (`email_id`),
+  CONSTRAINT `attachments_ibfk_1` FOREIGN KEY (`email_id`) REFERENCES `emails` (`email_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `delivery_status` (
+  `delivery_id` int(11) NOT NULL AUTO_INCREMENT,
+  `recipient_id` int(11) NOT NULL,
+  `delivery_status` enum('success','failed') NOT NULL,
+  `read_status` enum('read','unread') NOT NULL,
+  PRIMARY KEY (`delivery_id`),
+  KEY `recipient_id` (`recipient_id`),
+  CONSTRAINT `delivery_status_ibfk_1` FOREIGN KEY (`recipient_id`) REFERENCES `recipients` (`recipient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

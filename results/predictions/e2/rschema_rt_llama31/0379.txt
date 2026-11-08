@@ -1,0 +1,43 @@
+-- Schema for database: rschema_0379
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact_details` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `invoice` (
+  `invoice_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `due_date` datetime NOT NULL,
+  `payment_amount` decimal(10,2) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  PRIMARY KEY (`invoice_id`),
+  CONSTRAINT `invoice_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `terms` (
+  `term_id` int(11) NOT NULL,
+  `invoice_id` int(11) NOT NULL,
+  `interest_rate` decimal(5,2) NOT NULL,
+  `payment_days` int(11) NOT NULL,
+  `term_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`term_id`),
+  CONSTRAINT `terms_ibfk_1` FOREIGN KEY (`invoice_id`) REFERENCES `invoice` (`invoice_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `invoice_and_customer` (
+  `invoice_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  PRIMARY KEY (`invoice_id`, `customer_id`),
+  CONSTRAINT `invoice_and_customer_ibfk_1` FOREIGN KEY (`invoice_id`) REFERENCES `invoice` (`invoice_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `invoice_and_customer_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `invoice_and_terms` (
+  `term_id` int(11) NOT NULL,
+  `invoice_id` int(11) NOT NULL,
+  PRIMARY KEY (`term_id`, `invoice_id`),
+  CONSTRAINT `invoice_and_terms_ibfk_1` FOREIGN KEY (`term_id`) REFERENCES `terms` (`term_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `invoice_and_terms_ibfk_2` FOREIGN KEY (`invoice_id`) REFERENCES `invoice` (`invoice_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

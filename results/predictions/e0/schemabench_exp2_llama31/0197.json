@@ -1,0 +1,28 @@
+{
+  "text_number": 197,
+  "id": "SB-197",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0197",
+  "question": "1) Background / Context\n\nThe project involves developing a digital banking platform called Data Bank, which integrates innovative financial services, cryptocurrency, and data management. Unlike traditional banks, Data Bank operates exclusively online, offering a secure and distributed data storage solution alongside traditional banking operations. The platform is hosted across a network of global nodes, akin to regional branches, providing monetary and data storage services.\n\n2) Objectives\n\n- To expand the customer base of Data Bank.\n- To optimize and accurately track customer data storage needs.\n- To develop a robust system for calculating metrics and analyzing data for strategic forecasting and planning.\n\n3) Stakeholders & Users\n\n- Stakeholders: Data Bank management team, investors.\n- Users: Customers of Data Bank, comprising individuals or businesses using banking and secure data storage services.\n\n4) Functional Descriptions\n\n- Customer Data Storage: Allocate cloud storage limits based on account balance.\n- Transaction Management: Handle customer financial transactions with diverse types.\n- Data Distribution: Randomly distribute customers across nodes based on region for enhanced security.\n- Dynamic Node Assignment: Frequently change customer node assignments to prevent unauthorized access.\n- Regional Node Management: Utilize a regions table to manage and assign global nodes.\n- Metric Calculation: Develop tools for assessing growth, data usage, and storage requirements.\n\n5) Non-Functional Descriptions\n\n- Security: Ensure high levels of security in both financial transactions and data storage.\n- Scalability: Support seamless scaling to accommodate growing customer and data demands.\n- Reliability: Maintain consistent system uptime and rapid recovery from potential failures.\n- Performance: Provide efficient data processing and low-latency access across distributed nodes.",
+  "ddl": "-- Schema for database: schemabench_0197\nCREATE TABLE `customers` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `balance` decimal(10,2) NOT NULL DEFAULT 0.00,\n  `storage_limit` int(11) NOT NULL DEFAULT 0,\n  PRIMARY KEY (`id`),\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `transactions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_id` int(11) NOT NULL,\n  `type` enum('deposit','withdrawal','transfer') NOT NULL,\n  `amount` decimal(10,2) NOT NULL,\n  `timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `fk_transactions_customers` (`customer_id`),\n  CONSTRAINT `fk_transactions_customers` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `nodes` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `region_id` int(11) NOT NULL,\n  `node_name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `fk_nodes_regions` (`region_id`),\n  CONSTRAINT `fk_nodes_regions` FOREIGN KEY (`region_id`) REFERENCES `regions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `regions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `customer_nodes` (\n  `customer_id` int(11) NOT NULL,\n  `node_id` int(11) NOT NULL,\n  PRIMARY KEY (`customer_id`, `node_id`),\n  KEY `fk_customer_nodes_customers` (`customer_id`),\n  KEY `fk_customer_nodes_nodes` (`node_id`),\n  CONSTRAINT `fk_customer_nodes_customers` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `fk_customer_nodes_nodes` FOREIGN KEY (`node_id`) REFERENCES `nodes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `metrics` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_id` int(11) NOT NULL,\n  `storage_usage` decimal(10,2) NOT NULL DEFAULT 0.00,\n  `growth_rate` decimal(10,2) NOT NULL DEFAULT 0.00,\n  PRIMARY KEY (`id`),\n  KEY `fk_metrics_customers` (`customer_id`),\n  CONSTRAINT `fk_metrics_customers` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "customers",
+      "transactions",
+      "nodes",
+      "regions",
+      "customer_nodes",
+      "metrics"
+    ],
+    "columns_by_table": {
+      "customers": [],
+      "transactions": [],
+      "nodes": [],
+      "regions": [],
+      "customer_nodes": [],
+      "metrics": []
+    }
+  }
+}

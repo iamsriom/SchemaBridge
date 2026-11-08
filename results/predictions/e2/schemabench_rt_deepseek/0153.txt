@@ -1,0 +1,68 @@
+-- Schema for database: schemabench_0153
+CREATE TABLE `books` (
+  `book_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `author` varchar(255) DEFAULT NULL,
+  `publisher` varchar(255) DEFAULT NULL,
+  `publication_date` datetime DEFAULT NULL,
+  `isbn` varchar(20) DEFAULT NULL,
+  `total_copies` int(11) NOT NULL,
+  `available_copies` int(11) NOT NULL,
+  PRIMARY KEY (`book_id`),
+  CONSTRAINT `books_author_publisher_check` CHECK ((`author` IS NOT NULL) XOR (`publisher` IS NOT NULL))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staffs` (
+  `staff_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone` varchar(15) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `doj` datetime DEFAULT NULL,
+  PRIMARY KEY (`staff_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `members` (
+  `member_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone` varchar(15) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `membership_status` ENUM('Active', 'NotActive') NOT NULL,
+  PRIMARY KEY (`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `issued_books` (
+  `issued_id` int(11) NOT NULL AUTO_INCREMENT,
+  `member_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `issue_date` datetime NOT NULL,
+  `due_date` datetime NOT NULL,
+  `issued_by` int(11) NOT NULL,
+  PRIMARY KEY (`issued_id`),
+  CONSTRAINT `issued_books_member_fk` FOREIGN KEY (`member_id`) REFERENCES `members` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `issued_books_book_fk` FOREIGN KEY (`book_id`) REFERENCES `books` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `issued_books_staff_fk` FOREIGN KEY (`issued_by`) REFERENCES `staffs` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `return_books` (
+  `return_id` int(11) NOT NULL AUTO_INCREMENT,
+  `issued_id` int(11) NOT NULL,
+  `return_date` datetime NOT NULL,
+  `received_by` int(11) NOT NULL,
+  PRIMARY KEY (`return_id`),
+  CONSTRAINT `return_books_issued_fk` FOREIGN KEY (`issued_id`) REFERENCES `issued_books` (`issued_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `return_books_staff_fk` FOREIGN KEY (`received_by`) REFERENCES `staffs` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fine` (
+  `fine_id` int(11) NOT NULL AUTO_INCREMENT,
+  `return_id` int(11) NOT NULL,
+  `issued_id` int(11) NOT NULL,
+  `member_id` int(11) NOT NULL,
+  `fine_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`fine_id`),
+  CONSTRAINT `fine_return_fk` FOREIGN KEY (`return_id`) REFERENCES `return_books` (`return_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fine_issued_fk` FOREIGN KEY (`issued_id`) REFERENCES `issued_books` (`issued_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fine_member_fk` FOREIGN KEY (`member_id`) REFERENCES `members` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

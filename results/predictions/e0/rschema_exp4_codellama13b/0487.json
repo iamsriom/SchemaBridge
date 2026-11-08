@@ -1,0 +1,24 @@
+{
+  "text_number": 487,
+  "id": "67552f0a13602ec03b41a8ab",
+  "llm": "codellama13b",
+  "model_id": "codellama/CodeLlama-13b-Instruct-hf",
+  "database": "rschema_0487",
+  "question": "The database is a system for managing code lists and their relationships, such as data standardization and mapping systems in the fields of finance, medical care or administrative management.\n\nMain functions\n\n1. Code relationship management: The system can store and manage the relationship between different code systems to ensure the standardization and consistency of the code.\n2. Time validity control: Each code relationship record has an effective start date and end date, and the system can ensure the validity of the code relationship within a specific time period.\n3. Audit tracking: Record the creator, creation time, modifier, and modification time of each record to facilitate auditing and tracking the change history of data.\n4. Uniqueness constraint: Ensure that each code relationship is unique in a specific code system combination to prevent duplicate data.\n5. Foreign key association: Associate to the KODELISTE table through a Foreign key to ensure the referential integrity of the code relationship.",
+  "ddl": "-- Schema for database: rschema_0487\n\nCREATE TABLE `code_relationship` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `code_system_id` int(11) NOT NULL,\n  `code_id` int(11) NOT NULL,\n  `related_code_system_id` int(11) NOT NULL,\n  `related_code_id` int(11) NOT NULL,\n  `effective_start_date` datetime NOT NULL,\n  `effective_end_date` datetime NOT NULL,\n  `created_by` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `modified_by` varchar(255) NOT NULL,\n  `modified_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `uk_code_relationship_code_system_id_code_id` (`code_system_id`, `code_id`),\n  FOREIGN KEY `fk_code_relationship_code_system_id` (`code_system_id`) REFERENCES `code_system` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY `fk_code_relationship_related_code_system_id` (`related_code_system_id`) REFERENCES `code_system` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `code_system` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` varchar(255) NOT NULL,\n  `created_by` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `modified_by` varchar(255) NOT NULL,\n  `modified_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `code` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `code_system_id` int(11) NOT NULL,\n  `code` varchar(255) NOT NULL,\n  `description` varchar(255) NOT NULL,\n  `created_by` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `modified_by` varchar(255) NOT NULL,\n  `modified_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `uk_code_code_system_id_code` (`code_system_id`, `code`),\n  FOREIGN KEY `fk_code_code_system_id` (`code_system_id`) REFERENCES `code_system` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `code_relationship_history` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `code_relationship_id` int(11) NOT NULL,\n  `effective_start_date` datetime NOT NULL,\n  `effective_end_date` datetime NOT NULL,\n  `created_by` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `modified_by` varchar(255) NOT NULL,\n  `modified_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  FOREIGN KEY `fk_code_relationship_history_code_relationship_id` (`code_relationship_id`) REFERENCES `code_relationship` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "code_relationship",
+      "code_system",
+      "code",
+      "code_relationship_history"
+    ],
+    "columns_by_table": {
+      "code_relationship": [],
+      "code_system": [],
+      "code": [],
+      "code_relationship_history": []
+    }
+  }
+}

@@ -1,0 +1,52 @@
+-- Schema for database: rschema_0081
+CREATE TABLE `user_group` (
+  `user_group_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`user_group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `one-time_password` varchar(255) DEFAULT NULL,
+  `password_reset_key` varchar(255) DEFAULT NULL,
+  `activation_status` varchar(50) DEFAULT NULL,
+  `user_allocation_time` datetime DEFAULT NULL,
+  `creator` int(11) DEFAULT NULL,
+  `updater` int(11) DEFAULT NULL,
+  `last_updated_time` datetime DEFAULT NULL,
+  `user_group_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`user_group_id`) REFERENCES `user_group` (`user_group_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `API_key` (
+  `key_id` int(11) NOT NULL,
+  `key_content` varchar(255) NOT NULL,
+  `key_creation_time` datetime DEFAULT NULL,
+  `allowed_ip_address_list` text DEFAULT NULL,
+  `permission_level` varchar(50) DEFAULT NULL,
+  `whether_it_is_a_private_key` tinyint(1) DEFAULT NULL,
+  `whether_to_ignore_call_limits` tinyint(1) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`key_id`),
+  CONSTRAINT `API_key_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `API_call_log` (
+  `log_id` int(11) NOT NULL,
+  `call_time` datetime NOT NULL,
+  `called_api_resource_path` varchar(255) NOT NULL,
+  `http_request_method` varchar(10) NOT NULL,
+  `client_ip_address` varchar(45) NOT NULL,
+  `api_response_status_code` int(11) DEFAULT NULL,
+  `authorization_status_of_the_call` varchar(50) DEFAULT NULL,
+  `request_parameters` text DEFAULT NULL,
+  `response_time` int(11) DEFAULT NULL,
+  `used_api_key_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`log_id`),
+  CONSTRAINT `API_call_log_ibfk_1` FOREIGN KEY (`used_api_key_id`) REFERENCES `API_key` (`key_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

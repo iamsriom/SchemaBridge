@@ -1,0 +1,43 @@
+-- Schema for database: rschema_0331
+CREATE TABLE `Player` (
+  `Player_ID` int(11) NOT NULL,
+  `Contact_Information` varchar(255) DEFAULT NULL,
+  `Gender` varchar(10) DEFAULT NULL,
+  `Nickname` varchar(50) DEFAULT NULL,
+  `Registration_Time` datetime DEFAULT NULL,
+  PRIMARY KEY (`Player_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Match_Information` (
+  `Match_ID` int(11) NOT NULL,
+  `Name` varchar(100) DEFAULT NULL,
+  `Start_Time` datetime DEFAULT NULL,
+  `End_Time` datetime DEFAULT NULL,
+  `Total_Participants` int(11) DEFAULT NULL,
+  `Type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`Match_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Match_Result` (
+  `Player_ID` int(11) NOT NULL,
+  `Match_ID` int(11) NOT NULL,
+  `Ranking` int(11) DEFAULT NULL,
+  `Total_Score` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Player_ID`, `Match_ID`),
+  CONSTRAINT `match_result_ibfk_1` FOREIGN KEY (`Player_ID`) REFERENCES `Player` (`Player_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `match_result_ibfk_2` FOREIGN KEY (`Match_ID`) REFERENCES `Match_Information` (`Match_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Battle` (
+  `Match_ID` int(11) NOT NULL,
+  `Player_1_ID` int(11) NOT NULL,
+  `Player_2_ID` int(11) NOT NULL,
+  `Match_Start_Time` datetime NOT NULL,
+  `Match_End_Time` datetime DEFAULT NULL,
+  `Battle_Duration` int(11) DEFAULT NULL,
+  `Result` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`Match_ID`, `Player_1_ID`, `Player_2_ID`, `Match_Start_Time`),
+  CONSTRAINT `battle_ibfk_1` FOREIGN KEY (`Match_ID`) REFERENCES `Match_Information` (`Match_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `battle_ibfk_2` FOREIGN KEY (`Player_1_ID`) REFERENCES `Player` (`Player_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `battle_ibfk_3` FOREIGN KEY (`Player_2_ID`) REFERENCES `Player` (`Player_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

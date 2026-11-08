@@ -1,0 +1,24 @@
+{
+  "text_number": 54,
+  "id": "SB-054",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0054",
+  "question": "Screenshot as a Service System\n\n Background / Context\nThe system is a \"Screenshot as a Service\" application that allows users to create website screenshots via a simple API. The application is developed using the Laravel framework, facilitating a user-friendly interface for generating and retrieving screenshots.\n\n Objectives\n- Enable users to create and retrieve website screenshots efficiently.\n- Provide screenshots as either a file path or a base64 encoded string.\n- Ensure security and control through API key authentication.\n\n Stakeholders & Users\n- End Users: Individuals or businesses needing website screenshots.\n- API Consumers: External applications or services integrating with the API.\n- Administrators: Personnel managing API keys and monitoring system usage.\n\n Functional Descriptions\n1. API Key Management:\n   - Users can obtain unique API keys for accessing the service.\n   - API keys are tied to user accounts and stored securely.\n\n2. Screenshot Generation:\n   - Users send requests containing the API key and target URL to generate screenshots.\n   - Responses include the screenshot in file path format or as a base64 encoded string.\n\n3. Data Handling:\n   - Screenshots are automatically deleted from the server after 1 hour.\n\n4. Logging:\n   - All API interactions are logged, including user ID and associated API key.\n\n Non-Functional Descriptions\n- Scalability: The system should efficiently handle multiple requests simultaneously.\n- Security: Protect API keys and user data; ensure secure communication.\n- Reliability: Consistently generate and deliver accurate screenshots.\n- Usability: Easy integration for external applications and straightforward API documentation for developers.",
+  "ddl": "-- Schema for database: schemabench_0054\nCREATE TABLE `api_keys` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `key` char(32) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `api_keys_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `screenshots` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `api_key` char(32) NOT NULL,\n  `target_url` varchar(255) NOT NULL,\n  `screenshot_type` enum('file_path','base64') NOT NULL DEFAULT 'file_path',\n  `screenshot` mediumblob,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `expires_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `api_key` (`api_key`),\n  KEY `target_url` (`target_url`),\n  CONSTRAINT `screenshots_ibfk_1` FOREIGN KEY (`api_key`) REFERENCES `api_keys` (`key`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `logs` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `api_key` char(32) NOT NULL,\n  `action` enum('create','read','update','delete') NOT NULL,\n  `target_url` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`),\n  KEY `api_key` (`api_key`),\n  KEY `target_url` (`target_url`),\n  CONSTRAINT `logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `logs_ibfk_2` FOREIGN KEY (`api_key`) REFERENCES `api_keys` (`key`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `email` varchar(255) NOT NULL,\n  `password` char(60) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "api_keys",
+      "screenshots",
+      "logs",
+      "users"
+    ],
+    "columns_by_table": {
+      "api_keys": [],
+      "screenshots": [],
+      "logs": [],
+      "users": []
+    }
+  }
+}

@@ -1,0 +1,101 @@
+-- Schema for database: rschema_0164
+
+CREATE TABLE warehouses (
+  warehouse_id INT(11) NOT NULL AUTO_INCREMENT,
+  warehouse_name VARCHAR(255) NOT NULL,
+  warehouse_location VARCHAR(255) NOT NULL,
+  warehouse_type VARCHAR(255) NOT NULL,
+  warehouse_image_path VARCHAR(255) NOT NULL,
+  warehouse_description VARCHAR(255) NOT NULL,
+  creation_time DATETIME NOT NULL,
+  creation_date DATE NOT NULL,
+  update_date DATE NOT NULL,
+  PRIMARY KEY (warehouse_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE stack_positions (
+  stack_position_id INT(11) NOT NULL AUTO_INCREMENT,
+  stack_position_name VARCHAR(255) NOT NULL,
+  stack_position_type VARCHAR(255) NOT NULL,
+  stack_position_image_path VARCHAR(255) NOT NULL,
+  stack_position_description VARCHAR(255) NOT NULL,
+  creation_time DATETIME NOT NULL,
+  creation_date DATE NOT NULL,
+  update_date DATE NOT NULL,
+  warehouse_id INT(11) NOT NULL,
+  PRIMARY KEY (stack_position_id),
+  FOREIGN KEY (warehouse_id) REFERENCES warehouses(warehouse_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE sensors (
+  sensor_id INT(11) NOT NULL AUTO_INCREMENT,
+  sensor_type VARCHAR(255) NOT NULL,
+  collected_data_value VARCHAR(255) NOT NULL,
+  collection_time DATETIME NOT NULL,
+  data_status VARCHAR(255) NOT NULL,
+  data_description VARCHAR(255) NOT NULL,
+  PRIMARY KEY (sensor_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE users (
+  user_id INT(11) NOT NULL AUTO_INCREMENT,
+  username VARCHAR(255) NOT NULL,
+  user_role VARCHAR(255) NOT NULL,
+  user_password VARCHAR(255) NOT NULL,
+  user_phone VARCHAR(255) NOT NULL,
+  user_email VARCHAR(255) NOT NULL,
+  creation_time DATETIME NOT NULL,
+  creation_date DATE NOT NULL,
+  update_date DATE NOT NULL,
+  PRIMARY KEY (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE operation_records (
+  operation_record_id INT(11) NOT NULL AUTO_INCREMENT,
+  operation_type VARCHAR(255) NOT NULL,
+  operation_time DATETIME NOT NULL,
+  operation_description VARCHAR(255) NOT NULL,
+  PRIMARY KEY (operation_record_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE alerts (
+  alert_id INT(11) NOT NULL AUTO_INCREMENT,
+  alert_type VARCHAR(255) NOT NULL,
+  alert_time DATETIME NOT NULL,
+  alert_level VARCHAR(255) NOT NULL,
+  alert_description VARCHAR(255) NOT NULL,
+  alert_status VARCHAR(255) NOT NULL,
+  PRIMARY KEY (alert_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE warehouse_stack_position (
+  warehouse_id INT(11) NOT NULL,
+  stack_position_id INT(11) NOT NULL,
+  PRIMARY KEY (warehouse_id, stack_position_id),
+  FOREIGN KEY (warehouse_id) REFERENCES warehouses(warehouse_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (stack_position_id) REFERENCES stack_positions(stack_position_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE sensor_stack_position (
+  sensor_id INT(11) NOT NULL,
+  stack_position_id INT(11) NOT NULL,
+  PRIMARY KEY (sensor_id, stack_position_id),
+  FOREIGN KEY (sensor_id) REFERENCES sensors(sensor_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (stack_position_id) REFERENCES stack_positions(stack_position_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE user_operation_record (
+  user_id INT(11) NOT NULL,
+  operation_record_id INT(11) NOT NULL,
+  PRIMARY KEY (user_id, operation_record_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (operation_record_id) REFERENCES operation_records(operation_record_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE alert_stack_position (
+  alert_id INT(11) NOT NULL,
+  stack_position_id INT(11) NOT NULL,
+  PRIMARY KEY (alert_id, stack_position_id),
+  FOREIGN KEY (alert_id) REFERENCES alerts(alert_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (stack_position_id) REFERENCES stack_positions(stack_position_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

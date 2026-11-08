@@ -1,0 +1,64 @@
+-- Schema for database: rschema_0095
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `company_name` varchar(255) DEFAULT NULL,
+  `gender` char(1) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `department` varchar(255) DEFAULT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `level` int(11) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_opportunity` (
+  `opportunity_name` varchar(255) NOT NULL,
+  `estimated_amount` decimal(10,2) DEFAULT NULL,
+  `estimated_transaction_date` date DEFAULT NULL,
+  `actual_transaction_period` date DEFAULT NULL,
+  `creation_time` datetime DEFAULT NULL,
+  `customer_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `opportunity_stage` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`opportunity_name`),
+  CONSTRAINT `sales_opportunity_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_opportunity_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `communication_record` (
+  `creation_time` datetime DEFAULT NULL,
+  `communication_content` text DEFAULT NULL,
+  `communication_method` varchar(255) DEFAULT NULL,
+  `communication_result` varchar(255) DEFAULT NULL,
+  `communication_stage` varchar(255) DEFAULT NULL,
+  `customer_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  PRIMARY KEY (`creation_time`, `customer_id`, `employee_id`),
+  CONSTRAINT `communication_record_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `communication_record_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_request` (
+  `creation_time` datetime DEFAULT NULL,
+  `request_description` text DEFAULT NULL,
+  `request_type` varchar(255) DEFAULT NULL,
+  `solution` text DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `customer_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  PRIMARY KEY (`creation_time`, `customer_id`, `employee_id`),
+  CONSTRAINT `service_request_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `service_request_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

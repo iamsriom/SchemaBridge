@@ -1,0 +1,95 @@
+-- Schema for database: schemabench_0199
+
+CREATE TABLE `product_details` (
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `product_category` varchar(255) NOT NULL,
+  `product_description` varchar(255) NOT NULL,
+  `product_price` decimal(10,2) NOT NULL,
+  `product_image` varchar(255) NOT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales` (
+  `sale_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `sale_date` datetime NOT NULL,
+  `sale_quantity` int(11) NOT NULL,
+  `sale_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`sale_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `product_details` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_hierarchy` (
+  `product_id` int(11) NOT NULL,
+  `parent_product_id` int(11) NOT NULL,
+  PRIMARY KEY (`product_id`),
+  FOREIGN KEY (`product_id`) REFERENCES `product_details` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`parent_product_id`) REFERENCES `product_details` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_prices` (
+  `product_id` int(11) NOT NULL,
+  `price_date` datetime NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`product_id`, `price_date`),
+  FOREIGN KEY (`product_id`) REFERENCES `product_details` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  `customer_email` varchar(255) NOT NULL,
+  `customer_phone` varchar(255) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_report` (
+  `report_id` int(11) NOT NULL,
+  `report_date` datetime NOT NULL,
+  `report_type` varchar(255) NOT NULL,
+  `report_data` text NOT NULL,
+  PRIMARY KEY (`report_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_report_details` (
+  `report_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `sale_quantity` int(11) NOT NULL,
+  `sale_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`report_id`, `product_id`),
+  FOREIGN KEY (`report_id`) REFERENCES `sales_report` (`report_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`product_id`) REFERENCES `product_details` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_report_hierarchy` (
+  `report_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `parent_product_id` int(11) NOT NULL,
+  PRIMARY KEY (`report_id`, `product_id`),
+  FOREIGN KEY (`report_id`) REFERENCES `sales_report` (`report_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`product_id`) REFERENCES `product_details` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`parent_product_id`) REFERENCES `product_details` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_report_prices` (
+  `report_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `price_date` datetime NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`report_id`, `product_id`, `price_date`),
+  FOREIGN KEY (`report_id`) REFERENCES `sales_report` (`report_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`product_id`) REFERENCES `product_details` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_report_customers` (
+  `report_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `sale_quantity` int(11) NOT NULL,
+  `sale_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`report_id`, `customer_id`),
+  FOREIGN KEY (`report_id`) REFERENCES `sales_report` (`report_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

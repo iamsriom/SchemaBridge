@@ -1,0 +1,55 @@
+-- Schema for database: rschema_0424
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `account_status` varchar(255) NOT NULL,
+  `last_login_time` datetime NOT NULL,
+  `login_ip` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `systems` (
+  `system_id` int(11) NOT NULL,
+  `system_name` varchar(255) NOT NULL,
+  `system_domain` varchar(255) NOT NULL,
+  `access_time` datetime NOT NULL,
+  `callback_url` varchar(255) NOT NULL,
+  `secret_key` varchar(255) NOT NULL,
+  `token_validity_period` int(11) NOT NULL,
+  `enabled` tinyint(1) NOT NULL,
+  `approval_required` tinyint(1) NOT NULL,
+  PRIMARY KEY (`system_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `login_records` (
+  `user_id` int(11) NOT NULL,
+  `system_id` int(11) NOT NULL,
+  `login_time` datetime NOT NULL,
+  `login_ip` varchar(255) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expiration_time` datetime NOT NULL,
+  `validity` tinyint(1) NOT NULL,
+  `logout_time` datetime NOT NULL,
+  PRIMARY KEY (`user_id`, `system_id`, `login_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `authorizations` (
+  `user_id` int(11) NOT NULL,
+  `system_id` int(11) NOT NULL,
+  `authorization_time` datetime NOT NULL,
+  `effective` tinyint(1) NOT NULL,
+  `expiration_time` datetime NOT NULL,
+  PRIMARY KEY (`user_id`, `system_id`, `authorization_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+ALTER TABLE `login_records`
+  ADD CONSTRAINT `login_records_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `login_records_ibfk_2` FOREIGN KEY (`system_id`) REFERENCES `systems` (`system_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `authorizations`
+  ADD CONSTRAINT `authorizations_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `authorizations_ibfk_2` FOREIGN KEY (`system_id`) REFERENCES `systems` (`system_id`) ON DELETE CASCADE ON UPDATE CASCADE;

@@ -1,0 +1,24 @@
+{
+  "text_number": 45,
+  "id": "SB-045",
+  "llm": "llama31",
+  "model_id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "database": "schemabench_0045",
+  "question": "Project Description: Octobox - GitHub Notifications Manager\n\n1) Background / Context\nOctobox is designed to enhance the user experience of managing GitHub notifications, surpassing the capabilities of GitHub’s built-in notification system. Developers often face overwhelming email notifications which can lead to missed or overlooked issues and pull requests. Octobox provides a standalone application that allows users to handle these notifications directly, avoiding the need to filter via email.\n\n2) Objectives\nThe primary goal of Octobox is to provide developers with an efficient tool to triage and manage GitHub notifications by introducing features such as notification archiving, enhanced filtering, and real-time updates on issue and pull-request statuses.\n\n3) Stakeholders & Users\n- Developers: Primary users who need to manage their GitHub notifications effectively.\n- GitHub Staff: May also benefit by using Octobox to handle large volumes of notifications.\n- Octobox Administrators: Responsible for maintaining the application and ensuring it aligns with user needs.\n\n4) Functional Descriptions\n- Archive Notifications: Users can mark notifications as \"done\" by moving them to an \"archived\" state. If any activity occurs on an archived item, it is automatically moved back to the inbox.\n- Notification Filtering: Users can filter notifications based on criteria such as repository, organization, type, action, state, CI status, labels, author, and assignees.\n- Real-time Updates: Continuously updates notification information with relevant data like issue statuses, CI statuses, labels, and more.\n\n5) Non-Functional Descriptions\n- Performance: The system must handle a high volume of notifications without significant delay.\n- Usability: The user interface should be intuitive and provide easy navigation and operation for users.\n- Security: Secure handling of user data, especially API tokens and personal access tokens, with encryption in storage.\n- Reliability: Ensure consistent uptime and prompt updates for maintaining synchronization with GitHub data.",
+  "ddl": "-- Schema for database: schemabench_0045\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `password` char(60) NOT NULL,\n  `github_token` char(255) NOT NULL,\n  `personal_access_token` char(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `username` (`username`),\n  UNIQUE KEY `email` (`email`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `repositories` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `owner` varchar(255) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `owner_name` (`owner`, `name`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `notifications` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `repository_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `type` enum('issue','pull_request') NOT NULL,\n  `action` enum('opened','closed','assigned','unassigned','labeled','unlabeled') NOT NULL,\n  `state` enum('open','closed') NOT NULL,\n  `ci_status` enum('success','failure','pending') NOT NULL,\n  `labels` set('bug','enhancement','help wanted','good first issue') NOT NULL,\n  `author` varchar(255) NOT NULL,\n  `assignee` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `repository_id` (`repository_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`repository_id`) REFERENCES `repositories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `archived_notifications` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `notification_id` int(11) NOT NULL,\n  `archived_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `notification_id` (`notification_id`),\n  CONSTRAINT `archived_notifications_ibfk_1` FOREIGN KEY (`notification_id`) REFERENCES `notifications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "repositories",
+      "notifications",
+      "archived_notifications"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "repositories": [],
+      "notifications": [],
+      "archived_notifications": []
+    }
+  }
+}

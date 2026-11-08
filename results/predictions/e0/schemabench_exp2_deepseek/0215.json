@@ -1,0 +1,30 @@
+{
+  "text_number": 215,
+  "id": "SB-215",
+  "llm": "deepseek",
+  "model_id": "deepseek-ai/deepseek-coder-6.7b-instruct",
+  "database": "schemabench_0215",
+  "question": "American Airlines Operations Application\n\n1) Background / Context\nAmerican Airlines requires a comprehensive application to support their day-to-day operations. The system is intended to manage critical data related to passengers, airport activities, aircraft, flight crew, and flight logistics using a MySQL database.\n\n2) Objectives\n- To streamline management of flight operations, crew, and ticketing.\n- To enhance data accessibility and management for operational efficiency.\n- To integrate diverse operational components within a unified system.\n\n3) Stakeholders & Users\n- Airline Operations Managers\n- Flight Crew Members\n- Ticketing Agents\n- Passengers\n\n4) Functional Descriptions\n- Manage passenger information, including account details and frequent flyer data.\n- Maintain airport details, including codes, names, and locations.\n- Track aircraft details such as make, weight limits, and assigned flight numbers.\n- Handle flight crew details including personal information and assigned airport.\n- Schedule and manage flight information including departure, arrival times, and pricing.\n- Issue tickets with route specifics, seating, pricing, and flight status.\n- Transport luggage management, correlating with passenger and flight details.\n\n5) Non-Functional Descriptions\n- Ensure data integrity and referential integrity across all entities.\n- Support efficient data retrieval to handle operational demands.\n- Maintain system security for sensitive data related to flights and passengers.\n- Achieve high availability and reliability to support continuous airline operations.",
+  "ddl": "-- Schema for database: `schemabench_0215`\n\n-- Table: `passenger`\nCREATE TABLE `passenger` (\n  `passenger_id` int(11) NOT NULL AUTO_INCREMENT,\n  `first_name` varchar(255) NOT NULL,\n  `last_name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `phone_number` varchar(255) NOT NULL,\n  `account_creation_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `frequent_flyer_points` int(11) DEFAULT 0,\n  PRIMARY KEY (`passenger_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `airport`\nCREATE TABLE `airport` (\n  `airport_code` char(3) NOT NULL,\n  `airport_name` varchar(255) NOT NULL,\n  `location` varchar(255) NOT NULL,\n  PRIMARY KEY (`airport_code`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `aircraft`\nCREATE TABLE `aircraft` (\n  `aircraft_id` int(11) NOT NULL AUTO_INCREMENT,\n  `make` varchar(255) NOT NULL,\n  `weight_limit` int(11) NOT NULL,\n  `assigned_flight_number` varchar(255) NOT NULL,\n  PRIMARY KEY (`aircraft_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `flight_crew`\nCREATE TABLE `flight_crew` (\n  `crew_id` int(11) NOT NULL AUTO_INCREMENT,\n  `first_name` varchar(255) NOT NULL,\n  `last_name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `phone_number` varchar(255) NOT NULL,\n  `assigned_airport` char(3) NOT NULL,\n  PRIMARY KEY (`crew_id`),\n  FOREIGN KEY (`assigned_airport`) REFERENCES `airport` (`airport_code`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `flight_logistics`\nCREATE TABLE `flight_logistics` (\n  `flight_id` int(11) NOT NULL AUTO_INCREMENT,\n  `departure_time` datetime NOT NULL,\n  `arrival_time` datetime NOT NULL,\n  `price` decimal(10,2) NOT NULL,\n  `departure_airport` char(3) NOT NULL,\n  `arrival_airport` char(3) NOT NULL,\n  `aircraft_id` int(11) NOT NULL,\n  `crew_id` int(11) NOT NULL,\n  PRIMARY KEY (`flight_id`),\n  FOREIGN KEY (`departure_airport`) REFERENCES `airport` (`airport_code`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`arrival_airport`) REFERENCES `airport` (`airport_code`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`aircraft_id`) REFERENCES `aircraft` (`aircraft_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`crew_id`) REFERENCES `flight_crew` (`crew_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `ticket`\nCREATE TABLE `ticket` (\n  `ticket_id` int(11) NOT NULL AUTO_INCREMENT,\n  `passenger_id` int(11) NOT NULL,\n  `flight_id` int(11) NOT NULL,\n  `seat_number` varchar(255) NOT NULL,\n  `price` decimal(10,2) NOT NULL,\n  `status` varchar(255) NOT NULL,\n  PRIMARY KEY (`ticket_id`),\n  FOREIGN KEY (`passenger_id`) REFERENCES `passenger` (`passenger_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`flight_id`) REFERENCES `flight_logistics` (`flight_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\n-- Table: `luggage`\nCREATE TABLE `luggage` (\n  `luggage_id` int(11) NOT NULL AUTO_INCREMENT,\n  `passenger_id` int(11) NOT NULL,\n  `flight_id` int(11) NOT NULL,\n  `weight` int(11) NOT NULL,\n  PRIMARY KEY (`luggage_id`),\n  FOREIGN KEY (`passenger_id`) REFERENCES `passenger` (`passenger_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  FOREIGN KEY (`flight_id`) REFERENCES `flight_logistics` (`flight_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "passenger",
+      "airport",
+      "aircraft",
+      "flight_crew",
+      "flight_logistics",
+      "ticket",
+      "luggage"
+    ],
+    "columns_by_table": {
+      "passenger": [],
+      "airport": [],
+      "aircraft": [],
+      "flight_crew": [],
+      "flight_logistics": [],
+      "ticket": [],
+      "luggage": []
+    }
+  }
+}

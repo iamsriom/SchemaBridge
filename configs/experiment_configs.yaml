@@ -1,0 +1,98 @@
+# Experiment definitions aligned with the ICDE EAB brief.
+# E0–E2 numerical targets: configs/paper_reference_values.json
+#   (from results/baselines/paper_methods_vs_paper_tables_comparison.txt).
+# No LaTeX manuscript is present on disk — E3–E5 paper cells cannot be verified.
+
+paper_reference_values: configs/paper_reference_values.json
+tolerance:
+  float_3dp: 0.0005
+  float_2dp: 0.005
+
+experiments:
+  E0:
+    name: text2schema
+    description: "Text → Schema from gold NL requirements"
+    paper_tables: [tab:e0_overall, tab:e0_baselines]
+    paper_figures: [fig:e0_heatmap]
+    datasets: [rschema, schemabench]  # 518+239=757
+    models: [codellama13b, llama31, deepseek, claude_sonnet_4_6, gpt_5_4_mini]
+    prompt: prompts/constructor.txt
+    metrics: [nged, halluc, tables_f1, attributes_f1, domain_f1, entity_f1, referential_f1]
+    aggregation: "micro F1 over summed counts (Exp4); PaperMethods baselines use macro + zero policy"
+    archived:
+      rschema: results/metrics/archived/e0_rschema_exp4_evaluation.json
+      schemabench_fewshot: results/baselines/e0_schemabench_papermethods_evaluation.json
+    status: "PARTIAL/MISMATCH/BLOCKED — see audit/E0_reproduction.md"
+    enabled: true
+
+  E1:
+    name: schema2text
+    description: "Schema → Text; Basic vs Detailed describers"
+    paper_tables: [tab:e1_s2t]
+    paper_figures: [fig:e2_scr]
+    datasets: [enterprise145, rschema, schemabench]  # 902
+    models: [codellama13b, llama31, deepseek, claude_sonnet_4_6, gpt_5_4_mini]
+    prompts:
+      basic: prompts/describer_basic.txt
+      detailed: prompts/describer_detailed.txt
+    metrics: [bleu4, rougeL, bertscore_f1, scr]
+    archived:
+      rschema_detailed: results/metrics/archived/e1_rschema_schema2text_evaluation.json
+    status: "PARTIAL — RSchema open Detailed BLEU/ROUGE/SCR PASS; else BLOCKED"
+    enabled: true
+
+  E2:
+    name: roundtrip
+    description: "Schema → Text → Schema; constructor fixed to GPT-4o-mini"
+    paper_tables: [tab:e2_roundtrip, tab:e2_sizecliff]
+    paper_figures: [fig:e2_scr, fig:e2_trajectory]
+    datasets: [enterprise145, rschema, schemabench]
+    constructor: gpt-4o-mini
+    metrics: [nged, tables_f1, attributes_f1, domain_f1, entity_f1, referential_f1]
+    archived:
+      rschema_detailed: results/metrics/archived/e2_rschema_roundtrip_evaluation.json
+    status: "MISMATCH/BLOCKED — RSchema Detailed 14/18 PASS"
+    enabled: true
+
+  E3:
+    name: constructor_isolation
+    description: "Fixed GPT-5.4-mini detailed describer; vary constructors (tab:e3_overall)"
+    paper_tables: [tab:e3_overall]
+    datasets: [enterprise145, rschema, schemabench]
+    fixed_describer: gpt_5_4_mini
+    fixed_prompt: prompts/describer_detailed.txt
+    status: "BLOCKED — fixed descriptions and reconstructions missing"
+    # Historical masking describer tree (NOT paper E3):
+    historical_masking_describer_preds: results/predictions/e3/rschema_cases_describer
+    enabled: true
+
+  E4:
+    name: masking_inferability
+    description: "1Q1–1Q5 masking; direct and round-trip tracks"
+    paper_tables: [tab:e4_split, tab:e4_fk_support, tab:e4_by_dataset]
+    paper_figures: [fig:e4_recall, fig:e4_retention]
+    datasets: [enterprise145, rschema, schemabench]
+    masking_reference: third_party/MASKING_VERIFICATION.md
+    predictions:
+      enterprise: results/predictions/e4/
+      rschema_describer_only: results/predictions/e3/rschema_cases_describer
+    archived:
+      cases3: results/metrics/archived/e4_cases3_results.json
+      cases_summary: results/metrics/archived/e4_cases_analysis_summary.json
+    status: "PARTIAL artifacts / BLOCKED vs paper tables"
+    enabled: true
+
+  E5:
+    name: cost_latency
+    description: "Inference time and API cost (tab:e5_cost)"
+    paper_tables: [tab:e5_cost]
+    status: "BLOCKED — no usage/billing logs"
+    note: "fig:e0_heatmap is E0, not E5"
+    enabled: true
+
+output:
+  predictions_dir: results/predictions
+  archived_metrics_dir: results/metrics/archived
+  reproduced_metrics_dir: results/metrics/reproduced
+  baselines_dir: results/baselines
+online: false

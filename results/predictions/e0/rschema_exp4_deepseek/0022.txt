@@ -1,0 +1,54 @@
+-- Schema for database: `rschema`
+
+-- Table: `documents`
+CREATE TABLE `documents` (
+  `document_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `category` varchar(255) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `status` varchar(255) NOT NULL,
+  PRIMARY KEY (`document_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `approval_records`
+CREATE TABLE `approval_records` (
+  `document_id` int(11) NOT NULL,
+  `approver` int(11) NOT NULL,
+  `approval_time` datetime NOT NULL,
+  `approval_comments` text,
+  PRIMARY KEY (`document_id`, `approver`),
+  FOREIGN KEY (`document_id`) REFERENCES `documents` (`document_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`approver`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `archiving_records`
+CREATE TABLE `archiving_records` (
+  `document_id` int(11) NOT NULL,
+  `archivist` int(11) NOT NULL,
+  `archiving_time` datetime NOT NULL,
+  `archiving_location` varchar(255) NOT NULL,
+  PRIMARY KEY (`document_id`),
+  FOREIGN KEY (`document_id`) REFERENCES `documents` (`document_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`archivist`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `query_records`
+CREATE TABLE `query_records` (
+  `document_id` int(11) NOT NULL,
+  `query_personnel` int(11) NOT NULL,
+  `query_time` datetime NOT NULL,
+  `query_results` text,
+  PRIMARY KEY (`document_id`, `query_personnel`),
+  FOREIGN KEY (`document_id`) REFERENCES `documents` (`document_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`query_personnel`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Table: `employee`
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(6) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `contact_information` varchar(255) NOT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
