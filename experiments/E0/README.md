@@ -28,9 +28,9 @@ Canonical closed Direct inference: `run_direct_api.py` (also via `run.py --onlin
 
 | Status | Meaning |
 |---|---|
-| `COMPLETE` | All expected gold IDs present (recorded generation failures allowed) |
-| `INCOMPLETE` | Some gold IDs missing prediction files |
-| `INVALID` | Duplicate / mismatched IDs |
+| `COMPLETE` | All expected gold IDs present (recorded generation failures allowed); no extras |
+| `INCOMPLETE` | Some gold IDs missing prediction files (no integrity violations) |
+| `INVALID` | Duplicate IDs, unexpected IDs, or malformed prediction files |
 | `BLOCKED` | Required baseline file unavailable — no fabricated metrics |
 
 `--strict` exits nonzero on `INCOMPLETE`, `INVALID`, or `BLOCKED`. Missing files are scored as empty for diagnostics, but never imply a finished inference run.

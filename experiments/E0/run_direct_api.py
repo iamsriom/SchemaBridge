@@ -277,6 +277,15 @@ def build_user_content(nl_text: str, database: str) -> str:
 REQUIRED_PRED_FIELDS = ("text_number", "id", "llm", "model_id", "database", "question", "ddl", "metadata")
 
 
+def normalize_saved_ddl(ddl: str) -> str:
+    """Normalize line endings / surrounding whitespace for TXT↔JSON consistency checks only.
+
+    Does not alter SQL identifiers, comments, or evaluation semantics — only CRLF/LF and
+    leading/trailing blank lines that arise from file encoding differences.
+    """
+    return (ddl or "").replace("\r\n", "\n").replace("\r", "\n").strip()
+
+
 def prediction_is_valid(
     data: dict,
     *,
@@ -317,7 +326,7 @@ def record_done(
     expected_model_id: str | None = None,
     expected_question: str | None = None,
 ) -> bool:
-    """True when JSON+TXT exist, match, and represent a valid prediction for this record."""
+    """True when JSON+TXT exist, match exactly (normalized), and represent a valid prediction."""
     out_txt, out_json = output_paths(out_dir, text_number)
     if not out_txt.is_file() or not out_json.is_file():
         return False
@@ -334,20 +343,17 @@ def record_done(
         expected_question=expected_question,
     ):
         return False
-    # TXT must agree with JSON DDL (interrupted / corrupted writes fail resume).
-    txt = out_txt.read_text(encoding="utf-8")
-    json_ddl = (data.get("ddl") or "").strip()
-    if json_ddl and json_ddl not in txt and txt.strip() != json_ddl:
-        # Allow leading comment / whitespace differences of one line.
-        if "CREATE TABLE" not in txt.upper():
-            return False
-        if txt.strip().startswith("[ERROR"):
-            return False
     if expected_id is not None and str(data.get("id") or "") != str(expected_id):
-        # Identity conflict — caller must not overwrite silently; treat as not-done.
+        return False
+    # TXT must equal JSON DDL after CRLF/whitespace normalization only.
+    # save_record writes the JSON ddl string verbatim into the TXT file on success.
+    txt = out_txt.read_text(encoding="utf-8")
+    if txt.lstrip().startswith("[ERROR"):
+        return False
+    json_ddl = data.get("ddl") or ""
+    if normalize_saved_ddl(txt) != normalize_saved_ddl(json_ddl):
         return False
     return True
-
 
 def record_id_conflict(out_dir: Path, text_number: int, expected_id: str) -> str | None:
     """Return conflict message if existing JSON belongs to a different schema id."""

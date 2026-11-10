@@ -215,70 +215,40 @@ def test_ensure_prediction_metadata_type_conflict_recorded():
     assert any("type_mismatch" in m for m in out.get("_metadata_ddl_mismatches") or [])
 
 
-def test_direct_coverage_partial_is_incomplete(tmp_path):
-    gold = [{"id": "g1"}, {"id": "g2"}, {"id": "g3"}]
+def _write_pred(pred_dir: Path, stem: str, rid: str, *, ddl: str | None = "CREATE TABLE t (`a` int);", error: str | None = None):
+    payload = {
+        "text_number": int(stem),
+        "id": rid,
+        "llm": "x",
+        "model_id": "x",
+        "database": "db",
+        "question": "q",
+        "ddl": ddl,
+        "metadata": {},
+    }
+    if error is not None:
+        payload["error"] = error
+        payload["ddl"] = None
+    (pred_dir / f"{stem}.json").write_text(json.dumps(payload), encoding="utf-8")
+
+
+def test_direct_coverage_complete_expected_set(tmp_path):
+    gold = [{"id": "g1"}, {"id": "g2"}]
     pred_dir = tmp_path / "preds"
     pred_dir.mkdir()
-    ddl = "CREATE TABLE t (`a` int);"
-    (pred_dir / "0001.json").write_text(
-        json.dumps(
-            {
-                "text_number": 1,
-                "id": "g1",
-                "llm": "claude_sonnet_4_6",
-                "model_id": "claude-sonnet-4-6",
-                "database": "db",
-                "question": "q",
-                "ddl": ddl,
-                "metadata": {},
-            }
-        ),
-        encoding="utf-8",
-    )
-    index = genuine.index_predictions(pred_dir)
-    cov = genuine.compute_direct_coverage(gold, index)
-    assert cov["expected"] == 3
-    assert cov["present"] == 1
-    assert cov["missing"] == 2
-    assert cov["status"] == "INCOMPLETE"
+    _write_pred(pred_dir, "0001", "g1")
+    _write_pred(pred_dir, "0002", "g2")
+    cov = genuine.compute_direct_coverage(gold, genuine.index_predictions(pred_dir))
+    assert cov["status"] == "COMPLETE"
+    assert cov["present"] == 2 and cov["valid"] == 2 and cov["missing"] == 0
 
 
 def test_direct_coverage_complete_with_recorded_failure(tmp_path):
     gold = [{"id": "g1"}, {"id": "g2"}]
     pred_dir = tmp_path / "preds"
     pred_dir.mkdir()
-    ddl = "CREATE TABLE t (`a` int);"
-    (pred_dir / "0001.json").write_text(
-        json.dumps(
-            {
-                "text_number": 1,
-                "id": "g1",
-                "llm": "x",
-                "model_id": "x",
-                "database": "db",
-                "question": "q",
-                "ddl": ddl,
-                "metadata": {},
-            }
-        ),
-        encoding="utf-8",
-    )
-    (pred_dir / "0002.json").write_text(
-        json.dumps(
-            {
-                "text_number": 2,
-                "id": "g2",
-                "llm": "x",
-                "model_id": "x",
-                "database": "db",
-                "question": "q",
-                "error": "timeout",
-                "ddl": None,
-                "metadata": {},
-            }
-        ),
-        encoding="utf-8",
-    )
+    _write_pred(pred_dir, "0001", "g1")
+    _write_pred(pred_dir, "0002", "g2", error="timeout")
     cov = genuine.compute_direct_coverage(gold, genuine.index_predictions(pred_dir))
     assert cov["status"] == "COMPLETE"
     assert cov["valid"] == 1
@@ -286,26 +256,62 @@ def test_direct_coverage_complete_with_recorded_failure(tmp_path):
     assert cov["missing"] == 0
 
 
+def test_direct_coverage_partial_is_incomplete(tmp_path):
+    gold = [{"id": "g1"}, {"id": "g2"}, {"id": "g3"}]
+    pred_dir = tmp_path / "preds"
+    pred_dir.mkdir()
+    _write_pred(pred_dir, "0001", "g1")
+    cov = genuine.compute_direct_coverage(gold, genuine.index_predictions(pred_dir))
+    assert cov["expected"] == 3
+    assert cov["present"] == 1
+    assert cov["missing"] == 2
+    assert cov["status"] == "INCOMPLETE"
+
+
 def test_direct_coverage_detects_duplicate_ids(tmp_path):
     gold = [{"id": "g1"}]
     pred_dir = tmp_path / "preds"
     pred_dir.mkdir()
-    payload = {
-        "text_number": 1,
-        "id": "g1",
-        "llm": "x",
-        "model_id": "x",
-        "database": "db",
-        "question": "q",
-        "ddl": "CREATE TABLE t (`a` int);",
-        "metadata": {},
-    }
-    (pred_dir / "0001.json").write_text(json.dumps(payload), encoding="utf-8")
-    payload2 = dict(payload)
-    payload2["text_number"] = 2
-    (pred_dir / "0002.json").write_text(json.dumps(payload2), encoding="utf-8")
+    _write_pred(pred_dir, "0001", "g1")
+    _write_pred(pred_dir, "0002", "g1")
     cov = genuine.compute_direct_coverage(gold, genuine.index_predictions(pred_dir))
     assert cov["duplicate_ids"] >= 1
+    assert cov["status"] == "INVALID"
+
+
+def test_direct_coverage_unexpected_id_is_invalid(tmp_path):
+    gold = [{"id": "g1"}]
+    pred_dir = tmp_path / "preds"
+    pred_dir.mkdir()
+    _write_pred(pred_dir, "0001", "g1")
+    _write_pred(pred_dir, "0002", "extra")
+    cov = genuine.compute_direct_coverage(gold, genuine.index_predictions(pred_dir))
+    assert cov["unexpected_ids"] == 1
+    assert cov["present"] == 1
+    assert cov["status"] == "INVALID"
+
+
+def test_direct_coverage_malformed_json_is_invalid(tmp_path):
+    gold = [{"id": "g1"}]
+    pred_dir = tmp_path / "preds"
+    pred_dir.mkdir()
+    _write_pred(pred_dir, "0001", "g1")
+    (pred_dir / "0002.json").write_text("{not-json", encoding="utf-8")
+    cov = genuine.compute_direct_coverage(gold, genuine.index_predictions(pred_dir))
+    assert cov["malformed"] >= 1
+    assert cov["status"] == "INVALID"
+
+
+def test_direct_coverage_complete_plus_malformed_extra_is_invalid(tmp_path):
+    gold = [{"id": "g1"}, {"id": "g2"}]
+    pred_dir = tmp_path / "preds"
+    pred_dir.mkdir()
+    _write_pred(pred_dir, "0001", "g1")
+    _write_pred(pred_dir, "0002", "g2")
+    (pred_dir / "0003.json").write_text("<<<broken>>>", encoding="utf-8")
+    cov = genuine.compute_direct_coverage(gold, genuine.index_predictions(pred_dir))
+    assert cov["present"] == 2
+    assert cov["malformed"] >= 1
     assert cov["status"] == "INVALID"
 
 
@@ -320,7 +326,10 @@ def test_partial_baseline_is_incomplete(tmp_path, monkeypatch):
     root = tmp_path / "rschema_papermethods"
     path = root / "codellama13b" / "one_shot" / "results.jsonl"
     path.parent.mkdir(parents=True)
-    path.write_text(json.dumps({"id": "a", "status": "ok", "answer": {"T": {"Attributes": ["x"], "Primary key": ["x"]}}}) + "\n")
+    path.write_text(
+        json.dumps({"id": "a", "status": "ok", "answer": {"T": {"Attributes": ["x"], "Primary key": ["x"]}}})
+        + "\n"
+    )
     monkeypatch.setitem(genuine.BASELINE_ROOT, "RSchema", root)
     bundle = genuine.load_baseline_predictions(
         "RSchema", "codellama13b", "one_shot", expected_ids={"a", "b"}
@@ -328,6 +337,69 @@ def test_partial_baseline_is_incomplete(tmp_path, monkeypatch):
     assert bundle["status"] == "INCOMPLETE"
     assert bundle["coverage"]["present"] == 1
     assert bundle["coverage"]["missing"] == 1
+
+
+def test_baseline_complete_with_recorded_failure(tmp_path, monkeypatch):
+    root = tmp_path / "rschema_papermethods"
+    path = root / "codellama13b" / "one_shot" / "results.jsonl"
+    path.parent.mkdir(parents=True)
+    lines = [
+        json.dumps({"id": "a", "status": "ok", "answer": {"T": {"Attributes": ["x"], "Primary key": ["x"]}}}),
+        json.dumps({"id": "b", "status": "error", "error": "oom", "answer": None}),
+    ]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    monkeypatch.setitem(genuine.BASELINE_ROOT, "RSchema", root)
+    bundle = genuine.load_baseline_predictions(
+        "RSchema", "codellama13b", "one_shot", expected_ids={"a", "b"}
+    )
+    assert bundle["status"] == "COMPLETE"
+    assert bundle["coverage"]["generation_failed"] == 1
+    assert bundle["coverage"]["valid"] == 1
+
+
+def test_baseline_unexpected_id_is_invalid(tmp_path, monkeypatch):
+    root = tmp_path / "rschema_papermethods"
+    path = root / "codellama13b" / "one_shot" / "results.jsonl"
+    path.parent.mkdir(parents=True)
+    lines = [
+        json.dumps({"id": "a", "status": "ok", "answer": {"T": {"Attributes": ["x"], "Primary key": ["x"]}}}),
+        json.dumps({"id": "extra", "status": "ok", "answer": {"T": {"Attributes": ["x"], "Primary key": ["x"]}}}),
+    ]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    monkeypatch.setitem(genuine.BASELINE_ROOT, "RSchema", root)
+    bundle = genuine.load_baseline_predictions(
+        "RSchema", "codellama13b", "one_shot", expected_ids={"a"}
+    )
+    assert bundle["coverage"]["unexpected_ids"] == 1
+    assert bundle["status"] == "INVALID"
+
+
+def test_baseline_duplicate_id_is_invalid(tmp_path, monkeypatch):
+    root = tmp_path / "rschema_papermethods"
+    path = root / "codellama13b" / "one_shot" / "results.jsonl"
+    path.parent.mkdir(parents=True)
+    row = json.dumps({"id": "a", "status": "ok", "answer": {"T": {"Attributes": ["x"], "Primary key": ["x"]}}})
+    path.write_text(row + "\n" + row + "\n", encoding="utf-8")
+    monkeypatch.setitem(genuine.BASELINE_ROOT, "RSchema", root)
+    bundle = genuine.load_baseline_predictions(
+        "RSchema", "codellama13b", "one_shot", expected_ids={"a"}
+    )
+    assert bundle["coverage"]["duplicate_ids"] >= 1
+    assert bundle["status"] == "INVALID"
+
+
+def test_baseline_malformed_jsonl_is_invalid(tmp_path, monkeypatch):
+    root = tmp_path / "rschema_papermethods"
+    path = root / "codellama13b" / "one_shot" / "results.jsonl"
+    path.parent.mkdir(parents=True)
+    good = json.dumps({"id": "a", "status": "ok", "answer": {"T": {"Attributes": ["x"], "Primary key": ["x"]}}})
+    path.write_text(good + "\n{bad\n", encoding="utf-8")
+    monkeypatch.setitem(genuine.BASELINE_ROOT, "RSchema", root)
+    bundle = genuine.load_baseline_predictions(
+        "RSchema", "codellama13b", "one_shot", expected_ids={"a"}
+    )
+    assert bundle["coverage"]["malformed"] >= 1
+    assert bundle["status"] == "INVALID"
 
 
 def test_evaluator_strict_incomplete_tmpdir(tmp_path):
@@ -451,6 +523,15 @@ def test_record_done_does_not_treat_error_as_valid(tmp_path):
     assert api.record_done(out, 1, expected_id="id1", expected_llm="claude_sonnet_4_6") is False
 
 
+def _done_kwargs():
+    return dict(
+        expected_id="id1",
+        expected_llm="gpt_5_4_mini",
+        expected_model_id="gpt-5.4-mini",
+        expected_question="q",
+    )
+
+
 def test_resume_skips_valid_prediction(tmp_path):
     out = tmp_path / "preds"
     out.mkdir()
@@ -465,17 +546,104 @@ def test_resume_skips_valid_prediction(tmp_path):
         "db",
         {"ddl": ddl, "metadata": {"database": "db", "tables": ["t"], "columns_by_table": {"t": []}}},
     )
-    assert (
-        api.record_done(
-            out,
-            1,
-            expected_id="id1",
-            expected_llm="gpt_5_4_mini",
-            expected_model_id="gpt-5.4-mini",
-            expected_question="q",
-        )
-        is True
+    assert api.record_done(out, 1, **_done_kwargs()) is True
+
+
+def test_txt_json_identical_ddl_is_done(tmp_path):
+    out = tmp_path / "preds"
+    out.mkdir()
+    ddl = "CREATE TABLE t (`a` int);"
+    api.save_record(out, "gpt_5_4_mini", "gpt-5.4-mini", "id1", 1, "q", "db", {"ddl": ddl, "metadata": {}})
+    assert api.record_done(out, 1, **_done_kwargs()) is True
+
+
+def test_txt_json_crlf_and_trailing_whitespace_still_done(tmp_path):
+    out = tmp_path / "preds"
+    out.mkdir()
+    ddl = "CREATE TABLE t (`a` int);"
+    api.save_record(out, "gpt_5_4_mini", "gpt-5.4-mini", "id1", 1, "q", "db", {"ddl": ddl, "metadata": {}})
+    # Simulate Windows line endings / trailing blank line in TXT only.
+    txt_path = out / "0001.txt"
+    txt_path.write_bytes((ddl + "\r\n\r\n").encode("utf-8"))
+    assert api.normalize_saved_ddl(txt_path.read_text(encoding="utf-8")) == api.normalize_saved_ddl(ddl)
+    assert api.record_done(out, 1, **_done_kwargs()) is True
+
+
+def test_txt_json_different_table_name_not_done(tmp_path):
+    out = tmp_path / "preds"
+    out.mkdir()
+    ddl = "CREATE TABLE t (`a` int);"
+    api.save_record(out, "gpt_5_4_mini", "gpt-5.4-mini", "id1", 1, "q", "db", {"ddl": ddl, "metadata": {}})
+    (out / "0001.txt").write_text("CREATE TABLE other (`a` int);", encoding="utf-8")
+    assert api.record_done(out, 1, **_done_kwargs()) is False
+
+
+def test_txt_json_different_columns_not_done(tmp_path):
+    out = tmp_path / "preds"
+    out.mkdir()
+    ddl = "CREATE TABLE t (`a` int);"
+    api.save_record(out, "gpt_5_4_mini", "gpt-5.4-mini", "id1", 1, "q", "db", {"ddl": ddl, "metadata": {}})
+    (out / "0001.txt").write_text("CREATE TABLE t (`a` int, `b` int);", encoding="utf-8")
+    assert api.record_done(out, 1, **_done_kwargs()) is False
+
+
+def test_txt_json_different_fk_not_done(tmp_path):
+    out = tmp_path / "preds"
+    out.mkdir()
+    ddl = "CREATE TABLE t (`a` int, FOREIGN KEY (`a`) REFERENCES p(`id`));"
+    api.save_record(out, "gpt_5_4_mini", "gpt-5.4-mini", "id1", 1, "q", "db", {"ddl": ddl, "metadata": {}})
+    (out / "0001.txt").write_text(
+        "CREATE TABLE t (`a` int, FOREIGN KEY (`a`) REFERENCES q(`id`));",
+        encoding="utf-8",
     )
+    assert api.record_done(out, 1, **_done_kwargs()) is False
+
+
+def test_txt_json_partial_txt_not_done(tmp_path):
+    out = tmp_path / "preds"
+    out.mkdir()
+    ddl = "CREATE TABLE t (`a` int);\nCREATE TABLE u (`b` int);"
+    api.save_record(out, "gpt_5_4_mini", "gpt-5.4-mini", "id1", 1, "q", "db", {"ddl": ddl, "metadata": {}})
+    (out / "0001.txt").write_text("CREATE TABLE t (`a` int);", encoding="utf-8")
+    assert api.record_done(out, 1, **_done_kwargs()) is False
+
+
+def test_txt_json_substring_create_table_not_enough(tmp_path):
+    """Both contain CREATE TABLE but differ — must NOT be treated as done."""
+    out = tmp_path / "preds"
+    out.mkdir()
+    ddl = "CREATE TABLE t (`a` int);"
+    api.save_record(out, "gpt_5_4_mini", "gpt-5.4-mini", "id1", 1, "q", "db", {"ddl": ddl, "metadata": {}})
+    (out / "0001.txt").write_text("CREATE TABLE t (`a` varchar(10));", encoding="utf-8")
+    assert "CREATE TABLE" in (out / "0001.txt").read_text(encoding="utf-8").upper()
+    assert api.record_done(out, 1, **_done_kwargs()) is False
+
+
+def test_missing_txt_not_done(tmp_path):
+    out = tmp_path / "preds"
+    out.mkdir()
+    ddl = "CREATE TABLE t (`a` int);"
+    api.save_record(out, "gpt_5_4_mini", "gpt-5.4-mini", "id1", 1, "q", "db", {"ddl": ddl, "metadata": {}})
+    (out / "0001.txt").unlink()
+    assert api.record_done(out, 1, **_done_kwargs()) is False
+
+
+def test_corrupted_json_not_done(tmp_path):
+    out = tmp_path / "preds"
+    out.mkdir()
+    ddl = "CREATE TABLE t (`a` int);"
+    api.save_record(out, "gpt_5_4_mini", "gpt-5.4-mini", "id1", 1, "q", "db", {"ddl": ddl, "metadata": {}})
+    (out / "0001.json").write_text("{broken", encoding="utf-8")
+    assert api.record_done(out, 1, **_done_kwargs()) is False
+
+
+def test_recorded_failure_not_done(tmp_path):
+    out = tmp_path / "preds"
+    out.mkdir()
+    api.save_record(
+        out, "gpt_5_4_mini", "gpt-5.4-mini", "id1", 1, "q", "db", None, error="boom"
+    )
+    assert api.record_done(out, 1, **_done_kwargs()) is False
 
 
 def test_resume_rejects_wrong_model_id(tmp_path):
@@ -499,6 +667,26 @@ def test_resume_rejects_wrong_model_id(tmp_path):
             expected_id="id1",
             expected_llm="claude_sonnet_4_6",
             expected_model_id="claude-sonnet-4-6",
+            expected_question="q",
+        )
+        is False
+    )
+
+
+def test_resume_rejects_wrong_schema_id(tmp_path):
+    out = tmp_path / "preds"
+    out.mkdir()
+    ddl = "CREATE TABLE `t` (`a` int);"
+    api.save_record(
+        out, "gpt_5_4_mini", "gpt-5.4-mini", "id1", 1, "q", "db", {"ddl": ddl, "metadata": {}}
+    )
+    assert (
+        api.record_done(
+            out,
+            1,
+            expected_id="OTHER",
+            expected_llm="gpt_5_4_mini",
+            expected_model_id="gpt-5.4-mini",
             expected_question="q",
         )
         is False

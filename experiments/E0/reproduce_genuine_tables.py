@@ -379,14 +379,11 @@ def load_baseline_predictions(
         "duplicate_ids": duplicate_ids,
         "unexpected_ids": unexpected,
     }
-    if malformed and not preds:
-        status_s = "INVALID"
-        msg = f"INVALID: baseline file malformed: {path}"
-    elif duplicate_ids or (expected and unexpected and not present_ids):
+    if malformed or duplicate_ids or unexpected:
         status_s = "INVALID"
         msg = (
-            f"INVALID: baseline duplicates={duplicate_ids} unexpected={unexpected} "
-            f"present={coverage['present']}/{coverage['expected']}"
+            f"INVALID: baseline malformed={malformed} duplicates={duplicate_ids} "
+            f"unexpected={unexpected} present={coverage['present']}/{coverage['expected']}"
         )
     elif expected and coverage["present"] < coverage["expected"]:
         status_s = "INCOMPLETE"
@@ -703,11 +700,11 @@ def compute_direct_coverage(gold_rows: list[dict], index: dict[str, Any]) -> dic
         "duplicate_id_list": duplicate_ids,
         "unexpected_id_list": unexpected[:20],
     }
-    if duplicate_ids or (unexpected and present == 0):
+    if duplicate_ids or unexpected or malformed:
         status = "INVALID"
         msg = (
             f"INVALID: duplicates={len(duplicate_ids)} unexpected={len(unexpected)} "
-            f"present={present}/{coverage['expected']}"
+            f"malformed={malformed} present={present}/{coverage['expected']}"
         )
     elif missing > 0 or present < coverage["expected"]:
         status = "INCOMPLETE"
