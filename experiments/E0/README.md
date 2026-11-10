@@ -17,12 +17,23 @@ Canonical closed Direct inference: `run_direct_api.py` (also via `run.py --onlin
 | Metric | Definition |
 |---|---|
 | Structural F1 (T/A/E/R) | Micro-averaged; RSchema vs 518 logical; SchemaBench vs 239 DDL |
-| Domain F1 | Micro over typed gold columns with known nullability; RSchema 381 DDL IDs; SchemaBench 239. Baselines: `--` |
+| Domain F1 | Micro over columns with recognised type **and** known nullability; RSchema 381 DDL IDs; SchemaBench 239. Baselines: `--` |
 | Hallucination | \(H=\frac14\sum_{d\in\{T,A,E,R\}}\max(0,P_d-M_d)/P_d\) micro; Domain excluded |
 | nGED | Structural `names_only=True` (no type/nullability in labels) |
 | Nullability | MySQL dialect; bare → YES; NOT NULL / inline PK → NO |
 | Failures | Empty prediction kept in population; nGED=1; Hall not forced to 1 |
-| Parser | `legacy=False` |
+| Parser | `legacy=False`; prediction structure from DDL (JSON metadata compared, not preferred) |
+
+### Coverage status (Direct / baselines)
+
+| Status | Meaning |
+|---|---|
+| `COMPLETE` | All expected gold IDs present (recorded generation failures allowed) |
+| `INCOMPLETE` | Some gold IDs missing prediction files |
+| `INVALID` | Duplicate / mismatched IDs |
+| `BLOCKED` | Required baseline file unavailable — no fabricated metrics |
+
+`--strict` exits nonzero on `INCOMPLETE`, `INVALID`, or `BLOCKED`. Missing files are scored as empty for diagnostics, but never imply a finished inference run.
 
 Never substitute `configs/paper_reference_values.json` for missing prediction files.
 

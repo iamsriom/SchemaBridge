@@ -280,15 +280,18 @@ def test_comments_with_parens_and_keywords_are_ignored():
     assert parse_ddl_primary_unique(ddl)[0] == []
 
 
-def test_ensure_prediction_metadata_fills_from_ddl_only_when_empty():
+def test_ensure_prediction_metadata_prefers_ddl_structure():
     ddl = "CREATE TABLE t (a int);"
     filled = ensure_prediction_metadata({}, ddl, database="d")
     assert filled["tables"] == ["t"] and cols(filled, "t") == ["a"] and filled["database"] == "d"
+    # Conflicting JSON metadata is not preferred over DDL; mismatches are recorded.
     given = {"tables": ["x"], "columns_by_table": {"x": [{"COLUMN_NAME": "q"}]}}
-    assert ensure_prediction_metadata(given, ddl) == given
-    # tables kept when only columns are empty
+    fixed = ensure_prediction_metadata(given, ddl)
+    assert fixed["tables"] == ["t"] and cols(fixed, "t") == ["a"]
+    assert fixed.get("_metadata_ddl_mismatches")
+    # Empty column map still yields DDL columns; DDL tables win.
     kept = ensure_prediction_metadata({"tables": ["keep"], "columns_by_table": {}}, ddl)
-    assert kept["tables"] == ["keep"] and cols(kept, "t") == ["a"]
+    assert kept["tables"] == ["t"] and cols(kept, "t") == ["a"]
 
 
 def test_parse_ddl_structured_schema():

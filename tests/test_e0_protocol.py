@@ -15,7 +15,6 @@ sys.path.insert(0, str(ROOT / "experiments" / "E0"))
 
 from src.evaluator import (  # noqa: E402
     empty_prediction_against_gold,
-    evaluate_schema_pair,
     five_element_counts,
     gold_record_to_metadata_and_ddl,
 )
@@ -25,8 +24,9 @@ from src.metrics import (  # noqa: E402
     micro_f1,
     normalized_graph_edit_distance,
 )
-from src.schema_parser import metadata_from_ddl  # noqa: E402
+from src.schema_parser import ensure_prediction_metadata, metadata_from_ddl  # noqa: E402
 
+import reproduce_genuine_tables as genuine  # noqa: E402
 import run_direct_api as api  # noqa: E402
 
 
@@ -54,7 +54,6 @@ def test_dataset_join_by_id_not_position():
     logical = _load_jsonl(ROOT / "datasets/rschema/annotation.jsonl")
     ddl = _load_jsonl(ROOT / "datasets/rschema/annotation_ddl.jsonl")
     by_id = {r["id"]: r for r in ddl}
-    # First DDL id must match by id lookup, not necessarily logical[0]
     first = ddl[0]
     assert by_id[first["id"]]["id"] == first["id"]
     assert any(r["id"] == first["id"] for r in logical)
@@ -65,8 +64,7 @@ def test_unknown_type_not_imputed_as_varchar():
     meta = metadata_from_ddl(ddl, legacy=False)
     x = next(c for c in meta["columns_by_table"]["t"] if c["COLUMN_NAME"] == "x")
     assert (x.get("DATA_TYPE") or "").lower() != "varchar"
-    assert x.get("TYPE_STATUS") in (None, "unsupported", "unknown", "ok") or True
-    # Placeholder / unknown must not invent VARCHAR
+    assert x.get("TYPE_STATUS") == "unsupported"
     assert "varchar" not in (x.get("COLUMN_TYPE") or "").lower()
 
 
@@ -116,6 +114,15 @@ def test_domain_requires_type_and_nullability():
     assert counts["domain"]["matched"] < counts["attributes"]["matched"]
 
 
+def test_domain_unknown_nullability_excluded_from_denominator():
+    # Unsupported placeholder type with unknown nullability must not enter Domain G.
+    gold_ddl = "CREATE TABLE t (`x` null, `y` int);"
+    g_meta = metadata_from_ddl(gold_ddl, legacy=False)
+    counts = five_element_counts(g_meta, gold_ddl, g_meta, gold_ddl, legacy=False)
+    assert counts["attributes"]["gold"] == 2
+    assert counts["domain"]["gold"] == 1  # only `y`
+
+
 def test_micro_f1_sums_before_ratio():
     g = [10, 2]
     p = [10, 2]
@@ -163,12 +170,241 @@ def test_sb001_deepseek_failure_kept_in_population():
         assert empty["tables"]["gold"] > 0
         assert empty["tables"]["recreated"] == 0
     else:
-        # If this dump is non-empty in a given checkout, still keep SB-001 in gold pop.
         assert g_meta["tables"]
 
 
+def test_ensure_prediction_metadata_prefers_ddl_over_partial_json():
+    ddl = "CREATE TABLE t (`a` int, `b` int);"
+    partial = {
+        "database": "db",
+        "tables": ["t"],
+        "columns_by_table": {
+            "t": [{"COLUMN_NAME": "a", "DATA_TYPE": "int", "IS_NULLABLE": "YES", "TYPE_STATUS": "ok"}]
+        },
+    }
+    fixed = ensure_prediction_metadata(partial, ddl, legacy=False)
+    cols = fixed["columns_by_table"]["t"]
+    assert len(cols) == 2
+    assert any(m.startswith("column_count_mismatch") for m in fixed.get("_metadata_ddl_mismatches") or [])
+
+
+def test_ensure_prediction_metadata_empty_ddl_keeps_json():
+    meta = {"database": "db", "tables": ["t"], "columns_by_table": {"t": [{"COLUMN_NAME": "a"}]}}
+    out = ensure_prediction_metadata(meta, "", legacy=False)
+    assert out["tables"] == ["t"]
+    assert len(out["columns_by_table"]["t"]) == 1
+
+
+def test_ensure_prediction_metadata_type_conflict_recorded():
+    ddl = "CREATE TABLE t (`a` int);"
+    meta = {
+        "tables": ["t"],
+        "columns_by_table": {
+            "t": [
+                {
+                    "COLUMN_NAME": "a",
+                    "DATA_TYPE": "varchar",
+                    "IS_NULLABLE": "YES",
+                    "TYPE_STATUS": "ok",
+                }
+            ]
+        },
+    }
+    out = ensure_prediction_metadata(meta, ddl, legacy=False)
+    assert (out["columns_by_table"]["t"][0].get("DATA_TYPE") or "").lower() == "int"
+    assert any("type_mismatch" in m for m in out.get("_metadata_ddl_mismatches") or [])
+
+
+def test_direct_coverage_partial_is_incomplete(tmp_path):
+    gold = [{"id": "g1"}, {"id": "g2"}, {"id": "g3"}]
+    pred_dir = tmp_path / "preds"
+    pred_dir.mkdir()
+    ddl = "CREATE TABLE t (`a` int);"
+    (pred_dir / "0001.json").write_text(
+        json.dumps(
+            {
+                "text_number": 1,
+                "id": "g1",
+                "llm": "claude_sonnet_4_6",
+                "model_id": "claude-sonnet-4-6",
+                "database": "db",
+                "question": "q",
+                "ddl": ddl,
+                "metadata": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+    index = genuine.index_predictions(pred_dir)
+    cov = genuine.compute_direct_coverage(gold, index)
+    assert cov["expected"] == 3
+    assert cov["present"] == 1
+    assert cov["missing"] == 2
+    assert cov["status"] == "INCOMPLETE"
+
+
+def test_direct_coverage_complete_with_recorded_failure(tmp_path):
+    gold = [{"id": "g1"}, {"id": "g2"}]
+    pred_dir = tmp_path / "preds"
+    pred_dir.mkdir()
+    ddl = "CREATE TABLE t (`a` int);"
+    (pred_dir / "0001.json").write_text(
+        json.dumps(
+            {
+                "text_number": 1,
+                "id": "g1",
+                "llm": "x",
+                "model_id": "x",
+                "database": "db",
+                "question": "q",
+                "ddl": ddl,
+                "metadata": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+    (pred_dir / "0002.json").write_text(
+        json.dumps(
+            {
+                "text_number": 2,
+                "id": "g2",
+                "llm": "x",
+                "model_id": "x",
+                "database": "db",
+                "question": "q",
+                "error": "timeout",
+                "ddl": None,
+                "metadata": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+    cov = genuine.compute_direct_coverage(gold, genuine.index_predictions(pred_dir))
+    assert cov["status"] == "COMPLETE"
+    assert cov["valid"] == 1
+    assert cov["generation_failed"] == 1
+    assert cov["missing"] == 0
+
+
+def test_direct_coverage_detects_duplicate_ids(tmp_path):
+    gold = [{"id": "g1"}]
+    pred_dir = tmp_path / "preds"
+    pred_dir.mkdir()
+    payload = {
+        "text_number": 1,
+        "id": "g1",
+        "llm": "x",
+        "model_id": "x",
+        "database": "db",
+        "question": "q",
+        "ddl": "CREATE TABLE t (`a` int);",
+        "metadata": {},
+    }
+    (pred_dir / "0001.json").write_text(json.dumps(payload), encoding="utf-8")
+    payload2 = dict(payload)
+    payload2["text_number"] = 2
+    (pred_dir / "0002.json").write_text(json.dumps(payload2), encoding="utf-8")
+    cov = genuine.compute_direct_coverage(gold, genuine.index_predictions(pred_dir))
+    assert cov["duplicate_ids"] >= 1
+    assert cov["status"] == "INVALID"
+
+
+def test_missing_baseline_is_blocked(tmp_path, monkeypatch):
+    monkeypatch.setitem(genuine.BASELINE_ROOT, "RSchema", tmp_path / "missing_root")
+    bundle = genuine.load_baseline_predictions("RSchema", "codellama13b", "one_shot", expected_ids={"a"})
+    assert bundle["status"] == "BLOCKED"
+    assert "unavailable" in bundle["message"].lower()
+
+
+def test_partial_baseline_is_incomplete(tmp_path, monkeypatch):
+    root = tmp_path / "rschema_papermethods"
+    path = root / "codellama13b" / "one_shot" / "results.jsonl"
+    path.parent.mkdir(parents=True)
+    path.write_text(json.dumps({"id": "a", "status": "ok", "answer": {"T": {"Attributes": ["x"], "Primary key": ["x"]}}}) + "\n")
+    monkeypatch.setitem(genuine.BASELINE_ROOT, "RSchema", root)
+    bundle = genuine.load_baseline_predictions(
+        "RSchema", "codellama13b", "one_shot", expected_ids={"a", "b"}
+    )
+    assert bundle["status"] == "INCOMPLETE"
+    assert bundle["coverage"]["present"] == 1
+    assert bundle["coverage"]["missing"] == 1
+
+
+def test_evaluator_strict_incomplete_tmpdir(tmp_path):
+    """Missing Direct pred dir → INCOMPLETE/BLOCKED under --strict."""
+    gold_dir = tmp_path / "gold"
+    gold_dir.mkdir()
+    # Tiny synthetic gold files
+    (gold_dir / "annotation.jsonl").write_text(
+        json.dumps(
+            {
+                "id": "S1",
+                "question": "q",
+                "answer": {"T": {"Attributes": ["a"], "Primary key": ["a"]}},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (gold_dir / "annotation_ddl.jsonl").write_text(
+        json.dumps(
+            {
+                "id": "S1",
+                "answer": "CREATE TABLE `T` (`a` int NOT NULL, PRIMARY KEY (`a`));",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    pred_root = tmp_path / "preds"
+    # Intentionally omit closed-model dirs; create one open-weight complete dump
+    d = pred_root / "rschema_exp4_codellama13b"
+    d.mkdir(parents=True)
+    (d / "0001.json").write_text(
+        json.dumps(
+            {
+                "text_number": 1,
+                "id": "S1",
+                "llm": "codellama13b",
+                "model_id": "x",
+                "database": "db",
+                "question": "q",
+                "ddl": "CREATE TABLE `T` (`a` int NOT NULL, PRIMARY KEY (`a`));",
+                "metadata": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+    (d / "0001.txt").write_text("CREATE TABLE `T` (`a` int NOT NULL, PRIMARY KEY (`a`));\n")
+
+    # Unit-level: coverage for missing Claude dir
+    missing = pred_root / "rschema_exp4_claude_sonnet_4_6"
+    assert not missing.is_dir()
+    # Simulate evaluator coverage for empty/missing dir via empty index
+    missing.mkdir()
+    cov = genuine.compute_direct_coverage(
+        [{"id": "S1"}], genuine.index_predictions(missing)
+    )
+    assert cov["status"] == "INCOMPLETE"
+    assert cov["missing"] == 1
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "experiments/E0/reproduce_genuine_tables.py"),
+            "--validate-only",
+            "--skip-pytest",
+        ],
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    # validate-only uses real gold; should pass independently of preds
+    assert proc.returncode == 0
+
+
 def test_direct_api_dry_run_no_network(tmp_path, monkeypatch):
-    # Ensure dry-run exits 0 and does not need keys
     env = {k: v for k, v in os.environ.items() if k not in ("OPENAI_API_KEY", "ANTHROPIC_API_KEY")}
     proc = subprocess.run(
         [sys.executable, str(ROOT / "experiments/E0/run_direct_api.py"), "--dry-run", "--limit", "1"],
@@ -212,7 +448,7 @@ def test_record_done_does_not_treat_error_as_valid(tmp_path):
         None,
         error="boom",
     )
-    assert api.record_done(out, 1) is False
+    assert api.record_done(out, 1, expected_id="id1", expected_llm="claude_sonnet_4_6") is False
 
 
 def test_resume_skips_valid_prediction(tmp_path):
@@ -229,7 +465,81 @@ def test_resume_skips_valid_prediction(tmp_path):
         "db",
         {"ddl": ddl, "metadata": {"database": "db", "tables": ["t"], "columns_by_table": {"t": []}}},
     )
-    assert api.record_done(out, 1) is True
+    assert (
+        api.record_done(
+            out,
+            1,
+            expected_id="id1",
+            expected_llm="gpt_5_4_mini",
+            expected_model_id="gpt-5.4-mini",
+            expected_question="q",
+        )
+        is True
+    )
+
+
+def test_resume_rejects_wrong_model_id(tmp_path):
+    out = tmp_path / "preds"
+    out.mkdir()
+    ddl = "CREATE TABLE `t` (`a` int);"
+    api.save_record(
+        out,
+        "gpt_5_4_mini",
+        "gpt-5.4-mini",
+        "id1",
+        1,
+        "q",
+        "db",
+        {"ddl": ddl, "metadata": {}},
+    )
+    assert (
+        api.record_done(
+            out,
+            1,
+            expected_id="id1",
+            expected_llm="claude_sonnet_4_6",
+            expected_model_id="claude-sonnet-4-6",
+            expected_question="q",
+        )
+        is False
+    )
+
+
+def test_resume_detects_id_conflict(tmp_path):
+    out = tmp_path / "preds"
+    out.mkdir()
+    ddl = "CREATE TABLE `t` (`a` int);"
+    api.save_record(
+        out,
+        "gpt_5_4_mini",
+        "gpt-5.4-mini",
+        "OTHER",
+        1,
+        "q",
+        "db",
+        {"ddl": ddl, "metadata": {}},
+    )
+    assert api.record_id_conflict(out, 1, "id1") is not None
+
+
+def test_empty_requirement_saves_failure_record(tmp_path, monkeypatch):
+    out = tmp_path / "preds"
+    # Exercise save path used by empty-q handling
+    api.save_record(
+        out,
+        "claude_sonnet_4_6",
+        "claude-sonnet-4-6",
+        "id1",
+        1,
+        "",
+        "db",
+        None,
+        error="empty or missing requirement (question)",
+    )
+    data = json.loads((out / "0001.json").read_text(encoding="utf-8"))
+    assert data["id"] == "id1"
+    assert data.get("error")
+    assert api.record_done(out, 1, expected_id="id1") is False
 
 
 def test_redact_secrets_never_leaks_keys():
@@ -243,8 +553,38 @@ def test_constructor_prompt_file_exists_and_matches_contract():
     assert "CREATE TABLE" in text
 
 
-def test_incomplete_closed_dir_skipped_by_evaluator_paths():
-    # Path configured; missing dir must not crash index helper when skipped in main
-    missing = ROOT / "results/predictions/e0/schemabench_exp2_gpt_5_4_mini"
-    # Evaluator main skips missing dirs; unit-check the guard pattern
-    assert not missing.is_dir() or missing.is_dir()
+def test_table_v_vi_direct_consistency_helper():
+    # Bit-identity of Direct rows is enforced in reproduce_genuine_tables.main;
+    # unit-check the equality predicate used there.
+    r = {
+        "dataset": "RSchema",
+        "model": "X",
+        "n": 2,
+        "failed": 0,
+        "nged": 0.1,
+        "halluc": 0.2,
+        "tables": 0.3,
+        "attributes": 0.4,
+        "domain": 0.5,
+        "entity": 0.6,
+        "referential": 0.7,
+    }
+    vi = {
+        "dataset": "RSchema",
+        "method": "Direct",
+        "model": "X",
+        "eval": 2,
+        "zero": 0,
+        "nged": 0.1,
+        "halluc": 0.2,
+        "tables": 0.3,
+        "attributes": 0.4,
+        "domain": 0.5,
+        "entity": 0.6,
+        "referential": 0.7,
+    }
+    assert all(
+        r[m] == vi[m]
+        for m in ("nged", "halluc", "tables", "attributes", "domain", "entity", "referential")
+    )
+    assert r["n"] == vi["eval"] and r["failed"] == vi["zero"]

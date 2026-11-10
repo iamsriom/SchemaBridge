@@ -540,24 +540,66 @@ def metadata_from_ddl(ddl: str, database: str = "", *, legacy: bool = False) -> 
 
 
 def ensure_prediction_metadata(pred_meta: dict, pred_ddl: str, database: str = "", *, legacy: bool = False) -> dict:
-    """Return prediction metadata, filling columns from DDL when JSON metadata has none.
+    """Return prediction metadata with DDL as the authoritative structural source when present.
 
-    If ``pred_meta['columns_by_table']`` already holds at least one column it is returned
-    unchanged (a shallow copy).  Otherwise columns come from :func:`metadata_from_ddl`;
-    ``tables`` is only replaced when the metadata had none.
+    E0 predictions are SQL DDL. When ``pred_ddl`` contains parseable ``CREATE TABLE``
+    statements, structural tables/columns come from :func:`metadata_from_ddl`. Supplied
+    JSON metadata is compared for diagnostics and never silently preferred when it would
+    drop DDL columns or invent metadata-only tables that contradict the DDL.
+
+    When DDL is empty/missing, the (possibly empty) JSON metadata is returned unchanged
+    so older empty-failure dumps remain evaluable.
     """
     meta = dict(pred_meta or {})
-    cbt = meta.get("columns_by_table") or {}
-    if sum(len(v or []) for v in cbt.values()) > 0:
+    ddl = (pred_ddl or "").strip()
+    if not ddl:
+        meta.setdefault("database", database or meta.get("database") or "")
+        meta.setdefault("tables", list(meta.get("tables") or []))
+        meta.setdefault("columns_by_table", dict(meta.get("columns_by_table") or {}))
         return meta
+
     parsed = metadata_from_ddl(
-        pred_ddl, database=database or meta.get("database") or "", legacy=legacy
+        ddl, database=database or meta.get("database") or "", legacy=legacy
     )
-    if not meta.get("tables"):
-        meta["tables"] = parsed.get("tables") or []
-    meta["columns_by_table"] = parsed.get("columns_by_table") or {}
-    meta.setdefault("database", parsed.get("database") or database)
-    return meta
+    mismatches: list[str] = []
+    meta_tables = [str(t) for t in (meta.get("tables") or [])]
+    parsed_tables = list(parsed.get("tables") or [])
+    meta_cbt = meta.get("columns_by_table") or {}
+    parsed_cbt = parsed.get("columns_by_table") or {}
+
+    meta_col_n = sum(len(v or []) for v in meta_cbt.values())
+    parsed_col_n = sum(len(v or []) for v in parsed_cbt.values())
+    if meta_tables and set(map(str.lower, meta_tables)) != set(map(str.lower, parsed_tables)):
+        mismatches.append(
+            f"table_set_mismatch meta={sorted(meta_tables)} ddl={sorted(parsed_tables)}"
+        )
+    if meta_col_n and meta_col_n != parsed_col_n:
+        mismatches.append(f"column_count_mismatch meta={meta_col_n} ddl={parsed_col_n}")
+
+    # Type conflicts on shared (table, column) names — diagnostic only.
+    for t in parsed_tables:
+        pcols = {str(c.get("COLUMN_NAME") or "").lower(): c for c in (parsed_cbt.get(t) or [])}
+        # find matching meta table (case-insensitive)
+        mt = next((x for x in meta_cbt if str(x).lower() == str(t).lower()), None)
+        if mt is None:
+            continue
+        for mc in meta_cbt.get(mt) or []:
+            name = str(mc.get("COLUMN_NAME") or "").lower()
+            if not name or name not in pcols:
+                continue
+            md = (mc.get("DATA_TYPE") or "").strip().lower()
+            pd = (pcols[name].get("DATA_TYPE") or "").strip().lower()
+            if md and pd and md != pd:
+                mismatches.append(f"type_mismatch {t}.{name}: meta={md} ddl={pd}")
+
+    out = {
+        "database": parsed.get("database") or meta.get("database") or database or "",
+        "tables": parsed_tables,
+        "columns_by_table": parsed_cbt,
+    }
+    if mismatches:
+        out["_metadata_ddl_mismatches"] = mismatches
+    return out
 
 
 # --------------------------------------------------------------------------- constraints

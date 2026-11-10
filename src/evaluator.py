@@ -198,7 +198,7 @@ def five_element_counts(
     attr_match = domain_match = 0
 
     def _typed(info: dict) -> bool:
-        """Eligible for Domain: recognised non-empty DATA_TYPE (TYPE_STATUS ok)."""
+        """Recognised non-empty DATA_TYPE (TYPE_STATUS ok / not unsupported)."""
         status = (info.get("TYPE_STATUS") or "").lower()
         dtype = (info.get("DATA_TYPE") or "").strip()
         if status == "unsupported" or not dtype:
@@ -214,6 +214,12 @@ def five_element_counts(
             return False
         return True
 
+    def _domain_eligible(info: dict) -> bool:
+        """Domain denominator rule: valid recognised type AND known nullability."""
+        if legacy:
+            return True
+        return _typed(info) and _nullability_known(info)
+
     def _null_ok(gi: dict, pi: dict) -> bool:
         if legacy:
             return ((gi.get("IS_NULLABLE") or "").upper() == "YES") == (
@@ -228,11 +234,11 @@ def five_element_counts(
     domain_gold = domain_pred = 0
     for t, cols in g_cols.items():
         for c in cols:
-            if _typed(g_info.get(t, {}).get(c, {})):
+            if _domain_eligible(g_info.get(t, {}).get(c, {})):
                 domain_gold += 1
     for t, cols in p_cols.items():
         for c in cols:
-            if _typed(p_info.get(t, {}).get(c, {})):
+            if _domain_eligible(p_info.get(t, {}).get(c, {})):
                 domain_pred += 1
 
     for tn in matched_tables:
@@ -244,7 +250,8 @@ def five_element_counts(
         for cn in shared:
             gi = g_info.get(gt, {}).get(gc[cn], {})
             pi = p_info.get(pt, {}).get(pc[cn], {})
-            if not _typed(gi) or not _typed(pi):
+            # Match requires both sides Domain-eligible under the same rule.
+            if not _domain_eligible(gi) or not _domain_eligible(pi):
                 continue
             type_ok = types_compatible(gi.get("DATA_TYPE"), pi.get("DATA_TYPE"), legacy=legacy)
             if type_ok and _null_ok(gi, pi):

@@ -281,24 +281,132 @@ def normalize_prediction_answer(answer: Any) -> dict:
     return tables
 
 
-def load_baseline_predictions(dataset: str, model_file: str, method: str) -> dict[str, dict]:
+def load_baseline_predictions(
+    dataset: str,
+    model_file: str,
+    method: str,
+    expected_ids: set[str] | None = None,
+) -> dict[str, Any]:
+    """Load PaperMethods baseline predictions with explicit coverage status.
+
+    Returns::
+        {
+          "path": Path,
+          "status": "COMPLETE"|"INCOMPLETE"|"BLOCKED"|"INVALID",
+          "preds": {id: answer_dict_or_empty},
+          "coverage": {...},
+          "message": str,
+        }
+    Empty ``answer`` dict marks a recorded generation failure (scored as empty).
+    """
     path = BASELINE_ROOT[dataset] / model_file / method / "results.jsonl"
-    out: dict[str, dict] = {}
+    expected = set(expected_ids or [])
+    empty_cov = {
+        "expected": len(expected),
+        "present": 0,
+        "valid": 0,
+        "generation_failed": 0,
+        "malformed": 0,
+        "missing": len(expected),
+        "duplicate_ids": 0,
+        "unexpected_ids": 0,
+    }
     if not path.is_file():
-        return out
-    for line in path.read_text(encoding="utf-8").splitlines():
+        return {
+            "path": path,
+            "status": "BLOCKED",
+            "preds": {},
+            "coverage": empty_cov,
+            "message": f"BLOCKED: baseline prediction file unavailable: {path}",
+        }
+    raw = path.read_text(encoding="utf-8")
+    if not raw.strip():
+        return {
+            "path": path,
+            "status": "BLOCKED",
+            "preds": {},
+            "coverage": empty_cov,
+            "message": f"BLOCKED: baseline prediction file empty: {path}",
+        }
+
+    preds: dict[str, dict] = {}
+    duplicate_ids = 0
+    malformed = 0
+    generation_failed = 0
+    seen: set[str] = set()
+    unexpected = 0
+    for line_no, line in enumerate(raw.splitlines(), 1):
         if not line.strip():
             continue
-        r = json.loads(line)
+        try:
+            r = json.loads(line)
+        except Exception:  # noqa: BLE001
+            malformed += 1
+            continue
         rid = r.get("id")
         if not rid:
+            malformed += 1
             continue
+        rid = str(rid)
+        if rid in seen:
+            duplicate_ids += 1
+        seen.add(rid)
+        if expected and rid not in expected:
+            unexpected += 1
         status = r.get("status")
         if status not in (None, "ok") and r.get("error"):
-            out[rid] = {}
+            preds[rid] = {}
+            generation_failed += 1
             continue
-        out[rid] = normalize_prediction_answer(r.get("answer"))
-    return out
+        answer = normalize_prediction_answer(r.get("answer"))
+        if not answer:
+            preds[rid] = {}
+            generation_failed += 1
+        else:
+            preds[rid] = answer
+
+    present_ids = set(preds) & expected if expected else set(preds)
+    missing = sorted(expected - set(preds)) if expected else []
+    valid = sum(1 for rid in present_ids if preds.get(rid))
+    gen_fail_in_expected = sum(1 for rid in present_ids if not preds.get(rid))
+    coverage = {
+        "expected": len(expected) if expected else len(preds),
+        "present": len(present_ids) if expected else len(preds),
+        "valid": valid,
+        "generation_failed": gen_fail_in_expected,
+        "malformed": malformed,
+        "missing": len(missing),
+        "duplicate_ids": duplicate_ids,
+        "unexpected_ids": unexpected,
+    }
+    if malformed and not preds:
+        status_s = "INVALID"
+        msg = f"INVALID: baseline file malformed: {path}"
+    elif duplicate_ids or (expected and unexpected and not present_ids):
+        status_s = "INVALID"
+        msg = (
+            f"INVALID: baseline duplicates={duplicate_ids} unexpected={unexpected} "
+            f"present={coverage['present']}/{coverage['expected']}"
+        )
+    elif expected and coverage["present"] < coverage["expected"]:
+        status_s = "INCOMPLETE"
+        msg = (
+            f"INCOMPLETE: baseline coverage {coverage['present']}/{coverage['expected']} "
+            f"(missing={coverage['missing']})"
+        )
+    else:
+        status_s = "COMPLETE"
+        msg = (
+            f"COMPLETE: baseline {coverage['present']}/{coverage['expected']} present, "
+            f"{coverage['valid']} valid, {coverage['generation_failed']} recorded failures"
+        )
+    return {
+        "path": path,
+        "status": status_s,
+        "preds": preds,
+        "coverage": coverage,
+        "message": msg,
+    }
 
 
 # --------------------------------------------------------------------------- gold verification
@@ -324,7 +432,11 @@ def verify_gold_refs() -> dict[str, Any]:
     assert len(ids_sb) == 239
     typed = sum(1 for r in ddl_rs if isinstance(r.get("answer"), str) and ddl_has_genuine_types(r["answer"]))
     typed_sb = sum(1 for r in sb if isinstance(r.get("answer"), str) and ddl_has_genuine_types(r["answer"]))
-    unsupported_attrs = 0
+    total_cols = 0
+    typed_ok = 0
+    unsupported = 0
+    unknown_null = 0
+    overlap_excl = 0
     eligible_attrs = 0
     null_dist: dict[str, int] = defaultdict(int)
     for r in ddl_rs:
@@ -332,20 +444,36 @@ def verify_gold_refs() -> dict[str, Any]:
         meta = metadata_from_ddl(ddl, legacy=False)
         for t, cols in (meta.get("columns_by_table") or {}).items():
             for c in cols or []:
+                total_cols += 1
                 dt = (c.get("DATA_TYPE") or "").strip()
-                null_dist[c.get("NULLABILITY_STATUS") or ""] += 1
-                if dt and (c.get("TYPE_STATUS") or "ok") == "ok":
+                tstat = (c.get("TYPE_STATUS") or "").lower()
+                nstat = (c.get("NULLABILITY_STATUS") or "").lower()
+                null_dist[nstat or ""] += 1
+                is_typed = bool(dt) and tstat == "ok"
+                is_null_known = nstat != "unknown" and not (
+                    not (c.get("IS_NULLABLE") or "").strip() and nstat in ("", "unknown")
+                )
+                if not is_typed:
+                    unsupported += 1
+                if not is_null_known:
+                    unknown_null += 1
+                if (not is_typed) and (not is_null_known):
+                    overlap_excl += 1
+                if is_typed:
+                    typed_ok += 1
+                if is_typed and is_null_known:
                     eligible_attrs += 1
-                else:
-                    unsupported_attrs += 1
     return {
         "rschema_logical": 518,
         "rschema_ddl": 381,
         "rschema_ddl_subset_of_logical": True,
         "rschema_ddl_typed_records": typed,
-        "rschema_ddl_eligible_attributes": eligible_attrs,
-        "rschema_ddl_unsupported_attributes": unsupported_attrs,
-        "rschema_ddl_total_parsed_columns": eligible_attrs + unsupported_attrs,
+        "rschema_ddl_total_parsed_columns": total_cols,
+        "rschema_ddl_typed_ok_columns": typed_ok,
+        "rschema_ddl_unsupported_type_columns": unsupported,
+        "rschema_ddl_unknown_nullability_columns": unknown_null,
+        "rschema_ddl_overlap_unsupported_and_unknown_null": overlap_excl,
+        "rschema_ddl_domain_eligible_attributes": eligible_attrs,
         "rschema_nullability_status": dict(null_dist),
         "schemabench": 239,
         "schemabench_typed_records": typed_sb,
@@ -406,7 +534,24 @@ def write_domain_column_reconciliation(ddl_rows: list[dict], path: Path) -> dict
                         }
                     )
                     continue
-                eligible = bool(obj.get("DATA_TYPE")) and (obj.get("TYPE_STATUS") or "") == "ok"
+                typed_ok = bool(obj.get("DATA_TYPE")) and (obj.get("TYPE_STATUS") or "") == "ok"
+                nstat = (obj.get("NULLABILITY_STATUS") or "").lower()
+                null_known = nstat != "unknown" and not (
+                    not (obj.get("IS_NULLABLE") or "").strip() and nstat in ("", "unknown")
+                )
+                eligible = typed_ok and null_known
+                if not typed_ok and not null_known:
+                    reason = "unsupported_type_and_unknown_nullability"
+                    parse_status = "recovered_unsupported_type"
+                elif not typed_ok:
+                    reason = "unsupported_or_placeholder_type"
+                    parse_status = "recovered_unsupported_type"
+                elif not null_known:
+                    reason = "unknown_nullability"
+                    parse_status = "unknown_nullability"
+                else:
+                    reason = ""
+                    parse_status = "ok"
                 rows.append(
                     {
                         "schema_id": rid,
@@ -417,8 +562,8 @@ def write_domain_column_reconciliation(ddl_rows: list[dict], path: Path) -> dict
                         "parsed_nullability": obj.get("IS_NULLABLE") if obj.get("IS_NULLABLE") != "" else "",
                         "nullability_status": obj.get("NULLABILITY_STATUS") or "",
                         "type_status": obj.get("TYPE_STATUS") or "",
-                        "parse_status": "ok" if eligible else "recovered_unsupported_type",
-                        "exclusion_reason": "" if eligible else "unsupported_or_placeholder_type",
+                        "parse_status": parse_status,
+                        "exclusion_reason": reason,
                         "domain_eligible": eligible,
                     }
                 )
@@ -436,13 +581,24 @@ def write_domain_column_reconciliation(ddl_rows: list[dict], path: Path) -> dict
         "domain_eligible",
     ]
     write_csv(path, rows, fields)
+    col_rows = [r for r in rows if r["parse_status"] not in ("constraint_skipped",)]
+    parsed_cols = [r for r in col_rows if r["parse_status"] != "unparsed"]
     eligible = sum(1 for r in rows if r["domain_eligible"])
-    recovered_unsup = sum(1 for r in rows if r["parse_status"] == "recovered_unsupported_type")
+    unsupported = sum(1 for r in rows if "unsupported" in (r["exclusion_reason"] or ""))
+    unknown_null = sum(
+        1 for r in rows if "unknown_nullability" in (r["exclusion_reason"] or "")
+    )
+    overlap = sum(
+        1 for r in rows if r["exclusion_reason"] == "unsupported_type_and_unknown_nullability"
+    )
     unparsed = sum(1 for r in rows if r["parse_status"] == "unparsed")
     return {
         "declaration_rows": len(rows),
-        "domain_eligible_typed": eligible,
-        "recovered_unsupported_type": recovered_unsup,
+        "parsed_columns": len(parsed_cols),
+        "domain_eligible": eligible,
+        "unsupported_or_placeholder_type": unsupported,
+        "unknown_nullability": unknown_null,
+        "overlap_unsupported_and_unknown_null": overlap,
         "unparsed": unparsed,
         "constraints_skipped": sum(1 for r in rows if r["parse_status"] == "constraint_skipped"),
     }
@@ -468,20 +624,106 @@ def micro_struct(items: list[dict]) -> dict[str, float]:
     return out
 
 
-def index_predictions(pred_dir: Path) -> tuple[dict[str, tuple[str, dict | None, str | None]], dict[str, tuple[dict | None, str | None]]]:
+def index_predictions(pred_dir: Path) -> dict[str, Any]:
+    """Index NNNN.json predictions and detect duplicates / malformed files."""
     pred_by_id: dict[str, tuple[str, dict | None, str | None]] = {}
     pred_by_stem: dict[str, tuple[dict | None, str | None]] = {}
+    id_to_stems: dict[str, list[str]] = defaultdict(list)
+    malformed_stems: list[str] = []
     for pred_path in sorted(pred_dir.glob("[0-9][0-9][0-9][0-9].json")):
         stem = pred_path.stem
         try:
             data = json.loads(pred_path.read_text(encoding="utf-8"))
             pred_by_stem[stem] = (data, None)
-            rid = data.get("id") or ""
+            rid = str(data.get("id") or "")
             if rid:
+                id_to_stems[rid].append(stem)
                 pred_by_id[rid] = (stem, data, None)
         except Exception as e:  # noqa: BLE001
             pred_by_stem[stem] = (None, str(e))
-    return pred_by_id, pred_by_stem
+            malformed_stems.append(stem)
+    duplicate_ids = sorted(rid for rid, stems in id_to_stems.items() if len(stems) > 1)
+    return {
+        "pred_by_id": pred_by_id,
+        "pred_by_stem": pred_by_stem,
+        "id_to_stems": dict(id_to_stems),
+        "duplicate_ids": duplicate_ids,
+        "malformed_stems": malformed_stems,
+    }
+
+
+def classify_prediction_record(data: dict | None, read_error: str | None = None) -> str:
+    """Return one of: valid | generation_failed | malformed."""
+    if read_error or data is None:
+        return "malformed"
+    if data.get("error") or data.get("skipped"):
+        return "generation_failed"
+    ddl = (data.get("ddl") or "").strip()
+    if not ddl or "CREATE TABLE" not in ddl.upper():
+        return "generation_failed"
+    return "valid"
+
+
+def compute_direct_coverage(gold_rows: list[dict], index: dict[str, Any]) -> dict[str, Any]:
+    """Coverage vs gold IDs — independent of scoring population size."""
+    expected_ids = [str(r["id"]) for r in gold_rows]
+    expected_set = set(expected_ids)
+    pred_by_id = index["pred_by_id"]
+    present = 0
+    valid = 0
+    generation_failed = 0
+    malformed = 0
+    missing = 0
+    for rid in expected_ids:
+        if rid not in pred_by_id:
+            missing += 1
+            continue
+        present += 1
+        _stem, data, _err = pred_by_id[rid]
+        kind = classify_prediction_record(data)
+        if kind == "valid":
+            valid += 1
+        elif kind == "generation_failed":
+            generation_failed += 1
+        else:
+            malformed += 1
+    # malformed stems without usable id also count
+    malformed += len(index.get("malformed_stems") or [])
+    unexpected = sorted(set(pred_by_id) - expected_set)
+    duplicate_ids = list(index.get("duplicate_ids") or [])
+    coverage = {
+        "expected": len(expected_ids),
+        "present": present,
+        "valid": valid,
+        "generation_failed": generation_failed,
+        "malformed": malformed,
+        "missing": missing,
+        "duplicate_ids": len(duplicate_ids),
+        "unexpected_ids": len(unexpected),
+        "duplicate_id_list": duplicate_ids,
+        "unexpected_id_list": unexpected[:20],
+    }
+    if duplicate_ids or (unexpected and present == 0):
+        status = "INVALID"
+        msg = (
+            f"INVALID: duplicates={len(duplicate_ids)} unexpected={len(unexpected)} "
+            f"present={present}/{coverage['expected']}"
+        )
+    elif missing > 0 or present < coverage["expected"]:
+        status = "INCOMPLETE"
+        msg = (
+            f"INCOMPLETE: {present}/{coverage['expected']} present "
+            f"({valid} valid, {generation_failed} recorded failures, {missing} missing)"
+        )
+    else:
+        status = "COMPLETE"
+        msg = (
+            f"COMPLETE: {present}/{coverage['expected']} present, "
+            f"{valid} valid, {generation_failed} recorded failures"
+        )
+    coverage["status"] = status
+    coverage["message"] = msg
+    return coverage
 
 
 def score_empty(g_meta, g_ddl, tc, cc, reason: str) -> dict:
@@ -497,7 +739,10 @@ def score_empty(g_meta, g_ddl, tc, cc, reason: str) -> dict:
 
 
 def evaluate_direct_rschema(pred_dir: Path, logical_rows: list[dict], ddl_by_id: dict[str, dict]) -> dict:
-    pred_by_id, pred_by_stem = index_predictions(pred_dir)
+    index = index_predictions(pred_dir)
+    coverage = compute_direct_coverage(logical_rows, index)
+    pred_by_id = index["pred_by_id"]
+    pred_by_stem = index["pred_by_stem"]
     items: list[dict] = []
     domain_items: list[dict] = []
     failed = 0
@@ -510,8 +755,11 @@ def evaluate_direct_rschema(pred_dir: Path, logical_rows: list[dict], ddl_by_id:
         if rid in pred_by_id:
             stem, data, _ = pred_by_id[rid]
             label = stem
-            if data.get("error") or data.get("skipped") or not data.get("ddl"):
+            kind = classify_prediction_record(data)
+            if kind == "generation_failed":
                 failure_reason = data.get("error") or data.get("skip_reason") or "missing ddl"
+            elif kind == "malformed":
+                failure_reason = "malformed prediction"
         elif label in pred_by_stem and pred_by_stem[label][0] is None:
             failure_reason = pred_by_stem[label][1] or "unreadable prediction JSON"
         else:
@@ -538,7 +786,6 @@ def evaluate_direct_rschema(pred_dir: Path, logical_rows: list[dict], ddl_by_id:
                 ddl_by_id[rid]["answer"]
             ):
                 d_meta, d_ddl, _, _ = gold_record_to_metadata_and_ddl(ddl_by_id[rid], legacy=False)
-                # Pred metadata may list tables with empty columns_by_table; rebuild from DDL.
                 pred_meta = ensure_prediction_metadata(
                     data.get("metadata") or {}, data.get("ddl") or "", legacy=False
                 )
@@ -571,6 +818,8 @@ def evaluate_direct_rschema(pred_dir: Path, logical_rows: list[dict], ddl_by_id:
         "n": len(items),
         "failed": failed,
         "domain_n": len(domain_items),
+        "coverage": coverage,
+        "status": coverage["status"],
         "nged": agg["mean_normalized_graph_edit_distance"],
         "halluc": hall,
         "tables": struct["tables"],
@@ -591,7 +840,10 @@ def evaluate_direct_rschema(pred_dir: Path, logical_rows: list[dict], ddl_by_id:
 
 
 def evaluate_direct_schemabench(pred_dir: Path, gold_rows: list[dict]) -> dict:
-    pred_by_id, pred_by_stem = index_predictions(pred_dir)
+    index = index_predictions(pred_dir)
+    coverage = compute_direct_coverage(gold_rows, index)
+    pred_by_id = index["pred_by_id"]
+    pred_by_stem = index["pred_by_stem"]
     items: list[dict] = []
     failed = 0
     for idx, gold in enumerate(gold_rows):
@@ -603,8 +855,11 @@ def evaluate_direct_schemabench(pred_dir: Path, gold_rows: list[dict]) -> dict:
         if rid in pred_by_id:
             stem, data, _ = pred_by_id[rid]
             label = stem
-            if data.get("error") or data.get("skipped") or not data.get("ddl"):
+            kind = classify_prediction_record(data)
+            if kind == "generation_failed":
                 failure_reason = data.get("error") or data.get("skip_reason") or "missing ddl"
+            elif kind == "malformed":
+                failure_reason = "malformed prediction"
         elif label in pred_by_stem and pred_by_stem[label][0] is None:
             failure_reason = pred_by_stem[label][1] or "unreadable prediction JSON"
         else:
@@ -640,6 +895,8 @@ def evaluate_direct_schemabench(pred_dir: Path, gold_rows: list[dict]) -> dict:
         "n": len(items),
         "failed": failed,
         "domain_n": len(items),
+        "coverage": coverage,
+        "status": coverage["status"],
         "nged": agg["mean_normalized_graph_edit_distance"],
         "halluc": hall,
         "tables": float(fe["tables"]["f1"]),
@@ -668,30 +925,58 @@ def evaluate_baseline(
     method: str,
     gold_rows: list[dict],
 ) -> dict:
-    preds = load_baseline_predictions(dataset, MODEL_FILE[model], method)
+    expected_ids = {str(r["id"]) for r in gold_rows}
+    bundle = load_baseline_predictions(dataset, MODEL_FILE[model], method, expected_ids=expected_ids)
+    if bundle["status"] == "BLOCKED":
+        return {
+            "n": 0,
+            "failed": 0,
+            "status": "BLOCKED",
+            "coverage": bundle["coverage"],
+            "message": bundle["message"],
+            "nged": None,
+            "halluc": None,
+            "tables": None,
+            "attributes": None,
+            "domain": None,
+            "entity": None,
+            "referential": None,
+            "hall_rates": None,
+            "hall_totals": None,
+            "struct_counts": None,
+            "items": [],
+        }
+
+    preds = bundle["preds"]
     items: list[dict] = []
     failed = 0
     for gold in gold_rows:
         rid = gold["id"]
         g_meta, g_ddl, tc, cc = gold_record_to_metadata_and_ddl(gold, legacy=False)
-        pred_answer = preds.get(rid) or {}
-        if not pred_answer:
-            rec = score_empty(g_meta, g_ddl, tc, cc, "missing or empty prediction")
+        if rid not in preds:
+            rec = score_empty(g_meta, g_ddl, tc, cc, "missing prediction")
             failed += 1
         else:
-            # Logical / untyped prediction → synthetic DDL for structural comparison only
-            p_meta, p_ddl = gold_answer_to_metadata_and_ddl(pred_answer, database=f"pred_{str(rid)[:8]}")
-            rec = evaluate_schema_pair(
-                g_meta,
-                g_ddl,
-                p_meta,
-                p_ddl,
-                legacy=False,
-                table_count=tc,
-                column_count=cc,
-                names_only=True,
-            )
-            rec["failed"] = False
+            pred_answer = preds.get(rid) or {}
+            if not pred_answer:
+                rec = score_empty(g_meta, g_ddl, tc, cc, "recorded generation failure")
+                failed += 1
+            else:
+                # Logical / untyped prediction → synthetic DDL for structural comparison only
+                p_meta, p_ddl = gold_answer_to_metadata_and_ddl(
+                    pred_answer, database=f"pred_{str(rid)[:8]}"
+                )
+                rec = evaluate_schema_pair(
+                    g_meta,
+                    g_ddl,
+                    p_meta,
+                    p_ddl,
+                    legacy=False,
+                    table_count=tc,
+                    column_count=cc,
+                    names_only=True,
+                )
+                rec["failed"] = False
         rec["id"] = rid
         rec["domain_eligible"] = False  # baselines never report Domain
         items.append(rec)
@@ -705,6 +990,9 @@ def evaluate_baseline(
     return {
         "n": len(items),
         "failed": failed,
+        "status": bundle["status"],
+        "coverage": bundle["coverage"],
+        "message": bundle["message"],
         "nged": agg["mean_normalized_graph_edit_distance"],
         "halluc": hall,
         "tables": struct["tables"],
@@ -857,6 +1145,8 @@ def build_table_v_tex(rows: list[dict]) -> str:
     first = True
     for ds in ["RSchema", "SchemaBench"]:
         ds_rows = by_ds[ds]
+        if not ds_rows:
+            continue
         best = {m: (min if m in LOWER else max)(r3(r[m]) for r in ds_rows) for m in METRICS_V}
         if not first:
             lines += ["\\midrule", ""]
@@ -1045,6 +1335,8 @@ def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     AUDIT.mkdir(parents=True, exist_ok=True)
     incomplete: list[str] = []
+    blocked: list[str] = []
+    coverage_rows: list[dict[str, Any]] = []
 
     print(f"[{utcnow()}] Verifying gold references...", flush=True)
     gold_info = verify_gold_refs()
@@ -1073,24 +1365,20 @@ def main() -> int:
 
     if args.skip_pytest:
         pytest_rc = 0
-        pytest_passed = "skipped (--skip-pytest); prior run 153 passed"
-        print(f"[{utcnow()}] pytest skipped", flush=True)
+        pytest_passed = "Tests skipped for this run."
+        print(f"[{utcnow()}] {pytest_passed}", flush=True)
     else:
-        print(f"[{utcnow()}] pytest...", flush=True)
+        print(f"[{utcnow()}] pytest (full suite required)...", flush=True)
         rc = subprocess.call([sys.executable, "-m", "pytest", "-q"], cwd=str(ROOT))
         pytest_rc = rc
         if rc != 0:
-            print("WARNING: full pytest returned non-zero; continuing after focused suite", flush=True)
-            rc2 = subprocess.call(
-                [sys.executable, "-m", "pytest", "-q", "tests/test_metrics.py", "tests/test_evaluator.py"],
-                cwd=str(ROOT),
+            print(
+                "Full pytest FAILED — refusing to report final verification as PASS.",
+                file=sys.stderr,
+                flush=True,
             )
-            if rc2 != 0:
-                print("focused pytest FAILED", flush=True)
-                return rc2
-            pytest_passed = "focused metrics/evaluator (full suite failed)"
-        else:
-            pytest_passed = "153 passed (full suite)"
+            return rc
+        pytest_passed = f"full suite passed (exit={rc})"
 
     try:
         commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
@@ -1113,14 +1401,21 @@ def main() -> int:
             incomplete.append(f"RSchema/{model}: missing {pred_dir}")
             continue
         res = evaluate_direct_rschema(pred_dir, logical_rows, ddl_by_id)
-        if res["n"] < len(logical_rows):
-            incomplete.append(f"RSchema/{model}: coverage {res['n']}/{len(logical_rows)}")
+        cov = res.get("coverage") or {}
+        coverage_rows.append({"dataset": "RSchema", "model": model, "method": "Direct", **cov})
+        print(f"    {cov.get('message') or res.get('status')}", flush=True)
+        if res.get("status") in ("INCOMPLETE", "INVALID"):
+            incomplete.append(f"RSchema/{model}: {cov.get('message') or res.get('status')}")
         row = {
             "dataset": "RSchema",
             "model": model,
             "n": res["n"],
             "failed": res["failed"],
             "domain_n": res["domain_n"],
+            "status": res.get("status"),
+            "present": cov.get("present"),
+            "valid": cov.get("valid"),
+            "missing": cov.get("missing"),
             "nged": res["nged"],
             "halluc": res["halluc"],
             "tables": res["tables"],
@@ -1181,14 +1476,21 @@ def main() -> int:
             incomplete.append(f"SchemaBench/{model}: missing {pred_dir}")
             continue
         res = evaluate_direct_schemabench(pred_dir, sb_rows)
-        if res["n"] < len(sb_rows):
-            incomplete.append(f"SchemaBench/{model}: coverage {res['n']}/{len(sb_rows)}")
+        cov = res.get("coverage") or {}
+        coverage_rows.append({"dataset": "SchemaBench", "model": model, "method": "Direct", **cov})
+        print(f"    {cov.get('message') or res.get('status')}", flush=True)
+        if res.get("status") in ("INCOMPLETE", "INVALID"):
+            incomplete.append(f"SchemaBench/{model}: {cov.get('message') or res.get('status')}")
         row = {
             "dataset": "SchemaBench",
             "model": model,
             "n": res["n"],
             "failed": res["failed"],
             "domain_n": res["domain_n"],
+            "status": res.get("status"),
+            "present": cov.get("present"),
+            "valid": cov.get("valid"),
+            "missing": cov.get("missing"),
             "nged": res["nged"],
             "halluc": res["halluc"],
             "tables": res["tables"],
@@ -1249,6 +1551,42 @@ def main() -> int:
                     continue
                 print(f"  {ds} / {METHOD_LABEL[method]} / {model}", flush=True)
                 res = evaluate_baseline(ds, model, method, gold_rows)
+                cov = res.get("coverage") or {}
+                coverage_rows.append(
+                    {
+                        "dataset": ds,
+                        "model": model,
+                        "method": METHOD_LABEL[method],
+                        **{k: v for k, v in cov.items() if k != "duplicate_id_list"},
+                        "status": res.get("status"),
+                        "message": res.get("message"),
+                    }
+                )
+                print(f"    {res.get('message') or res.get('status')}", flush=True)
+                if res.get("status") == "BLOCKED":
+                    blocked.append(f"{ds}/{METHOD_LABEL[method]}/{model}: {res.get('message')}")
+                    tvi_rows.append(
+                        {
+                            "dataset": ds,
+                            "method": METHOD_LABEL[method],
+                            "model": model,
+                            "eval": 0,
+                            "zero": 0,
+                            "status": "BLOCKED",
+                            "nged": None,
+                            "halluc": None,
+                            "tables": None,
+                            "attributes": None,
+                            "domain": None,
+                            "entity": None,
+                            "referential": None,
+                        }
+                    )
+                    continue
+                if res.get("status") in ("INCOMPLETE", "INVALID"):
+                    incomplete.append(
+                        f"{ds}/{METHOD_LABEL[method]}/{model}: {res.get('message') or res.get('status')}"
+                    )
                 tvi_rows.append(
                     {
                         "dataset": ds,
@@ -1256,6 +1594,7 @@ def main() -> int:
                         "model": model,
                         "eval": res["n"],
                         "zero": res["failed"],
+                        "status": res.get("status"),
                         "nged": res["nged"],
                         "halluc": res["halluc"],
                         "tables": res["tables"],
@@ -1285,6 +1624,7 @@ def main() -> int:
                     "model": r["model"],
                     "eval": r["n"],
                     "zero": r["failed"],
+                    "status": r.get("status"),
                     "nged": r["nged"],
                     "halluc": r["halluc"],
                     "tables": r["tables"],
@@ -1321,7 +1661,18 @@ def main() -> int:
     write_csv(
         OUT / "E0_TABLE_V_FINAL.csv",
         tv_rows,
-        ["dataset", "model", "n", "failed", "domain_n", *METRICS_V],
+        [
+            "dataset",
+            "model",
+            "n",
+            "failed",
+            "domain_n",
+            "status",
+            "present",
+            "valid",
+            "missing",
+            *METRICS_V,
+        ],
     )
     (OUT / "E0_TABLE_V_FINAL.tex").write_text(build_table_v_tex(tv_rows), encoding="utf-8")
     (OUT / "E0_TABLE_V_FINAL.json").write_text(
@@ -1351,7 +1702,7 @@ def main() -> int:
     write_csv(
         OUT / "E0_TABLE_VI_FINAL.csv",
         tvi_rows,
-        ["dataset", "method", "model", "eval", "zero", *METRICS_V],
+        ["dataset", "method", "model", "eval", "zero", "status", *METRICS_V],
     )
     (OUT / "E0_TABLE_VI_FINAL.tex").write_text(build_table_vi_tex(tvi_rows), encoding="utf-8")
     (OUT / "E0_TABLE_VI_FINAL.json").write_text(
@@ -1476,7 +1827,10 @@ def main() -> int:
     md.append("- Extended `_ROBUST_TYPE_RE` (blob/json/enum/binary/text variants); never invent VARCHAR for unknowns.")
     md.append("- Lenient identifiers: `-`, `/`, mid-word `'` recovered; apostrophe no longer swallows following columns.")
     md.append("- MySQL nullability: bare → YES (`dialect_default`); NOT NULL / inline PK → NO; unsupported type → unknown.")
-    md.append("- Domain denominators count only typed (`TYPE_STATUS=ok`) columns; unknown nullability cannot Domain-match.")
+    md.append(
+        "- Domain denominators count only columns with recognised type "
+        "(`TYPE_STATUS=ok`) **and** known nullability."
+    )
     md.append("")
     md.append("## Gold references")
     md.append("")
@@ -1489,25 +1843,53 @@ def main() -> int:
         md.append(f"- {c}")
     md.append(f"- pytest: `{pytest_passed}` (exit={pytest_rc})")
     md.append("")
+    md.append("## Prediction coverage")
+    md.append("")
+    md.append(
+        "| Dataset | Model/Method | Status | Expected | Present | Valid | GenFail | Missing | Dup | Unexpected |"
+    )
+    md.append("|---|---|---|---:|---:|---:|---:|---:|---:|---:|")
+    for c in coverage_rows:
+        md.append(
+            f"| {c.get('dataset')} | {c.get('model')}/{c.get('method')} | {c.get('status')} | "
+            f"{c.get('expected')} | {c.get('present')} | {c.get('valid')} | "
+            f"{c.get('generation_failed')} | {c.get('missing')} | "
+            f"{c.get('duplicate_ids')} | {c.get('unexpected_ids')} |"
+        )
+    md.append("")
     md.append("## Table V")
     md.append("")
-    md.append("| Dataset | Model | Eval | Zero | Domain_n | nGED | Hall | Tables | Attr | Domain | Entity | Ref |")
-    md.append("|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
+    md.append(
+        "| Dataset | Model | Status | Present | Eval | Zero | Domain_n | nGED | Hall | "
+        "Tables | Attr | Domain | Entity | Ref |"
+    )
+    md.append("|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
     for r in tv_rows:
         md.append(
-            f"| {r['dataset']} | {r['model']} | {r['n']} | {r['failed']} | {r['domain_n']} | "
+            f"| {r['dataset']} | {r['model']} | {r.get('status')} | {r.get('present')} | "
+            f"{r['n']} | {r['failed']} | {r['domain_n']} | "
             f"{r['nged']:.3f} | {r['halluc']:.3f} | {r['tables']:.3f} | {r['attributes']:.3f} | "
             f"{r['domain']:.3f} | {r['entity']:.3f} | {r['referential']:.3f} |"
         )
     md.append("")
     md.append("## Table VI")
     md.append("")
-    md.append("| Dataset | Method | Model | Eval | Zero | nGED | Hall | Tables | Attr | Domain | Entity | Ref |")
-    md.append("|---|---|---|---:|---:|---:|---:|---:|---:|---|---:|---:|")
+    md.append(
+        "| Dataset | Method | Model | Status | Eval | Zero | nGED | Hall | "
+        "Tables | Attr | Domain | Entity | Ref |"
+    )
+    md.append("|---|---|---|---|---:|---:|---:|---:|---:|---:|---|---:|---:|")
     for r in tvi_rows:
+        if r.get("status") == "BLOCKED" or r.get("nged") is None:
+            md.append(
+                f"| {r['dataset']} | {r['method']} | {r['model']} | {r.get('status')} | "
+                f"{r['eval']} | {r['zero']} | -- | -- | -- | -- | -- | -- | -- |"
+            )
+            continue
         dom = "--" if r["domain"] is None else f"{r['domain']:.3f}"
         md.append(
-            f"| {r['dataset']} | {r['method']} | {r['model']} | {r['eval']} | {r['zero']} | "
+            f"| {r['dataset']} | {r['method']} | {r['model']} | {r.get('status')} | "
+            f"{r['eval']} | {r['zero']} | "
             f"{r['nged']:.3f} | {r['halluc']:.3f} | {r['tables']:.3f} | {r['attributes']:.3f} | "
             f"{dom} | {r['entity']:.3f} | {r['referential']:.3f} |"
         )
@@ -1542,11 +1924,39 @@ def main() -> int:
         )
         print(f"[{utcnow()}] Wrote G/P/M counts -> {AUDIT / 'E0_GPM_COUNTS.csv'}", flush=True)
 
+    if coverage_rows:
+        write_csv(
+            AUDIT / "E0_PREDICTION_COVERAGE.csv",
+            coverage_rows,
+            [
+                "dataset",
+                "model",
+                "method",
+                "status",
+                "expected",
+                "present",
+                "valid",
+                "generation_failed",
+                "malformed",
+                "missing",
+                "duplicate_ids",
+                "unexpected_ids",
+                "message",
+            ],
+        )
+
     print(f"[{utcnow()}] Wrote FINAL tables + verification.", flush=True)
+    if blocked:
+        print(f"[{utcnow()}] Blocked baselines ({len(blocked)}):", flush=True)
+        for msg in blocked:
+            print(f"  - {msg}", flush=True)
     if incomplete:
-        print(f"[{utcnow()}] Incomplete Direct coverage ({len(incomplete)}):", flush=True)
+        print(f"[{utcnow()}] Incomplete/invalid coverage ({len(incomplete)}):", flush=True)
         for msg in incomplete:
             print(f"  - {msg}", flush=True)
+    if blocked and not incomplete:
+        status = "BLOCKED"
+    elif incomplete:
         status = "INCOMPLETE"
     else:
         status = "COMPLETE"
@@ -1556,7 +1966,8 @@ def main() -> int:
         print("\n===== TABLE V =====", flush=True)
         for r in tv_rows:
             print(
-                f"{r['dataset']:12} {r['model']:22} "
+                f"{r['dataset']:12} {r['model']:22} {str(r.get('status') or ''):12} "
+                f"present={r.get('present')}/{r.get('n')} "
                 f"nGED={r['nged']:.3f} Hall={r['halluc']:.3f} "
                 f"T={r['tables']:.3f} A={r['attributes']:.3f} D={r['domain']:.3f} "
                 f"E={r['entity']:.3f} R={r['referential']:.3f}",
@@ -1564,16 +1975,24 @@ def main() -> int:
             )
         print("\n===== TABLE VI =====", flush=True)
         for r in tvi_rows:
+            if r.get("status") == "BLOCKED" or r.get("nged") is None:
+                print(
+                    f"{r['dataset']:12} {r['method']:12} {r['model']:22} "
+                    f"status=BLOCKED (no fabricated metrics)",
+                    flush=True,
+                )
+                continue
             dom = "--" if r["domain"] is None else f"{r['domain']:.3f}"
             print(
                 f"{r['dataset']:12} {r['method']:12} {r['model']:22} "
+                f"{str(r.get('status') or ''):12} "
                 f"Eval={r['eval']:3} Zero={r['zero']:3} "
                 f"nGED={r['nged']:.3f} Hall={r['halluc']:.3f} "
                 f"T={r['tables']:.3f} A={r['attributes']:.3f} D={dom} "
                 f"E={r['entity']:.3f} R={r['referential']:.3f}",
                 flush=True,
             )
-    if args.strict and incomplete:
+    if args.strict and (incomplete or blocked):
         return 2
     return 0
 

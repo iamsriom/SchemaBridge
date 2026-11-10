@@ -274,12 +274,50 @@ def build_user_content(nl_text: str, database: str) -> str:
     )
 
 
-def prediction_is_valid(data: dict) -> bool:
+REQUIRED_PRED_FIELDS = ("text_number", "id", "llm", "model_id", "database", "question", "ddl", "metadata")
+
+
+def prediction_is_valid(
+    data: dict,
+    *,
+    expected_id: str | None = None,
+    expected_text_number: int | None = None,
+    expected_llm: str | None = None,
+    expected_model_id: str | None = None,
+    expected_question: str | None = None,
+) -> bool:
+    """Return True only for a usable, identity-matched prediction (no recorded error)."""
+    if not isinstance(data, dict) or data.get("error"):
+        return False
+    for key in REQUIRED_PRED_FIELDS:
+        if key not in data:
+            return False
     ddl = (data.get("ddl") or "").strip()
-    return bool(ddl) and not data.get("error") and "CREATE TABLE" in ddl.upper()
+    if not ddl or "CREATE TABLE" not in ddl.upper():
+        return False
+    if expected_id is not None and str(data.get("id") or "") != str(expected_id):
+        return False
+    if expected_text_number is not None and int(data.get("text_number") or -1) != int(expected_text_number):
+        return False
+    if expected_llm is not None and str(data.get("llm") or "") != str(expected_llm):
+        return False
+    if expected_model_id is not None and str(data.get("model_id") or "") != str(expected_model_id):
+        return False
+    if expected_question is not None and str(data.get("question") or "") != str(expected_question):
+        return False
+    return True
 
 
-def record_done(out_dir: Path, text_number: int) -> bool:
+def record_done(
+    out_dir: Path,
+    text_number: int,
+    *,
+    expected_id: str | None = None,
+    expected_llm: str | None = None,
+    expected_model_id: str | None = None,
+    expected_question: str | None = None,
+) -> bool:
+    """True when JSON+TXT exist, match, and represent a valid prediction for this record."""
     out_txt, out_json = output_paths(out_dir, text_number)
     if not out_txt.is_file() or not out_json.is_file():
         return False
@@ -287,7 +325,43 @@ def record_done(out_dir: Path, text_number: int) -> bool:
         data = json.loads(out_json.read_text(encoding="utf-8"))
     except Exception:
         return False
-    return prediction_is_valid(data)
+    if not prediction_is_valid(
+        data,
+        expected_id=expected_id,
+        expected_text_number=text_number,
+        expected_llm=expected_llm,
+        expected_model_id=expected_model_id,
+        expected_question=expected_question,
+    ):
+        return False
+    # TXT must agree with JSON DDL (interrupted / corrupted writes fail resume).
+    txt = out_txt.read_text(encoding="utf-8")
+    json_ddl = (data.get("ddl") or "").strip()
+    if json_ddl and json_ddl not in txt and txt.strip() != json_ddl:
+        # Allow leading comment / whitespace differences of one line.
+        if "CREATE TABLE" not in txt.upper():
+            return False
+        if txt.strip().startswith("[ERROR"):
+            return False
+    if expected_id is not None and str(data.get("id") or "") != str(expected_id):
+        # Identity conflict — caller must not overwrite silently; treat as not-done.
+        return False
+    return True
+
+
+def record_id_conflict(out_dir: Path, text_number: int, expected_id: str) -> str | None:
+    """Return conflict message if existing JSON belongs to a different schema id."""
+    _, out_json = output_paths(out_dir, text_number)
+    if not out_json.is_file():
+        return None
+    try:
+        data = json.loads(out_json.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    existing = str(data.get("id") or "")
+    if existing and existing != str(expected_id):
+        return f"stem {serial_stem(text_number)} has id={existing}, expected {expected_id}"
+    return None
 
 
 def sanitize_result(result: dict, database: str) -> dict:
@@ -498,7 +572,15 @@ def run_one(
             )
         return call_anthropic(client, model_id, system, user, max_tokens=max_tokens)
 
-    stats = {"ok": 0, "err": 0, "skipped": 0, "empty_q": 0, "failed_ids": []}
+    stats = {
+        "ok": 0,
+        "err": 0,
+        "skipped": 0,
+        "empty_q": 0,
+        "id_conflicts": 0,
+        "failed_ids": [],
+        "conflict_ids": [],
+    }
     print(
         f"\n[{dataset}/{llm_name}] model_id={model_id} provider={provider} "
         f"temp={temperature} max_tokens={max_tokens} -> {out_dir} (n={len(records)})",
@@ -508,14 +590,54 @@ def run_one(
     for i, rec in enumerate(records, 1):
         rid = rec.get("id") or f"row_{i}"
         text_number = int(rec.get("_text_number") or i)
-        if skip_existing and record_done(out_dir, text_number):
+        nl_text = (rec.get("question") or "").strip()
+        database = database_name(rec, ds["prefix"])
+
+        conflict = record_id_conflict(out_dir, text_number, rid)
+        if conflict:
+            stats["id_conflicts"] += 1
+            stats["conflict_ids"].append(rid)
+            print(
+                f"  [{llm_name}] [{i}/{len(records)}] CONFLICT: {conflict} (not overwritten)",
+                file=sys.stderr,
+                flush=True,
+            )
+            continue
+
+        if skip_existing and record_done(
+            out_dir,
+            text_number,
+            expected_id=rid,
+            expected_llm=llm_name,
+            expected_model_id=model_id,
+            expected_question=nl_text if nl_text else None,
+        ):
             stats["skipped"] += 1
             continue
-        nl_text = (rec.get("question") or "").strip()
+
         if not nl_text:
+            save_record(
+                out_dir,
+                llm_name,
+                model_id,
+                rid,
+                text_number,
+                "",
+                database,
+                None,
+                "empty or missing requirement (question)",
+            )
             stats["empty_q"] += 1
+            stats["err"] += 1
+            stats["failed_ids"].append(rid)
+            print(
+                f"  [{llm_name}] [{i}/{len(records)}] {serial_stem(text_number)} "
+                f"ERROR id={rid}: empty requirement",
+                file=sys.stderr,
+                flush=True,
+            )
             continue
-        database = database_name(rec, ds["prefix"])
+
         t0 = time.time()
         try:
             result = text_to_schema(
@@ -551,11 +673,18 @@ def run_one(
     n_index = rebuild_index(out_dir)
     print(
         f"[{dataset}/{llm_name}] done: ok={stats['ok']} err={stats['err']} "
-        f"skipped={stats['skipped']} empty_q={stats['empty_q']} index={n_index}",
+        f"skipped={stats['skipped']} empty_q={stats['empty_q']} "
+        f"id_conflicts={stats['id_conflicts']} index={n_index}",
         flush=True,
     )
     if stats["failed_ids"]:
         print(f"[{dataset}/{llm_name}] failed_ids={stats['failed_ids']}", file=sys.stderr, flush=True)
+    if stats["conflict_ids"]:
+        print(
+            f"[{dataset}/{llm_name}] conflict_ids={stats['conflict_ids']}",
+            file=sys.stderr,
+            flush=True,
+        )
     return stats
 
 
@@ -677,7 +806,10 @@ def main() -> int:
     # Local summary only — never commit.
     atomic_write_text(summary_path, json.dumps(summary, indent=2) + "\n")
     print(f"\nFinished in {summary['elapsed_s']}s. Local summary: {summary_path}")
-    any_err = any(s.get("err", 0) > 0 for s in all_stats)
+    any_err = any(
+        (s.get("err", 0) > 0) or (s.get("empty_q", 0) > 0) or (s.get("id_conflicts", 0) > 0)
+        for s in all_stats
+    )
     return 2 if any_err else 0
 
 
