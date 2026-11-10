@@ -31,13 +31,29 @@ Two parsing modes
     data-type normalisation, escaped identifiers, and several constraints in one
     statement.  Columns are split on top-level commas (quote/paren/comment aware).
 
-Conventions kept in both modes (documented so nobody is surprised):
+Conventions
+-----------
+``legacy=True`` nullability (historical):
+    ``IS_NULLABLE`` is ``"YES"`` only if the column text contains ``NULL`` and not
+    ``NOT NULL`` (so ``DEFAULT NULL`` -> YES, bare ``a int`` -> NO).
 
-* ``IS_NULLABLE`` is ``"YES"`` only if the column text contains ``NULL`` and not
-  ``NOT NULL`` (so ``DEFAULT NULL`` -> YES, bare ``a int`` -> NO).
-* ``COLUMN_KEY`` is ``PRI``/``UNI`` only for *inline* ``PRIMARY KEY``/``UNIQUE``.
-  Table-level keys are returned by :func:`parse_ddl_primary_unique`.
-* ``integer`` is normalised to ``int`` and ``int`` gets ``COLUMN_TYPE='int(11)'``.
+``legacy=False`` nullability (authoritative E0 / MySQL-dialect recovery):
+    * Explicit ``NOT NULL`` -> ``NO`` (``NULLABILITY_STATUS=explicit_not_null``).
+    * Inline ``PRIMARY KEY`` -> ``NO`` (``NULLABILITY_STATUS=primary_key``).
+    * Explicit ``NULL`` (and not ``NOT NULL``) -> ``YES`` (``explicit_null``).
+    * Otherwise bare column -> ``YES`` (``dialect_default``; MySQL default nullable).
+    * Unsupported/placeholder type with no clear null clause -> ``IS_NULLABLE=""``
+      and ``NULLABILITY_STATUS=unknown`` (excluded from Domain agreement).
+
+``COLUMN_KEY`` is ``PRI``/``UNI`` only for *inline* ``PRIMARY KEY``/``UNIQUE``.
+Table-level keys are returned by :func:`parse_ddl_primary_unique`.
+``integer`` is normalised to ``int`` and ``int`` gets ``COLUMN_TYPE='int(11)'``.
+
+Lenient identifier recovery (``legacy=False`` only, documented dataset rule):
+    Unquoted names may contain ``-``, ``/``, and mid-identifier ``'``
+    (e.g. ``Check-in_Time``, ``State/Province``, ``User's_Last_Login``).
+    A ``'`` preceded by an identifier character is *not* treated as a string
+    delimiter when masking/splitting, so subsequent columns are not swallowed.
 """
 
 from __future__ import annotations
@@ -48,11 +64,24 @@ from typing import Any, Iterator
 
 # --------------------------------------------------------------------------- regexes
 
-_TYPE_RE = re.compile(
+# Vendored / legacy type set (must stay frozen for bit-for-bit archive reproduction).
+_LEGACY_TYPE_RE = re.compile(
     r"\b(varchar|char|text|int|integer|tinyint|smallint|mediumint|bigint|"
     r"float|double|decimal|numeric|real|datetime|date|time|timestamp|bool|boolean)\b",
     re.IGNORECASE,
 )
+# Authoritative E0 type set: includes blob/json/enum/binary and common text variants.
+_ROBUST_TYPE_RE = re.compile(
+    r"\b(varchar|nvarchar|char|nchar|text|tinytext|mediumtext|longtext|"
+    r"int|integer|tinyint|smallint|mediumint|bigint|"
+    r"float|double|decimal|numeric|real|"
+    r"datetime|date|time|timestamp|year|bool|boolean|bit|"
+    r"blob|tinyblob|mediumblob|longblob|binary|varbinary|"
+    r"json|enum|set)\b",
+    re.IGNORECASE,
+)
+# Back-compat alias used by older tests / imports.
+_TYPE_RE = _ROBUST_TYPE_RE
 
 # Vendored header pattern (legacy mode).
 _LEGACY_HEADER_RE = re.compile(
@@ -67,6 +96,11 @@ _TABLE_RE = _LEGACY_HEADER_RE
 
 # One SQL identifier: `a b`, "a b", [a b] or bare word.  Doubled delimiters escape.
 _IDENT = r"(?:`(?:[^`]|``)+`|\"(?:[^\"]|\"\")+\"|\[[^\]]+\]|[^\W\d][\w$]*)"
+# Lenient bare column/table tokens for dataset recovery (hyphen, slash, mid-word apostrophe).
+_LENIENT_BARE_IDENT = r"[A-Za-z_][\w$/\-]*(?:'[A-Za-z_][\w$/\-]*)*"
+_ROBUST_COL_NAME = (
+    r"(?:`(?:[^`]|``)+`|\"(?:[^\"]|\"\")+\"|\[[^\]]+\]|" + _LENIENT_BARE_IDENT + r")"
+)
 _ROBUST_HEADER_RE = re.compile(
     r"CREATE\s+(?:(?:GLOBAL\s+|LOCAL\s+)?(?:TEMP|TEMPORARY)\s+)?TABLE\s+"
     r"(?:IF\s+NOT\s+EXISTS\s+)?"
@@ -76,7 +110,8 @@ _ROBUST_HEADER_RE = re.compile(
 )
 
 _INT_TYPES = frozenset({"int", "tinyint", "smallint", "mediumint", "bigint", "integer"})
-_STR_TYPES = frozenset({"varchar", "char", "text"})
+_STR_TYPES = frozenset({"varchar", "nvarchar", "char", "nchar", "text", "tinytext", "mediumtext", "longtext"})
+_BINARY_TYPES = frozenset({"blob", "tinyblob", "mediumblob", "longblob", "binary", "varbinary"})
 
 _SKIP_PREFIXES = (
     "PRIMARY KEY",
@@ -88,6 +123,9 @@ _SKIP_PREFIXES = (
     "INDEX ",
 )
 _ROBUST_SKIP_PREFIXES = _SKIP_PREFIXES + ("FULLTEXT", "SPATIAL")
+
+# Placeholder / non-types seen in RSchema DDL that must not become VARCHAR(255).
+_UNSUPPORTED_TYPE_TOKENS = frozenset({"null", "none", "unknown", "n/a", "na"})
 
 
 # --------------------------------------------------------------------------- helpers
@@ -111,12 +149,34 @@ def unquote_identifier(token: str) -> str:
     return t
 
 
-def _mask_noise(text: str) -> str:
+def _prev_nonspace(text: str, i: int) -> str:
+    j = i - 1
+    while j >= 0 and text[j] in " \t":
+        j -= 1
+    return text[j] if j >= 0 else ""
+
+
+def _apostrophe_is_string_delimiter(text: str, i: int) -> bool:
+    """True if ``text[i]`` is a SQL string quote, not a mid-identifier apostrophe.
+
+    Dataset-recovery rule (robust mode): an apostrophe immediately after an
+    identifier character (``User's_Name``) is part of the identifier.
+    """
+    prev = _prev_nonspace(text, i)
+    if prev and (prev.isalnum() or prev in "_$"):
+        return False
+    return True
+
+
+def _mask_noise(text: str, *, lenient_apostrophe: bool = True) -> str:
     """Return ``text`` with quoted spans, strings and comments replaced by spaces.
 
     Length is preserved so indices into the masked text are valid for the original.
     Delimiters of quoted spans are kept (as the quote char) so that tokenisation of the
     original string is not disturbed; only the *inner* characters are blanked.
+
+    With ``lenient_apostrophe=True`` (default, robust path), mid-identifier ``'`` does
+    not open a string span, preventing subsequent columns from disappearing.
     """
     out = list(text)
     i, n = 0, len(text)
@@ -134,6 +194,8 @@ def _mask_noise(text: str) -> str:
             for k in range(i, j):
                 out[k] = " "
             i = j
+        elif ch == "'" and lenient_apostrophe and not _apostrophe_is_string_delimiter(text, i):
+            i += 1
         elif ch in "`\"'":
             j = i + 1
             while j < n:
@@ -154,9 +216,9 @@ def _mask_noise(text: str) -> str:
     return "".join(out)
 
 
-def _split_top_level(body: str) -> list[str]:
+def _split_top_level(body: str, *, lenient_apostrophe: bool = True) -> list[str]:
     """Split ``body`` on commas at paren depth 0, ignoring quotes/strings/comments."""
-    masked = _mask_noise(body)
+    masked = _mask_noise(body, lenient_apostrophe=lenient_apostrophe)
     parts: list[str] = []
     depth = 0
     start = 0
@@ -172,7 +234,7 @@ def _split_top_level(body: str) -> list[str]:
     return [p for p in parts]
 
 
-def _strip_comments(body: str) -> str:
+def _strip_comments(body: str, *, lenient_apostrophe: bool = True) -> str:
     """Remove ``--`` and ``/* */`` comments while leaving quoted text untouched."""
     out: list[str] = []
     i, n = 0, len(body)
@@ -184,6 +246,9 @@ def _strip_comments(body: str) -> str:
         elif ch == "/" and body.startswith("/*", i):
             j = body.find("*/", i + 2)
             i = n if j == -1 else j + 2
+        elif ch == "'" and lenient_apostrophe and not _apostrophe_is_string_delimiter(body, i):
+            out.append(ch)
+            i += 1
         elif ch in "`\"'":
             j = i + 1
             while j < n:
@@ -212,25 +277,54 @@ def _split_ident_list(text: str) -> list[str]:
 # --------------------------------------------------------------------------- types
 
 
-def _parse_data_type(line: str) -> tuple[str, str]:
+def _parse_data_type(line: str, *, legacy: bool = False) -> tuple[str, str]:
     """Return ``(DATA_TYPE, COLUMN_TYPE)`` for the text following a column name.
 
     ``integer`` -> ``int``; ``int`` -> ``int(11)``; ``varchar/char/decimal/numeric`` keep
-    their ``(args)``; unknown/absent type falls back to ``("varchar", "varchar(255)")``.
+    their ``(args)``.
+
+    * ``legacy=True``: unknown/absent type falls back to ``("varchar", "varchar(255)")``
+      (vendored behaviour).
+    * ``legacy=False``: unknown/absent type returns ``("", "")`` — never invent a type.
     """
-    m = _TYPE_RE.search(line)
+    rx = _LEGACY_TYPE_RE if legacy else _ROBUST_TYPE_RE
+    m = rx.search(line)
     if not m:
-        return "varchar", "varchar(255)"
+        return ("varchar", "varchar(255)") if legacy else ("", "")
     dtype = m.group(1).lower()
     if dtype == "integer":
         dtype = "int"
+    if dtype == "nvarchar":
+        dtype = "varchar"
+    if dtype == "nchar":
+        dtype = "char"
     col_type = dtype
     paren = re.search(r"\(([^)]+)\)", line)
-    if paren and dtype in ("varchar", "char", "decimal", "numeric"):
+    if paren and dtype in ("varchar", "char", "decimal", "numeric", "enum", "set", "binary", "varbinary"):
         col_type = f"{dtype}({paren.group(1)})"
     elif dtype == "int":
         col_type = "int(11)"
     return dtype, col_type
+
+
+def _infer_nullability(rest: str, *, legacy: bool, inline_pri: bool) -> tuple[str, str]:
+    """Return ``(IS_NULLABLE, NULLABILITY_STATUS)``.
+
+    See module docstring for legacy vs MySQL-dialect robust rules.
+    """
+    has_not_null = bool(re.search(r"\bNOT\s+NULL\b", rest, re.IGNORECASE))
+    has_null = bool(re.search(r"\bNULL\b", rest, re.IGNORECASE)) and not has_not_null
+    if legacy:
+        if has_null:
+            return "YES", "explicit_null"
+        return "NO", "legacy_default_not_null"
+    if has_not_null:
+        return "NO", "explicit_not_null"
+    if inline_pri:
+        return "NO", "primary_key"
+    if has_null:
+        return "YES", "explicit_null"
+    return "YES", "dialect_default"
 
 
 # --------------------------------------------------------------------------- tables
@@ -250,7 +344,7 @@ def _body_end_legacy(ddl: str, start: int) -> int:
 
 
 def _body_end_robust(ddl: str, start: int) -> int:
-    masked = _mask_noise(ddl[start:])
+    masked = _mask_noise(ddl[start:], lenient_apostrophe=True)
     depth = 1
     i = 0
     while i < len(masked) and depth:
@@ -294,14 +388,22 @@ def iter_ddl_table_bodies(ddl: str, *, legacy: bool = False) -> Iterator[tuple[s
         pos = max(end, m.end())
 
 
-def _name_and_rest(text: str) -> tuple[str, str] | None:
+def _name_and_rest(text: str, *, legacy: bool = False) -> tuple[str, str] | None:
     """Split a column definition into ``(unquoted_name, rest)`` (no type requirement)."""
-    if text.upper().startswith(_ROBUST_SKIP_PREFIXES):
+    if text.upper().startswith(_ROBUST_SKIP_PREFIXES if not legacy else _SKIP_PREFIXES):
         return None
-    m = re.match(r"(" + _IDENT + r")\s+(.+)", text)
+    if legacy:
+        m = re.match(r"(" + _IDENT + r")\s+(.+)", text)
+    else:
+        m = re.match(r"(" + _ROBUST_COL_NAME + r"|'(?:[^']|'')+')\s+(.+)", text)
     if not m:
         return None
     return unquote_identifier(m.group(1)), m.group(2)
+
+
+def _first_token(rest: str) -> str:
+    m = re.match(r"([A-Za-z_][\w$]*)", (rest or "").strip())
+    return (m.group(1).lower() if m else "")
 
 
 def _column_item_to_obj(
@@ -321,21 +423,57 @@ def _column_item_to_obj(
             col_name, rest = col_match.group(1), col_match.group(2)
         else:
             col_name, rest = col_match.group(3), col_match.group(4)
+        if not _LEGACY_TYPE_RE.search(rest):
+            return None
+        dtype, col_type = _parse_data_type(rest, legacy=True)
+        type_status = "ok"
+        nullable, null_status = _infer_nullability(rest, legacy=True, inline_pri=False)
+        # preserve exact legacy YES/NO rule (ignore primary_key special-case)
+        nullable = (
+            "YES"
+            if re.search(r"\bNULL\b", rest, re.IGNORECASE)
+            and not re.search(r"\bNOT\s+NULL\b", rest, re.IGNORECASE)
+            else "NO"
+        )
+        null_status = "explicit_null" if nullable == "YES" else "legacy_default_not_null"
     else:
-        line = re.sub(r"\s+", " ", line)
-        col_match = re.match(r"(" + _IDENT + r"|'(?:[^']|'')+')\s+(.+)", line)
+        # Keep newlines out of the name/rest match but do not collapse the item before
+        # top-level splitting — splitting already happened.
+        line_n = re.sub(r"\s+", " ", line)
+        col_match = re.match(r"(" + _ROBUST_COL_NAME + r"|'(?:[^']|'')+')\s+(.+)", line_n)
         if not col_match:
             return None
         col_name, rest = unquote_identifier(col_match.group(1)), col_match.group(2)
-    if not _TYPE_RE.search(rest):
-        return None
-    dtype, col_type = _parse_data_type(rest)
-    nullable = (
-        "YES"
-        if re.search(r"\bNULL\b", rest, re.IGNORECASE)
-        and not re.search(r"\bNOT\s+NULL\b", rest, re.IGNORECASE)
-        else "NO"
-    )
+        inline_pri = bool(re.search(r"\bPRIMARY\s+KEY\b", rest, re.IGNORECASE))
+        if _ROBUST_TYPE_RE.search(rest):
+            dtype, col_type = _parse_data_type(rest, legacy=False)
+            type_status = "ok"
+            nullable, null_status = _infer_nullability(rest, legacy=False, inline_pri=inline_pri)
+        else:
+            # Recover structural column for unsupported/placeholder types; never invent VARCHAR.
+            tok = _first_token(rest)
+            if tok in _UNSUPPORTED_TYPE_TOKENS or tok:
+                dtype, col_type = "", ""
+                type_status = "unsupported"
+                # Strip the placeholder type token before reading nullability clauses so
+                # ``AccountID null`` is *unknown*, not ``explicit_null``.
+                rest_clauses = re.sub(
+                    r"^\s*(?:" + "|".join(sorted(_UNSUPPORTED_TYPE_TOKENS, key=len, reverse=True)) + r")\b",
+                    "",
+                    rest,
+                    count=1,
+                    flags=re.IGNORECASE,
+                ).strip()
+                if re.search(r"\bNOT\s+NULL\b", rest_clauses, re.IGNORECASE):
+                    nullable, null_status = "NO", "explicit_not_null"
+                elif re.search(r"\bNULL\b", rest_clauses, re.IGNORECASE):
+                    nullable, null_status = "YES", "explicit_null"
+                elif inline_pri or re.search(r"\bPRIMARY\s+KEY\b", rest_clauses, re.IGNORECASE):
+                    nullable, null_status = "NO", "primary_key"
+                else:
+                    nullable, null_status = "", "unknown"
+            else:
+                return None
     col_key = ""
     if re.search(r"\bPRIMARY\s+KEY\b", rest, re.IGNORECASE):
         col_key = "PRI"
@@ -346,7 +484,9 @@ def _column_item_to_obj(
         "ORDINAL_POSITION": ord_pos,
         "COLUMN_DEFAULT": None,
         "IS_NULLABLE": nullable,
+        "NULLABILITY_STATUS": null_status,
         "DATA_TYPE": dtype,
+        "TYPE_STATUS": type_status,
         "CHARACTER_MAXIMUM_LENGTH": 255 if dtype in ("varchar", "char") else None,
         "NUMERIC_PRECISION": None,
         "NUMERIC_SCALE": None,
@@ -579,6 +719,8 @@ def extract_schema_from_metadata(
             info[name] = {
                 "DATA_TYPE": (c.get("DATA_TYPE") or "").lower(),
                 "IS_NULLABLE": (c.get("IS_NULLABLE") or "").upper(),
+                "NULLABILITY_STATUS": (c.get("NULLABILITY_STATUS") or "").lower(),
+                "TYPE_STATUS": (c.get("TYPE_STATUS") or ("ok" if c.get("DATA_TYPE") else "unsupported")).lower(),
                 "COLUMN_KEY": (c.get("COLUMN_KEY") or "").upper(),
                 "COLUMN_TYPE": (c.get("COLUMN_TYPE") or "").lower(),
             }
@@ -647,7 +789,7 @@ def parse_ddl(ddl: str, *, legacy: bool = False) -> Schema:
                     name=c["COLUMN_NAME"],
                     dtype=c["DATA_TYPE"],
                     column_type=c["COLUMN_TYPE"],
-                    nullable=c["IS_NULLABLE"] == "YES",
+                    nullable=(c.get("IS_NULLABLE") or "").upper() == "YES",
                     primary_key=c["COLUMN_KEY"] == "PRI",
                     unique=c["COLUMN_KEY"] == "UNI",
                 )

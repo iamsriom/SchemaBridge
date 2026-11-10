@@ -1,19 +1,47 @@
 experiment: E0
-title: "Text -> Schema from gold NL (Table V, `tab:e0_overall`)"
-paper_table_label: "tab:e0_overall"
-reference_values: configs/paper_reference_values.json
-online: false            # generation is disabled; offline evaluation of archived artefacts only
-tolerance:
-  float_3dp: 0.0005
-  float_2dp: 0.005       # BLEU-4 (0-100 scale, 2dp)
-datasets:
-  - "RSchema (518)"
-  - "SchemaBench (239)"
-models: "CodeLlama-13B, Llama-3.1-8B, DeepSeek-Coder-6.7B (open, local archives); Claude Sonnet 4.6, GPT-5.4-mini (paper only)"
-metrics: "nGED, Halluc (lower better); Tables / Attributes / Domain / Entity / Referential F1 (micro)"
-prompts: "prompts/constructor.txt"
-predictions:
-  - "results/predictions/e0/rschema_exp4_{codellama13b,llama31,deepseek}"
-  - "results/predictions/e0/schemabench_exp2_{codellama13b,llama31,deepseek}"
-  - "results/predictions/e0/rschema_papermethods, schemabench_papermethods (PaperMethods runs)"
-status: "RSchema: open models compared (MISMATCH on several cells; see results/metrics/reproduced/E0_cells.csv); SchemaBench: only few_shot corrected-parser baselines exist (MISMATCH expected); Claude/GPT BLOCKED."
+paper_table_labels: ["tab:e0_overall", "tab:e0_baselines"]
+online: false
+canonical:
+  inference: experiments/E0/run_direct_api.py
+  evaluation: experiments/E0/reproduce_genuine_tables.py
+  offline_entry: experiments/E0/evaluate.py
+  constructor_prompt: prompts/constructor.txt
+models:
+  table_v_default:
+    - CodeLlama-13B
+    - Llama-3.1-8B
+    - DeepSeek-Coder-6.7B
+    - Claude Sonnet 4.6
+    - GPT-5.4-mini
+  table_v_optional:
+    - GPT-4o-mini
+  closed_api:
+    claude_sonnet_4_6:
+      provider: anthropic
+      model_id: claude-sonnet-4-6
+    gpt_5_4_mini:
+      provider: openai
+      model_id: gpt-5.4-mini
+decoding:
+  # Closed Direct API defaults (open-weight Exp4 used local HF decoding separately).
+  temperature: 0.2
+  max_tokens: 4096
+evaluator:
+  module: src.evaluator
+  legacy: false
+  include_failures: true
+  f1: micro
+  hallucination: 4-dim micro mean over tables,attributes,entity,referential
+  domain_excluded_from_hall: true
+  nged: names_only structural (tables + attribute names + FK edges)
+  failure_policy: empty prediction against gold; nGED=1; Hall not forced to 1
+  rschema:
+    structural_n: 518
+    domain_n: 381
+  schemabench:
+    n: 239
+outputs:
+  table_v: results/metrics/reproduced/E0_TABLE_V_FINAL.*
+  table_vi: results/metrics/reproduced/E0_TABLE_VI_FINAL.*
+  verification: audit/e0_gold_requirement_verification/E0_FINAL_PARSER_VERIFICATION.md
+status: REPRODUCIBLE offline for open-weight Direct + PaperMethods baselines; closed Direct via run_direct_api.py

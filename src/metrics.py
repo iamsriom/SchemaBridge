@@ -21,8 +21,12 @@ per-schema vacuous policy (:func:`set_prf` with ``empty="vacuous"``)
     ``empty="zero"`` instead returns 0.0 for any empty denominator (micro convention).
 
 zero-score policy for failed predictions (:func:`zero_scored_schema_metrics`)
-    PaperMethods runs count a missing/failed/empty prediction as
+    Historical PaperMethods macro policy: missing/failed/empty prediction as
     ``F1 = 0, nGED = 1.0, hallucination = 1.0`` and still divide by all gold schemas.
+    Authoritative E0 (Table V) instead scores failures as an *empty prediction*
+    against the retained gold (gold counts included in micro F1; nGED = 1;
+    per-dimension Hall. rates stay 0 because Recreated = 0) and reports
+    :func:`aggregate_hallucination_micro`.
 
 nGED (:func:`normalized_graph_edit_distance`)
     ``edit_cost / max(gold_size + pred_size, 1)`` where size = #tables + #column labels +
@@ -40,6 +44,10 @@ from .normalization import normalize_rschema_name, type_family
 from .schema_parser import extract_schema_from_metadata, parse_ddl_fks
 
 ELEMENTS = ("tables", "attributes", "domain", "entity", "referential")
+
+# Authoritative E0 Hall. aggregate (Tables V–VI): Domain excluded so RSchema /
+# SchemaBench remain comparable without synthetic type agreement.
+HALLUCINATION_DIMS = ("tables", "attributes", "entity", "referential")
 
 NameFn = Callable[[str], str]
 
@@ -120,6 +128,40 @@ def micro_aggregate_all(items: list[dict]) -> dict[str, dict]:
     return {k: micro_aggregate(items, k) for k in ELEMENTS}
 
 
+def aggregate_hallucination_micro(
+    items: list[dict],
+    *,
+    dims: tuple[str, ...] | None = None,
+) -> float:
+    """Unweighted mean of dimension-wise *micro* false-positive rates (E0 Hall.).
+
+    Default dimensions are :data:`HALLUCINATION_DIMS` = ``(T, A, E, R)`` — Domain is
+    **excluded** so Hall. is comparable across RSchema and SchemaBench without
+    synthetic type/nullability agreement.
+
+    For each dimension ``d``, counts are summed over all evaluated schemata first:
+    ``H_d = max(0, Σ P_{i,d} − Σ M_{i,d}) / Σ P_{i,d}`` (0 if the denominator is 0).
+    Reported Hallucination: ``H = (1/|dims|) Σ_d H_d``.
+
+    Empty / failed predictions contribute ``P=0, M=0`` and do **not** inflate ``H``
+    (unlike the historical PaperMethods macro policy that forced Hall.=1).
+
+    Pass ``dims=ELEMENTS`` to recover the historical five-dimensional mean (audit only).
+    """
+    use_dims = dims if dims is not None else HALLUCINATION_DIMS
+    if not use_dims:
+        return 0.0
+    aggregates = micro_aggregate_all(items)
+    return sum(
+        hallucination_rate(aggregates[d]["recreated"], aggregates[d]["matched"]) for d in use_dims
+    ) / len(use_dims)
+
+
+def aggregate_hallucination_micro_5dim(items: list[dict]) -> float:
+    """Historical E0 Hall.: mean of five micro FP rates including Domain (audit only)."""
+    return aggregate_hallucination_micro(items, dims=ELEMENTS)
+
+
 def macro_mean(values: Iterable[float]) -> float:
     """Arithmetic mean; ``0.0`` for an empty input."""
     vals = list(values)
@@ -171,22 +213,34 @@ def zero_scored_schema_metrics() -> dict[str, Any]:
 
 
 def column_labels(
-    meta: dict, name_fn: NameFn = normalize_rschema_name
-) -> dict[str, set[tuple[str, str, str]]]:
-    """``table_norm -> {(col_norm, type_family, nullable YES/NO)}`` from metadata.
+    meta: dict,
+    name_fn: NameFn = normalize_rschema_name,
+    *,
+    names_only: bool = False,
+) -> dict[str, set]:
+    """``table_norm ->`` attribute label set from metadata.
+
+    Default labels are ``(col_norm, type_family, nullable YES/NO)``.
+    With ``names_only=True`` (authoritative E0 structural nGED), labels are just
+    ``col_norm`` — no synthetic type/nullability contribution.
 
     Missing nullability defaults to ``"NO"``.  If two raw tables normalise to the same
     key the later one overwrites the earlier (vendored behaviour).
     """
-    out: dict[str, set[tuple[str, str, str]]] = {}
+    out: dict[str, set] = {}
     tables, cols_by_table, info = extract_schema_from_metadata(meta)
     for t in sorted(tables, reverse=True):  # deterministic under normalisation collisions
         tn = name_fn(t)
-        labels: set[tuple[str, str, str]] = set()
+        labels: set = set()
         for col in cols_by_table.get(t, set()):
             cn = name_fn(col)
-            inf = info.get(t, {}).get(col, {})
-            labels.add((cn, type_family(inf.get("DATA_TYPE") or ""), (inf.get("IS_NULLABLE") or "NO").upper()))
+            if names_only:
+                labels.add(cn)
+            else:
+                inf = info.get(t, {}).get(col, {})
+                labels.add(
+                    (cn, type_family(inf.get("DATA_TYPE") or ""), (inf.get("IS_NULLABLE") or "NO").upper())
+                )
         out[tn] = labels
     return out
 
@@ -245,15 +299,19 @@ def normalized_graph_edit_distance(
     *,
     name_fn: NameFn = normalize_rschema_name,
     legacy: bool = False,
+    names_only: bool = False,
 ) -> float:
     """nGED in ``[0, 1]`` (lower is better, 0 = identical under ``name_fn``).
 
     Adapted from ``evaluate_exp4_text2schema.normalized_graph_edit_distance``; see the
     module docstring for the empty-graph policy and the normaliser.
+
+    ``names_only=True``: attribute labels are column names only (E0 genuine structural
+    nGED — excludes type family / nullability, including synthetic RSchema types).
     """
     cost, denom = graph_edit_cost(
-        column_labels(gold_meta, name_fn),
-        column_labels(pred_meta, name_fn),
+        column_labels(gold_meta, name_fn, names_only=names_only),
+        column_labels(pred_meta, name_fn, names_only=names_only),
         fk_edges(gold_ddl, name_fn, legacy=legacy),
         fk_edges(pred_ddl, name_fn, legacy=legacy),
     )
@@ -262,6 +320,9 @@ def normalized_graph_edit_distance(
 
 __all__ = [
     "ELEMENTS",
+    "HALLUCINATION_DIMS",
+    "aggregate_hallucination_micro",
+    "aggregate_hallucination_micro_5dim",
     "column_labels",
     "f1_score",
     "fk_edges",

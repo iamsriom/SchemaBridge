@@ -11,6 +11,9 @@ from .evaluator import (
 )
 from .metrics import (
     ELEMENTS,
+    HALLUCINATION_DIMS,
+    aggregate_hallucination_micro,
+    aggregate_hallucination_micro_5dim,
     f1_score,
     hallucination_rate,
     micro_aggregate,
@@ -38,7 +41,10 @@ from .schema_parser import (
 
 __all__ = [
     "ELEMENTS",
+    "HALLUCINATION_DIMS",
     "Schema",
+    "aggregate_hallucination_micro",
+    "aggregate_hallucination_micro_5dim",
     "aggregate_schemas",
     "ensure_prediction_metadata",
     "evaluate_ddl_pair",

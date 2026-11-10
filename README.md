@@ -25,14 +25,12 @@ Academic authors: Sriom Chakrabarti, Sean Bin Yang, Arijit Khan, Sebastian Link.
 
 | ID | Objective | Docs | Verification |
 |----|-----------|------|--------------|
-| **E0** | Text2Schema from NL | [docs/experiments/E0.md](docs/experiments/E0.md) | PARTIAL / MISMATCH — open RSchema archived; closed missing |
+| **E0** | Text2Schema from NL | [docs/experiments/E0.md](docs/experiments/E0.md) | Offline Tables V–VI (genuine-gold); closed Direct via API runner |
 | **E1** | Schema verbalization | [docs/experiments/E1.md](docs/experiments/E1.md) | PARTIAL — RSchema open detailed BLEU/ROUGE/SCR match |
 | **E2** | Round-trip preservation | [docs/experiments/E2.md](docs/experiments/E2.md) | PARTIAL — RSchema open detailed mostly matches |
 | **E3** | Constructor isolation | [docs/experiments/E3.md](docs/experiments/E3.md) | UNVERIFIED — frozen descriptions missing |
 | **E4** | Masking / inferability | [docs/experiments/E4.md](docs/experiments/E4.md) | UNVERIFIED — Tables X–XI not recovered |
 | **E5** | Scalability and cost | [docs/experiments/E5.md](docs/experiments/E5.md) | REPRODUCED, PROVENANCE INCOMPLETE (N=30) |
-
-Evidence: [`audit/PHASE12_VERIFICATION_REPORT.md`](audit/PHASE12_VERIFICATION_REPORT.md).
 
 ## Quick start (offline)
 
@@ -40,17 +38,26 @@ Evidence: [`audit/PHASE12_VERIFICATION_REPORT.md`](audit/PHASE12_VERIFICATION_RE
 git clone https://github.com/iamsriom/SchemaBridge.git
 cd SchemaBridge
 pip install -r requirements.txt
-python scripts/reproduce_tables.py --all --offline
-python scripts/reproduce_tables.py --experiment E0 --recompute
-python scripts/offline_e1_rschema_detailed.py
-pytest -q
+python3 -m pytest -q
+
+# Authoritative E0 Tables V+VI from local prediction dumps
+python3 experiments/E0/evaluate.py
 ```
 
-Open-weight E0–E2 predictions are real files under `results/predictions/` (not host symlinks). SchemaAgent / PaperMethods trees are excluded.
+See [`experiments/E0/README.md`](experiments/E0/README.md) for the full E0 pipeline (Direct API, baselines, metric definitions).
 
-## Live inference
+## Live E0 Direct inference (paid; optional)
 
-Copy `.env.example` to `.env` and set keys only if you opt into paid runs under `experiments/e5_small/` or `experiments/*/run.py`.
+```bash
+pip install openai anthropic   # optional providers
+export OPENAI_API_KEY=...      # or local openai_api.txt
+export ANTHROPIC_API_KEY=...   # or local anthropic.txt
+
+python3 experiments/E0/run_direct_api.py --dry-run
+python3 experiments/E0/run_direct_api.py --limit 1 --confirm-paid
+```
+
+Never commit API keys or generated `results/predictions/` / `results/metrics/` dumps.
 
 ## Citation
 

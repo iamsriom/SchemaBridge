@@ -20,7 +20,10 @@ from typing import Callable
 NameFn = Callable[[str], str]
 
 INT_TYPES = frozenset({"int", "tinyint", "smallint", "mediumint", "bigint", "integer"})
-STR_TYPES = frozenset({"varchar", "char", "text"})
+STR_TYPES = frozenset(
+    {"varchar", "nvarchar", "char", "nchar", "text", "tinytext", "mediumtext", "longtext"}
+)
+BINARY_TYPES = frozenset({"blob", "tinyblob", "mediumblob", "longblob", "binary", "varbinary"})
 
 # Exact tuples used by the vendored ``evaluate_one`` domain check (note: no "integer").
 _LEGACY_INT_TYPES = frozenset({"int", "tinyint", "smallint", "mediumint", "bigint"})
@@ -66,17 +69,23 @@ def normalize_rschema_name(s: str | None) -> str:
 
 
 def type_family(dtype: str | None) -> str:
-    """Collapse SQL types to a family: ``int`` / ``str`` / the lowercase type itself.
+    """Collapse SQL types to a family: ``int`` / ``str`` / ``binary`` / lowercase type.
 
     ``int``-family: int, integer, tinyint, smallint, mediumint, bigint.
-    ``str``-family: varchar, char, text.  Everything else is returned lowercased
-    (so ``decimal`` != ``float`` != ``datetime``).
+    ``str``-family: varchar, nvarchar, char, nchar, text, tiny/medium/longtext.
+    ``binary``-family: blob variants, binary, varbinary.
+    Empty / unknown types return ``""`` (never invent a family).
+    Everything else is returned lowercased (so ``decimal`` != ``float`` != ``datetime``).
     """
     d = (dtype or "").strip().lower()
+    if not d:
+        return ""
     if d in INT_TYPES:
         return "int"
     if d in STR_TYPES:
         return "str"
+    if d in BINARY_TYPES:
+        return "binary"
     return d
 
 
@@ -86,16 +95,23 @@ def types_compatible(gold_type: str | None, pred_type: str | None, *, legacy: bo
     ``legacy=True`` reproduces the vendored ``evaluate_one`` which does *not* treat the
     literal string ``integer`` as part of the int family (the parser never emits it, but
     LLM-provided JSON metadata can).
+
+    Empty / unsupported types never match (no fabricated Domain agreement).
     """
     g = (gold_type or "").lower()
     p = (pred_type or "").lower()
+    if not g or not p:
+        return False
     if g == p:
         return True
     if legacy:
         if g in _LEGACY_INT_TYPES and p in _LEGACY_INT_TYPES:
             return True
         return g in STR_TYPES and p in STR_TYPES
-    return type_family(g) == type_family(p)
+    gf, pf = type_family(g), type_family(p)
+    if not gf or not pf:
+        return False
+    return gf == pf
 
 
 def normalize_whitespace(text: str) -> str:
