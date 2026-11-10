@@ -108,13 +108,29 @@ def test_experiment_files_exist(exp):
     assert (d / "run.py").is_file() == (exp != "E5")
 
 
-@pytest.mark.parametrize("exp", ["E0", "E1", "E2", "E3", "E4"])
+@pytest.mark.parametrize("exp", ["E1", "E2", "E3", "E4"])
 def test_run_py_refuses_online(exp):
     p = subprocess.run([sys.executable, str(ROOT / "experiments" / exp / "run.py"), "--online"],
                        capture_output=True, text=True, cwd=ROOT, timeout=60,
                        env={"PATH": "/usr/bin:/bin"})  # no SCHEMABRIDGE_ALLOW_ONLINE
     assert p.returncode == 2
     assert "DISABLED" in p.stdout and "archived predictions" in p.stdout and "--online ignored" in p.stdout
+
+
+def test_e0_run_py_online_requires_confirm_paid():
+    """E0 routes --online to run_direct_api.py but still requires --confirm-paid."""
+    p = subprocess.run(
+        [sys.executable, str(ROOT / "experiments" / "E0" / "run.py"), "--online"],
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
+        timeout=60,
+        env={"PATH": "/usr/bin:/bin"},
+    )
+    assert p.returncode == 2
+    combined = (p.stdout + p.stderr).lower()
+    assert "confirm-paid" in combined
+    assert "disabled" not in combined  # E0 is not the legacy refuse_online path
 
 
 def test_configs_load_and_match_paper_semantics():

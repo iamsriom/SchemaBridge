@@ -4,12 +4,16 @@ import pytest
 
 from src.metrics import (
     ELEMENTS,
+    HALLUCINATION_DIMS,
+    aggregate_hallucination_micro,
+    aggregate_hallucination_micro_5dim,
     f1_score,
     graph_edit_cost,
     hallucination_rate,
     is_exact_match,
     macro_mean,
     micro_aggregate,
+    micro_aggregate_all,
     micro_f1,
     micro_prf,
     normalized_graph_edit_distance,
@@ -62,6 +66,77 @@ def test_hallucination_rate():
     assert hallucination_rate(0, 0) == 0.0  # nothing recreated -> 0 by policy
     assert hallucination_rate(3, 5) == 0.0  # never negative
     assert hallucination_rate(5, 5) == 0.0
+
+
+def test_aggregate_hallucination_micro_vs_macro_on_unequal_sizes():
+    """Micro Hall. pools counts first; macro averages per-schema rates — they diverge."""
+    # Schema A: tiny, high FP rate (1/1 = 1.0 on every dim).
+    # Schema B: large, low FP rate (1/99 ≈ 0.0101 on every dim).
+    items = []
+    for gold, rec, mat in ((1, 1, 0), (99, 99, 98)):
+        row = {k: {"gold": gold, "recreated": rec, "matched": mat} for k in ELEMENTS}
+        row["hallucination_rate_by_dimension"] = {
+            k: hallucination_rate(rec, mat) for k in ELEMENTS
+        }
+        items.append(row)
+    micro_h = aggregate_hallucination_micro(items)
+    # Pooled: R=100, M=98 -> H_d = 2/100 = 0.02 for each of T/A/E/R -> mean = 0.02
+    assert micro_h == pytest.approx(0.02)
+    assert set(HALLUCINATION_DIMS) == {"tables", "attributes", "entity", "referential"}
+    macro_h = macro_mean(
+        [macro_mean(s["hallucination_rate_by_dimension"].values()) for s in items]
+    )
+    assert macro_h == pytest.approx((1.0 + 1 / 99) / 2)
+    assert micro_h != pytest.approx(macro_h)
+
+
+def test_aggregate_hallucination_micro_excludes_domain():
+    # Domain has high FP rate; T/A/E/R are perfect -> Hall4 = 0, Hall5 > 0
+    items = [
+        {
+            "tables": {"gold": 2, "recreated": 2, "matched": 2},
+            "attributes": {"gold": 4, "recreated": 4, "matched": 4},
+            "domain": {"gold": 4, "recreated": 4, "matched": 0},
+            "entity": {"gold": 2, "recreated": 2, "matched": 2},
+            "referential": {"gold": 1, "recreated": 1, "matched": 1},
+        }
+    ]
+    assert aggregate_hallucination_micro(items) == 0.0
+    assert aggregate_hallucination_micro_5dim(items) == pytest.approx(0.2)  # only Domain FP
+
+
+def test_aggregate_hallucination_micro_empty_prediction_is_zero():
+    # Empty prediction: R=0, M=0 on every dim -> each H_d = 0 -> Hall. = 0
+    items = [{k: {"gold": 5, "recreated": 0, "matched": 0} for k in ELEMENTS}]
+    assert aggregate_hallucination_micro(items) == 0.0
+    fe = micro_aggregate_all(items)
+    assert all(fe[d]["hallucination_rate"] == 0.0 for d in ELEMENTS)
+
+
+def test_extra_unmatched_prediction_raises_hall():
+    base = [
+        {
+            "tables": {"gold": 1, "recreated": 1, "matched": 1},
+            "attributes": {"gold": 2, "recreated": 2, "matched": 2},
+            "domain": {"gold": 2, "recreated": 2, "matched": 2},
+            "entity": {"gold": 1, "recreated": 1, "matched": 1},
+            "referential": {"gold": 0, "recreated": 0, "matched": 0},
+        }
+    ]
+    assert aggregate_hallucination_micro(base) == 0.0
+    worse = [
+        {
+            "tables": {"gold": 1, "recreated": 2, "matched": 1},  # +1 unmatched table
+            "attributes": {"gold": 2, "recreated": 2, "matched": 2},
+            "domain": {"gold": 2, "recreated": 99, "matched": 0},  # Domain noise must not affect Hall4
+            "entity": {"gold": 1, "recreated": 1, "matched": 1},
+            "referential": {"gold": 0, "recreated": 0, "matched": 0},
+        }
+    ]
+    h = aggregate_hallucination_micro(worse)
+    # Only tables contributes: H_T=1/2, others 0 -> mean = 0.125
+    assert h == pytest.approx(0.125)
+    assert h > 0.0
 
 
 def test_micro_prf_fields_consistent():

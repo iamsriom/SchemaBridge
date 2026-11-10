@@ -37,6 +37,8 @@ from typing import Any, Callable
 
 from .metrics import (
     ELEMENTS,
+    HALLUCINATION_DIMS,
+    aggregate_hallucination_micro,
     hallucination_rate,
     is_exact_match,
     macro_mean,
@@ -194,6 +196,51 @@ def five_element_counts(
     attr_gold = sum(len(c) for c in g_cols.values())
     attr_pred = sum(len(c) for c in p_cols.values())
     attr_match = domain_match = 0
+
+    def _typed(info: dict) -> bool:
+        """Recognised non-empty DATA_TYPE (TYPE_STATUS ok / not unsupported)."""
+        status = (info.get("TYPE_STATUS") or "").lower()
+        dtype = (info.get("DATA_TYPE") or "").strip()
+        if status == "unsupported" or not dtype:
+            return False
+        return True
+
+    def _nullability_known(info: dict) -> bool:
+        status = (info.get("NULLABILITY_STATUS") or "").lower()
+        if status == "unknown":
+            return False
+        # Empty IS_NULLABLE without a known status is not scorable.
+        if not (info.get("IS_NULLABLE") or "").strip() and status in ("", "unknown"):
+            return False
+        return True
+
+    def _domain_eligible(info: dict) -> bool:
+        """Domain denominator rule: valid recognised type AND known nullability."""
+        if legacy:
+            return True
+        return _typed(info) and _nullability_known(info)
+
+    def _null_ok(gi: dict, pi: dict) -> bool:
+        if legacy:
+            return ((gi.get("IS_NULLABLE") or "").upper() == "YES") == (
+                (pi.get("IS_NULLABLE") or "").upper() == "YES"
+            )
+        if not _nullability_known(gi) or not _nullability_known(pi):
+            return False
+        return ((gi.get("IS_NULLABLE") or "").upper() == "YES") == (
+            (pi.get("IS_NULLABLE") or "").upper() == "YES"
+        )
+
+    domain_gold = domain_pred = 0
+    for t, cols in g_cols.items():
+        for c in cols:
+            if _domain_eligible(g_info.get(t, {}).get(c, {})):
+                domain_gold += 1
+    for t, cols in p_cols.items():
+        for c in cols:
+            if _domain_eligible(p_info.get(t, {}).get(c, {})):
+                domain_pred += 1
+
     for tn in matched_tables:
         gt, pt = g_norm[tn], p_norm[tn]
         gc = {name_fn(c): c for c in sorted(g_cols.get(gt, set()), reverse=True)}
@@ -203,11 +250,11 @@ def five_element_counts(
         for cn in shared:
             gi = g_info.get(gt, {}).get(gc[cn], {})
             pi = p_info.get(pt, {}).get(pc[cn], {})
+            # Match requires both sides Domain-eligible under the same rule.
+            if not _domain_eligible(gi) or not _domain_eligible(pi):
+                continue
             type_ok = types_compatible(gi.get("DATA_TYPE"), pi.get("DATA_TYPE"), legacy=legacy)
-            null_ok = ((gi.get("IS_NULLABLE") or "").upper() == "YES") == (
-                (pi.get("IS_NULLABLE") or "").upper() == "YES"
-            )
-            if type_ok and null_ok:
+            if type_ok and _null_ok(gi, pi):
                 domain_match += 1
 
     g_pk, g_uq = parse_ddl_primary_unique(gold_ddl, legacy=legacy)
@@ -228,7 +275,11 @@ def five_element_counts(
     return {
         "tables": {"gold": len(g_tables), "recreated": len(p_tables), "matched": len(matched_tables)},
         "attributes": {"gold": attr_gold, "recreated": attr_pred, "matched": attr_match},
-        "domain": {"gold": attr_gold, "recreated": attr_pred, "matched": domain_match},
+        "domain": {
+            "gold": domain_gold if not legacy else attr_gold,
+            "recreated": domain_pred if not legacy else attr_pred,
+            "matched": domain_match,
+        },
         "entity": {
             "gold": len(g_pk) + len(g_uq),
             "recreated": len(p_pk) + len(p_uq),
@@ -248,12 +299,16 @@ def evaluate_schema_pair(
     legacy: bool = False,
     table_count: int | None = None,
     column_count: int | None = None,
+    names_only: bool = False,
 ) -> dict[str, Any]:
     """Evaluate one (gold, prediction) pair; returns a per-schema record.
 
     ``pred_meta`` is passed through :func:`ensure_prediction_metadata`, so ``{}`` is fine
     when the prediction is DDL only.  ``table_count``/``column_count`` (used only for the
     easy/medium/hard label) default to the gold metadata sizes.
+
+    ``names_only=True``: structural nGED uses attribute *names* only (no type/nullability
+    labels) — authoritative E0 genuine-reference protocol.
     """
     pred_meta = ensure_prediction_metadata(pred_meta, pred_ddl, legacy=legacy)
     counts = five_element_counts(gold_meta, gold_ddl, pred_meta, pred_ddl, name_fn=name_fn, legacy=legacy)
@@ -265,7 +320,13 @@ def evaluate_schema_pair(
         **counts,
         "exact_match": is_exact_match(**counts),
         "normalized_graph_edit_distance": normalized_graph_edit_distance(
-            gold_meta, gold_ddl, pred_meta, pred_ddl, name_fn=name_fn, legacy=legacy
+            gold_meta,
+            gold_ddl,
+            pred_meta,
+            pred_ddl,
+            name_fn=name_fn,
+            legacy=legacy,
+            names_only=names_only,
         ),
         "hallucination_rate_by_dimension": {
             k: hallucination_rate(counts[k]["recreated"], counts[k]["matched"]) for k in ELEMENTS
@@ -284,36 +345,89 @@ def evaluate_ddl_pair(gold_ddl: str, pred_ddl: str, **kwargs: Any) -> dict[str, 
 # --------------------------------------------------------------------------- aggregation
 
 
+def empty_prediction_against_gold(
+    gold_meta: dict,
+    gold_ddl: str,
+    *,
+    name_fn: NameFn = normalize_rschema_name,
+    legacy: bool = False,
+    table_count: int | None = None,
+    column_count: int | None = None,
+    failure_reason: str = "empty prediction",
+    names_only: bool = False,
+) -> dict[str, Any]:
+    """Score a failed/missing/empty prediction as an empty schema against retained gold.
+
+    Gold element counts are preserved (so micro F1 recall uses the full population).
+    Predicted/matched counts are zero; nGED = 1.0; per-dimension Hall. rates are 0.0
+    because nothing was recreated (unified E0 policy — does *not* force Hall.=1).
+    """
+    rec = evaluate_schema_pair(
+        gold_meta,
+        gold_ddl,
+        {},
+        "",
+        name_fn=name_fn,
+        legacy=legacy,
+        table_count=table_count,
+        column_count=column_count,
+        names_only=names_only,
+    )
+    # Defensive: empty vs non-empty gold must be nGED=1 under the sum normaliser.
+    if rec["normalized_graph_edit_distance"] != 1.0 and (
+        (gold_meta.get("tables") or []) or (gold_ddl or "").strip()
+    ):
+        rec["normalized_graph_edit_distance"] = 1.0
+    rec["failed"] = True
+    rec["failure_reason"] = failure_reason
+    rec["scored_as_empty"] = True
+    return rec
+
+
 def aggregate_schemas(items: list[dict], *, n_gold: int | None = None) -> dict[str, Any]:
     """Aggregate per-schema records.
 
     * ``five_elements``: micro aggregates (summed counts).
     * ``mean_normalized_graph_edit_distance``: macro mean over ``items``.
-    * If ``n_gold`` is given and larger than ``len(items)``, the missing schemas are scored
-      with the zero-score policy for nGED (1.0) and hallucination (1.0) and F1 macro means.
-      Micro counts are unaffected (missing schemas contribute no counts).
+    * ``mean_hallucination_rate_micro`` / ``hallucination``: authoritative E0 Hall. —
+      unweighted mean of four dimension-wise *micro* false-positive rates over
+      :data:`HALLUCINATION_DIMS` = (T, A, E, R); Domain excluded
+      (:func:`aggregate_hallucination_micro`). Empty predictions do not inflate it.
+    * ``mean_hallucination_rate_over_dimensions``: *legacy* macro mean of per-schema
+      mean dimension rates (PaperMethods-style). Kept for historical comparison.
+    * If ``n_gold`` is given and larger than ``len(items)``, the missing schemas are
+      padded with nGED = 1.0 and legacy macro Hall. = 1.0. Micro F1 / micro Hall. are
+      unaffected by padding without gold counts — prefer including empty-scored items
+      via :func:`evaluate_predictions_dir` / :func:`empty_prediction_against_gold`.
     """
     n = len(items)
     n_total = max(n, n_gold or 0)
     n_zero = n_total - n
     nged_sum = sum(s["normalized_graph_edit_distance"] for s in items) + n_zero * 1.0
     exact = sum(1 for s in items if s.get("exact_match"))
+    micro_hall = aggregate_hallucination_micro(items)
+    legacy_macro_hall = (
+        (
+            sum(macro_mean(s["hallucination_rate_by_dimension"].values()) for s in items)
+            + n_zero * zero_scored_schema_metrics()["per_schema_hallucination"]
+        )
+        / n_total
+        if n_total
+        else 0.0
+    )
     return {
         "total_schemas": n,
         "zero_scored": n_zero,
+        "failed_count": sum(1 for s in items if s.get("failed") or s.get("scored_as_empty")),
         "exact_match_count": exact,
         "exact_match_rate": exact / n if n else 0.0,
         "mean_normalized_graph_edit_distance": nged_sum / n_total if n_total else 0.0,
         "five_elements": micro_aggregate_all(items),
-        "mean_hallucination_rate_over_dimensions": (
-            (
-                sum(macro_mean(s["hallucination_rate_by_dimension"].values()) for s in items)
-                + n_zero * zero_scored_schema_metrics()["per_schema_hallucination"]
-            )
-            / n_total
-            if n_total
-            else 0.0
-        ),
+        # Authoritative unified Hall. for Table V / E0 Direct.
+        "mean_hallucination_rate_micro": micro_hall,
+        "hallucination": micro_hall,
+        # Legacy macro field (PaperMethods / historical).
+        "mean_hallucination_rate_over_dimensions": legacy_macro_hall,
     }
 
 
@@ -324,37 +438,69 @@ def evaluate_predictions_dir(
     name_fn: NameFn = normalize_rschema_name,
     legacy: bool = False,
     limit: int | None = None,
+    include_failures: bool = True,
+    names_only: bool = False,
 ) -> dict[str, Any]:
     """Re-evaluate an Exp4-style prediction folder (``NNNN.json`` with ``id``/``ddl``/``metadata``).
 
-    Mirrors ``evaluate_exp4_text2schema.run_evaluation``: predictions with ``error``,
-    ``skipped`` or empty ``ddl`` are *skipped* (not scored).  Use ``legacy=True`` to
-    reproduce archived numbers exactly.  Offline only; no API calls.
+    Authoritative E0 mode (``include_failures=True``, default): evaluate against the
+    *complete* gold population. Failed, missing, malformed, or empty predictions are
+    retained as empty schemas (gold counts included, nGED = 1, Hall. not forced to 1).
+
+    Historical skip mode (``include_failures=False``): predictions with ``error``,
+    ``skipped`` or empty ``ddl`` are omitted from aggregates (Exp4 archive behaviour).
+
+    ``names_only=True``: structural nGED ignores type/nullability labels (E0 genuine protocol).
+
+    Use ``legacy=True`` only to reproduce archived parser quirks. Offline only; no API calls.
     """
-    gold_by_id = {r["id"]: r for r in load_jsonl(gold_path) if r.get("id")}
-    per_schema: dict[str, dict] = {}
-    skipped = 0
-    files = sorted(Path(pred_dir).glob("[0-9][0-9][0-9][0-9].json"))
-    if limit is not None:
-        files = files[:limit]
+    gold_rows = [r for r in load_jsonl(gold_path) if r.get("id")]
+    gold_by_id = {r["id"]: r for r in gold_rows}
+
+    # Index predictions by gold id (and by stem for unreadable JSON fallback).
+    pred_dir_p = Path(pred_dir)
+    files = sorted(pred_dir_p.glob("[0-9][0-9][0-9][0-9].json"))
+    pred_by_id: dict[str, tuple[str, dict | None, str | None]] = {}
+    # stem -> (data or None, parse_error)
+    pred_by_stem: dict[str, tuple[dict | None, str | None]] = {}
     for pred_path in files:
-        label = pred_path.stem
+        stem = pred_path.stem
         try:
             data = json.loads(pred_path.read_text(encoding="utf-8"))
+            pred_by_stem[stem] = (data, None)
+            rid = data.get("id") or ""
+            if rid:
+                pred_by_id[rid] = (stem, data, None)
         except Exception as e:  # noqa: BLE001
-            per_schema[label] = {"error": str(e)}
-            skipped += 1
-            continue
-        gold = gold_by_id.get(data.get("id") or "")
-        if not gold:
-            per_schema[label] = {"error": "no gold record"}
-            skipped += 1
-            continue
-        if data.get("error") or data.get("skipped") or not data.get("ddl"):
-            per_schema[label] = {"error": data.get("error") or data.get("skip_reason") or "missing ddl"}
-            skipped += 1
-            continue
+            pred_by_stem[stem] = (None, str(e))
+
+    per_schema: dict[str, dict] = {}
+    failed = 0
+    skipped = 0
+
+    def _score_pair(label: str, gold: dict, data: dict | None, failure_reason: str | None) -> None:
+        nonlocal failed, skipped
         g_meta, g_ddl, tc, cc = gold_record_to_metadata_and_ddl(gold, legacy=legacy)
+        if failure_reason is not None:
+            if not include_failures:
+                per_schema[label] = {"error": failure_reason, "id": gold.get("id")}
+                skipped += 1
+                return
+            rec = empty_prediction_against_gold(
+                g_meta,
+                g_ddl,
+                name_fn=name_fn,
+                legacy=legacy,
+                table_count=tc,
+                column_count=cc,
+                failure_reason=failure_reason,
+                names_only=names_only,
+            )
+            rec["id"] = gold.get("id")
+            per_schema[label] = rec
+            failed += 1
+            return
+        assert data is not None
         rec = evaluate_schema_pair(
             g_meta,
             g_ddl,
@@ -364,10 +510,63 @@ def evaluate_predictions_dir(
             legacy=legacy,
             table_count=tc,
             column_count=cc,
+            names_only=names_only,
         )
-        rec["id"] = data.get("id")
+        rec["id"] = data.get("id") or gold.get("id")
+        rec["failed"] = False
         per_schema[label] = rec
+
+    if include_failures:
+        # Complete gold population: one scored record per gold schema.
+        rows = gold_rows if limit is None else gold_rows[:limit]
+        for idx, gold in enumerate(rows):
+            rid = gold["id"]
+            label = f"{idx + 1:04d}"
+            if rid in pred_by_id:
+                stem, data, _err = pred_by_id[rid]
+                label = stem
+                if data.get("error") or data.get("skipped") or not data.get("ddl"):
+                    reason = data.get("error") or data.get("skip_reason") or "missing ddl"
+                    _score_pair(label, gold, data, reason)
+                else:
+                    _score_pair(label, gold, data, None)
+            elif label in pred_by_stem and pred_by_stem[label][0] is None:
+                # Unreadable JSON at the expected stem; gold order matches generation order.
+                _score_pair(label, gold, None, pred_by_stem[label][1] or "unreadable prediction JSON")
+            else:
+                _score_pair(label, gold, None, "missing prediction file")
+    else:
+        # Historical: iterate prediction files only; skip failures.
+        use_files = files if limit is None else files[:limit]
+        for pred_path in use_files:
+            label = pred_path.stem
+            data, parse_err = pred_by_stem.get(label, (None, "missing"))
+            if parse_err or data is None:
+                per_schema[label] = {"error": parse_err or "unreadable prediction JSON"}
+                skipped += 1
+                continue
+            gold = gold_by_id.get(data.get("id") or "")
+            if not gold:
+                per_schema[label] = {"error": "no gold record"}
+                skipped += 1
+                continue
+            if data.get("error") or data.get("skipped") or not data.get("ddl"):
+                per_schema[label] = {
+                    "error": data.get("error") or data.get("skip_reason") or "missing ddl"
+                }
+                skipped += 1
+                continue
+            _score_pair(label, gold, data, None)
+
     scored = [s for s in per_schema.values() if "error" not in s]
     out = aggregate_schemas(scored)
-    out.update({"skipped": skipped, "per_schema": per_schema})
+    out.update(
+        {
+            "skipped": skipped,
+            "failed": failed,
+            "include_failures": include_failures,
+            "gold_total": len(gold_rows),
+            "per_schema": per_schema,
+        }
+    )
     return out

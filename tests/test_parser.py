@@ -149,16 +149,31 @@ def test_09_inline_references_direction():
 
 
 # 10 ------------------------------------------------------------------------
-@pytest.mark.parametrize("legacy", [False, True])
-def test_10_nullability(legacy):
+def test_10_nullability_legacy_vendored():
     ddl = (
         "CREATE TABLE t (\n"
         "  a int NOT NULL,\n  b int NULL,\n  c int DEFAULT NULL,\n  d int,\n  e varchar(5) NOT NULL DEFAULT 'x'\n);"
     )
-    meta = metadata_from_ddl(ddl, legacy=legacy)
+    meta = metadata_from_ddl(ddl, legacy=True)
     got = {c["COLUMN_NAME"]: c["IS_NULLABLE"] for c in meta["columns_by_table"]["t"]}
-    # documented convention: YES only with an explicit NULL and no NOT NULL
+    # vendored: YES only with an explicit NULL and no NOT NULL; bare -> NO
     assert got == {"a": "NO", "b": "YES", "c": "YES", "d": "NO", "e": "NO"}
+
+
+def test_10_nullability_mysql_dialect_default():
+    ddl = (
+        "CREATE TABLE t (\n"
+        "  a int NOT NULL,\n  b int NULL,\n  c int DEFAULT NULL,\n  d int,\n"
+        "  e varchar(5) NOT NULL DEFAULT 'x',\n  id int PRIMARY KEY\n);"
+    )
+    meta = metadata_from_ddl(ddl, legacy=False)
+    got = {c["COLUMN_NAME"]: (c["IS_NULLABLE"], c["NULLABILITY_STATUS"]) for c in meta["columns_by_table"]["t"]}
+    assert got["a"] == ("NO", "explicit_not_null")
+    assert got["b"] == ("YES", "explicit_null")
+    assert got["c"] == ("YES", "explicit_null")
+    assert got["d"] == ("YES", "dialect_default")  # MySQL: bare column nullable
+    assert got["e"] == ("NO", "explicit_not_null")
+    assert got["id"] == ("NO", "primary_key")
 
 
 # 11 ------------------------------------------------------------------------
@@ -173,11 +188,20 @@ def test_10_nullability(legacy):
         ("DECIMAL(10,2)", ("decimal", "decimal(10,2)")),
         ("DATETIME", ("datetime", "datetime")),
         ("BOOLEAN", ("boolean", "boolean")),
-        ("somethingweird", ("varchar", "varchar(255)")),
+        ("BLOB", ("blob", "blob")),
+        ("JSON", ("json", "json")),
+        ("ENUM('a','b')", ("enum", "enum('a','b')")),
+        ("VARBINARY(16)", ("varbinary", "varbinary(16)")),
+        ("LONGTEXT", ("longtext", "longtext")),
     ],
 )
 def test_11_data_type_normalization(text, expected):
-    assert _parse_data_type(text) == expected
+    assert _parse_data_type(text, legacy=False) == expected
+
+
+def test_11_unknown_type_no_fabricated_varchar_robust():
+    assert _parse_data_type("somethingweird", legacy=False) == ("", "")
+    assert _parse_data_type("somethingweird", legacy=True) == ("varchar", "varchar(255)")
 
 
 def test_11_integer_column_becomes_int_in_metadata():
@@ -256,15 +280,18 @@ def test_comments_with_parens_and_keywords_are_ignored():
     assert parse_ddl_primary_unique(ddl)[0] == []
 
 
-def test_ensure_prediction_metadata_fills_from_ddl_only_when_empty():
+def test_ensure_prediction_metadata_prefers_ddl_structure():
     ddl = "CREATE TABLE t (a int);"
     filled = ensure_prediction_metadata({}, ddl, database="d")
     assert filled["tables"] == ["t"] and cols(filled, "t") == ["a"] and filled["database"] == "d"
+    # Conflicting JSON metadata is not preferred over DDL; mismatches are recorded.
     given = {"tables": ["x"], "columns_by_table": {"x": [{"COLUMN_NAME": "q"}]}}
-    assert ensure_prediction_metadata(given, ddl) == given
-    # tables kept when only columns are empty
+    fixed = ensure_prediction_metadata(given, ddl)
+    assert fixed["tables"] == ["t"] and cols(fixed, "t") == ["a"]
+    assert fixed.get("_metadata_ddl_mismatches")
+    # Empty column map still yields DDL columns; DDL tables win.
     kept = ensure_prediction_metadata({"tables": ["keep"], "columns_by_table": {}}, ddl)
-    assert kept["tables"] == ["keep"] and cols(kept, "t") == ["a"]
+    assert kept["tables"] == ["t"] and cols(kept, "t") == ["a"]
 
 
 def test_parse_ddl_structured_schema():
@@ -278,3 +305,71 @@ def test_parse_ddl_structured_schema():
     assert c.primary_key == [["id"]]
     assert [(fk.columns, fk.ref_table, fk.ref_columns) for fk in c.foreign_keys] == [(["pid"], "p", ["id"])]
     assert not c.columns[1].nullable
+
+
+# parser corrections (E0 genuine Domain) ------------------------------------
+def test_blob_json_enum_binary_recovered():
+    ddl = (
+        "CREATE TABLE t (\n"
+        "  img BLOB,\n  meta JSON,\n  kind ENUM('a','b'),\n  raw VARBINARY(16),\n  doc LONGTEXT\n);"
+    )
+    meta = metadata_from_ddl(ddl)
+    assert cols(meta, "t") == ["img", "meta", "kind", "raw", "doc"]
+    assert col(meta, "t", "img")["DATA_TYPE"] == "blob"
+    assert col(meta, "t", "meta")["DATA_TYPE"] == "json"
+    assert col(meta, "t", "kind")["DATA_TYPE"] == "enum"
+    assert col(meta, "t", "raw")["DATA_TYPE"] == "varbinary"
+    assert col(meta, "t", "doc")["DATA_TYPE"] == "longtext"
+
+
+def test_special_character_identifiers_recovered():
+    ddl = (
+        "CREATE TABLE t (\n"
+        "  Check-in_Time DATETIME,\n"
+        "  State/Province VARCHAR(255),\n"
+        "  E-book_ID INTEGER NOT NULL\n);"
+    )
+    meta = metadata_from_ddl(ddl)
+    assert cols(meta, "t") == ["Check-in_Time", "State/Province", "E-book_ID"]
+    assert col(meta, "t", "E-book_ID")["IS_NULLABLE"] == "NO"
+
+
+def test_unquoted_apostrophe_does_not_swallow_following_columns():
+    ddl = (
+        "CREATE TABLE patient (\n"
+        "  patient_ID INTEGER PRIMARY KEY,\n"
+        "  patient's_treatment_information VARCHAR(255),\n"
+        "  registration_category_ID INTEGER,\n"
+        "  ward_ID INTEGER\n);"
+    )
+    meta = metadata_from_ddl(ddl)
+    assert cols(meta, "patient") == [
+        "patient_ID",
+        "patient's_treatment_information",
+        "registration_category_ID",
+        "ward_ID",
+    ]
+
+
+def test_decimal_and_enum_commas_do_not_split_columns():
+    ddl = "CREATE TABLE t (price DECIMAL(10,2) NOT NULL, kind ENUM('a','b','c'), note VARCHAR(10));"
+    assert cols(metadata_from_ddl(ddl), "t") == ["price", "kind", "note"]
+
+
+def test_placeholder_null_type_recovered_without_fabricated_varchar():
+    ddl = "CREATE TABLE t (\n  AccountID null PRIMARY KEY,\n  Balance null,\n  Name VARCHAR(255)\n);"
+    meta = metadata_from_ddl(ddl)
+    assert cols(meta, "t") == ["AccountID", "Balance", "Name"]
+    a = col(meta, "t", "AccountID")
+    assert a["DATA_TYPE"] == "" and a["TYPE_STATUS"] == "unsupported"
+    assert a["COLUMN_KEY"] == "PRI" and a["IS_NULLABLE"] == "NO"
+    b = col(meta, "t", "Balance")
+    assert b["TYPE_STATUS"] == "unsupported" and b["NULLABILITY_STATUS"] == "unknown"
+    assert b["IS_NULLABLE"] == ""
+    assert col(meta, "t", "Name")["DATA_TYPE"] == "varchar"
+
+
+def test_legacy_still_drops_blob():
+    ddl = "CREATE TABLE t (a int, b BLOB);"
+    assert cols(metadata_from_ddl(ddl, legacy=True), "t") == ["a"]
+    assert cols(metadata_from_ddl(ddl, legacy=False), "t") == ["a", "b"]
