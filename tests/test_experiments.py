@@ -51,16 +51,23 @@ def test_e1_blocked_labels(refs):
 # ------------------------------------------------------------------ E2
 @pytest.mark.skipif(not (rt.ARCHIVED / "e2_rschema_roundtrip_evaluation.json").is_file(),
                     reason="E2 archived metrics missing")
-def test_e2_rschema_detailed_compared_and_basic_blocked(refs):
+def test_e2_legacy_archive_harness_still_runs(refs):
+    """Legacy ``reproduce_tables.run_e2`` compares the N=518 Detailed archive.
+
+    Canonical PRIMARY results (145/381/239) live under
+    ``results/metrics/reproduced/E2_AUDIT/`` and are covered by ``test_e2_primary.py``.
+    Paper reference values are PRIMARY, so archive cells are expected to MISMATCH
+    or remain BLOCKED for Basic/closed/incomplete slices.
+    """
     res = rt.run_e2(refs)
     lab = status(res, "tab:e2_roundtrip", "RSchema")
-    assert lab.n_pass > 0 and lab.n_blocked > 0
-    assert lab.status in (rt.MISMATCH, rt.PARTIAL, rt.PASS)
+    assert lab.n_blocked > 0
+    assert lab.status in (rt.MISMATCH, rt.PARTIAL, rt.PASS, rt.BLOCKED)
     basic = [c for c in res.cells if c.dataset == "RSchema" and c.variant == "basic"]
     assert basic and all(c.status == rt.BLOCKED for c in basic)
-    # the archive is the Detailed describer: nGED(D) must be among the passing cells
     d = {c.metric: c for c in res.cells if c.dataset == "RSchema" and c.model == "codellama13b"}
-    assert d["nged_detailed"].status == rt.PASS and d["tables_detailed"].status == rt.PASS
+    assert d["nged_detailed"].status in (rt.PASS, rt.MISMATCH)
+    assert d["tables_detailed"].status in (rt.PASS, rt.MISMATCH)
 
 
 def test_e2_schemabench_incomplete_is_blocked(refs):
