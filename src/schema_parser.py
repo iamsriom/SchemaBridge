@@ -375,17 +375,33 @@ def iter_ddl_table_bodies(ddl: str, *, legacy: bool = False) -> Iterator[tuple[s
             i = _body_end_legacy(ddl, start)
             yield table, ddl[start : i - 1]
         return
-    pos = 0
-    while True:
-        m = _ROBUST_HEADER_RE.search(ddl, pos)
-        if not m:
-            break
+    # Use finditer so a malformed / unclosed first table cannot suppress later
+    # CREATE TABLE headers.  Some LLM outputs place ``ENGINE=...`` inside the
+    # column list (comma before ENGINE, missing ``)``); paren-depth scanning then
+    # swallows the rest of the file.  Clamp the body at the next CREATE TABLE.
+    matches = list(_ROBUST_HEADER_RE.finditer(ddl))
+    for idx, m in enumerate(matches):
         table = unquote_identifier(m.group(1)).strip()
         start = m.end()
-        end = _body_end_robust(ddl, start)
-        if table:
-            yield table, ddl[start : max(start, end - 1)]
-        pos = max(end, m.end())
+        paren_end = _body_end_robust(ddl, start)
+        next_start = matches[idx + 1].start() if idx + 1 < len(matches) else None
+        if next_start is not None and paren_end > next_start:
+            # Unclosed body would absorb the next table — truncate before it.
+            body = ddl[start:next_start]
+            # Drop a trailing comma left by ``PRIMARY KEY (...), ENGINE=...`` patterns.
+            body = re.sub(r",\s*$", "", body.rstrip())
+            # If ENGINE leaked into the body without a closing paren, strip it.
+            body = re.sub(
+                r",?\s*ENGINE\s*=.*$",
+                "",
+                body,
+                flags=re.IGNORECASE | re.DOTALL,
+            )
+            if table:
+                yield table, body
+        else:
+            if table:
+                yield table, ddl[start : max(start, paren_end - 1)]
 
 
 def _name_and_rest(text: str, *, legacy: bool = False) -> tuple[str, str] | None:

@@ -168,3 +168,15 @@ Recovery open-weight trees are **byte-identical** to this branch. Claude/GPT tre
 ### Status unchanged
 
 Experiment remains **PARTIAL**: Direct offline COMPLETE; PaperMethods per-schema trees still missing (ARCHIVE_AGGREGATE). Do not merge as E0 COMPLETE.
+
+
+## Forensic root-cause addendum (2026-11-11 evening)
+
+See `audit/E0_FORENSIC_FINDINGS.md`, `audit/E0_ORIGINAL_PAPER_RESULT_LINEAGE.md`,
+`audit/E0_HISTORICAL_REPRODUCTION.csv`, `audit/E0_PROTOCOL_ABLATION.csv`,
+`audit/E0_ROOT_CAUSE_MATRIX.csv`.
+
+Summary: manuscript Table V is a hybrid of Exp3 historical metrics (typed nGED,
+synthetic Domain, Hall5) and later genuine-protocol cells. Claude/GPT gaps are
+explained by protocol change on identical predictions. Parser bug for unclosed
+`ENGINE=`-inside-table DDL fixed in `src/schema_parser.py`.
