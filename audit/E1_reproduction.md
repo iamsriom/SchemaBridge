@@ -1,33 +1,34 @@
-# E1 reproduction — Schema2Text
+# E1 reproduction — Schema2Text (`tab:e1_s2t`)
 
-**Status: PARTIAL**
+**Status: VERIFIED** — see `E1_AUDIT_VERDICT.md` and `experiments/E1/outputs/verified/`.
 
-## Claimed coverage
+## Protocol
 
-902 schemata × 5 describers × 2 prompts (basic/detailed), minus failures.
+- Enterprise-145: SCR only, N=145
+- RSchema: N=**381** DDL-matched IDs
+- SchemaBench: N=239
+- BLEU-4: `sacrebleu.corpus_bleu(hyps, [refs])` (correct layout)
+- Basic = Exp1 / Schema2Text1; Detailed = Experiment2 / Schema2Text2 / SchemaBench/Experiment
+- **Never** `results/predictions/e1/schemabench_*`
 
-## What we have
+## Quick recompute
 
-| Dataset | Open basic | Open detailed | Claude/GPT | Metrics archive |
-|---|---|---|---|---|
-| RSchema | not separately archived | 518×3 preds; metrics match paper **Detailed** BLEU/ROUGE/SCR | MISSING | `e1_rschema_schema2text_evaluation.json` (`skip_bertscore: true`) |
-| SchemaBench | preds 239×3 | same dirs (prompt variant unclear) | MISSING | **no** evaluation JSON |
-| Enterprise-145 | partial LLMTranslations | partial | MISSING | paper SCR only; no ref NL → BLEU n/a |
+```bash
+python3 experiments/E1/evaluate.py          # BLEU/ROUGE/SCR → experiments/E1/outputs/verified/
+python3 experiments/E1/evaluate.py --bert   # + BERTScore (GPU; use screen)
+# equivalent:
+python3 audit/e1_independent_reproduce.py
+```
 
-## Matches
+## Deliverables
 
-RSchema open Detailed vs `tab:e1_s2t`: BLEU-4, ROUGE-L, SCR — **9/9 PASS** (within tolerance).
+| File | Content |
+|---|---|
+| `E1_CODE_PROVENANCE.md` | Scripts, prompts, trees, evaluators |
+| `experiments/E1/outputs/verified/E1_REPRODUCTION_COMPARISON.csv` | Manuscript vs recomputed (90 MATCH) |
+| `experiments/E1/outputs/verified/E1_BRIEF_CORRECTIONS.csv` | 9 brief → manuscript corrections |
+| `E1_VERIFIED_TABLE.tex` / `outputs/verified/tab_e1_s2t_verified.tex` | Corrected `tab:e1_s2t` |
+| `E1_PAPER_TEXT_AUDIT.md` | Setup LaTeX replacement |
+| `E1_AUDIT_VERDICT.md` | Final counts and readiness |
 
-## Blocked / gaps
-
-- Basic prompt metrics for RSchema not in the archived evaluation file (archive appears Detailed-only)
-- BERTScore skipped in archive → cannot verify paper BERT columns
-- Claude / GPT describer outputs absent
-- SchemaBench and Enterprise reference-metric recomputation not wired
-- Enterprise has no reference NL — paper correctly marks BLEU/ROUGE/BERT as n/a; do not fabricate
-- SCR substring false-positive risk: not silently “fixed”; needs dedicated diagnostic if manuscript claims change
-
-## Prompt files
-
-- `prompts/describer_basic.txt` — extracted from Exp4 schema2text SYSTEM_PROMPT
-- `prompts/describer_detailed.txt` — extracted from Text2ER detailed pipeline
+Do **not** regenerate paid-API outputs for this audit; open-weight Detailed regeneration is optional via `experiments/E1/run_e1_corrected_gpu.py`.

@@ -1,0 +1,58 @@
+name: E1 Schema2Text tests
+
+on:
+  push:
+    branches: [main, e1-schema2text-reproduce, icde2027-e1-verified]
+    paths:
+      - "experiments/E1/**"
+      - "prompts/describer_*.txt"
+      - "datasets/rschema/**"
+      - "datasets/schemabench/**"
+      - "src/**"
+      - ".github/workflows/e1-tests.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "experiments/E1/**"
+      - "prompts/describer_*.txt"
+      - "datasets/rschema/**"
+      - "datasets/schemabench/**"
+      - "src/**"
+      - ".github/workflows/e1-tests.yml"
+
+jobs:
+  e1:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.10"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install E1 CI dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r experiments/E1/requirements-e1-ci.txt
+
+      - name: E1 unit + smoke tests (CPU)
+        run: |
+          python -m pytest -q \
+            experiments/E1/test_e1_smoke.py \
+            experiments/E1/test_e1_corrected.py \
+            experiments/E1/test_reproduce_table_vii.py
+
+      - name: CLI dry-run (no models)
+        run: |
+          python experiments/E1/run_e1_corrected_gpu.py --help
+          python experiments/E1/evaluate_e1_corrected.py --help
+          python experiments/E1/run_e1_corrected_gpu.py \
+            --dataset RSchema --model llama31 --limit 2 --dry-run
+          python experiments/E1/recover_oom_4bit.py --help
