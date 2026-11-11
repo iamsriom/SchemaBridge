@@ -60,7 +60,7 @@ python3 experiments/E0/reproduce_genuine_tables.py --include-gpt4o-mini   # opti
 Outputs: `results/metrics/reproduced/E0_TABLE_{V,VI}_FINAL.*`
 Verification: `audit/E0_VERIFICATION_REPORT.md`, `audit/E0_PAPER_COMPARISON.csv`
 
-**Honesty note:** PaperMethods baseline `results.jsonl` trees are not recoverable on the research server. Offline reproduction falls back to `ARCHIVE_AGGREGATE` metrics from `results/baselines/e0_rschema_papermethods_evaluation.json` (pooled G/P/M → micro T/A/E/R + Hall4; nGED = historical macro mean). Full per-schema names-only recompute remains blocked until trees are restored. Do **not** substitute `prompt_conditions_v2`. SchemaAgent multi-agent code is intentionally **not** shipped. Original prompting helpers live under `original_benchmarks/`.
+**Honesty note:** Historical PaperMethods `results.jsonl` trees were not recovered. Offline Table VI prompting currently uses `ARCHIVE_AGGREGATE` (pooled G/P/M) as provisional evidence; a `REGENERATED_NEW_RUN` campaign (`results/predictions/e0/rschema_papermethods_regenerated/`) is in progress with the packaged `original_benchmarks/run_baselines.py` runner. Do **not** substitute `prompt_conditions_v2`. SchemaAgent is intentionally **not** shipped. Direct Table V is `VERIFIED_FROM_PREDICTIONS` after parser F1–F6 repair.
 
 Status vocabulary: `COMPLETE` | `INCOMPLETE` | `INVALID` | `BLOCKED` | `ARCHIVE_AGGREGATE` | experiment-level `PARTIAL`.
 
