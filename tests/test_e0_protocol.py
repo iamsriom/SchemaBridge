@@ -341,6 +341,60 @@ def test_partial_baseline_is_incomplete(tmp_path, monkeypatch):
     assert bundle["coverage"]["missing"] == 1
 
 
+def test_partial_regen_falls_back_to_archive(tmp_path, monkeypatch):
+    """Incomplete REGENERATED_NEW_RUN must not score missing IDs as empty."""
+    hist = tmp_path / "hist_missing"
+    regen = tmp_path / "regen"
+    path = regen / "codellama13b" / "one_shot" / "results.jsonl"
+    path.parent.mkdir(parents=True)
+    path.write_text(
+        json.dumps({"id": "a", "status": "ok", "answer": {"T": {"Attributes": ["x"], "Primary key": ["x"]}}})
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setitem(genuine.BASELINE_ROOT, "RSchema", hist)
+    monkeypatch.setitem(genuine.BASELINE_REGENERATED_ROOT, "RSchema", regen)
+
+    archived = {
+        "n": 2,
+        "failed": 0,
+        "status": "ARCHIVE_AGGREGATE",
+        "coverage": {"expected": 2, "present": 2},
+        "message": "ARCHIVE_AGGREGATE: stub",
+        "nged": 0.5,
+        "halluc": 0.1,
+        "tables": 0.2,
+        "attributes": 0.3,
+        "domain": None,
+        "entity": 0.4,
+        "referential": 0.05,
+        "hall_rates": {},
+        "hall_totals": {},
+        "struct_counts": {},
+        "items": [],
+        "archive_path": "stub",
+    }
+    monkeypatch.setattr(
+        genuine, "metrics_from_papermethods_archive", lambda *a, **k: archived
+    )
+    gold_rows = [
+        {
+            "id": "a",
+            "answer": {"T": {"Attributes": ["x"], "Primary key": ["x"]}},
+            "ddl": "CREATE TABLE T (x INT PRIMARY KEY);",
+        },
+        {
+            "id": "b",
+            "answer": {"U": {"Attributes": ["y"], "Primary key": ["y"]}},
+            "ddl": "CREATE TABLE U (y INT PRIMARY KEY);",
+        },
+    ]
+    res = genuine.evaluate_baseline("RSchema", "CodeLlama-13B", "one_shot", gold_rows)
+    assert res["status"] == "ARCHIVE_AGGREGATE"
+    assert "ignoring partial REGENERATED_NEW_RUN" in res["message"]
+    assert res["nged"] == 0.5
+
+
 def test_baseline_complete_with_recorded_failure(tmp_path, monkeypatch):
     root = tmp_path / "rschema_papermethods"
     path = root / "codellama13b" / "one_shot" / "results.jsonl"

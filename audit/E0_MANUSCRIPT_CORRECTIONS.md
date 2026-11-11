@@ -15,7 +15,7 @@ Dataset & Model & nGED$\downarrow$ & Hall.$\downarrow$ & T & A & D & E & R \\
  & CodeLlama-13B & 0.583 & 0.669 & 0.554 & 0.414 & 0.115 & 0.301 & 0.141 \\
  & Llama-3.1-8B & 0.615 & 0.696 & 0.572 & 0.377 & 0.121 & 0.199 & 0.104 \\
  & DeepSeek-Coder-6.7B & 0.579 & 0.594 & 0.566 & 0.427 & 0.146 & 0.377 & 0.177 \\
- & Claude Sonnet 4.6 & 0.560 & 0.635 & 0.602 & 0.401 & 0.207 & 0.407 & 0.204 \\
+ & Claude Sonnet 4.6 & 0.560 & 0.635 & 0.602 & 0.401 & 0.208 & 0.407 & 0.204 \\
  & GPT-5.4-mini & 0.553 & 0.605 & 0.600 & 0.433 & 0.223 & 0.399 & 0.225 \\
 \midrule
 \multirow{5}{*}{SchemaBench}
@@ -28,7 +28,7 @@ Dataset & Model & nGED$\downarrow$ & Hall.$\downarrow$ & T & A & D & E & R \\
 \end{tabular}
 ```
 
-Borderline rounding (full precision → 3dp): CodeLlama RSchema Ref 0.140587→0.141; Claude SB Entity 0.345433→0.345.
+Borderline rounding (full precision → 3dp): Claude RS Domain 0.207507→0.208; Llama Hall 0.695508→0.696; CodeLlama Entity 0.300543→0.301.
 
 ## B. Corrected Table VI (LaTeX) — Direct rows locked; prompting provisional
 

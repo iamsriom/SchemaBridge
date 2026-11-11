@@ -1058,28 +1058,44 @@ def evaluate_baseline(
 ) -> dict:
     expected_ids = {str(r["id"]) for r in gold_rows}
     bundle = load_baseline_predictions(dataset, MODEL_FILE[model], method, expected_ids=expected_ids)
-    if bundle["status"] == "BLOCKED":
+    # Incomplete REGENERATED_NEW_RUN trees must not enter Table VI — they would
+    # score missing IDs as empty and silently understate every metric. Fall back
+    # to ARCHIVE_AGGREGATE until regeneration coverage is complete.
+    tree_label = (bundle.get("coverage") or {}).get("tree_label")
+    use_archive = bundle["status"] == "BLOCKED" or (
+        bundle["status"] == "INCOMPLETE" and tree_label == "REGENERATED_NEW_RUN"
+    )
+    if use_archive:
         archived = metrics_from_papermethods_archive(dataset, model, method)
         if archived is not None:
+            if bundle["status"] == "INCOMPLETE":
+                cov = bundle["coverage"]
+                archived["message"] = (
+                    archived["message"]
+                    + f"; ignoring partial REGENERATED_NEW_RUN "
+                    f"{cov.get('present', 0)}/{cov.get('expected', 0)} until complete"
+                )
+                archived["regen_partial"] = cov
             return archived
-        return {
-            "n": 0,
-            "failed": 0,
-            "status": "BLOCKED",
-            "coverage": bundle["coverage"],
-            "message": bundle["message"],
-            "nged": None,
-            "halluc": None,
-            "tables": None,
-            "attributes": None,
-            "domain": None,
-            "entity": None,
-            "referential": None,
-            "hall_rates": None,
-            "hall_totals": None,
-            "struct_counts": None,
-            "items": [],
-        }
+        if bundle["status"] == "BLOCKED":
+            return {
+                "n": 0,
+                "failed": 0,
+                "status": "BLOCKED",
+                "coverage": bundle["coverage"],
+                "message": bundle["message"],
+                "nged": None,
+                "halluc": None,
+                "tables": None,
+                "attributes": None,
+                "domain": None,
+                "entity": None,
+                "referential": None,
+                "hall_rates": None,
+                "hall_totals": None,
+                "struct_counts": None,
+                "items": [],
+            }
 
     preds = bundle["preds"]
     items: list[dict] = []

@@ -79,3 +79,11 @@
 
 ### Merge state
 - PR dirty vs `origin/main` (workflow/gitignore/README); merge after this commit.
+
+## 2026-11-11 — Merge + partial-regen guard + lock rounding
+
+- Merged `origin/main` into `icde2027-e0-verified` (`c5e05e1`); conflicts resolved keeping E0 repair tree.
+- Bugfix: incomplete `REGENERATED_NEW_RUN` trees must not enter Table VI (would score missing IDs as empty). `evaluate_baseline` now falls back to `ARCHIVE_AGGREGATE` until coverage is complete.
+- Relocked manuscript targets with proper 3dp rounding; Claude RSchema Domain 0.207→0.208.
+- Wave1 regeneration (CodeLlama×3 + Llama×3) continues on cuda:0–5; DeepSeek queued for after free GPUs (resume from partial jsonl).
+- Comparison: VERIFY PASS with `--allow-archive` (100 PASS + 54 PASS_ARCHIVE).
