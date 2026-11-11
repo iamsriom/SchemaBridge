@@ -2,18 +2,28 @@ experiment: E2
 title: "Round trip Schema -> Text -> Schema (Table VIII, `tab:e2_roundtrip`)"
 paper_table_label: "tab:e2_roundtrip"
 reference_values: configs/paper_reference_values.json
-online: false            # generation is disabled; offline evaluation of archived artefacts only
+# Default mode is OFFLINE.  experiments/E2/run.py is dry-run by default; --execute --confirm-paid
+# sends paid GPT-4o-mini constructor requests.
+online: false
+online_generation: opt-in          # run.py --execute --confirm-paid
 tolerance:
   float_3dp: 0.0005
-  float_2dp: 0.005       # BLEU-4 (0-100 scale, 2dp)
 datasets:
-  - "RSchema (518)"
-  - "SchemaBench (239)"
-  - "Enterprise-145 (145)"
-models: "Describers: CodeLlama-13B, Llama-3.1-8B, DeepSeek-Coder (open), Claude Sonnet 4.6, GPT-5.4-mini; constructor fixed to GPT-4o-mini"
-metrics: "nGED; Tables / Attributes / Domain / Entity / Referential micro F1; Basic (B) and Detailed (D) describers"
-prompts: "prompts/describer_basic.txt, prompts/describer_detailed.txt, prompts/constructor.txt"
-predictions:
-  - "results/predictions/e2/rschema_rt_{codellama13b,llama31,deepseek}"
-  - "results/predictions/e2/schemabench_rt_{codellama13b,llama31,deepseek} (INCOMPLETE: 216/195/227 of 239)"
-status: "RSchema Detailed: most cells PASS, a few MISMATCH at the 0.0005 tolerance; SchemaBench incomplete -> BLOCKED; Enterprise-145, Basic, Claude/GPT BLOCKED."
+  enterprise145: {n: 145}
+  schemabench:   {n: 239}
+  rschema:       {n: 381, note: "PRIMARY gold = 381 genuine DDL schemas (NOT the synthetic varchar DDL of the 518 logical annotations)"}
+describer_models: [codellama13b, llama31, deepseek, sonnet46, gpt54mini]
+constructor: {key: gpt4omini, model_id: gpt-4o-mini, provider: openai, paid: true, env_key: OPENAI_API_KEY,
+              temperature: 0.2, max_tokens: 16384}
+prompts:
+  basic:       {file: prompts/describer_basic.txt,    sha256: e1422bc806119c375d89e44759feee44f13eb2717335154ad3c9ca933b6e6c20}
+  detailed:    {file: prompts/describer_detailed.txt, sha256: f09fc8cae8d8ec73deb79f8bc7c2e71842d5fd35e92d833a02954b539755622d}
+  constructor: {file: prompts/constructor.txt,        sha256: 392a396f7073bc015d206460055f7e3b8a3c94a21ed09c059bc47c13d3884ad4}
+metrics:
+  per_dimension: "micro-F1 over Tables / Attributes / Domain / Entity / Referential (summed counts)"
+  nged: "mean normalised graph edit distance (macro over schemas)"
+fail_policy_default: score          # failed -> matched/recreated = 0 with gold counts kept, nGED = 1
+outputs:                            # all git-ignored
+  reconstruction: "experiments/E2/outputs/<dataset>_<prompt>_<describer>/NNNN.{txt,json}"
+  metrics: "experiments/E2/outputs/metrics/"
+  tables: "experiments/E2/outputs/latex_generated/"

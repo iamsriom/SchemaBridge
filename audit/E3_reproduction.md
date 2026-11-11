@@ -1,29 +1,40 @@
 # E3 reproduction — Constructor isolation
 
-**Status: BLOCKED**
+**Status: REPRODUCIBLE (code) — experimental outputs not shipped**
 
-## Paper intent (from audit brief)
+## Paper intent
 
-- Describer **fixed** to GPT-5.4-mini with **detailed** prompt
+- Describer **fixed** to GPT-5.4-mini with **Detailed** prompt
 - Same NL description for every constructor on a given gold schema
 - Vary constructors; report `tab:e3_overall` (nGED, Halluc, T/A/D/E/R)
 
-## Local artifacts
+## What this repository provides
 
-| Required | Found? |
+| Artefact | Shipped? |
 |---|---|
-| Fixed GPT-5.4-mini detailed descriptions for 902 schemata | **NO** |
-| Per-constructor reconstructions from those identical NLs | **NO** |
-| Paper numerical dump for `tab:e3_overall` | **NO** (not in comparison.txt) |
+| Verified constructor prompt + decoding configs | **YES** (`prompts/constructor.txt`, `src/inference_clients.py`) |
+| Fixed-description loader / isolation hash checks | **YES** (`experiments/E3/prepare_inputs.py`, `validate_inputs.py`) |
+| Five constructor dry-run / HF execute CLIs | **YES** (`experiments/E3/run.py`) |
+| Audited structural evaluator (empty-gold + 5-dim Hall.) | **YES** (`experiments/E3/evaluate.py`, shared `src/`) |
+| Synthetic tests | **YES** (`tests/test_e3_*.py`) |
+| Step-by-step guide | **YES** (`docs/REPRODUCE_E3.md`) |
+| Fixed GPT-5.4-mini Detailed descriptions | **NO** (generate/load locally) |
+| Per-constructor reconstructions | **NO** |
+| Table IX numerical values / LaTeX with scores | **NO** (generate locally via `generate_table_ix.py`) |
 
 ## Naming collision
 
-Historical folder `RSchema_ExpResults4/Experiment3/Case1Q*` is **masking/describer**, which maps to paper **E4**, not E3. Symlinked under `results/predictions/e3/` for migration history only — do not treat as constructor-isolation evidence.
+Historical folder `results/predictions/e3/rschema_cases_describer` is **masking/describer**, which maps to paper **E4**, not E3. Kept for migration history only — do not treat as constructor-isolation evidence.
 
-## Correlation claim (nGED vs Domain F1 on RSchema)
+## Methodological notes (final recheck)
 
-Cannot recalculate under E3 protocol without fixed descriptions. Any historical Exp2/Exp4 correlations are **different experiments**.
+- PRIMARY population: Enterprise-145=145, RSchema=381 genuine DDL, SchemaBench=239 (N=765).
+- Empty gold + empty reconstruction ⇒ nGED = 0 (valid).
+- Hallucination = mean of five micro `(R−M)/R` rates; Recreated=0 → 0.
+- Name normalisation: RSchema-style (shared with verified E2 scorer).
 
 ## Verdict
 
-**BLOCKED** — missing proprietary fixed descriptions and constructor outputs. Do not invent Domain/Entity scores.
+Reproduction **implementation** is available in-tree. Offline archive comparison via
+`scripts/reproduce_tables.py --experiment E3` remains **BLOCKED** because experimental
+predictions and paper cell dumps are intentionally not distributed.

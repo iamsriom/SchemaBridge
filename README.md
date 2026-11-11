@@ -28,7 +28,7 @@ Academic authors: Sriom Chakrabarti, Sean Bin Yang, Arijit Khan, Sebastian Link.
 | **E0** | Text2Schema from NL | [docs/experiments/E0.md](docs/experiments/E0.md) | Offline Tables V–VI (genuine-gold); closed Direct via API runner |
 | **E1** | Schema verbalization | [docs/experiments/E1.md](docs/experiments/E1.md) | PARTIAL — RSchema open detailed BLEU/ROUGE/SCR match |
 | **E2** | Round-trip preservation | [docs/experiments/E2.md](docs/experiments/E2.md) | PARTIAL — RSchema open detailed mostly matches |
-| **E3** | Constructor isolation | [docs/experiments/E3.md](docs/experiments/E3.md) | UNVERIFIED — frozen descriptions missing |
+| **E3** | Constructor isolation | [docs/experiments/E3.md](docs/experiments/E3.md) | REPRODUCIBLE (code) — generate results locally; see [docs/REPRODUCE_E3.md](docs/REPRODUCE_E3.md) |
 | **E4** | Masking / inferability | [docs/experiments/E4.md](docs/experiments/E4.md) | UNVERIFIED — Tables X–XI not recovered |
 | **E5** | Scalability and cost | [docs/experiments/E5.md](docs/experiments/E5.md) | REPRODUCED, PROVENANCE INCOMPLETE (N=30) |
 

@@ -1,12 +1,46 @@
 experiment: E3
-title: "Constructor isolation (fixed GPT-5.4-mini detailed describer)"
-paper_table_label: "tab:e3_overall"
+title: "Constructor isolation (fixed GPT-5.4-mini Detailed describer; Table IX, `tab:e3_constructor` / `tab:e3_overall`)"
+paper_table_label: "tab:e3_constructor"
+paper_table_label_aliases: ["tab:e3_overall"]
 reference_values: configs/paper_reference_values.json
+# Default mode is OFFLINE evaluation.  experiments/E3/run.py is dry-run by default.
+# Open-weight HF constructors may use --execute.  Paid Anthropic/OpenAI constructors
+# follow the package policy (API execute paths disabled; dry-run payload validation only).
 online: false
+online_generation: opt-in
 tolerance:
   float_3dp: 0.0005
-datasets: [enterprise145, rschema, schemabench]
-fixed_describer: gpt_5_4_mini
-fixed_prompt: prompts/describer_detailed.txt
-status: "BLOCKED — fixed descriptions and constructor reconstructions missing"
+datasets:
+  enterprise145: {n: 145, note: "includes three empty-gold schemata (archive, ctu_vondreli, tmp)"}
+  schemabench:   {n: 239}
+  rschema:       {n: 381, note: "PRIMARY gold = 381 genuine DDL schemas (NOT synthetic varchar DDL of 518)"}
+fixed_describer:
+  key: gpt54mini
+  model_id: gpt-5.4-mini
+  prompt: detailed
+  prompt_file: prompts/describer_detailed.txt
+  sha256: f09fc8cae8d8ec73deb79f8bc7c2e71842d5fd35e92d833a02954b539755622d
+  note: "Reuse verified E1 Detailed descriptions; all E3 constructors must receive identical nl_text"
+constructors: [codellama13b, llama31, deepseek, sonnet46, gpt54mini]
+constructor_prompt:
+  file: prompts/constructor.txt
+  sha256: 392a396f7073bc015d206460055f7e3b8a3c94a21ed09c059bc47c13d3884ad4
+decoding:
+  codellama13b: {provider: hf, temperature: 0.1, max_new_tokens: 1536}
+  llama31:      {provider: hf, temperature: 0.1, max_new_tokens: 2048}
+  deepseek:     {provider: hf, temperature: 0.1, max_new_tokens: 4096}
+  sonnet46:     {provider: anthropic, temperature: 0.1, max_tokens: 4096, paid: true}
+  gpt54mini:    {provider: openai, temperature: 0.2, max_tokens: 16384, paid: true, note: "Enterprise Exp4 Batch used 0.2"}
+metrics:
+  per_dimension: "micro-F1 over Tables / Attributes / Domain / Entity / Referential (summed counts)"
+  nged: "mean normalised graph edit distance (macro over schemas); empty-empty = 0; invalid = 1"
+  hallucination: "mean of five dimension-wise micro FP rates (R-M)/R; 0 when Recreated=0"
+fail_policy_default: score
+empty_gold_policy: "gold empty + reconstruction empty => valid, nGED=0"
+outputs:
+  descriptions: "experiments/E1/outputs/<dataset>_detailed_gpt54mini/  (or any local E1-compatible dir)"
+  reconstruction: "experiments/E3/outputs/<dataset>_detailed_<constructor>/NNNN.{txt,json}"
+  metrics: "experiments/E3/outputs/metrics/"
+  tables: "experiments/E3/outputs/latex_generated/"
+status: "REPRODUCIBLE — source + offline evaluation; experimental outputs are not shipped"
 historical_note: "results/predictions/e3/rschema_cases_describer is masking (paper E4), not E3"
