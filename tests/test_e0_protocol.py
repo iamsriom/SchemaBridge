@@ -317,6 +317,7 @@ def test_direct_coverage_complete_plus_malformed_extra_is_invalid(tmp_path):
 
 def test_missing_baseline_is_blocked(tmp_path, monkeypatch):
     monkeypatch.setitem(genuine.BASELINE_ROOT, "RSchema", tmp_path / "missing_root")
+    monkeypatch.setitem(genuine.BASELINE_REGENERATED_ROOT, "RSchema", tmp_path / "no_regen")
     bundle = genuine.load_baseline_predictions("RSchema", "codellama13b", "one_shot", expected_ids={"a"})
     assert bundle["status"] == "BLOCKED"
     assert "unavailable" in bundle["message"].lower()
@@ -331,12 +332,67 @@ def test_partial_baseline_is_incomplete(tmp_path, monkeypatch):
         + "\n"
     )
     monkeypatch.setitem(genuine.BASELINE_ROOT, "RSchema", root)
+    monkeypatch.setitem(genuine.BASELINE_REGENERATED_ROOT, "RSchema", tmp_path / "no_regen")
     bundle = genuine.load_baseline_predictions(
         "RSchema", "codellama13b", "one_shot", expected_ids={"a", "b"}
     )
     assert bundle["status"] == "INCOMPLETE"
     assert bundle["coverage"]["present"] == 1
     assert bundle["coverage"]["missing"] == 1
+
+
+def test_partial_regen_falls_back_to_archive(tmp_path, monkeypatch):
+    """Incomplete REGENERATED_NEW_RUN must not score missing IDs as empty."""
+    hist = tmp_path / "hist_missing"
+    regen = tmp_path / "regen"
+    path = regen / "codellama13b" / "one_shot" / "results.jsonl"
+    path.parent.mkdir(parents=True)
+    path.write_text(
+        json.dumps({"id": "a", "status": "ok", "answer": {"T": {"Attributes": ["x"], "Primary key": ["x"]}}})
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setitem(genuine.BASELINE_ROOT, "RSchema", hist)
+    monkeypatch.setitem(genuine.BASELINE_REGENERATED_ROOT, "RSchema", regen)
+
+    archived = {
+        "n": 2,
+        "failed": 0,
+        "status": "ARCHIVE_AGGREGATE",
+        "coverage": {"expected": 2, "present": 2},
+        "message": "ARCHIVE_AGGREGATE: stub",
+        "nged": 0.5,
+        "halluc": 0.1,
+        "tables": 0.2,
+        "attributes": 0.3,
+        "domain": None,
+        "entity": 0.4,
+        "referential": 0.05,
+        "hall_rates": {},
+        "hall_totals": {},
+        "struct_counts": {},
+        "items": [],
+        "archive_path": "stub",
+    }
+    monkeypatch.setattr(
+        genuine, "metrics_from_papermethods_archive", lambda *a, **k: archived
+    )
+    gold_rows = [
+        {
+            "id": "a",
+            "answer": {"T": {"Attributes": ["x"], "Primary key": ["x"]}},
+            "ddl": "CREATE TABLE T (x INT PRIMARY KEY);",
+        },
+        {
+            "id": "b",
+            "answer": {"U": {"Attributes": ["y"], "Primary key": ["y"]}},
+            "ddl": "CREATE TABLE U (y INT PRIMARY KEY);",
+        },
+    ]
+    res = genuine.evaluate_baseline("RSchema", "CodeLlama-13B", "one_shot", gold_rows)
+    assert res["status"] == "ARCHIVE_AGGREGATE"
+    assert "ignoring partial REGENERATED_NEW_RUN" in res["message"]
+    assert res["nged"] == 0.5
 
 
 def test_baseline_complete_with_recorded_failure(tmp_path, monkeypatch):
@@ -349,6 +405,7 @@ def test_baseline_complete_with_recorded_failure(tmp_path, monkeypatch):
     ]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     monkeypatch.setitem(genuine.BASELINE_ROOT, "RSchema", root)
+    monkeypatch.setitem(genuine.BASELINE_REGENERATED_ROOT, "RSchema", tmp_path / "no_regen")
     bundle = genuine.load_baseline_predictions(
         "RSchema", "codellama13b", "one_shot", expected_ids={"a", "b"}
     )
@@ -367,6 +424,7 @@ def test_baseline_unexpected_id_is_invalid(tmp_path, monkeypatch):
     ]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     monkeypatch.setitem(genuine.BASELINE_ROOT, "RSchema", root)
+    monkeypatch.setitem(genuine.BASELINE_REGENERATED_ROOT, "RSchema", tmp_path / "no_regen")
     bundle = genuine.load_baseline_predictions(
         "RSchema", "codellama13b", "one_shot", expected_ids={"a"}
     )
@@ -381,6 +439,7 @@ def test_baseline_duplicate_id_is_invalid(tmp_path, monkeypatch):
     row = json.dumps({"id": "a", "status": "ok", "answer": {"T": {"Attributes": ["x"], "Primary key": ["x"]}}})
     path.write_text(row + "\n" + row + "\n", encoding="utf-8")
     monkeypatch.setitem(genuine.BASELINE_ROOT, "RSchema", root)
+    monkeypatch.setitem(genuine.BASELINE_REGENERATED_ROOT, "RSchema", tmp_path / "no_regen")
     bundle = genuine.load_baseline_predictions(
         "RSchema", "codellama13b", "one_shot", expected_ids={"a"}
     )
@@ -395,6 +454,7 @@ def test_baseline_malformed_jsonl_is_invalid(tmp_path, monkeypatch):
     good = json.dumps({"id": "a", "status": "ok", "answer": {"T": {"Attributes": ["x"], "Primary key": ["x"]}}})
     path.write_text(good + "\n{bad\n", encoding="utf-8")
     monkeypatch.setitem(genuine.BASELINE_ROOT, "RSchema", root)
+    monkeypatch.setitem(genuine.BASELINE_REGENERATED_ROOT, "RSchema", tmp_path / "no_regen")
     bundle = genuine.load_baseline_predictions(
         "RSchema", "codellama13b", "one_shot", expected_ids={"a"}
     )

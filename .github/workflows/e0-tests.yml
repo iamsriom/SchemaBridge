@@ -2,7 +2,7 @@ name: E0 offline tests
 
 on:
   push:
-    branches: [main, e0-direct-api-reproduce]
+    branches: [main, e0-verified-code-only]
   pull_request:
     branches: [main]
 
@@ -28,6 +28,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run full pytest suite
+        # Prediction-dependent tests skip when dumps are absent (code-only checkout).
         run: python -m pytest -q
 
       - name: Direct API dry-run (no credentials)
@@ -36,5 +37,36 @@ jobs:
           OPENAI_API_KEY: ""
           ANTHROPIC_API_KEY: ""
 
+      - name: Baseline runner dry-run (no GPU)
+        run: |
+          python experiments/E0/original_benchmarks/run_baselines.py \
+            --model codellama-13b --method one_shot --dry-run --limit 2
+
       - name: E0 gold-reference validation
         run: python experiments/E0/reproduce_genuine_tables.py --validate-only --skip-pytest
+
+      - name: Missing Direct predictions fail under --strict
+        run: |
+          set +e
+          python experiments/E0/reproduce_genuine_tables.py --skip-pytest --strict
+          ec=$?
+          set -e
+          if [ "$ec" -eq 0 ]; then
+            echo "unexpected success without predictions"
+            exit 1
+          fi
+          if [ "$ec" -ne 2 ]; then
+            echo "expected exit 2 from --strict, got $ec"
+            exit 1
+          fi
+          echo "--strict correctly exited 2 without Direct dumps"
+
+      - name: Confirm no tracked E0 prediction dumps
+        run: |
+          tracked=$(git ls-files 'results/predictions/e0/**' 'results/metrics/reproduced/E0_*' 'results/baselines/e0_*' 'results/metrics/archived/e0_*' || true)
+          if [ -n "$tracked" ]; then
+            echo "Tracked E0 experimental outputs must not be published:"
+            echo "$tracked"
+            exit 1
+          fi
+          echo "No tracked E0 prediction/result dumps."

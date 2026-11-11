@@ -373,3 +373,28 @@ def test_legacy_still_drops_blob():
     ddl = "CREATE TABLE t (a int, b BLOB);"
     assert cols(metadata_from_ddl(ddl, legacy=True), "t") == ["a"]
     assert cols(metadata_from_ddl(ddl, legacy=False), "t") == ["a", "b"]
+
+
+def test_robust_recovers_tables_when_engine_leaks_inside_unclosed_body():
+    """LLM outputs sometimes emit ``PRIMARY KEY (...), ENGINE=...`` without ``)``.
+
+    Robust mode must still discover subsequent CREATE TABLE headers (legacy finditer
+    already did). Regression for RSchema Llama-3.1 Direct Text2Schema table under-count.
+    """
+    ddl = (
+        "CREATE TABLE `candidates` (\n"
+        "  `id` int(11) NOT NULL,\n"
+        "  `name` varchar(255) NOT NULL,\n"
+        "  PRIMARY KEY (`id`),\n"
+        "  ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n"
+        "\n"
+        "CREATE TABLE `voters` (\n"
+        "  `id` int(11) NOT NULL,\n"
+        "  `name` varchar(255) NOT NULL,\n"
+        "  PRIMARY KEY (`id`)\n"
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n"
+    )
+    meta = metadata_from_ddl(ddl, legacy=False)
+    assert meta["tables"] == ["candidates", "voters"]
+    assert cols(meta, "candidates") == ["id", "name"]
+    assert cols(meta, "voters") == ["id", "name"]
