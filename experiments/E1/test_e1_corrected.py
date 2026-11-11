@@ -50,7 +50,7 @@ def test_failure_metrics_are_zero_for_nonempty_schema():
     ddl = "CREATE TABLE T (a INT); CREATE TABLE U (b INT);"
     scr = e1.schema_coverage_rate(ddl, "")
     assert scr["coverage"] == 0.0
-    from rouge_score import rouge_scorer
+    rouge_scorer = pytest.importorskip("rouge_score.rouge_scorer")
 
     r = rouge_scorer.RougeScorer(["rougeL"], use_stemmer=True).score("gold text here", "")
     assert r["rougeL"].fmeasure == 0.0
