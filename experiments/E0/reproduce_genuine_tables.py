@@ -95,6 +95,11 @@ BASELINE_ROOT = {
     "RSchema": ROOT / "results/predictions/e0/rschema_papermethods",
     "SchemaBench": ROOT / "results/predictions/e0/schemabench_papermethods",
 }
+# Prefer regenerated per-schema trees when present (Phase 4 new runs).
+BASELINE_REGENERATED_ROOT = {
+    "RSchema": ROOT / "results/predictions/e0/rschema_papermethods_regenerated",
+    "SchemaBench": ROOT / "results/predictions/e0/schemabench_papermethods_regenerated",
+}
 # Surviving PaperMethods aggregate scores (2026-10-12). Used only when
 # per-schema results.jsonl trees are unavailable — status ARCHIVE_AGGREGATE.
 PAPERMETHODS_ARCHIVE = {
@@ -306,7 +311,21 @@ def load_baseline_predictions(
         }
     Empty ``answer`` dict marks a recorded generation failure (scored as empty).
     """
-    path = BASELINE_ROOT[dataset] / model_file / method / "results.jsonl"
+    regen = BASELINE_REGENERATED_ROOT.get(dataset)
+    hist = BASELINE_ROOT[dataset]
+    regen_path = (regen / model_file / method / "results.jsonl") if regen else None
+    hist_path = hist / model_file / method / "results.jsonl"
+    # Prefer historical PaperMethods trees when present (original evidence).
+    # Use regenerated trees only when historical trees are absent.
+    if hist_path.is_file() and hist_path.stat().st_size > 0:
+        path = hist_path
+        tree_label = "HISTORICAL"
+    elif regen_path is not None and regen_path.is_file() and regen_path.stat().st_size > 0:
+        path = regen_path
+        tree_label = "REGENERATED_NEW_RUN"
+    else:
+        path = hist_path
+        tree_label = "HISTORICAL"
     expected = set(expected_ids or [])
     empty_cov = {
         "expected": len(expected),
@@ -398,12 +417,20 @@ def load_baseline_predictions(
             f"INCOMPLETE: baseline coverage {coverage['present']}/{coverage['expected']} "
             f"(missing={coverage['missing']})"
         )
+    elif tree_label == "REGENERATED_NEW_RUN":
+        status_s = "REGENERATED_NEW_RUN"
+        msg = (
+            f"REGENERATED_NEW_RUN: {coverage['present']}/{coverage['expected']} present, "
+            f"{coverage['valid']} valid, {coverage['generation_failed']} recorded failures "
+            f"(path={path})"
+        )
     else:
         status_s = "COMPLETE"
         msg = (
             f"COMPLETE: baseline {coverage['present']}/{coverage['expected']} present, "
             f"{coverage['valid']} valid, {coverage['generation_failed']} recorded failures"
         )
+    coverage["tree_label"] = tree_label
     return {
         "path": path,
         "status": status_s,

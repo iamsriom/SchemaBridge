@@ -105,7 +105,8 @@ _ROBUST_HEADER_RE = re.compile(
     r"CREATE\s+(?:(?:GLOBAL\s+|LOCAL\s+)?(?:TEMP|TEMPORARY)\s+)?TABLE\s+"
     r"(?:IF\s+NOT\s+EXISTS\s+)?"
     r"(?:(?:" + _IDENT + r")\s*\.\s*)*"
-    r"(" + _IDENT + r")\s*\(",
+    # F3: accept unquoted hyphenated / slashed bare identifiers (Sign-in, users/teams).
+    r"(" + _IDENT + r"|" + _LENIENT_BARE_IDENT + r")\s*\(",
     re.IGNORECASE,
 )
 
@@ -113,16 +114,51 @@ _INT_TYPES = frozenset({"int", "tinyint", "smallint", "mediumint", "bigint", "in
 _STR_TYPES = frozenset({"varchar", "nvarchar", "char", "nchar", "text", "tinytext", "mediumtext", "longtext"})
 _BINARY_TYPES = frozenset({"blob", "tinyblob", "mediumblob", "longblob", "binary", "varbinary"})
 
+# Constraint-line prefixes. Plain ``UNIQUE`` / ``CONSTRAINT`` / ``FULLTEXT`` /
+# ``SPATIAL`` must NOT match column names such as ``unique_code`` (defect F4);
+# use the word-boundary helper ``_is_constraint_line`` instead of startswith.
 _SKIP_PREFIXES = (
     "PRIMARY KEY",
     "FOREIGN KEY",
-    "UNIQUE",
     "KEY ",
-    "CONSTRAINT",
     "CHECK ",
     "INDEX ",
 )
-_ROBUST_SKIP_PREFIXES = _SKIP_PREFIXES + ("FULLTEXT", "SPATIAL")
+_ROBUST_SKIP_PREFIXES = _SKIP_PREFIXES
+_CONSTRAINT_LINE_RE = re.compile(
+    r"^\s*(?:"
+    r"PRIMARY\s+KEY|"
+    r"FOREIGN\s+KEY|"
+    # UNIQUE / CONSTRAINT / FULLTEXT / SPATIAL: word boundary so unique_code survives (F4).
+    # CHECK: must be CHECK (…), not a column like Check-in_Time (hyphen is a \b edge).
+    r"UNIQUE(?:\s+(?:KEY|INDEX))?\b|"
+    r"CONSTRAINT\b|"
+    r"CHECK\s*\(|"
+    r"INDEX\b|"
+    r"KEY\b|"
+    r"FULLTEXT\b|"
+    r"SPATIAL\b"
+    r")",
+    re.IGNORECASE,
+)
+
+
+def _is_constraint_line(text: str, *, legacy: bool = False) -> bool:
+    """True if ``text`` is a table-level constraint / index clause, not a column."""
+    if legacy:
+        upper = text.lstrip().upper()
+        return upper.startswith(
+            (
+                "PRIMARY KEY",
+                "FOREIGN KEY",
+                "UNIQUE",
+                "KEY ",
+                "CONSTRAINT",
+                "CHECK ",
+                "INDEX ",
+            )
+        )
+    return bool(_CONSTRAINT_LINE_RE.match(text or ""))
 
 # Placeholder / non-types seen in RSchema DDL that must not become VARCHAR(255).
 _UNSUPPORTED_TYPE_TOKENS = frozenset({"null", "none", "unknown", "n/a", "na"})
@@ -149,23 +185,32 @@ def unquote_identifier(token: str) -> str:
     return t
 
 
-def _prev_nonspace(text: str, i: int) -> str:
-    j = i - 1
-    while j >= 0 and text[j] in " \t":
-        j -= 1
-    return text[j] if j >= 0 else ""
-
-
 def _apostrophe_is_string_delimiter(text: str, i: int) -> bool:
     """True if ``text[i]`` is a SQL string quote, not a mid-identifier apostrophe.
 
-    Dataset-recovery rule (robust mode): an apostrophe immediately after an
-    identifier character (``User's_Name``) is part of the identifier.
+    Mid-identifier apostrophes (``User's_Name``) are recognised only when the
+    apostrophe is *immediately* preceded by an identifier character. Skipping
+    whitespace would mis-classify ``DEFAULT ''`` as a mid-identifier apostrophe
+    (defect F1) and desynchronise quote masking across the rest of the DDL.
     """
-    prev = _prev_nonspace(text, i)
+    prev = text[i - 1] if i > 0 else ""
     if prev and (prev.isalnum() or prev in "_$"):
         return False
     return True
+
+
+def _normalize_escaped_whitespace(ddl: str) -> str:
+    """Turn LLM-emitted literal ``\\n`` / ``\\t`` into real newlines/tabs (F5).
+
+    Only applied when escaped newlines outnumber real ones, so ordinary SQL
+    string literals that happen to contain a backslash-n are left alone when the
+    DDL is already properly line-broken.
+    """
+    if not ddl or "\\n" not in ddl:
+        return ddl
+    if ddl.count("\n") < ddl.count("\\n"):
+        return ddl.replace("\\n", "\n").replace("\\t", "\t")
+    return ddl
 
 
 def _mask_noise(text: str, *, lenient_apostrophe: bool = True) -> str:
@@ -363,6 +408,10 @@ def iter_ddl_table_bodies(ddl: str, *, legacy: bool = False) -> Iterator[tuple[s
     Handles ``IF NOT EXISTS`` and statements without ``ENGINE=``.  Empty/blank input
     yields nothing.  In robust mode table names are unquoted/unescaped and may be
     schema-qualified (the last identifier is the table name).
+
+    Defect F2: when a table body is never closed (e.g. missing ``)`` before
+    ``ENGINE=``), the body ends at the next ``CREATE TABLE`` header instead of
+    swallowing every later table.
     """
     if not (ddl or "").strip():
         return
@@ -375,22 +424,35 @@ def iter_ddl_table_bodies(ddl: str, *, legacy: bool = False) -> Iterator[tuple[s
             i = _body_end_legacy(ddl, start)
             yield table, ddl[start : i - 1]
         return
-    pos = 0
-    while True:
-        m = _ROBUST_HEADER_RE.search(ddl, pos)
-        if not m:
-            break
-        table = unquote_identifier(m.group(1)).strip()
-        start = m.end()
-        end = _body_end_robust(ddl, start)
+    # Walk headers on a noise-masked copy so parentheses inside string literals
+    # do not affect body boundaries; table names come from the original text.
+    masked = _mask_noise(ddl, lenient_apostrophe=True)
+    heads = list(_ROBUST_HEADER_RE.finditer(masked))
+    for k, m in enumerate(heads):
+        mo = _ROBUST_HEADER_RE.match(ddl, m.start())
+        if mo is None:
+            continue
+        table = unquote_identifier(mo.group(1)).strip()
+        start = mo.end()
+        limit = heads[k + 1].start() if k + 1 < len(heads) else len(ddl)
+        depth = 1
+        i = start
+        while i < limit and depth:
+            ch = masked[i]
+            if ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+            i += 1
+        # Closed body → exclude the closing ')'; unclosed → take up to next header.
+        body = ddl[start : max(start, i - 1)] if depth == 0 else ddl[start:i]
         if table:
-            yield table, ddl[start : max(start, end - 1)]
-        pos = max(end, m.end())
+            yield table, body
 
 
 def _name_and_rest(text: str, *, legacy: bool = False) -> tuple[str, str] | None:
     """Split a column definition into ``(unquoted_name, rest)`` (no type requirement)."""
-    if text.upper().startswith(_ROBUST_SKIP_PREFIXES if not legacy else _SKIP_PREFIXES):
+    if _is_constraint_line(text, legacy=legacy):
         return None
     if legacy:
         m = re.match(r"(" + _IDENT + r")\s+(.+)", text)
@@ -412,8 +474,7 @@ def _column_item_to_obj(
     line = item.strip().rstrip(",")
     if not line:
         return None
-    upper = line.upper()
-    if upper.startswith(_SKIP_PREFIXES if legacy else _ROBUST_SKIP_PREFIXES):
+    if _is_constraint_line(line, legacy=legacy):
         return None
     if legacy:
         col_match = re.match(r"[`'\"]([^`'\"]+)[`'\"]\s+(.+)|(\w+)\s+(.+)", line)
@@ -507,6 +568,8 @@ def metadata_from_ddl(ddl: str, database: str = "", *, legacy: bool = False) -> 
     """
     if not (ddl or "").strip():
         return {"database": database, "tables": [], "columns_by_table": {}}
+    if not legacy:
+        ddl = _normalize_escaped_whitespace(ddl)
 
     tables: list[str] = []
     columns_by_table: dict[str, list[dict]] = {}
@@ -621,11 +684,21 @@ _INLINE_REF_RE = re.compile(
 FKTuple = tuple[str, list[str], str, list[str]]
 
 
+_ALTER_FK_RE = re.compile(
+    r"ALTER\s+TABLE\s+(?:(?:" + _IDENT + r")\s*\.\s*)*(" + _IDENT + r")\s+"
+    r"(?:ADD\s+)?(?:CONSTRAINT\s+(?:" + _IDENT + r")\s+)?"
+    r"FOREIGN\s+KEY\s*(?:" + _IDENT + r"\s*)?\(([^)]+)\)\s*REFERENCES\s+"
+    r"(?:(?:" + _IDENT + r")\s*\.\s*)*(" + _IDENT + r")\s*(?:\(([^)]+)\))?",
+    re.IGNORECASE,
+)
+
+
 def parse_ddl_fks(ddl: str, *, legacy: bool = False) -> tuple[list[FKTuple], int]:
     """Extract foreign keys as ``(from_table, from_cols, to_table, to_cols)`` tuples.
 
     Direction is always *referencing* -> *referenced*.  Returns ``(fks, n_composite)``.
-    Robust mode also reads inline ``col type REFERENCES t(col)`` and ``FOREIGN KEY idx (..)``.
+    Robust mode also reads inline ``col type REFERENCES t(col)``, ``FOREIGN KEY idx (..)``,
+    and ``ALTER TABLE … ADD CONSTRAINT FOREIGN KEY`` (defect F6).
     """
     fks: list[FKTuple] = []
     if legacy:
@@ -641,6 +714,7 @@ def parse_ddl_fks(ddl: str, *, legacy: bool = False) -> tuple[list[FKTuple], int
             if from_table:
                 fks.append((from_table, from_cols, to_table, to_cols))
     else:
+        ddl = _normalize_escaped_whitespace(ddl)
         for table, body in iter_ddl_table_bodies(ddl):
             clean = _strip_comments(body)
             for item in _split_top_level(clean):
@@ -661,6 +735,13 @@ def parse_ddl_fks(ddl: str, *, legacy: bool = False) -> tuple[list[FKTuple], int
                     to_table = unquote_identifier(im.group(1))
                     to_cols = _split_ident_list(im.group(2)) if im.group(2) else []
                     fks.append((table, [nr[0]], to_table, to_cols))
+        # F6: ALTER TABLE … ADD [CONSTRAINT …] FOREIGN KEY
+        for m in _ALTER_FK_RE.finditer(ddl):
+            from_table = unquote_identifier(m.group(1))
+            cols = _split_ident_list(m.group(2))
+            to_table = unquote_identifier(m.group(3))
+            to_cols = _split_ident_list(m.group(4)) if m.group(4) else []
+            fks.append((from_table, cols, to_table, to_cols))
     composite = sum(1 for _, cols, _, _ in fks if len(cols) > 1)
     return fks, composite
 
@@ -674,6 +755,8 @@ def parse_ddl_primary_unique(
     Robust mode additionally counts plain ``UNIQUE (cols)`` / ``CONSTRAINT x UNIQUE (cols)``
     (the vendored parser ignores those, see module docstring).
     """
+    if not legacy:
+        ddl = _normalize_escaped_whitespace(ddl)
     primaries: list[tuple[str, list[str]]] = []
     uniques: list[tuple[str, list[str]]] = []
     for table, body in iter_ddl_table_bodies(ddl, legacy=legacy):
@@ -695,7 +778,7 @@ def parse_ddl_primary_unique(
                 line = line.strip().rstrip(",")
                 if not line:
                     continue
-                if line.upper().startswith(_SKIP_PREFIXES):
+                if _is_constraint_line(line, legacy=True):
                     continue
                 col_match = re.match(r"[`'\"]([^`'\"]+)[`'\"]|(\w+)", line)
                 if not col_match:
