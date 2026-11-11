@@ -105,14 +105,14 @@ Schema2Text experiments compare **Basic (B)** and **Detailed (D)** prompting str
 
 SchemaBridge consists of six experiments:
 
-| ID | Objective |
-|---|---|
-| **E0** | **Text2Schema:** Evaluate relational schema generation from natural-language requirements under different prompting strategies |
-| **E1** | **Schema2Text:** Evaluate natural-language schema descriptions using BLEU-4, ROUGE-L, BERTScore-F1, and SCR |
-| **E2** | **Round-Trip Preservation:** Measure structural fidelity while varying the describer and fixing the constructor |
-| **E3** | **Constructor Isolation:** Measure reconstruction performance across constructors using fixed generated descriptions |
-| **E4** | **Masking and Inferability:** Evaluate recovery of hidden schema elements from remaining structural evidence |
-| **E5** | **Inference Efficiency:** Analyze end-to-end latency, token consumption, and API cost |
+| ID | Objective | Verification |
+|---|---|---|
+| **E0** | **Text2Schema:** Evaluate relational schema generation from natural-language requirements under different prompting strategies | Direct reproducible from private saved predictions; prompting baselines PARTIAL |
+| **E1** | **Schema2Text:** Evaluate natural-language schema descriptions using BLEU-4, ROUGE-L, BERTScore-F1, and SCR | VERIFIED — full `tab:e1_s2t` |
+| **E2** | **Round-Trip Preservation:** Measure structural fidelity while varying the describer and fixing the constructor | VERIFIED — PRIMARY 765; see `E2_AUDIT/` |
+| **E3** | **Constructor Isolation:** Measure reconstruction performance across constructors using fixed generated descriptions | VERIFIED — PRIMARY 765; see `E3_AUDIT/` |
+| **E4** | **Masking and Inferability:** Evaluate recovery of hidden schema elements from remaining structural evidence | UNVERIFIED — Tables X–XI not recovered |
+| **E5** | **Inference Efficiency:** Analyze end-to-end latency, token consumption, and API cost | REPRODUCED, PROVENANCE INCOMPLETE (N=30) |
 
 Detailed experimental documentation is available in [`docs/experiments/`](docs/experiments/).
 
@@ -183,7 +183,7 @@ The public repository provides evaluation implementations, documentation, and av
 
 However, **not every experiment can currently be reproduced from a fresh public clone**.
 
-Some evaluations depend on archived model predictions or provider logs stored separately from the repository. The public release does not yet contain all artifacts required for independent end-to-end reproduction of E3 and E4. E0 prompting baselines and E5 provenance also have documented limitations.
+Some evaluations depend on archived model predictions or provider logs stored separately from the repository. **E3** metrics and checksums are published under `results/metrics/reproduced/E3_AUDIT/`, but the frozen descriptions and Exp4 prediction JSON remain private (see [REPRODUCE_E3.md](docs/REPRODUCE_E3.md)). **E4** is not yet recovered. E0 prompting baselines and E5 provenance also have documented limitations.
 
 See the experiment documentation and audit reports for details.
 

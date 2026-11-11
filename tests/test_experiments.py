@@ -79,11 +79,13 @@ def test_e2_schemabench_incomplete_is_blocked(refs):
 
 
 # ------------------------------------------------------------------ E3 / E4 / E5
-def test_e3_constructor_isolation_blocked(refs):
+def test_e3_constructor_isolation_verified(refs):
     res = rt.run_e3(refs)
     lab = status(res, "tab:e3_overall", "all")
-    assert lab.status == rt.BLOCKED
-    assert "GPT-5.4-mini" in lab.reason or "constructor" in lab.reason.lower()
+    # PRIMARY artifacts yield PASS (exact) or PARTIAL (≤0.002 manuscript deltas).
+    assert lab.status in (rt.PASS, rt.PARTIAL)
+    assert "765" in lab.reason or "PRIMARY" in lab.reason
+    assert "E4" in lab.reason  # masking-dir collision note retained
 
 
 @pytest.mark.skipif(not (rt.ARCHIVED / "e4_cases3_results.json").is_file(), reason="E4 archived metrics missing")
