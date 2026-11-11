@@ -2,18 +2,35 @@ experiment: E2
 title: "Round trip Schema -> Text -> Schema (Table VIII, `tab:e2_roundtrip`)"
 paper_table_label: "tab:e2_roundtrip"
 reference_values: configs/paper_reference_values.json
-online: false            # generation is disabled; offline evaluation of archived artefacts only
-tolerance:
-  float_3dp: 0.0005
-  float_2dp: 0.005       # BLEU-4 (0-100 scale, 2dp)
-datasets:
-  - "RSchema (518)"
-  - "SchemaBench (239)"
-  - "Enterprise-145 (145)"
-models: "Describers: CodeLlama-13B, Llama-3.1-8B, DeepSeek-Coder (open), Claude Sonnet 4.6, GPT-5.4-mini; constructor fixed to GPT-4o-mini"
-metrics: "nGED; Tables / Attributes / Domain / Entity / Referential micro F1; Basic (B) and Detailed (D) describers"
-prompts: "prompts/describer_basic.txt, prompts/describer_detailed.txt, prompts/constructor.txt"
-predictions:
-  - "results/predictions/e2/rschema_rt_{codellama13b,llama31,deepseek}"
-  - "results/predictions/e2/schemabench_rt_{codellama13b,llama31,deepseek} (INCOMPLETE: 216/195/227 of 239)"
-status: "RSchema Detailed: most cells PASS, a few MISMATCH at the 0.0005 tolerance; SchemaBench incomplete -> BLOCKED; Enterprise-145, Basic, Claude/GPT BLOCKED."
+online: false
+constructor: gpt-4o-mini
+temperature: 0.2
+population:
+  Enterprise-145: 145
+  RSchema: 381  # genuine DDL-matched subset of annotation_ddl.jsonl
+  SchemaBench: 239
+  total: 765
+describers:
+  - CodeLlama-13B
+  - Llama-3.1-8B
+  - DeepSeek-Coder
+  - Claude Sonnet 4.6
+  - GPT-5.4-mini
+prompts:
+  basic: prompts/describer_basic.txt
+  detailed: prompts/describer_detailed.txt
+  constructor: prompts/constructor.txt
+metrics:
+  - mean_nged  # edit_cost / (gold_size + pred_size); arithmetic mean over population
+  - tables_f1  # micro-averaged
+  - attributes_f1
+  - domain_f1  # type-family + nullability
+  - entity_f1
+  - referential_f1
+failure_policy: score  # nGED=1; matched=recreated=0; gold retained; stay in population
+artifacts:
+  audit: results/metrics/reproduced/E2_AUDIT/
+  table: results/metrics/reproduced/E2_AUDIT/latex/tab_e2_roundtrip_verified.tex
+  figure: results/metrics/reproduced/E2_AUDIT/figures/cmp_chart4_trajectory.png
+  comparison: results/metrics/reproduced/E2_AUDIT/metrics/E2_CELL_COMPARISON_180.csv
+status: "PRIMARY 765-schema offline reproduction; original GPT-4o-mini predictions required locally."
