@@ -76,11 +76,13 @@ def test_constructor_request_and_role_guards():
         ic.build_request("llama31", task="schema2text", database="d", ddl=None, variant="basic")
 
 
-def test_paid_calls_need_confirmation(monkeypatch):
+def test_paid_api_methods_are_disabled(monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     assert isinstance(ic.get_client("sonnet46", dry_run=True), ic.DryRunClient)
-    with pytest.raises(ic.PaidCallNotConfirmed):
+    with pytest.raises(ic.ApiMethodsDisabled):
         ic.get_client("gpt54mini", dry_run=False, confirm_paid=False)
-    with pytest.raises(ic.MissingApiKey):
+    with pytest.raises(ic.ApiMethodsDisabled):
         ic.get_client("gpt54mini", dry_run=False, confirm_paid=True)
+    with pytest.raises(ic.ApiMethodsDisabled):
+        ic.get_client("gpt4omini", dry_run=False, confirm_paid=True)

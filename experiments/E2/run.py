@@ -3,13 +3,11 @@
 
     python experiments/E2/run.py --dataset rschema --describer-model llama31 --prompt detailed \\
         --e1-pred-dir experiments/E1/outputs/rschema_detailed_llama31                     # dry-run
-    python experiments/E2/run.py ... --execute --confirm-paid                              # PAID (OpenAI)
 
-Reads the E1 descriptions (``nl_text`` of ``NNNN.json``), sends each to the constructor prompt
-(``prompts/constructor.txt``, hash-verified) and writes the reconstructed schema as
-``NNNN.json`` (text_number, id, llm, model_id, source_schema2text_llm, database, nl_text,
-gold_question, ddl, metadata, [error]) plus ``NNNN.txt`` (the DDL).  The dry-run validates every
-payload without any API call.  The key is read from ``OPENAI_API_KEY`` (environment only).
+Reads the E1 descriptions (``nl_text`` of ``NNNN.json``) and builds GPT-4o-mini constructor
+payloads (``prompts/constructor.txt``, hash-verified).  **Live constructor API calls are
+disabled** in this package: dry-run validates payloads only.  Evaluate already-saved
+reconstructions with ``experiments/E2/evaluate.py`` (offline).
 """
 from __future__ import annotations
 
@@ -37,8 +35,8 @@ PLACEHOLDER_NL = "[placeholder description used only to size a dry-run payload]"
 
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
-        description="E2 constructor pipeline (GPT-4o-mini). Dry-run by default: --execute --confirm-paid "
-        "sends paid OpenAI requests.",
+        description="E2 constructor pipeline. Dry-run validates GPT-4o-mini payloads; live paid "
+        "OpenAI constructor calls are disabled in this package.",
     )
     ap.add_argument("--dataset", choices=rio.DATASET_CHOICES, required=True)
     ap.add_argument("--describer-model", choices=DESCRIBER_CHOICES, required=True,
@@ -62,7 +60,8 @@ def build_parser() -> argparse.ArgumentParser:
     mode = ap.add_mutually_exclusive_group()
     mode.add_argument("--dry-run", action="store_true", help="default behaviour: validate payloads, no API call")
     mode.add_argument("--execute", action="store_true", help="actually call the constructor (required)")
-    ap.add_argument("--confirm-paid", action="store_true", help="required with --execute (GPT-4o-mini is a paid API)")
+    ap.add_argument("--confirm-paid", action="store_true",
+                    help="DEPRECATED/ignored: paid API constructor is disabled in this package")
     ap.add_argument("--write-plan", action="store_true", help="dry-run only: write dry_run_plan.json under --out-dir")
     return ap
 
@@ -199,8 +198,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     datasets = rio.expand(args.dataset, rio.DATASETS)
     describers = rio.expand(args.describer_model, ic.DESCRIBER_KEYS)
     multi = len(datasets) * len(describers) > 1
-    if args.execute and not args.confirm_paid:
-        ap.error("the GPT-4o-mini constructor is a paid API: add --confirm-paid together with --execute")
+    if args.execute:
+        ap.error(
+            "Paid API methods are disabled: the GPT-4o-mini constructor cannot be executed from "
+            "this package. Use dry-run (default) to validate payloads, or evaluate saved "
+            "reconstructions with experiments/E2/evaluate.py."
+        )
     if args.write_plan and args.execute:
         ap.error("--write-plan is a dry-run option")
     if args.limit is not None and args.limit < 1:
@@ -220,22 +223,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 2
 
     print("prompt hashes verified: " + ", ".join(f"{k}={v[:12]}" for k, v in pa.EXPECTED_SHA256.items()))
-    if not args.execute:
-        print("DRY-RUN: payloads are validated; no API call is made (use --execute --confirm-paid).")
+    print("DRY-RUN: payloads are validated; paid constructor API calls are disabled.")
     try:
-        if not args.execute:
-            for d in datasets:
-                for m in describers:
-                    dry_run_one(d, m, args.prompt, args, *dirs[(d, m)])
-            return 0
-        client = ic.get_client(rio.CONSTRUCTOR_KEY, dry_run=False, confirm_paid=args.confirm_paid)
-        errors = 0
         for d in datasets:
             for m in describers:
-                errors += execute_one(d, m, args.prompt, args, *dirs[(d, m)], client)
-        return 1 if errors else 0
-    except ic.MissingApiKey as e:
-        print(f"error: {e} (keys are read from the environment only)", file=sys.stderr)
+                dry_run_one(d, m, args.prompt, args, *dirs[(d, m)])
+        return 0
+    except (ic.ApiMethodsDisabled, ic.MissingApiKey) as e:
+        print(f"error: {e}", file=sys.stderr)
         return 2
     except (ValueError, FileNotFoundError, KeyError) as e:
         print(f"error: {e}", file=sys.stderr)

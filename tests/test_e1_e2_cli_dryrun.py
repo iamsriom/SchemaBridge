@@ -64,16 +64,16 @@ def test_e1_write_plan_only_writes_plan(tmp_path):
 
 
 @pytest.mark.parametrize("model", ["sonnet46", "gpt54mini", "all"])
-def test_e1_paid_execute_requires_confirm_paid(model, tmp_path):
+def test_e1_paid_execute_is_disabled(model, tmp_path):
     p = _run(["experiments/E1/run.py", "--dataset", "rschema", "--model", model, "--prompt", "basic", "--execute",
               "--limit", "1", "--out-dir", str(tmp_path / "o")])
-    assert p.returncode == 2 and "--confirm-paid" in p.stderr and not (tmp_path / "o").exists()
+    assert p.returncode == 2 and "paid API methods are disabled" in p.stderr and not (tmp_path / "o").exists()
 
 
-def test_e1_execute_paid_without_key_fails_before_any_call(tmp_path):
+def test_e1_paid_execute_disabled_even_with_confirm_paid(tmp_path):
     p = _run(["experiments/E1/run.py", "--dataset", "rschema", "--model", "gpt54mini", "--prompt", "basic",
               "--execute", "--confirm-paid", "--limit", "1", "--out-dir", str(tmp_path / "o")])
-    assert p.returncode == 2 and "OPENAI_API_KEY" in p.stderr
+    assert p.returncode == 2 and "paid API methods are disabled" in p.stderr
 
 
 def test_e1_refuses_tracked_out_dir():
@@ -90,10 +90,13 @@ def test_e2_dry_run_validates_payload_without_descriptions(tmp_path):
     assert "placeholder" in p.stdout and not (tmp_path / "o").exists()
 
 
-def test_e2_execute_requires_confirm_paid(tmp_path):
+def test_e2_execute_constructor_is_disabled(tmp_path):
     p = _run(["experiments/E2/run.py", "--dataset", "rschema", "--describer-model", "llama31", "--prompt", "basic",
               "--execute", "--out-dir", str(tmp_path / "o")])
-    assert p.returncode == 2 and "--confirm-paid" in p.stderr
+    assert p.returncode == 2 and "Paid API methods are disabled" in p.stderr
+    p2 = _run(["experiments/E2/run.py", "--dataset", "rschema", "--describer-model", "llama31", "--prompt", "basic",
+               "--execute", "--confirm-paid", "--out-dir", str(tmp_path / "o")])
+    assert p2.returncode == 2 and "Paid API methods are disabled" in p2.stderr
 
 
 def _non_strict(mod, monkeypatch):

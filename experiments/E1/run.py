@@ -218,9 +218,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     models = rio.expand(args.model, ic.DESCRIBER_KEYS)
     multi = len(datasets) * len(models) > 1
     paid = [m for m in models if ic.MODELS[m].paid]
-    if args.execute and paid and not args.confirm_paid:
-        ap.error(f"{', '.join(paid)} use paid APIs: add --confirm-paid together with --execute "
-                 "(or choose an open model)")
+    if args.execute and paid:
+        ap.error(
+            f"{', '.join(paid)}: paid API methods are disabled. "
+            "Use an open-weight model (codellama13b / llama31 / deepseek) with --execute, "
+            "or dry-run without --execute."
+        )
     if args.write_plan and args.execute:
         ap.error("--write-plan is a dry-run option")
     if args.limit is not None and args.limit < 1:
@@ -256,8 +259,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                                                dtype=args.dtype)
                 errors += execute_one(d, m, args.prompt, args, dirs[(d, m)], clients[m])
         return 1 if errors else 0
-    except ic.MissingApiKey as e:
-        print(f"error: {e} (keys are read from the environment only)", file=sys.stderr)
+    except (ic.ApiMethodsDisabled, ic.MissingApiKey) as e:
+        print(f"error: {e}", file=sys.stderr)
         return 2
     except (ValueError, FileNotFoundError, KeyError) as e:
         print(f"error: {e}", file=sys.stderr)

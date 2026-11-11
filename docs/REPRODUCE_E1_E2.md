@@ -97,6 +97,9 @@ Expected counts: Enterprise-145=145, SchemaBench=239, RSchema PRIMARY=381, RSche
 
 ## E. Run E1 inference
 
+**Paid API methods are disabled** in this package (Claude / GPT-5.4-mini describers and the GPT-4o-mini constructor cannot be executed). Dry-run still sizes requests. Live generation is open-weight HF only; evaluate saved predictions offline.
+
+
 Dry-run is the default (no model load, no API call):
 
 ```bash
@@ -116,16 +119,8 @@ python experiments/E1/run.py --dataset schemabench --model deepseek --prompt bas
 python experiments/E1/run.py --dataset schemabench --model deepseek --prompt detailed --execute
 ```
 
-Paid APIs (both `--execute` and `--confirm-paid` required; costs apply):
+Paid APIs (`sonnet46` / `gpt54mini`) **cannot be executed** from this package; `--execute` is refused even with `--confirm-paid`. Dry-run still works for request sizing.
 
-```bash
-export ANTHROPIC_API_KEY=...   # never commit
-export OPENAI_API_KEY=...
-python experiments/E1/run.py --dataset rschema --model sonnet46 --prompt basic --execute --confirm-paid
-python experiments/E1/run.py --dataset rschema --model sonnet46 --prompt detailed --execute --confirm-paid
-python experiments/E1/run.py --dataset schemabench --model gpt54mini --prompt basic --execute --confirm-paid
-python experiments/E1/run.py --dataset schemabench --model gpt54mini --prompt detailed --execute --confirm-paid
-```
 
 Useful flags: `--limit N`, `--skip-existing` / `--no-skip-existing` / `--resume`, `--device`, `--dtype`,
 `--load-in-4bit`, `--max-tokens`, `--max-retries`, `--retry-base-delay`, `--data-root`, `--out-dir`.
@@ -157,17 +152,20 @@ hypotheses; `skip` drops them. Writes `metrics.json`, `per_record.csv`, `e1_summ
 
 ## G. Run E2 reconstruction
 
+**Live GPT-4o-mini constructor API calls are disabled.** Use dry-run to validate payloads, or evaluate already-saved reconstructions with `experiments/E2/evaluate.py`.
+
+
 ```bash
 # dry-run: validate constructor payloads from E1 descriptions (no API)
 python experiments/E2/run.py --dataset rschema --describer-model llama31 --prompt detailed \
   --e1-pred-dir experiments/E1/outputs/rschema_detailed_llama31
 
-# paid reconstruction
-python experiments/E2/run.py --dataset rschema --describer-model llama31 --prompt detailed \
-  --e1-pred-dir experiments/E1/outputs/rschema_detailed_llama31 --execute --confirm-paid
+# live constructor API is disabled; evaluate saved reconstructions offline instead
+# python experiments/E2/evaluate.py --dataset rschema --describer-model llama31 --prompt detailed \
+#   --pred-dir experiments/E2/outputs/rschema_detailed_llama31
 ```
 
-Requires `OPENAI_API_KEY`. Supports `--skip-existing`, `--limit`, retries, and resume after interruption.
+Supports `--skip-existing`, `--limit` in dry-run. Live constructor execution is disabled.
 Missing/invalid E1 descriptions become error records without calling the API. Outputs:
 `experiments/E2/outputs/<dataset>_<prompt>_<describer>/NNNN.{json,txt}` with `ddl` + `metadata`.
 

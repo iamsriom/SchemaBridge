@@ -4,9 +4,10 @@ Safety model
 ------------
 * Importing this module performs no network access and imports no heavy dependency.
 * Dry-run is the default everywhere: requests are built and sized, nothing is sent.
-* Paid API calls (Anthropic / OpenAI) require BOTH ``execute`` and an explicit ``confirm_paid``
-  (CLI: ``--execute --confirm-paid``).  Keys are read ONLY from ``ANTHROPIC_API_KEY`` /
-  ``OPENAI_API_KEY``; they are never read from files, printed, or stored.
+* **Paid API methods are DISABLED** (Anthropic / OpenAI).  ``get_client`` refuses
+  ``sonnet46``, ``gpt54mini``, and ``gpt4omini`` whenever ``dry_run=False``.
+  Dry-run request sizing for documentation remains allowed; no keys are read or used.
+* Open-weight HF generation remains available with ``--execute`` (local GPU only).
 * Generated text is written only when ``--out-dir`` is given and it lies outside the repo tree or
   inside an ``outputs/`` directory (git-ignored).
 
@@ -126,13 +127,30 @@ class MissingApiKey(RuntimeError):
     pass
 
 
+class ApiMethodsDisabled(RuntimeError):
+    """Raised when a paid Anthropic/OpenAI client would be constructed.
+
+    SchemaBridge E1/E2 reproduction no longer runs hosted API inference from this package.
+    Use open-weight HF models locally, or evaluate already-saved predictions offline.
+    """
+
+
+API_METHODS_DISABLED = True
+API_DISABLED_MESSAGE = (
+    "Paid API methods are disabled in this package "
+    "(Anthropic Claude / OpenAI GPT describers and the GPT-4o-mini constructor). "
+    "Use open-weight HF models with --execute, or evaluate saved predictions offline. "
+    "Dry-run request sizing still works without contacting any provider."
+)
+
+
 def require_api_key(provider: str) -> str:
-    """Return the key from the environment ONLY; never log it."""
-    env = ENV_KEYS[provider]
-    key = os.environ.get(env, "").strip()
-    if not key:
-        raise MissingApiKey(f"{env} is not set in the environment")
-    return key
+    """Return the key from the environment ONLY; never log it.
+
+    Note: paid API clients are disabled via :data:`API_METHODS_DISABLED`; this helper is
+    retained only for compatibility and will not be reached in normal E1/E2 flows.
+    """
+    raise ApiMethodsDisabled(API_DISABLED_MESSAGE)
 
 
 def _assert_out_dir_ok(out_dir: Path) -> Path:
@@ -180,13 +198,7 @@ def _retry(fn, max_retries: int = 3):
 
 class AnthropicClient:
     def __init__(self, model: ModelSpec, *, confirm_paid: bool) -> None:
-        if not confirm_paid:
-            raise PaidCallNotConfirmed("Anthropic calls are paid: pass --confirm-paid")
-        key = require_api_key("anthropic")
-        import anthropic  # lazy
-
-        self.model = model
-        self._client = anthropic.Anthropic(api_key=key)
+        raise ApiMethodsDisabled(API_DISABLED_MESSAGE)
 
     def generate(self, req: Request) -> str:
         def call() -> str:
@@ -207,13 +219,7 @@ class AnthropicClient:
 
 class OpenAIClient:
     def __init__(self, model: ModelSpec, *, confirm_paid: bool) -> None:
-        if not confirm_paid:
-            raise PaidCallNotConfirmed("OpenAI calls are paid: pass --confirm-paid")
-        key = require_api_key("openai")
-        import openai  # lazy
-
-        self.model = model
-        self._client = openai.OpenAI(api_key=key)
+        raise ApiMethodsDisabled(API_DISABLED_MESSAGE)
 
     def generate(self, req: Request) -> str:
         def call() -> str:
@@ -307,14 +313,17 @@ def get_client(
     device_map: str = "auto",
     dtype: str = "float16",
 ) -> Client:
-    """Return a client.  ``dry_run=True`` NEVER touches the network or loads weights."""
+    """Return a client.  ``dry_run=True`` NEVER touches the network or loads weights.
+
+    Paid Anthropic/OpenAI models always raise :class:`ApiMethodsDisabled` when
+    ``dry_run=False`` (``confirm_paid`` is ignored).
+    """
+    del confirm_paid  # retained for CLI compatibility; API execute paths are hard-disabled
     model = MODELS[model_key]
     if dry_run:
         return DryRunClient()
-    if model.provider == "anthropic":
-        return AnthropicClient(model, confirm_paid=confirm_paid)
-    if model.provider == "openai":
-        return OpenAIClient(model, confirm_paid=confirm_paid)
+    if model.provider in PAID_PROVIDERS or model.paid:
+        raise ApiMethodsDisabled(API_DISABLED_MESSAGE)
     return HFClient(model, load_in_4bit=load_in_4bit, device_map=device_map, dtype=dtype)
 
 
