@@ -1,0 +1,39 @@
+-- Schema for database: schemabench_0029
+CREATE TABLE `site` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `domain` varchar(100) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `site_domain_uniq` (`domain`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `robots_txt_rule` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `site_id` int(11) NOT NULL,
+  `user_agent` varchar(255) NOT NULL,
+  `crawl_delay` int(11) DEFAULT NULL,
+  `order` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `robots_txt_rule_site_id_idx` (`site_id`),
+  CONSTRAINT `robots_txt_rule_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `site` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `robots_txt_allowed_url` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `rule_id` int(11) NOT NULL,
+  `path` varchar(255) NOT NULL,
+  `order` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `robots_txt_allowed_url_rule_id_idx` (`rule_id`),
+  CONSTRAINT `robots_txt_allowed_url_ibfk_1` FOREIGN KEY (`rule_id`) REFERENCES `robots_txt_rule` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `robots_txt_disallowed_url` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `rule_id` int(11) NOT NULL,
+  `path` varchar(255) NOT NULL,
+  `order` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `robots_txt_disallowed_url_rule_id_idx` (`rule_id`),
+  CONSTRAINT `robots_txt_disallowed_url_ibfk_1` FOREIGN KEY (`rule_id`) REFERENCES `robots_txt_rule` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,161 @@
+-- Schema for database: schemabench_0134
+CREATE TABLE `e_account_permission` (
+  `permission_id` int(11) NOT NULL,
+  `permission_name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`permission_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `e_customer` (
+  `customer_id` int(11) NOT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `e_customer_account` (
+  `account_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `account_number` varchar(50) NOT NULL,
+  `account_type` varchar(50) NOT NULL,
+  `open_date` datetime NOT NULL,
+  `status` varchar(20) NOT NULL,
+  PRIMARY KEY (`account_id`),
+  KEY `e_customer_account_ibfk_1` (`customer_id`),
+  CONSTRAINT `e_customer_account_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `e_customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `e_cash_transaction` (
+  `cash_transaction_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `transaction_date` datetime NOT NULL,
+  `amount` decimal(18,2) NOT NULL,
+  `transaction_type` varchar(30) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`cash_transaction_id`),
+  KEY `e_cash_transaction_ibfk_1` (`account_id`),
+  CONSTRAINT `e_cash_transaction_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `e_customer_account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `e_exchange` (
+  `exchange_id` int(11) NOT NULL,
+  `exchange_code` varchar(20) NOT NULL,
+  `exchange_name` varchar(255) NOT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`exchange_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `e_industry` (
+  `industry_id` int(11) NOT NULL,
+  `industry_name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`industry_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `e_company` (
+  `company_id` int(11) NOT NULL,
+  `industry_id` int(11) NOT NULL,
+  `company_name` varchar(255) NOT NULL,
+  `ticker_symbol` varchar(20) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`company_id`),
+  KEY `e_company_ibfk_1` (`industry_id`),
+  CONSTRAINT `e_company_ibfk_1` FOREIGN KEY (`industry_id`) REFERENCES `e_industry` (`industry_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `e_security` (
+  `security_id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `exchange_id` int(11) NOT NULL,
+  `security_symbol` varchar(50) NOT NULL,
+  `security_name` varchar(255) NOT NULL,
+  `security_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`security_id`),
+  KEY `e_security_ibfk_1` (`company_id`),
+  KEY `e_security_ibfk_2` (`exchange_id`),
+  CONSTRAINT `e_security_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `e_company` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `e_security_ibfk_2` FOREIGN KEY (`exchange_id`) REFERENCES `e_exchange` (`exchange_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `e_daily_market` (
+  `daily_market_id` int(11) NOT NULL,
+  `security_id` int(11) NOT NULL,
+  `market_date` date NOT NULL,
+  `open_price` decimal(18,4) NOT NULL,
+  `high_price` decimal(18,4) NOT NULL,
+  `low_price` decimal(18,4) NOT NULL,
+  `close_price` decimal(18,4) NOT NULL,
+  `volume` bigint(20) NOT NULL,
+  PRIMARY KEY (`daily_market_id`),
+  KEY `e_daily_market_ibfk_1` (`security_id`),
+  CONSTRAINT `e_daily_market_ibfk_1` FOREIGN KEY (`security_id`) REFERENCES `e_security` (`security_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `e_financial` (
+  `financial_id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `fiscal_year` int(11) NOT NULL,
+  `revenue` decimal(18,2) DEFAULT NULL,
+  `net_income` decimal(18,2) DEFAULT NULL,
+  `assets` decimal(18,2) DEFAULT NULL,
+  `liabilities` decimal(18,2) DEFAULT NULL,
+  PRIMARY KEY (`financial_id`),
+  KEY `e_financial_ibfk_1` (`company_id`),
+  CONSTRAINT `e_financial_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `e_company` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `e_trade` (
+  `trade_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `security_id` int(11) NOT NULL,
+  `trade_date` datetime NOT NULL,
+  `trade_type` varchar(20) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `price` decimal(18,4) NOT NULL,
+  `status` varchar(20) NOT NULL,
+  PRIMARY KEY (`trade_id`),
+  KEY `e_trade_ibfk_1` (`account_id`),
+  KEY `e_trade_ibfk_2` (`security_id`),
+  CONSTRAINT `e_trade_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `e_customer_account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `e_trade_ibfk_2` FOREIGN KEY (`security_id`) REFERENCES `e_security` (`security_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `e_settlement` (
+  `settlement_id` int(11) NOT NULL,
+  `trade_id` int(11) NOT NULL,
+  `settlement_date` datetime NOT NULL,
+  `settlement_amount` decimal(18,2) NOT NULL,
+  `status` varchar(20) NOT NULL,
+  PRIMARY KEY (`settlement_id`),
+  KEY `e_settlement_ibfk_1` (`trade_id`),
+  CONSTRAINT `e_settlement_ibfk_1` FOREIGN KEY (`trade_id`) REFERENCES `e_trade` (`trade_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `e_trade_history` (
+  `trade_history_id` int(11) NOT NULL,
+  `trade_id` int(11) NOT NULL,
+  `change_date` datetime NOT NULL,
+  `old_status` varchar(20) DEFAULT NULL,
+  `new_status` varchar(20) DEFAULT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`trade_history_id`),
+  KEY `e_trade_history_ibfk_1` (`trade_id`),
+  CONSTRAINT `e_trade_history_ibfk_1` FOREIGN KEY (`trade_id`) REFERENCES `e_trade` (`trade_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `e_holding_history` (
+  `holding_history_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `security_id` int(11) NOT NULL,
+  `history_date` datetime NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `market_value` decimal(18,2) DEFAULT NULL,
+  PRIMARY KEY (`holding_history_id`),
+  KEY `e_holding_history_ibfk_1` (`account_id`),
+  KEY `e_holding_history_ibfk_2` (`security_id`),
+  CONSTRAINT `e_holding_history_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `e_customer_account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `e_holding_history_ibfk_2` FOREIGN KEY (`security_id`) REFERENCES `e_security` (`security_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

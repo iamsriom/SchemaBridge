@@ -1,0 +1,26 @@
+{
+  "text_number": 316,
+  "id": "67552f0a13602ec03b41a8b1",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0316",
+  "question": "This is an online document knowledge base system for managing and displaying various e-books and their document content. The system supports a multi-level classification structure, facilitating content categorization and flexible adjustment of category display order. For document management, documents can belong to specific e-books and support a multi-level directory structure. For e-book management, e-books can belong to different levels of categories for easy user access, each e-book can contain multiple documents, and track total reads and likes, while providing cover images and detailed descriptions. For data statistics, the system records daily reading and like statistics for e-books, analyzing trends in content popularity. For user management, the system supports users to register personal accounts and log in, ensuring each user has a unique identity.",
+  "ddl": "-- Schema for database: rschema_0316\n\nCREATE TABLE `category` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `parent_id` int(11) DEFAULT NULL,\n  `sort_order` int(11) NOT NULL DEFAULT '0',\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `category_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `email` varchar(255) DEFAULT NULL,\n  `avatar` varchar(255) DEFAULT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `username` (`username`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `ebook` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `category_id` int(11) DEFAULT NULL,\n  `title` varchar(255) NOT NULL,\n  `cover` varchar(255) DEFAULT NULL,\n  `description` text DEFAULT NULL,\n  `total_reads` int(11) NOT NULL DEFAULT '0',\n  `total_likes` int(11) NOT NULL DEFAULT '0',\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  KEY `category_id` (`category_id`),\n  CONSTRAINT `ebook_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `document` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `ebook_id` int(11) NOT NULL,\n  `parent_id` int(11) DEFAULT NULL,\n  `title` varchar(255) NOT NULL,\n  `content` longtext DEFAULT NULL,\n  `sort_order` int(11) NOT NULL DEFAULT '0',\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  KEY `ebook_id` (`ebook_id`),\n  KEY `parent_id` (`parent_id`),\n  CONSTRAINT `document_ibfk_1` FOREIGN KEY (`ebook_id`) REFERENCES `ebook` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `document_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `document` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `ebook_stats` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `ebook_id` int(11) NOT NULL,\n  `stat_date` date NOT NULL,\n  `reads` int(11) NOT NULL DEFAULT '0',\n  `likes` int(11) NOT NULL DEFAULT '0',\n  PRIMARY KEY (`id`),\n  KEY `ebook_id` (`ebook_id`),\n  CONSTRAINT `ebook_stats_ibfk_1` FOREIGN KEY (`ebook_id`) REFERENCES `ebook` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "category",
+      "user",
+      "ebook",
+      "document",
+      "ebook_stats"
+    ],
+    "columns_by_table": {
+      "category": [],
+      "user": [],
+      "ebook": [],
+      "document": [],
+      "ebook_stats": []
+    }
+  }
+}

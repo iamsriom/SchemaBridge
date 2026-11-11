@@ -1,0 +1,43 @@
+-- Schema for database: rschema_0128
+CREATE TABLE `task_execution` (
+  `task_execution_id` int(11) NOT NULL AUTO_INCREMENT,
+  `external_execution_id` varchar(255) DEFAULT NULL,
+  `parent_task_execution_id` int(11) DEFAULT NULL,
+  `task_name` varchar(255) NOT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `exit_code` int(11) DEFAULT NULL,
+  `exit_message` varchar(1000) DEFAULT NULL,
+  `error_message` varchar(1000) DEFAULT NULL,
+  `last_update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`task_execution_id`),
+  KEY `task_execution_ibfk_1` (`parent_task_execution_id`),
+  CONSTRAINT `task_execution_ibfk_1` FOREIGN KEY (`parent_task_execution_id`) REFERENCES `task_execution` (`task_execution_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `task_execution_parameter` (
+  `task_execution_parameter_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_execution_id` int(11) NOT NULL,
+  `parameter_name` varchar(255) NOT NULL,
+  `parameter_value` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`task_execution_parameter_id`),
+  KEY `task_execution_parameter_ibfk_1` (`task_execution_id`),
+  CONSTRAINT `task_execution_parameter_ibfk_1` FOREIGN KEY (`task_execution_id`) REFERENCES `task_execution` (`task_execution_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `task_batch` (
+  `task_batch_id` int(11) NOT NULL AUTO_INCREMENT,
+  `batch_id` varchar(255) NOT NULL,
+  `batch_name` varchar(255) NOT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`task_batch_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `task_execution_batch` (
+  `task_execution_batch_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_execution_id` int(11) NOT NULL,
+  `task_batch_id` int(11) NOT NULL,
+  PRIMARY KEY (`task_execution_batch_id`),
+  KEY `task_execution_batch_ibfk_1` (`task_execution_id`),
+  KEY `task_execution_batch_ibfk_2` (`task_batch_id`),
+  CONSTRAINT `task_execution_batch_ibfk_1` FOREIGN KEY (`task_execution_id`) REFERENCES `task_execution` (`task_execution_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_execution_batch_ibfk_2` FOREIGN KEY (`task_batch_id`) REFERENCES `task_batch` (`task_batch_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

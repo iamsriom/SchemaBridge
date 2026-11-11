@@ -1,0 +1,121 @@
+-- Schema for database: rschema_0428
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `role` varchar(50) NOT NULL COMMENT 'admin, teacher, student',
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `admin` (
+  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `full_name` varchar(255) NOT NULL,
+  `department` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`admin_id`),
+  CONSTRAINT `admin_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teacher` (
+  `teacher_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `full_name` varchar(255) NOT NULL,
+  `department` varchar(255) DEFAULT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`teacher_id`),
+  CONSTRAINT `teacher_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `full_name` varchar(255) NOT NULL,
+  `student_no` varchar(50) NOT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `date_of_birth` datetime DEFAULT NULL,
+  `major` varchar(255) DEFAULT NULL,
+  `class_name` varchar(100) DEFAULT NULL,
+  `enrollment_year` int(11) DEFAULT NULL,
+  PRIMARY KEY (`student_id`),
+  CONSTRAINT `student_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dormitory` (
+  `dormitory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `building_name` varchar(255) NOT NULL,
+  `room_number` varchar(50) NOT NULL,
+  `capacity` int(11) NOT NULL DEFAULT 4,
+  `current_occupancy` int(11) NOT NULL DEFAULT 0,
+  `floor` int(11) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL COMMENT 'admin_id or teacher_id',
+  PRIMARY KEY (`dormitory_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dormitory_assignment` (
+  `assignment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `dormitory_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `assigned_at` datetime DEFAULT NULL,
+  `check_in_date` datetime DEFAULT NULL,
+  `check_out_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`assignment_id`),
+  CONSTRAINT `dormitory_assignment_ibfk_1` FOREIGN KEY (`dormitory_id`) REFERENCES `dormitory` (`dormitory_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `dormitory_assignment_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `repair_request` (
+  `request_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `dormitory_id` int(11) NOT NULL,
+  `description` varchar(1000) NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'pending' COMMENT 'pending, in_progress, resolved',
+  `submitted_at` datetime DEFAULT NULL,
+  `resolved_at` datetime DEFAULT NULL,
+  `handler_id` int(11) DEFAULT NULL COMMENT 'admin_id who handles the request',
+  PRIMARY KEY (`request_id`),
+  CONSTRAINT `repair_request_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `repair_request_ibfk_2` FOREIGN KEY (`dormitory_id`) REFERENCES `dormitory` (`dormitory_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course` (
+  `course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_code` varchar(50) NOT NULL,
+  `course_name` varchar(255) NOT NULL,
+  `credits` int(11) DEFAULT NULL,
+  `teacher_id` int(11) DEFAULT NULL,
+  `semester` varchar(50) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`course_id`),
+  CONSTRAINT `course_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_enrollment` (
+  `enrollment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `enrolled_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`enrollment_id`),
+  CONSTRAINT `course_enrollment_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_enrollment_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `grade` (
+  `grade_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `score` decimal(5,2) DEFAULT NULL,
+  `grade_level` varchar(10) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `recorded_by` int(11) DEFAULT NULL COMMENT 'teacher_id who recorded the grade',
+  `recorded_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`grade_id`),
+  CONSTRAINT `grade_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `grade_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `grade_ibfk_3` FOREIGN KEY (`recorded_by`) REFERENCES `teacher` (`teacher_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,34 @@
+{
+  "text_number": 28,
+  "id": "67552f0a13602ec03b41a7ca",
+  "llm": "gpt54mini",
+  "model_id": "gpt-5.4-mini",
+  "database": "rschema_0028",
+  "question": "The timber processing company needs to manage the procurement, processing, and sales of timber. Timber has information such as name, type, purchase price, processing cost, and selling price. Multiple departments in the company collaborate, each department has a name, person in charge, and contact information. Employee management includes employee ID, name, gender, phone number, and position. For each procurement, the system shall record the purchased timber, quantity, purchaser, supplier, and purchase time. During processing, the system shall record the processed timber, quantity, processor, and processing time. For sales, the system shall record the sold timber, quantity, salesperson, customer, and sales time. The system shall support performance evaluation for each department.",
+  "ddl": "-- Schema for database: rschema_0028\nCREATE TABLE `timber` (\n  `timber_id` int(11) NOT NULL AUTO_INCREMENT,\n  `timber_name` varchar(255) NOT NULL,\n  `timber_type` varchar(255) NOT NULL,\n  `purchase_price` decimal(10,2) NOT NULL,\n  `processing_cost` decimal(10,2) NOT NULL,\n  `selling_price` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`timber_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `department` (\n  `department_id` int(11) NOT NULL AUTO_INCREMENT,\n  `department_name` varchar(255) NOT NULL,\n  `person_in_charge` varchar(255) NOT NULL,\n  `contact_info` varchar(255) NOT NULL,\n  PRIMARY KEY (`department_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `employee` (\n  `employee_id` int(11) NOT NULL AUTO_INCREMENT,\n  `employee_code` varchar(50) NOT NULL,\n  `employee_name` varchar(255) NOT NULL,\n  `gender` varchar(10) NOT NULL,\n  `phone_number` varchar(20) NOT NULL,\n  `position` varchar(255) NOT NULL,\n  `department_id` int(11) DEFAULT NULL,\n  PRIMARY KEY (`employee_id`),\n  UNIQUE KEY `uk_employee_code` (`employee_code`),\n  KEY `employee_ibfk_1` (`department_id`),\n  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `supplier` (\n  `supplier_id` int(11) NOT NULL AUTO_INCREMENT,\n  `supplier_name` varchar(255) NOT NULL,\n  `contact_info` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`supplier_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `customer` (\n  `customer_id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_name` varchar(255) NOT NULL,\n  `contact_info` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`customer_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `procurement` (\n  `procurement_id` int(11) NOT NULL AUTO_INCREMENT,\n  `timber_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `purchaser_id` int(11) NOT NULL,\n  `supplier_id` int(11) NOT NULL,\n  `purchase_time` datetime NOT NULL,\n  PRIMARY KEY (`procurement_id`),\n  KEY `procurement_ibfk_1` (`timber_id`),\n  KEY `procurement_ibfk_2` (`purchaser_id`),\n  KEY `procurement_ibfk_3` (`supplier_id`),\n  CONSTRAINT `procurement_ibfk_1` FOREIGN KEY (`timber_id`) REFERENCES `timber` (`timber_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `procurement_ibfk_2` FOREIGN KEY (`purchaser_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `procurement_ibfk_3` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `processing` (\n  `processing_id` int(11) NOT NULL AUTO_INCREMENT,\n  `timber_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `processor_id` int(11) NOT NULL,\n  `processing_time` datetime NOT NULL,\n  PRIMARY KEY (`processing_id`),\n  KEY `processing_ibfk_1` (`timber_id`),\n  KEY `processing_ibfk_2` (`processor_id`),\n  CONSTRAINT `processing_ibfk_1` FOREIGN KEY (`timber_id`) REFERENCES `timber` (`timber_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `processing_ibfk_2` FOREIGN KEY (`processor_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sales` (\n  `sales_id` int(11) NOT NULL AUTO_INCREMENT,\n  `timber_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `salesperson_id` int(11) NOT NULL,\n  `customer_id` int(11) NOT NULL,\n  `sales_time` datetime NOT NULL,\n  PRIMARY KEY (`sales_id`),\n  KEY `sales_ibfk_1` (`timber_id`),\n  KEY `sales_ibfk_2` (`salesperson_id`),\n  KEY `sales_ibfk_3` (`customer_id`),\n  CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`timber_id`) REFERENCES `timber` (`timber_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `sales_ibfk_2` FOREIGN KEY (`salesperson_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `sales_ibfk_3` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `department_performance` (\n  `performance_id` int(11) NOT NULL AUTO_INCREMENT,\n  `department_id` int(11) NOT NULL,\n  `evaluation_period` varchar(50) NOT NULL,\n  `performance_score` decimal(10,2) NOT NULL,\n  `evaluation_content` text DEFAULT NULL,\n  `evaluation_time` datetime NOT NULL,\n  PRIMARY KEY (`performance_id`),\n  KEY `department_performance_ibfk_1` (`department_id`),\n  CONSTRAINT `department_performance_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "timber",
+      "department",
+      "employee",
+      "supplier",
+      "customer",
+      "procurement",
+      "processing",
+      "sales",
+      "department_performance"
+    ],
+    "columns_by_table": {
+      "timber": [],
+      "department": [],
+      "employee": [],
+      "supplier": [],
+      "customer": [],
+      "procurement": [],
+      "processing": [],
+      "sales": [],
+      "department_performance": []
+    }
+  }
+}

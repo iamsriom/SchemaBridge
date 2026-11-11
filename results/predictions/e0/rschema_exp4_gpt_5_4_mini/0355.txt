@@ -1,0 +1,65 @@
+-- Schema for database: rschema_0355
+CREATE TABLE `races` (
+  `race_id` int(11) NOT NULL AUTO_INCREMENT,
+  `race_name` varchar(255) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `result_summary` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`race_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `horses` (
+  `horse_id` int(11) NOT NULL AUTO_INCREMENT,
+  `horse_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`horse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bettors` (
+  `bettor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `bettor_name` varchar(255) NOT NULL,
+  `phone` varchar(20) NOT NULL,
+  `identity_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`bettor_id`),
+  UNIQUE KEY `uk_bettors_phone` (`phone`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `race_results` (
+  `race_result_id` int(11) NOT NULL AUTO_INCREMENT,
+  `race_id` int(11) NOT NULL,
+  `horse_id` int(11) NOT NULL,
+  `horse_number` int(11) NOT NULL,
+  `ranking` int(11) NOT NULL,
+  PRIMARY KEY (`race_result_id`),
+  KEY `race_results_ibfk_1` (`race_id`),
+  KEY `race_results_ibfk_2` (`horse_id`),
+  CONSTRAINT `race_results_ibfk_1` FOREIGN KEY (`race_id`) REFERENCES `races` (`race_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `race_results_ibfk_2` FOREIGN KEY (`horse_id`) REFERENCES `horses` (`horse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bets` (
+  `bet_id` int(11) NOT NULL AUTO_INCREMENT,
+  `bettor_id` int(11) NOT NULL,
+  `race_id` int(11) NOT NULL,
+  `horse_id` int(11) NOT NULL,
+  `bet_amount` decimal(10,2) NOT NULL,
+  `expected_ranking` int(11) NOT NULL,
+  `bet_time` datetime NOT NULL,
+  PRIMARY KEY (`bet_id`),
+  KEY `bets_ibfk_1` (`bettor_id`),
+  KEY `bets_ibfk_2` (`race_id`),
+  KEY `bets_ibfk_3` (`horse_id`),
+  CONSTRAINT `bets_ibfk_1` FOREIGN KEY (`bettor_id`) REFERENCES `bettors` (`bettor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bets_ibfk_2` FOREIGN KEY (`race_id`) REFERENCES `races` (`race_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bets_ibfk_3` FOREIGN KEY (`horse_id`) REFERENCES `horses` (`horse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bet_results` (
+  `bet_result_id` int(11) NOT NULL AUTO_INCREMENT,
+  `bet_id` int(11) NOT NULL,
+  `actual_ranking` int(11) DEFAULT NULL,
+  `is_won` tinyint(1) NOT NULL DEFAULT '0',
+  `comparison_note` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`bet_result_id`),
+  UNIQUE KEY `uk_bet_results_bet_id` (`bet_id`),
+  CONSTRAINT `bet_results_ibfk_1` FOREIGN KEY (`bet_id`) REFERENCES `bets` (`bet_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

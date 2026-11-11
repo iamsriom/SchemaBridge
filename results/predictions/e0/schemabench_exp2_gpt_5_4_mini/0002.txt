@@ -1,0 +1,170 @@
+-- Schema for database: schemabench_0002
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `remember_token` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `display_name` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `roles_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) NOT NULL,
+  `table_name` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `permissions_key_unique` (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role_user` (
+  `role_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`role_id`,`user_id`),
+  KEY `role_user_user_id_index` (`user_id`),
+  CONSTRAINT `role_user_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `role_user_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permission_role` (
+  `permission_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  PRIMARY KEY (`permission_id`,`role_id`),
+  KEY `permission_role_role_id_index` (`role_id`),
+  CONSTRAINT `permission_role_ibfk_1` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `permission_role_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `display_name_singular` varchar(255) NOT NULL,
+  `display_name_plural` varchar(255) NOT NULL,
+  `icon` varchar(255) DEFAULT NULL,
+  `model_name` varchar(255) DEFAULT NULL,
+  `controller` varchar(255) DEFAULT NULL,
+  `generate_permissions` tinyint(1) NOT NULL DEFAULT '0',
+  `description` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `data_types_name_unique` (`name`),
+  UNIQUE KEY `data_types_slug_unique` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_rows` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `data_type_id` int(11) NOT NULL,
+  `field` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `display_name` varchar(255) NOT NULL,
+  `required` tinyint(1) NOT NULL DEFAULT '0',
+  `browse` tinyint(1) NOT NULL DEFAULT '0',
+  `read` tinyint(1) NOT NULL DEFAULT '0',
+  `edit` tinyint(1) NOT NULL DEFAULT '0',
+  `add` tinyint(1) NOT NULL DEFAULT '0',
+  `delete` tinyint(1) NOT NULL DEFAULT '0',
+  `details` text DEFAULT NULL,
+  `order` int(11) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `data_rows_data_type_id_index` (`data_type_id`),
+  CONSTRAINT `data_rows_ibfk_1` FOREIGN KEY (`data_type_id`) REFERENCES `data_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `menus` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `menus_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `menu_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `menu_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `url` varchar(255) DEFAULT NULL,
+  `route` varchar(255) DEFAULT NULL,
+  `target` varchar(255) DEFAULT NULL,
+  `icon_class` varchar(255) DEFAULT NULL,
+  `color` varchar(255) DEFAULT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `order` int(11) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `menu_items_menu_id_index` (`menu_id`),
+  KEY `menu_items_parent_id_index` (`parent_id`),
+  CONSTRAINT `menu_items_ibfk_1` FOREIGN KEY (`menu_id`) REFERENCES `menus` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `menu_items_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `menu_items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) NOT NULL,
+  `display_name` varchar(255) NOT NULL,
+  `value` text DEFAULT NULL,
+  `details` text DEFAULT NULL,
+  `type` varchar(255) NOT NULL,
+  `order` int(11) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `settings_key_unique` (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `categories_slug_unique` (`slug`),
+  KEY `categories_parent_id_index` (`parent_id`),
+  CONSTRAINT `categories_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `media` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `disk` varchar(255) NOT NULL,
+  `directory` varchar(255) NOT NULL,
+  `mime_type` varchar(255) DEFAULT NULL,
+  `size` int(11) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `media_directory_index` (`directory`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `folders` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `folders_parent_id_index` (`parent_id`),
+  CONSTRAINT `folders_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `folders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,142 @@
+-- Schema for database: schemabench_0004
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `display_name` varchar(255) DEFAULT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'subscriber',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_username` (`username`),
+  UNIQUE KEY `uk_users_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `sites` (
+  `site_id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_user_id` int(11) NOT NULL,
+  `site_name` varchar(255) NOT NULL,
+  `site_slug` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'active',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`site_id`),
+  UNIQUE KEY `uk_sites_site_slug` (`site_slug`),
+  KEY `sites_ibfk_1` (`owner_user_id`),
+  CONSTRAINT `sites_ibfk_1` FOREIGN KEY (`owner_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `themes` (
+  `theme_id` int(11) NOT NULL AUTO_INCREMENT,
+  `theme_name` varchar(255) NOT NULL,
+  `theme_slug` varchar(255) NOT NULL,
+  `version` varchar(50) NOT NULL,
+  `author_name` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `is_premium` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`theme_id`),
+  UNIQUE KEY `uk_themes_theme_slug` (`theme_slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `site_themes` (
+  `site_theme_id` int(11) NOT NULL AUTO_INCREMENT,
+  `site_id` int(11) NOT NULL,
+  `theme_id` int(11) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 0,
+  `activated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`site_theme_id`),
+  UNIQUE KEY `uk_site_themes_site_theme` (`site_id`,`theme_id`),
+  KEY `site_themes_ibfk_1` (`site_id`),
+  KEY `site_themes_ibfk_2` (`theme_id`),
+  CONSTRAINT `site_themes_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `sites` (`site_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `site_themes_ibfk_2` FOREIGN KEY (`theme_id`) REFERENCES `themes` (`theme_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `plugins` (
+  `plugin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `plugin_name` varchar(255) NOT NULL,
+  `plugin_slug` varchar(255) NOT NULL,
+  `version` varchar(50) NOT NULL,
+  `author_name` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`plugin_id`),
+  UNIQUE KEY `uk_plugins_plugin_slug` (`plugin_slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `site_plugins` (
+  `site_plugin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `site_id` int(11) NOT NULL,
+  `plugin_id` int(11) NOT NULL,
+  `is_enabled` tinyint(1) NOT NULL DEFAULT 1,
+  `settings_json` text DEFAULT NULL,
+  `installed_at` datetime NOT NULL,
+  PRIMARY KEY (`site_plugin_id`),
+  UNIQUE KEY `uk_site_plugins_site_plugin` (`site_id`,`plugin_id`),
+  KEY `site_plugins_ibfk_1` (`site_id`),
+  KEY `site_plugins_ibfk_2` (`plugin_id`),
+  CONSTRAINT `site_plugins_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `sites` (`site_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `site_plugins_ibfk_2` FOREIGN KEY (`plugin_id`) REFERENCES `plugins` (`plugin_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `pages` (
+  `page_id` int(11) NOT NULL AUTO_INCREMENT,
+  `site_id` int(11) NOT NULL,
+  `author_user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `content` longtext DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'draft',
+  `published_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`page_id`),
+  UNIQUE KEY `uk_pages_site_slug` (`site_id`,`slug`),
+  KEY `pages_ibfk_1` (`site_id`),
+  KEY `pages_ibfk_2` (`author_user_id`),
+  CONSTRAINT `pages_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `sites` (`site_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pages_ibfk_2` FOREIGN KEY (`author_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `comments` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `parent_comment_id` int(11) DEFAULT NULL,
+  `author_name` varchar(255) NOT NULL,
+  `author_email` varchar(255) NOT NULL,
+  `comment_body` text NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'pending',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`comment_id`),
+  KEY `comments_ibfk_1` (`page_id`),
+  KEY `comments_ibfk_2` (`user_id`),
+  KEY `comments_ibfk_3` (`parent_comment_id`),
+  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `pages` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`parent_comment_id`) REFERENCES `comments` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `analytics_events` (
+  `event_id` int(11) NOT NULL AUTO_INCREMENT,
+  `site_id` int(11) NOT NULL,
+  `page_id` int(11) DEFAULT NULL,
+  `event_type` varchar(100) NOT NULL,
+  `event_label` varchar(255) DEFAULT NULL,
+  `event_value` varchar(255) DEFAULT NULL,
+  `occurred_at` datetime NOT NULL,
+  PRIMARY KEY (`event_id`),
+  KEY `analytics_events_ibfk_1` (`site_id`),
+  KEY `analytics_events_ibfk_2` (`page_id`),
+  CONSTRAINT `analytics_events_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `sites` (`site_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `analytics_events_ibfk_2` FOREIGN KEY (`page_id`) REFERENCES `pages` (`page_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `social_links` (
+  `social_link_id` int(11) NOT NULL AUTO_INCREMENT,
+  `site_id` int(11) NOT NULL,
+  `platform` varchar(100) NOT NULL,
+  `profile_url` varchar(500) NOT NULL,
+  `is_enabled` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`social_link_id`),
+  UNIQUE KEY `uk_social_links_site_platform` (`site_id`,`platform`),
+  KEY `social_links_ibfk_1` (`site_id`),
+  CONSTRAINT `social_links_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `sites` (`site_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

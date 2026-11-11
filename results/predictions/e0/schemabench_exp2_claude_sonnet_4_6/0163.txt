@@ -1,0 +1,102 @@
+-- Schema for database: schemabench_0163
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(50) DEFAULT NULL,
+  `zip_code` varchar(20) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `job_title` varchar(100) DEFAULT NULL,
+  `hire_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `facility` (
+  `facility_id` int(11) NOT NULL AUTO_INCREMENT,
+  `facility_name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(50) DEFAULT NULL,
+  `zip_code` varchar(20) DEFAULT NULL,
+  `capacity` int(11) DEFAULT NULL,
+  `manager_name` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`facility_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `event_request` (
+  `request_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `event_name` varchar(255) NOT NULL,
+  `desired_date` datetime NOT NULL,
+  `estimated_cost` decimal(10,2) DEFAULT NULL,
+  `estimated_audience` int(11) DEFAULT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'pending',
+  `notes` text DEFAULT NULL,
+  `submitted_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`request_id`),
+  CONSTRAINT `event_request_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `event_plan` (
+  `plan_id` int(11) NOT NULL AUTO_INCREMENT,
+  `request_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `plan_name` varchar(255) NOT NULL,
+  `start_datetime` datetime DEFAULT NULL,
+  `end_datetime` datetime DEFAULT NULL,
+  `total_cost` decimal(10,2) DEFAULT NULL,
+  `timeline_notes` text DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`plan_id`),
+  CONSTRAINT `event_plan_ibfk_1` FOREIGN KEY (`request_id`) REFERENCES `event_request` (`request_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `event_plan_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resource` (
+  `resource_id` int(11) NOT NULL AUTO_INCREMENT,
+  `resource_name` varchar(255) NOT NULL,
+  `resource_type` varchar(100) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `unit_rate` decimal(10,2) DEFAULT NULL,
+  `available_quantity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`resource_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `plan_resource` (
+  `plan_resource_id` int(11) NOT NULL AUTO_INCREMENT,
+  `plan_id` int(11) NOT NULL,
+  `resource_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `rate` decimal(10,2) DEFAULT NULL,
+  `total_cost` decimal(10,2) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`plan_resource_id`),
+  CONSTRAINT `plan_resource_ibfk_1` FOREIGN KEY (`plan_id`) REFERENCES `event_plan` (`plan_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `plan_resource_ibfk_2` FOREIGN KEY (`resource_id`) REFERENCES `resource` (`resource_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `plan_facility` (
+  `plan_facility_id` int(11) NOT NULL AUTO_INCREMENT,
+  `plan_id` int(11) NOT NULL,
+  `facility_id` int(11) NOT NULL,
+  `assigned_date` datetime DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`plan_facility_id`),
+  CONSTRAINT `plan_facility_ibfk_1` FOREIGN KEY (`plan_id`) REFERENCES `event_plan` (`plan_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `plan_facility_ibfk_2` FOREIGN KEY (`facility_id`) REFERENCES `facility` (`facility_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

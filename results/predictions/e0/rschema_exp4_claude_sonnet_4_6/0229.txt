@@ -1,0 +1,121 @@
+-- Schema for database: rschema_0229
+
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address_line1` varchar(255) DEFAULT NULL,
+  `address_line2` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `registration_date` datetime NOT NULL,
+  `consumption_habits` text DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`customer_id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `category` varchar(100) DEFAULT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `stock_quantity` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_number` varchar(50) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `order_status` varchar(50) NOT NULL DEFAULT 'pending',
+  `total_amount` decimal(10,2) NOT NULL,
+  `shipping_address_line1` varchar(255) DEFAULT NULL,
+  `shipping_address_line2` varchar(255) DEFAULT NULL,
+  `shipping_city` varchar(100) DEFAULT NULL,
+  `shipping_state` varchar(100) DEFAULT NULL,
+  `shipping_postal_code` varchar(20) DEFAULT NULL,
+  `shipping_country` varchar(100) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`order_id`),
+  UNIQUE KEY `order_number` (`order_number`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_items` (
+  `order_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`order_item_id`),
+  CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment_methods` (
+  `payment_method_id` int(11) NOT NULL AUTO_INCREMENT,
+  `method_name` varchar(100) NOT NULL,
+  `method_code` varchar(50) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`payment_method_id`),
+  UNIQUE KEY `method_code` (`method_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payments` (
+  `payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `payment_method_id` int(11) NOT NULL,
+  `payment_status` varchar(50) NOT NULL DEFAULT 'pending',
+  `amount` decimal(10,2) NOT NULL,
+  `transaction_id` varchar(255) DEFAULT NULL,
+  `payment_time` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`payment_id`),
+  CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `payments_ibfk_2` FOREIGN KEY (`payment_method_id`) REFERENCES `payment_methods` (`payment_method_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `logistics` (
+  `logistics_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `carrier` varchar(100) DEFAULT NULL,
+  `tracking_number` varchar(100) DEFAULT NULL,
+  `logistics_status` varchar(50) NOT NULL DEFAULT 'pending',
+  `shipped_at` datetime DEFAULT NULL,
+  `estimated_delivery` datetime DEFAULT NULL,
+  `delivered_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`logistics_id`),
+  CONSTRAINT `logistics_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_interactions` (
+  `interaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `interaction_type` varchar(100) NOT NULL,
+  `channel` varchar(100) DEFAULT NULL,
+  `subject` varchar(255) DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `handled_by` varchar(100) DEFAULT NULL,
+  `interaction_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`interaction_id`),
+  CONSTRAINT `customer_interactions_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

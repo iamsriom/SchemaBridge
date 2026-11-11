@@ -1,0 +1,114 @@
+-- Schema for database: rschema_0505
+CREATE TABLE `roles` (
+  `role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_name` varchar(100) NOT NULL,
+  `role_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`role_id`),
+  UNIQUE KEY `uk_roles_role_name` (`role_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `full_name` varchar(100) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `role_id` int(11) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_username` (`username`),
+  KEY `users_ibfk_1` (`role_id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `students` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_number` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `major` varchar(100) NOT NULL,
+  `grade_level` varchar(50) DEFAULT NULL,
+  `gpa` decimal(4,2) DEFAULT NULL,
+  `enrollment_date` date DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`student_id`),
+  UNIQUE KEY `uk_students_student_number` (`student_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `faculty_staff` (
+  `staff_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_number` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `personal_info` text DEFAULT NULL,
+  `job_title` varchar(100) NOT NULL,
+  `work_history` text DEFAULT NULL,
+  `hire_date` date DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`staff_id`),
+  UNIQUE KEY `uk_faculty_staff_employee_number` (`employee_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `research_projects` (
+  `project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_code` varchar(50) NOT NULL,
+  `project_name` varchar(255) NOT NULL,
+  `principal_investigator` varchar(100) NOT NULL,
+  `funding_amount` decimal(12,2) DEFAULT NULL,
+  `funding_source` varchar(255) DEFAULT NULL,
+  `research_outcomes` text DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`project_id`),
+  UNIQUE KEY `uk_research_projects_project_code` (`project_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permissions` (
+  `permission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `permission_name` varchar(100) NOT NULL,
+  `permission_code` varchar(100) NOT NULL,
+  `permission_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`permission_id`),
+  UNIQUE KEY `uk_permissions_permission_code` (`permission_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role_permissions` (
+  `role_permission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  `granted_at` datetime NOT NULL,
+  PRIMARY KEY (`role_permission_id`),
+  UNIQUE KEY `uk_role_permissions_role_permission` (`role_id`,`permission_id`),
+  KEY `role_permissions_ibfk_2` (`permission_id`),
+  CONSTRAINT `role_permissions_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `role_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`permission_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `operation_logs` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `operation_type` varchar(100) NOT NULL,
+  `target_table` varchar(100) DEFAULT NULL,
+  `target_record_id` int(11) DEFAULT NULL,
+  `operation_detail` text DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`log_id`),
+  KEY `operation_logs_ibfk_1` (`user_id`),
+  CONSTRAINT `operation_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `backup_records` (
+  `backup_id` int(11) NOT NULL AUTO_INCREMENT,
+  `backup_type` varchar(50) NOT NULL,
+  `backup_mode` varchar(50) NOT NULL,
+  `backup_path` varchar(255) NOT NULL,
+  `backup_size_mb` decimal(12,2) DEFAULT NULL,
+  `status` varchar(50) NOT NULL,
+  `started_at` datetime NOT NULL,
+  `completed_at` datetime DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  PRIMARY KEY (`backup_id`),
+  KEY `backup_records_ibfk_1` (`created_by`),
+  CONSTRAINT `backup_records_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

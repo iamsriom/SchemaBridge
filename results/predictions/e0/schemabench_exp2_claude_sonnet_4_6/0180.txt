@@ -1,0 +1,132 @@
+-- Schema for database: schemabench_0180
+
+CREATE TABLE `aircraft` (
+  `aircraft_id` int(11) NOT NULL AUTO_INCREMENT,
+  `registration` varchar(20) NOT NULL,
+  `aircraft_type` varchar(50) DEFAULT NULL,
+  `manufacturer` varchar(100) DEFAULT NULL,
+  `model` varchar(100) DEFAULT NULL,
+  `engine_manufacturer` varchar(100) DEFAULT NULL,
+  `engine_model` varchar(100) DEFAULT NULL,
+  `engine_count` int(11) DEFAULT NULL,
+  `year_of_manufacture` int(11) DEFAULT NULL,
+  `max_takeoff_weight` decimal(10,2) DEFAULT NULL,
+  `seat_capacity` int(11) DEFAULT NULL,
+  `is_grounded` tinyint(1) NOT NULL DEFAULT 0,
+  `grounded_since` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`aircraft_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `airline` (
+  `airline_id` int(11) NOT NULL AUTO_INCREMENT,
+  `iata_code` char(2) DEFAULT NULL,
+  `icao_code` char(3) DEFAULT NULL,
+  `airline_name` varchar(150) NOT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `region` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`airline_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `airport` (
+  `airport_id` int(11) NOT NULL AUTO_INCREMENT,
+  `iata_code` char(3) DEFAULT NULL,
+  `icao_code` char(4) DEFAULT NULL,
+  `airport_name` varchar(200) NOT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `latitude` decimal(9,6) DEFAULT NULL,
+  `longitude` decimal(9,6) DEFAULT NULL,
+  `altitude_ft` int(11) DEFAULT NULL,
+  `timezone` varchar(50) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`airport_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flight` (
+  `flight_id` int(11) NOT NULL AUTO_INCREMENT,
+  `flight_number` varchar(20) DEFAULT NULL,
+  `aircraft_id` int(11) NOT NULL,
+  `airline_id` int(11) NOT NULL,
+  `origin_airport_id` int(11) NOT NULL,
+  `destination_airport_id` int(11) NOT NULL,
+  `scheduled_departure` datetime NOT NULL,
+  `actual_departure` datetime DEFAULT NULL,
+  `scheduled_arrival` datetime NOT NULL,
+  `actual_arrival` datetime DEFAULT NULL,
+  `flight_status` varchar(30) DEFAULT NULL,
+  `flight_phase` varchar(50) DEFAULT NULL,
+  `distance_km` decimal(10,2) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`flight_id`),
+  CONSTRAINT `flight_ibfk_1` FOREIGN KEY (`aircraft_id`) REFERENCES `aircraft` (`aircraft_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_ibfk_2` FOREIGN KEY (`airline_id`) REFERENCES `airline` (`airline_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_ibfk_3` FOREIGN KEY (`origin_airport_id`) REFERENCES `airport` (`airport_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_ibfk_4` FOREIGN KEY (`destination_airport_id`) REFERENCES `airport` (`airport_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flying_hours` (
+  `flying_hours_id` int(11) NOT NULL AUTO_INCREMENT,
+  `flight_id` int(11) NOT NULL,
+  `aircraft_id` int(11) NOT NULL,
+  `engine_manufacturer` varchar(100) DEFAULT NULL,
+  `engine_model` varchar(100) DEFAULT NULL,
+  `block_off_time` datetime DEFAULT NULL,
+  `block_on_time` datetime DEFAULT NULL,
+  `airborne_hours` decimal(8,4) DEFAULT NULL,
+  `block_hours` decimal(8,4) DEFAULT NULL,
+  `report_month` int(11) DEFAULT NULL,
+  `report_year` int(11) DEFAULT NULL,
+  `period_label` varchar(20) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`flying_hours_id`),
+  CONSTRAINT `flying_hours_ibfk_1` FOREIGN KEY (`flight_id`) REFERENCES `flight` (`flight_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flying_hours_ibfk_2` FOREIGN KEY (`aircraft_id`) REFERENCES `aircraft` (`aircraft_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `aircraft_utilization` (
+  `utilization_id` int(11) NOT NULL AUTO_INCREMENT,
+  `aircraft_id` int(11) NOT NULL,
+  `report_month` int(11) NOT NULL,
+  `report_year` int(11) NOT NULL,
+  `total_flights` int(11) DEFAULT NULL,
+  `total_airborne_hours` decimal(10,4) DEFAULT NULL,
+  `total_block_hours` decimal(10,4) DEFAULT NULL,
+  `days_grounded` int(11) DEFAULT NULL,
+  `days_active` int(11) DEFAULT NULL,
+  `utilization_rate` decimal(5,4) DEFAULT NULL,
+  `covid_period` varchar(30) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`utilization_id`),
+  CONSTRAINT `aircraft_utilization_ibfk_1` FOREIGN KEY (`aircraft_id`) REFERENCES `aircraft` (`aircraft_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `engine_usage_report` (
+  `report_id` int(11) NOT NULL AUTO_INCREMENT,
+  `engine_manufacturer` varchar(100) NOT NULL,
+  `engine_model` varchar(100) DEFAULT NULL,
+  `report_month` int(11) NOT NULL,
+  `report_year` int(11) NOT NULL,
+  `total_aircraft_count` int(11) DEFAULT NULL,
+  `active_aircraft_count` int(11) DEFAULT NULL,
+  `grounded_aircraft_count` int(11) DEFAULT NULL,
+  `total_flights` int(11) DEFAULT NULL,
+  `total_airborne_hours` decimal(12,4) DEFAULT NULL,
+  `total_block_hours` decimal(12,4) DEFAULT NULL,
+  `avg_daily_utilization_hours` decimal(8,4) DEFAULT NULL,
+  `covid_period` varchar(30) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`report_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `covid_period` (
+  `period_id` int(11) NOT NULL AUTO_INCREMENT,
+  `period_label` varchar(50) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`period_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

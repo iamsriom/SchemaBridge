@@ -1,0 +1,74 @@
+-- Schema for database: rschema_0150
+CREATE TABLE `supplier` (
+  `supplier_id` int(11) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`supplier_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `warehouse` (
+  `warehouse_id` int(11) NOT NULL,
+  `area` varchar(255) DEFAULT NULL,
+  `person_in_charge` varchar(100) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`warehouse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `job_title` varchar(100) DEFAULT NULL,
+  `work_location` int(11) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  KEY `employee_ibfk_1` (`work_location`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`work_location`) REFERENCES `warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project` (
+  `project_id` int(11) NOT NULL,
+  `budget` decimal(12,2) DEFAULT NULL,
+  `start_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `part` (
+  `part_id` int(11) NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `specification` varchar(255) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `unit_price` decimal(12,2) DEFAULT NULL,
+  PRIMARY KEY (`part_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `warehouse_inventory_part` (
+  `warehouse_id` int(11) NOT NULL,
+  `part_id` int(11) NOT NULL,
+  `inventory_quantity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`warehouse_id`,`part_id`),
+  KEY `warehouse_inventory_part_ibfk_2` (`part_id`),
+  CONSTRAINT `warehouse_inventory_part_ibfk_1` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `warehouse_inventory_part_ibfk_2` FOREIGN KEY (`part_id`) REFERENCES `part` (`part_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_requires_part` (
+  `project_id` int(11) NOT NULL,
+  `part_id` int(11) NOT NULL,
+  `required_quantity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`project_id`,`part_id`),
+  KEY `project_requires_part_ibfk_2` (`part_id`),
+  CONSTRAINT `project_requires_part_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_requires_part_ibfk_2` FOREIGN KEY (`part_id`) REFERENCES `part` (`part_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supplier_supplies_project` (
+  `supplier_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `supply_quantity` int(11) DEFAULT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`supplier_id`,`project_id`),
+  KEY `supplier_supplies_project_ibfk_2` (`project_id`),
+  CONSTRAINT `supplier_supplies_project_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `supplier_supplies_project_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

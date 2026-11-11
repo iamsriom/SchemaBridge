@@ -1,0 +1,84 @@
+-- Schema for database: rschema_0223
+
+CREATE TABLE `role_type` (
+  `role_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_name` varchar(100) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `positioning` varchar(255) DEFAULT NULL,
+  `characteristics` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`role_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role` (
+  `role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_type_id` int(11) NOT NULL,
+  `role_name` varchar(100) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`role_id`),
+  CONSTRAINT `role_ibfk_1` FOREIGN KEY (`role_type_id`) REFERENCES `role_type` (`role_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ability` (
+  `ability_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ability_name` varchar(100) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `ability_type` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ability_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permission` (
+  `permission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `permission_name` varchar(100) NOT NULL,
+  `action` varchar(255) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`permission_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role_ability` (
+  `role_ability_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_id` int(11) NOT NULL,
+  `ability_id` int(11) NOT NULL,
+  `assigned_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`role_ability_id`),
+  CONSTRAINT `role_ability_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `role_ability_ibfk_2` FOREIGN KEY (`ability_id`) REFERENCES `ability` (`ability_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role_permission` (
+  `role_permission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  `assigned_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`role_permission_id`),
+  CONSTRAINT `role_permission_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `role_permission_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permission` (`permission_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `creature` (
+  `creature_id` int(11) NOT NULL AUTO_INCREMENT,
+  `creature_name` varchar(100) NOT NULL,
+  `creature_type` varchar(50) NOT NULL COMMENT 'player_character or npc',
+  `level` int(11) DEFAULT 1,
+  `description` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`creature_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `creature_role` (
+  `creature_role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `creature_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `assigned_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `expires_at` datetime DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`creature_role_id`),
+  CONSTRAINT `creature_role_ibfk_1` FOREIGN KEY (`creature_id`) REFERENCES `creature` (`creature_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `creature_role_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

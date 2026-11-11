@@ -1,0 +1,78 @@
+-- Schema for database: rschema_0263
+CREATE TABLE `students` (
+  `student_id` int(11) NOT NULL,
+  `student_name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `lecturers` (
+  `lecturer_id` int(11) NOT NULL,
+  `lecturer_name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`lecturer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teaching_staff` (
+  `staff_id` int(11) NOT NULL,
+  `staff_name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`staff_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `homework_submissions` (
+  `submission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `lecturer_id` int(11) NOT NULL,
+  `submitted_at` datetime NOT NULL,
+  `homework_file` varchar(255) NOT NULL,
+  `submission_status` varchar(50) NOT NULL,
+  `student_notification_sent` tinyint(1) NOT NULL DEFAULT '0',
+  `lecturer_notification_sent` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`submission_id`),
+  KEY `homework_submissions_ibfk_1` (`student_id`),
+  KEY `homework_submissions_ibfk_2` (`lecturer_id`),
+  CONSTRAINT `homework_submissions_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `homework_submissions_ibfk_2` FOREIGN KEY (`lecturer_id`) REFERENCES `lecturers` (`lecturer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `graded_homeworks` (
+  `graded_homework_id` int(11) NOT NULL AUTO_INCREMENT,
+  `submission_id` int(11) NOT NULL,
+  `lecturer_id` int(11) NOT NULL,
+  `graded_at` datetime NOT NULL,
+  `graded_homework_file` varchar(255) NOT NULL,
+  `overall_evaluation` text DEFAULT NULL,
+  `student_recorded` tinyint(1) NOT NULL DEFAULT '0',
+  `student_notified` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`graded_homework_id`),
+  KEY `graded_homeworks_ibfk_1` (`submission_id`),
+  KEY `graded_homeworks_ibfk_2` (`lecturer_id`),
+  CONSTRAINT `graded_homeworks_ibfk_1` FOREIGN KEY (`submission_id`) REFERENCES `homework_submissions` (`submission_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `graded_homeworks_ibfk_2` FOREIGN KEY (`lecturer_id`) REFERENCES `lecturers` (`lecturer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `homework_scores` (
+  `score_id` int(11) NOT NULL AUTO_INCREMENT,
+  `graded_homework_id` int(11) NOT NULL,
+  `question_no` int(11) NOT NULL,
+  `score` decimal(5,2) NOT NULL,
+  `evaluation` text DEFAULT NULL,
+  PRIMARY KEY (`score_id`),
+  KEY `homework_scores_ibfk_1` (`graded_homework_id`),
+  CONSTRAINT `homework_scores_ibfk_1` FOREIGN KEY (`graded_homework_id`) REFERENCES `graded_homeworks` (`graded_homework_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `random_inspections` (
+  `inspection_id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_id` int(11) NOT NULL,
+  `graded_homework_id` int(11) NOT NULL,
+  `inspected_at` datetime NOT NULL,
+  `inspection_opinion` text NOT NULL,
+  `report_to_lecturer` text DEFAULT NULL,
+  PRIMARY KEY (`inspection_id`),
+  KEY `random_inspections_ibfk_1` (`staff_id`),
+  KEY `random_inspections_ibfk_2` (`graded_homework_id`),
+  CONSTRAINT `random_inspections_ibfk_1` FOREIGN KEY (`staff_id`) REFERENCES `teaching_staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `random_inspections_ibfk_2` FOREIGN KEY (`graded_homework_id`) REFERENCES `graded_homeworks` (`graded_homework_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

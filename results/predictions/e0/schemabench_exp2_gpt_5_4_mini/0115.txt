@@ -1,0 +1,59 @@
+-- Schema for database: schemabench_0115
+CREATE TABLE `legalact` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `court_name` varchar(255) NOT NULL,
+  `case_number` varchar(100) NOT NULL,
+  `decision_date` date DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `summary` text DEFAULT NULL,
+  `source_url` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `person` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(255) NOT NULL,
+  `role` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `legalact_link` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `legalact_id` int(11) NOT NULL,
+  `linked_legalact_id` int(11) NOT NULL,
+  `link_type` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `legalact_id` (`legalact_id`),
+  KEY `linked_legalact_id` (`linked_legalact_id`),
+  CONSTRAINT `legalact_link_ibfk_1` FOREIGN KEY (`legalact_id`) REFERENCES `legalact` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `legalact_link_ibfk_2` FOREIGN KEY (`linked_legalact_id`) REFERENCES `legalact` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `legalact_people` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `legalact_id` int(11) NOT NULL,
+  `person_id` int(11) NOT NULL,
+  `relationship_type` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `legalact_id` (`legalact_id`),
+  KEY `person_id` (`person_id`),
+  CONSTRAINT `legalact_people_ibfk_1` FOREIGN KEY (`legalact_id`) REFERENCES `legalact` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `legalact_people_ibfk_2` FOREIGN KEY (`person_id`) REFERENCES `person` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `scrapefix` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `legalact_id` int(11) NOT NULL,
+  `contributor_name` varchar(255) NOT NULL,
+  `fix_description` text NOT NULL,
+  `fixed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `legalact_id` (`legalact_id`),
+  CONSTRAINT `scrapefix_ibfk_1` FOREIGN KEY (`legalact_id`) REFERENCES `legalact` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

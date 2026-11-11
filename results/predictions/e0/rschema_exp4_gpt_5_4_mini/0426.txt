@@ -1,0 +1,74 @@
+-- Schema for database: rschema_0426
+CREATE TABLE `user_account` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_number` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `nickname` varchar(100) DEFAULT NULL,
+  `bio` varchar(500) DEFAULT NULL,
+  `wechat_openid` varchar(100) DEFAULT NULL,
+  `wechat_unionid` varchar(100) DEFAULT NULL,
+  `avatar_url` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_user_account_number` (`account_number`),
+  UNIQUE KEY `uk_user_wechat_openid` (`wechat_openid`),
+  UNIQUE KEY `uk_user_wechat_unionid` (`wechat_unionid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attraction` (
+  `attraction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `attraction_name` varchar(255) NOT NULL,
+  `picture_url` varchar(255) DEFAULT NULL,
+  `reference_price` decimal(10,2) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`attraction_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_bookmark` (
+  `bookmark_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `attraction_id` int(11) NOT NULL,
+  `bookmarked_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`bookmark_id`),
+  UNIQUE KEY `uk_user_bookmark` (`user_id`,`attraction_id`),
+  KEY `user_bookmark_ibfk_2` (`attraction_id`),
+  CONSTRAINT `user_bookmark_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_account` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_bookmark_ibfk_2` FOREIGN KEY (`attraction_id`) REFERENCES `attraction` (`attraction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reservation` (
+  `reservation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `attraction_id` int(11) NOT NULL,
+  `reservation_time` datetime NOT NULL,
+  `ticket_purchase_time` datetime DEFAULT NULL,
+  `ticket_count` int(11) NOT NULL DEFAULT 1,
+  `reservation_status` varchar(50) DEFAULT NULL,
+  `remark` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`reservation_id`),
+  KEY `reservation_ibfk_1` (`user_id`),
+  KEY `reservation_ibfk_2` (`attraction_id`),
+  CONSTRAINT `reservation_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_account` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reservation_ibfk_2` FOREIGN KEY (`attraction_id`) REFERENCES `attraction` (`attraction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attraction_comment` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `attraction_id` int(11) NOT NULL,
+  `comment_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `comment_content` varchar(1000) NOT NULL,
+  `comment_status` varchar(20) NOT NULL DEFAULT 'pending',
+  `reviewed_at` datetime DEFAULT NULL,
+  `review_note` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`comment_id`),
+  KEY `attraction_comment_ibfk_1` (`user_id`),
+  KEY `attraction_comment_ibfk_2` (`attraction_id`),
+  CONSTRAINT `attraction_comment_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_account` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `attraction_comment_ibfk_2` FOREIGN KEY (`attraction_id`) REFERENCES `attraction` (`attraction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,64 @@
+-- Schema for database: rschema_0070
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone_number` varchar(50) DEFAULT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `mine` (
+  `mine_id` int(11) NOT NULL AUTO_INCREMENT,
+  `mine_name` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `person_in_charge_id` int(11) NOT NULL,
+  PRIMARY KEY (`mine_id`),
+  KEY `person_in_charge_id` (`person_in_charge_id`),
+  CONSTRAINT `mine_ibfk_1` FOREIGN KEY (`person_in_charge_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ore` (
+  `ore_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ore_name` varchar(255) NOT NULL,
+  `characteristics` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ore_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `processing_plant` (
+  `processing_plant_id` int(11) NOT NULL AUTO_INCREMENT,
+  `processing_plant_name` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `person_in_charge_id` int(11) NOT NULL,
+  PRIMARY KEY (`processing_plant_id`),
+  KEY `person_in_charge_id` (`person_in_charge_id`),
+  CONSTRAINT `processing_plant_ibfk_1` FOREIGN KEY (`person_in_charge_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ore_output` (
+  `ore_output_id` int(11) NOT NULL AUTO_INCREMENT,
+  `mine_id` int(11) NOT NULL,
+  `ore_id` int(11) NOT NULL,
+  `output_time` datetime NOT NULL,
+  `output_quantity` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`ore_output_id`),
+  KEY `mine_id` (`mine_id`),
+  KEY `ore_id` (`ore_id`),
+  CONSTRAINT `ore_output_ibfk_1` FOREIGN KEY (`mine_id`) REFERENCES `mine` (`mine_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ore_output_ibfk_2` FOREIGN KEY (`ore_id`) REFERENCES `ore` (`ore_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ore_processing` (
+  `ore_processing_id` int(11) NOT NULL AUTO_INCREMENT,
+  `processing_plant_id` int(11) NOT NULL,
+  `ore_id` int(11) NOT NULL,
+  `processing_date` datetime NOT NULL,
+  `processing_quantity` decimal(10,2) NOT NULL,
+  `processing_cost` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`ore_processing_id`),
+  KEY `processing_plant_id` (`processing_plant_id`),
+  KEY `ore_id` (`ore_id`),
+  CONSTRAINT `ore_processing_ibfk_1` FOREIGN KEY (`processing_plant_id`) REFERENCES `processing_plant` (`processing_plant_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ore_processing_ibfk_2` FOREIGN KEY (`ore_id`) REFERENCES `ore` (`ore_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

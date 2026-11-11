@@ -1,0 +1,70 @@
+-- Schema for database: rschema_0247
+
+CREATE TABLE `class` (
+  `class_id` int(11) NOT NULL AUTO_INCREMENT,
+  `class_name` varchar(100) NOT NULL,
+  `major` varchar(100) NOT NULL,
+  `grade` varchar(20) NOT NULL,
+  PRIMARY KEY (`class_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `student_number` varchar(50) DEFAULT NULL,
+  `teacher_id` varchar(50) DEFAULT NULL,
+  `role` varchar(20) NOT NULL,
+  `register_time` datetime NOT NULL,
+  `last_login_time` datetime DEFAULT NULL,
+  `class_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `student_number` (`student_number`),
+  UNIQUE KEY `teacher_id` (`teacher_id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course` (
+  `course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `teacher_user_id` int(11) NOT NULL,
+  PRIMARY KEY (`course_id`),
+  CONSTRAINT `course_ibfk_1` FOREIGN KEY (`teacher_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sign_in_control` (
+  `flag_id` int(11) NOT NULL AUTO_INCREMENT,
+  `teacher_user_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`flag_id`),
+  CONSTRAINT `sign_in_control_ibfk_1` FOREIGN KEY (`teacher_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sign_in_control_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sign_in_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_user_id` int(11) NOT NULL,
+  `flag_id` int(11) NOT NULL,
+  `sign_in_time` datetime NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'present',
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `sign_in_record_ibfk_1` FOREIGN KEY (`student_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sign_in_record_ibfk_2` FOREIGN KEY (`flag_id`) REFERENCES `sign_in_control` (`flag_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attendance_statistics` (
+  `stat_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_user_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `total_sign_in_count` int(11) NOT NULL DEFAULT 0,
+  `performance_score` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`stat_id`),
+  UNIQUE KEY `student_course_unique` (`student_user_id`, `course_id`),
+  CONSTRAINT `attendance_statistics_ibfk_1` FOREIGN KEY (`student_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `attendance_statistics_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,92 @@
+-- Schema for database: rschema_0244
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_number` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `user_type` varchar(20) NOT NULL DEFAULT 'general',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_account_number` (`account_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bus_routes` (
+  `route_id` int(11) NOT NULL AUTO_INCREMENT,
+  `route_name` varchar(100) NOT NULL,
+  `route_code` varchar(50) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'active',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`route_id`),
+  UNIQUE KEY `uk_bus_routes_route_name` (`route_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stations` (
+  `station_id` int(11) NOT NULL AUTO_INCREMENT,
+  `station_name` varchar(100) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`station_id`),
+  UNIQUE KEY `uk_stations_station_name` (`station_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `route_stations` (
+  `route_station_id` int(11) NOT NULL AUTO_INCREMENT,
+  `route_id` int(11) NOT NULL,
+  `station_id` int(11) NOT NULL,
+  `stop_order` int(11) NOT NULL,
+  `direction` varchar(20) DEFAULT NULL,
+  `arrival_time` varchar(20) DEFAULT NULL,
+  `departure_time` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`route_station_id`),
+  KEY `idx_route_stations_route_id` (`route_id`),
+  KEY `idx_route_stations_station_id` (`station_id`),
+  CONSTRAINT `route_stations_ibfk_1` FOREIGN KEY (`route_id`) REFERENCES `bus_routes` (`route_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `route_stations_ibfk_2` FOREIGN KEY (`station_id`) REFERENCES `stations` (`station_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `announcements` (
+  `announcement_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(200) NOT NULL,
+  `content` text NOT NULL,
+  `announcement_type` varchar(50) DEFAULT NULL,
+  `published_by` int(11) NOT NULL,
+  `published_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`announcement_id`),
+  KEY `idx_announcements_published_by` (`published_by`),
+  CONSTRAINT `announcements_ibfk_1` FOREIGN KEY (`published_by`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `questions` (
+  `question_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `route_id` int(11) DEFAULT NULL,
+  `title` varchar(200) NOT NULL,
+  `content` text NOT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'open',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`question_id`),
+  KEY `idx_questions_user_id` (`user_id`),
+  KEY `idx_questions_route_id` (`route_id`),
+  CONSTRAINT `questions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `questions_ibfk_2` FOREIGN KEY (`route_id`) REFERENCES `bus_routes` (`route_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `answers` (
+  `answer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `question_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`answer_id`),
+  KEY `idx_answers_question_id` (`question_id`),
+  KEY `idx_answers_user_id` (`user_id`),
+  CONSTRAINT `answers_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `questions` (`question_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `answers_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

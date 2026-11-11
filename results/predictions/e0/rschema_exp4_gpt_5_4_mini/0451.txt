@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0451
+CREATE TABLE `intrusion_detection_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `detection_time` datetime NOT NULL,
+  `source_ip` varchar(45) NOT NULL,
+  `destination_ip` varchar(45) NOT NULL,
+  `source_port` int(11) NOT NULL,
+  `destination_port` int(11) NOT NULL,
+  `attack_type` varchar(100) NOT NULL,
+  `threat_level` varchar(50) NOT NULL,
+  PRIMARY KEY (`record_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `response_plan` (
+  `plan_id` int(11) NOT NULL AUTO_INCREMENT,
+  `plan_generation_time` datetime NOT NULL,
+  `plan_type` varchar(50) NOT NULL,
+  `plan_content` text NOT NULL,
+  `execution_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`plan_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `knowledge_base_entry` (
+  `knowledge_id` int(11) NOT NULL AUTO_INCREMENT,
+  `knowledge_category` varchar(100) NOT NULL,
+  `knowledge_description` text NOT NULL,
+  `knowledge_source` varchar(255) NOT NULL,
+  `knowledge_reliability` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`knowledge_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alarm_info` (
+  `alarm_id` int(11) NOT NULL AUTO_INCREMENT,
+  `alarm_time` datetime NOT NULL,
+  `alarm_level` varchar(50) NOT NULL,
+  `alarm_content` text NOT NULL,
+  `processing_status` varchar(50) NOT NULL,
+  `record_id` int(11) NOT NULL,
+  PRIMARY KEY (`alarm_id`),
+  KEY `alarm_info_ibfk_1` (`record_id`),
+  CONSTRAINT `alarm_info_ibfk_1` FOREIGN KEY (`record_id`) REFERENCES `intrusion_detection_record` (`record_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `security_model` (
+  `model_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_name` varchar(100) NOT NULL,
+  `model_type` varchar(100) NOT NULL,
+  `model_description` text DEFAULT NULL,
+  `training_time` datetime DEFAULT NULL,
+  `model_accuracy` decimal(5,2) DEFAULT NULL,
+  `model_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

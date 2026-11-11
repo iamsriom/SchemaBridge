@@ -1,0 +1,144 @@
+-- Schema for database: schemabench_0162
+
+CREATE TABLE `regions` (
+  `region_id` int(11) NOT NULL AUTO_INCREMENT,
+  `region_name` varchar(100) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`region_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `countries` (
+  `country_id` int(11) NOT NULL AUTO_INCREMENT,
+  `country_name` varchar(100) NOT NULL,
+  `country_code` char(3) NOT NULL,
+  `region_id` int(11) NOT NULL,
+  PRIMARY KEY (`country_id`),
+  CONSTRAINT `countries_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `regions` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `markets` (
+  `market_id` int(11) NOT NULL AUTO_INCREMENT,
+  `market_name` varchar(100) NOT NULL,
+  `country_id` int(11) NOT NULL,
+  `currency_code` char(6) DEFAULT NULL,
+  PRIMARY KEY (`market_id`),
+  CONSTRAINT `markets_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `countries` (`country_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `categories` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(100) NOT NULL,
+  `category_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sub_categories` (
+  `sub_category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sub_category_name` varchar(100) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  PRIMARY KEY (`sub_category_id`),
+  CONSTRAINT `sub_categories_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(255) NOT NULL,
+  `product_code` varchar(50) NOT NULL,
+  `sub_category_id` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `unit_cost` decimal(10,2) NOT NULL,
+  `stock_quantity` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`product_id`),
+  CONSTRAINT `products_ibfk_1` FOREIGN KEY (`sub_category_id`) REFERENCES `sub_categories` (`sub_category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_segments` (
+  `segment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `segment_name` varchar(100) NOT NULL,
+  `segment_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`segment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(150) NOT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `phone` varchar(30) DEFAULT NULL,
+  `segment_id` int(11) NOT NULL,
+  `market_id` int(11) NOT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`customer_id`),
+  CONSTRAINT `customers_ibfk_1` FOREIGN KEY (`segment_id`) REFERENCES `customer_segments` (`segment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customers_ibfk_2` FOREIGN KEY (`market_id`) REFERENCES `markets` (`market_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shipping_modes` (
+  `shipping_mode_id` int(11) NOT NULL AUTO_INCREMENT,
+  `mode_name` varchar(100) NOT NULL,
+  `estimated_days` int(11) DEFAULT NULL,
+  PRIMARY KEY (`shipping_mode_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_reference` varchar(50) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `market_id` int(11) NOT NULL,
+  `shipping_mode_id` int(11) NOT NULL,
+  `order_date` datetime NOT NULL,
+  `ship_date` datetime DEFAULT NULL,
+  `order_status` varchar(50) DEFAULT NULL,
+  `total_amount` decimal(12,2) DEFAULT NULL,
+  `total_discount` decimal(12,2) DEFAULT NULL,
+  `total_profit` decimal(12,2) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`market_id`) REFERENCES `markets` (`market_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_3` FOREIGN KEY (`shipping_mode_id`) REFERENCES `shipping_modes` (`shipping_mode_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_items` (
+  `order_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `discount` decimal(5,4) DEFAULT NULL,
+  `sales_amount` decimal(12,2) NOT NULL,
+  `profit` decimal(12,2) DEFAULT NULL,
+  PRIMARY KEY (`order_item_id`),
+  CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_forecasts` (
+  `forecast_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `market_id` int(11) NOT NULL,
+  `forecast_date` datetime NOT NULL,
+  `forecasted_sales` decimal(12,2) NOT NULL,
+  `actual_sales` decimal(12,2) DEFAULT NULL,
+  `model_version` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`forecast_id`),
+  CONSTRAINT `sales_forecasts_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_forecasts_ibfk_2` FOREIGN KEY (`market_id`) REFERENCES `markets` (`market_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `analytics_reports` (
+  `report_id` int(11) NOT NULL AUTO_INCREMENT,
+  `report_name` varchar(150) NOT NULL,
+  `report_type` varchar(100) DEFAULT NULL,
+  `generated_by` varchar(100) DEFAULT NULL,
+  `report_date` datetime NOT NULL,
+  `parameters` varchar(255) DEFAULT NULL,
+  `output_format` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`report_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0167
+CREATE TABLE `region` (
+  `region_id` int(11) NOT NULL AUTO_INCREMENT,
+  `region_name` varchar(255) NOT NULL,
+  `administrative_division` varchar(255) NOT NULL,
+  `latitude` decimal(10,6) DEFAULT NULL,
+  `longitude` decimal(10,6) DEFAULT NULL,
+  `area` decimal(12,2) DEFAULT NULL,
+  `disaster_risk_level` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`region_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(255) NOT NULL,
+  `person_in_charge` varchar(255) DEFAULT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  `functional_scope` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `role` varchar(100) NOT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  `permission_level` varchar(50) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  KEY `user_ibfk_1` (`department_id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `department_region` (
+  `department_id` int(11) NOT NULL,
+  `region_id` int(11) NOT NULL,
+  PRIMARY KEY (`department_id`,`region_id`),
+  KEY `department_region_ibfk_2` (`region_id`),
+  CONSTRAINT `department_region_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `department_region_ibfk_2` FOREIGN KEY (`region_id`) REFERENCES `region` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `natural_disaster_data` (
+  `data_id` int(11) NOT NULL AUTO_INCREMENT,
+  `region_id` int(11) NOT NULL,
+  `data_type` varchar(100) NOT NULL,
+  `data_source` varchar(255) DEFAULT NULL,
+  `upload_time` datetime DEFAULT NULL,
+  `data_content` text DEFAULT NULL,
+  `data_format` varchar(50) DEFAULT NULL,
+  `layer_type` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`data_id`),
+  KEY `natural_disaster_data_ibfk_1` (`region_id`),
+  CONSTRAINT `natural_disaster_data_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

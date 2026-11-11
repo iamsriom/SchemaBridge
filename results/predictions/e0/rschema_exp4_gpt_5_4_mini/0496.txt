@@ -1,0 +1,91 @@
+-- Schema for database: rschema_0496
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `avatar_url` varchar(255) DEFAULT NULL,
+  `nickname` varchar(100) DEFAULT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `bio` text DEFAULT NULL,
+  `real_name` varchar(100) DEFAULT NULL,
+  `id_card_number` varchar(30) DEFAULT NULL,
+  `id_card_front_url` varchar(255) DEFAULT NULL,
+  `id_card_back_url` varchar(255) DEFAULT NULL,
+  `face_recognition_status` varchar(20) DEFAULT NULL,
+  `phone_bound` tinyint(1) NOT NULL DEFAULT 0,
+  `email_bound` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_phone_number` (`phone_number`),
+  UNIQUE KEY `uk_users_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_categories` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent_id` int(11) DEFAULT NULL,
+  `category_name` varchar(100) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`category_id`),
+  KEY `idx_product_categories_parent_id` (`parent_id`),
+  CONSTRAINT `product_categories_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `product_categories` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `seller_user_id` int(11) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `condition_description` varchar(255) DEFAULT NULL,
+  `original_price` decimal(10,2) DEFAULT NULL,
+  `selling_price` decimal(10,2) NOT NULL,
+  `negotiation_min_price` decimal(10,2) DEFAULT NULL,
+  `negotiation_max_price` decimal(10,2) DEFAULT NULL,
+  `transaction_location` varchar(255) DEFAULT NULL,
+  `valid_until` datetime DEFAULT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'pending_review',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`product_id`),
+  KEY `idx_products_seller_user_id` (`seller_user_id`),
+  KEY `idx_products_category_id` (`category_id`),
+  CONSTRAINT `products_ibfk_1` FOREIGN KEY (`seller_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `products_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `product_categories` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_images` (
+  `image_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `image_url` varchar(255) NOT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`image_id`),
+  KEY `idx_product_images_product_id` (`product_id`),
+  CONSTRAINT `product_images_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transactions` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `buyer_user_id` int(11) NOT NULL,
+  `seller_user_id` int(11) NOT NULL,
+  `transaction_status` varchar(20) NOT NULL,
+  `transaction_time` datetime DEFAULT NULL,
+  `transaction_amount` decimal(10,2) NOT NULL,
+  `transaction_location` varchar(255) DEFAULT NULL,
+  `transaction_method` varchar(50) DEFAULT NULL,
+  `evaluation` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  KEY `idx_transactions_product_id` (`product_id`),
+  KEY `idx_transactions_buyer_user_id` (`buyer_user_id`),
+  KEY `idx_transactions_seller_user_id` (`seller_user_id`),
+  CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`buyer_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactions_ibfk_3` FOREIGN KEY (`seller_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

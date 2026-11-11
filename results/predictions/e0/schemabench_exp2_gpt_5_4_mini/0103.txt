@@ -1,0 +1,89 @@
+-- Schema for database: schemabench_0103
+CREATE TABLE `region` (
+  `region_id` int(11) NOT NULL AUTO_INCREMENT,
+  `region_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`region_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `corporation` (
+  `corporation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `corporation_name` varchar(255) NOT NULL,
+  `region_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`corporation_id`),
+  KEY `corporation_ibfk_1` (`region_id`),
+  CONSTRAINT `corporation_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `member` (
+  `member_id` int(11) NOT NULL AUTO_INCREMENT,
+  `member_name` varchar(255) NOT NULL,
+  `corporation_id` int(11) DEFAULT NULL,
+  `region_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`member_id`),
+  KEY `member_ibfk_1` (`corporation_id`),
+  KEY `member_ibfk_2` (`region_id`),
+  CONSTRAINT `member_ibfk_1` FOREIGN KEY (`corporation_id`) REFERENCES `corporation` (`corporation_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `member_ibfk_2` FOREIGN KEY (`region_id`) REFERENCES `region` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `provider` (
+  `provider_id` int(11) NOT NULL AUTO_INCREMENT,
+  `provider_name` varchar(255) NOT NULL,
+  `region_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`provider_id`),
+  KEY `provider_ibfk_1` (`region_id`),
+  CONSTRAINT `provider_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `category` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `statement` (
+  `statement_id` int(11) NOT NULL AUTO_INCREMENT,
+  `member_id` int(11) NOT NULL,
+  `statement_date` datetime NOT NULL,
+  `statement_total` decimal(10,2) NOT NULL DEFAULT '0.00',
+  PRIMARY KEY (`statement_id`),
+  KEY `statement_ibfk_1` (`member_id`),
+  CONSTRAINT `statement_ibfk_1` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `charge` (
+  `charge_id` int(11) NOT NULL AUTO_INCREMENT,
+  `statement_id` int(11) NOT NULL,
+  `member_id` int(11) NOT NULL,
+  `provider_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `charge_date` datetime NOT NULL,
+  `charge_amount` decimal(10,2) NOT NULL,
+  `charge_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`charge_id`),
+  KEY `charge_ibfk_1` (`statement_id`),
+  KEY `charge_ibfk_2` (`member_id`),
+  KEY `charge_ibfk_3` (`provider_id`),
+  KEY `charge_ibfk_4` (`category_id`),
+  CONSTRAINT `charge_ibfk_1` FOREIGN KEY (`statement_id`) REFERENCES `statement` (`statement_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `charge_ibfk_2` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `charge_ibfk_3` FOREIGN KEY (`provider_id`) REFERENCES `provider` (`provider_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `charge_ibfk_4` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment` (
+  `payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `statement_id` int(11) NOT NULL,
+  `member_id` int(11) NOT NULL,
+  `provider_id` int(11) DEFAULT NULL,
+  `payment_date` datetime NOT NULL,
+  `payment_amount` decimal(10,2) NOT NULL,
+  `payment_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`payment_id`),
+  KEY `payment_ibfk_1` (`statement_id`),
+  KEY `payment_ibfk_2` (`member_id`),
+  KEY `payment_ibfk_3` (`provider_id`),
+  CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`statement_id`) REFERENCES `statement` (`statement_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `payment_ibfk_2` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `payment_ibfk_3` FOREIGN KEY (`provider_id`) REFERENCES `provider` (`provider_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

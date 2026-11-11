@@ -1,0 +1,106 @@
+-- Schema for database: schemabench_0208
+CREATE TABLE `organizers` (
+  `organizer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `organizer_name` varchar(255) NOT NULL,
+  `contact_email` varchar(255) NOT NULL,
+  `contact_phone` varchar(50) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`organizer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `venues` (
+  `venue_id` int(11) NOT NULL AUTO_INCREMENT,
+  `venue_name` varchar(255) NOT NULL,
+  `address` varchar(500) NOT NULL,
+  `capacity` int(11) NOT NULL,
+  `facility_details` text DEFAULT NULL,
+  PRIMARY KEY (`venue_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `categories` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`category_id`),
+  UNIQUE KEY `uk_categories_category_name` (`category_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `events` (
+  `event_id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_name` varchar(255) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  `venue_id` int(11) NOT NULL,
+  `organizer_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`event_id`),
+  KEY `events_ibfk_1` (`venue_id`),
+  KEY `events_ibfk_2` (`organizer_id`),
+  KEY `events_ibfk_3` (`category_id`),
+  CONSTRAINT `events_ibfk_1` FOREIGN KEY (`venue_id`) REFERENCES `venues` (`venue_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `events_ibfk_2` FOREIGN KEY (`organizer_id`) REFERENCES `organizers` (`organizer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `events_ibfk_3` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `participants` (
+  `participant_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`participant_id`),
+  UNIQUE KEY `uk_participants_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `event_participants` (
+  `event_participant_id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_id` int(11) NOT NULL,
+  `participant_id` int(11) NOT NULL,
+  `attendance_status` varchar(50) NOT NULL,
+  `registered_at` datetime NOT NULL,
+  PRIMARY KEY (`event_participant_id`),
+  KEY `event_participants_ibfk_1` (`event_id`),
+  KEY `event_participants_ibfk_2` (`participant_id`),
+  CONSTRAINT `event_participants_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `event_participants_ibfk_2` FOREIGN KEY (`participant_id`) REFERENCES `participants` (`participant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `speakers` (
+  `speaker_id` int(11) NOT NULL AUTO_INCREMENT,
+  `participant_id` int(11) NOT NULL,
+  `speaker_bio` text DEFAULT NULL,
+  `expertise_area` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`speaker_id`),
+  UNIQUE KEY `uk_speakers_participant_id` (`participant_id`),
+  CONSTRAINT `speakers_ibfk_1` FOREIGN KEY (`participant_id`) REFERENCES `participants` (`participant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `event_speakers` (
+  `event_speaker_id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_id` int(11) NOT NULL,
+  `speaker_id` int(11) NOT NULL,
+  `presentation_title` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`event_speaker_id`),
+  KEY `event_speakers_ibfk_1` (`event_id`),
+  KEY `event_speakers_ibfk_2` (`speaker_id`),
+  CONSTRAINT `event_speakers_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `event_speakers_ibfk_2` FOREIGN KEY (`speaker_id`) REFERENCES `speakers` (`speaker_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `feedback` (
+  `feedback_id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_id` int(11) NOT NULL,
+  `participant_id` int(11) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `rating` int(11) NOT NULL,
+  `comments` text DEFAULT NULL,
+  `feedback_date` datetime NOT NULL,
+  PRIMARY KEY (`feedback_id`),
+  KEY `feedback_ibfk_1` (`event_id`),
+  KEY `feedback_ibfk_2` (`participant_id`),
+  KEY `feedback_ibfk_3` (`category_id`),
+  CONSTRAINT `feedback_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `feedback_ibfk_2` FOREIGN KEY (`participant_id`) REFERENCES `participants` (`participant_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `feedback_ibfk_3` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

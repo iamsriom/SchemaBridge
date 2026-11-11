@@ -1,0 +1,28 @@
+{
+  "text_number": 454,
+  "id": "67552f0b13602ec03b41aa94",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0454",
+  "question": "The business requirements for the product distribution system are described as follows: The system records information about multiple chain supermarkets, including supermarket name, supermarket address, and supermarket contact information. The product distribution center receives supply requests from multiple chain supermarkets, with each supply request including the requesting chain supermarket, product number, and quantity. The distribution center manages the basic information of each product, including product name, product price, and inventory quantity. When the inventory meets the supply request, a distribution order is generated, recording the distribution order number, supply request number, distribution date, and distribution status. When the inventory is insufficient, a purchase order is generated, recording the purchase order number, product number, quantity, price, purchase date, and status. After each distribution or purchase is completed, the product inventory information is updated, and the status of the distribution or purchase is recorded.",
+  "ddl": "-- Schema for database: rschema_0454\n\nCREATE TABLE `supermarket` (\n  `supermarket_id` int(11) NOT NULL AUTO_INCREMENT,\n  `supermarket_name` varchar(255) NOT NULL,\n  `supermarket_address` varchar(500) NOT NULL,\n  `supermarket_contact` varchar(255) NOT NULL,\n  PRIMARY KEY (`supermarket_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `product` (\n  `product_id` int(11) NOT NULL AUTO_INCREMENT,\n  `product_name` varchar(255) NOT NULL,\n  `product_price` decimal(10,2) NOT NULL,\n  `inventory_quantity` int(11) NOT NULL DEFAULT 0,\n  PRIMARY KEY (`product_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `supply_request` (\n  `request_id` int(11) NOT NULL AUTO_INCREMENT,\n  `supermarket_id` int(11) NOT NULL,\n  `product_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `request_date` datetime NOT NULL,\n  `request_status` varchar(50) NOT NULL DEFAULT 'pending',\n  PRIMARY KEY (`request_id`),\n  CONSTRAINT `supply_request_ibfk_1` FOREIGN KEY (`supermarket_id`) REFERENCES `supermarket` (`supermarket_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `supply_request_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `distribution_order` (\n  `distribution_order_id` int(11) NOT NULL AUTO_INCREMENT,\n  `request_id` int(11) NOT NULL,\n  `distribution_date` datetime NOT NULL,\n  `distribution_status` varchar(50) NOT NULL DEFAULT 'pending',\n  PRIMARY KEY (`distribution_order_id`),\n  CONSTRAINT `distribution_order_ibfk_1` FOREIGN KEY (`request_id`) REFERENCES `supply_request` (`request_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `purchase_order` (\n  `purchase_order_id` int(11) NOT NULL AUTO_INCREMENT,\n  `product_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `price` decimal(10,2) NOT NULL,\n  `purchase_date` datetime NOT NULL,\n  `purchase_status` varchar(50) NOT NULL DEFAULT 'pending',\n  PRIMARY KEY (`purchase_order_id`),\n  CONSTRAINT `purchase_order_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `inventory_log` (\n  `log_id` int(11) NOT NULL AUTO_INCREMENT,\n  `product_id` int(11) NOT NULL,\n  `change_quantity` int(11) NOT NULL,\n  `change_type` varchar(50) NOT NULL,\n  `reference_id` int(11) DEFAULT NULL,\n  `change_date` datetime NOT NULL,\n  `remarks` varchar(500) DEFAULT NULL,\n  PRIMARY KEY (`log_id`),\n  CONSTRAINT `inventory_log_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "supermarket",
+      "product",
+      "supply_request",
+      "distribution_order",
+      "purchase_order",
+      "inventory_log"
+    ],
+    "columns_by_table": {
+      "supermarket": [],
+      "product": [],
+      "supply_request": [],
+      "distribution_order": [],
+      "purchase_order": [],
+      "inventory_log": []
+    }
+  }
+}

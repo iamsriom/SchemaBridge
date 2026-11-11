@@ -1,0 +1,128 @@
+-- Schema for database: schemabench_0185
+CREATE TABLE `pokemon` (
+  `pokemon_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `pokemon_number` int(11) NOT NULL,
+  `type1` varchar(50) DEFAULT NULL,
+  `type2` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`pokemon_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `player` (
+  `player_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`player_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inventory_batch` (
+  `batch_id` int(11) NOT NULL AUTO_INCREMENT,
+  `player_id` int(11) NOT NULL,
+  `batch_name` varchar(255) NOT NULL,
+  `uploaded_at` datetime NOT NULL,
+  `notes` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`batch_id`),
+  KEY `player_id` (`player_id`),
+  CONSTRAINT `inventory_batch_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_inventory` (
+  `inventory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `batch_id` int(11) NOT NULL,
+  `pokemon_id` int(11) NOT NULL,
+  `nickname` varchar(255) DEFAULT NULL,
+  `cp` int(11) NOT NULL,
+  `level` decimal(4,1) NOT NULL,
+  `attack_iv` int(11) NOT NULL,
+  `defense_iv` int(11) NOT NULL,
+  `stamina_iv` int(11) NOT NULL,
+  `is_shiny` tinyint(1) NOT NULL DEFAULT '0',
+  `is_shadow` tinyint(1) NOT NULL DEFAULT '0',
+  `is_purified` tinyint(1) NOT NULL DEFAULT '0',
+  `caught_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`inventory_id`),
+  KEY `batch_id` (`batch_id`),
+  KEY `pokemon_id` (`pokemon_id`),
+  CONSTRAINT `pokemon_inventory_ibfk_1` FOREIGN KEY (`batch_id`) REFERENCES `inventory_batch` (`batch_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pokemon_inventory_ibfk_2` FOREIGN KEY (`pokemon_id`) REFERENCES `pokemon` (`pokemon_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `league` (
+  `league_id` int(11) NOT NULL AUTO_INCREMENT,
+  `league_name` varchar(50) NOT NULL,
+  `cp_limit` int(11) NOT NULL,
+  PRIMARY KEY (`league_id`),
+  UNIQUE KEY `league_name` (`league_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_analysis` (
+  `analysis_id` int(11) NOT NULL AUTO_INCREMENT,
+  `inventory_id` int(11) NOT NULL,
+  `league_id` int(11) NOT NULL,
+  `rank` int(11) NOT NULL,
+  `stat_product` decimal(12,4) NOT NULL,
+  `cp_at_level_40` int(11) DEFAULT NULL,
+  `cp_at_level_50` int(11) DEFAULT NULL,
+  `is_viable` tinyint(1) NOT NULL DEFAULT '1',
+  `analyzed_at` datetime NOT NULL,
+  PRIMARY KEY (`analysis_id`),
+  KEY `inventory_id` (`inventory_id`),
+  KEY `league_id` (`league_id`),
+  CONSTRAINT `pokemon_analysis_ibfk_1` FOREIGN KEY (`inventory_id`) REFERENCES `pokemon_inventory` (`inventory_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pokemon_analysis_ibfk_2` FOREIGN KEY (`league_id`) REFERENCES `league` (`league_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `power_up_cost` (
+  `cost_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pokemon_id` int(11) NOT NULL,
+  `from_level` decimal(4,1) NOT NULL,
+  `to_level` decimal(4,1) NOT NULL,
+  `stardust_cost` int(11) NOT NULL,
+  `candy_cost` int(11) NOT NULL,
+  PRIMARY KEY (`cost_id`),
+  KEY `pokemon_id` (`pokemon_id`),
+  CONSTRAINT `power_up_cost_ibfk_1` FOREIGN KEY (`pokemon_id`) REFERENCES `pokemon` (`pokemon_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `friendship_level` (
+  `friendship_level_id` int(11) NOT NULL AUTO_INCREMENT,
+  `level_name` varchar(50) NOT NULL,
+  `trade_bonus` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`friendship_level_id`),
+  UNIQUE KEY `level_name` (`level_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trade_simulation` (
+  `trade_id` int(11) NOT NULL AUTO_INCREMENT,
+  `inventory_id` int(11) NOT NULL,
+  `friendship_level_id` int(11) NOT NULL,
+  `player_level` int(11) NOT NULL,
+  `partner_level` int(11) NOT NULL,
+  `min_attack_iv` int(11) NOT NULL,
+  `max_attack_iv` int(11) NOT NULL,
+  `min_defense_iv` int(11) NOT NULL,
+  `max_defense_iv` int(11) NOT NULL,
+  `min_stamina_iv` int(11) NOT NULL,
+  `max_stamina_iv` int(11) NOT NULL,
+  `simulated_at` datetime NOT NULL,
+  PRIMARY KEY (`trade_id`),
+  KEY `inventory_id` (`inventory_id`),
+  KEY `friendship_level_id` (`friendship_level_id`),
+  CONSTRAINT `trade_simulation_ibfk_1` FOREIGN KEY (`inventory_id`) REFERENCES `pokemon_inventory` (`inventory_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trade_simulation_ibfk_2` FOREIGN KEY (`friendship_level_id`) REFERENCES `friendship_level` (`friendship_level_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_filter` (
+  `filter_id` int(11) NOT NULL AUTO_INCREMENT,
+  `player_id` int(11) NOT NULL,
+  `filter_name` varchar(255) NOT NULL,
+  `min_stat_product` decimal(12,4) DEFAULT NULL,
+  `max_rank` int(11) DEFAULT NULL,
+  `max_cp` int(11) DEFAULT NULL,
+  `max_stardust_cost` int(11) DEFAULT NULL,
+  `max_candy_cost` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`filter_id`),
+  KEY `player_id` (`player_id`),
+  CONSTRAINT `user_filter_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

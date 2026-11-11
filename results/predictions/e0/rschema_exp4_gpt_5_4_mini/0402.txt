@@ -1,0 +1,91 @@
+-- Schema for database: rschema_0402
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(255) NOT NULL,
+  `personnel` varchar(255) DEFAULT NULL,
+  `department_number` varchar(50) NOT NULL,
+  `department_phone_number` varchar(50) DEFAULT NULL,
+  `department_address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`department_id`),
+  UNIQUE KEY `uk_department_number` (`department_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctor` (
+  `doctor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_id` int(11) DEFAULT NULL,
+  `doctor_name` varchar(255) NOT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `years_of_employment` int(11) DEFAULT NULL,
+  `work_permit` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`doctor_id`),
+  KEY `doctor_ibfk_1` (`department_id`),
+  CONSTRAINT `doctor_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ward` (
+  `ward_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ward_number` varchar(50) NOT NULL,
+  `number_of_beds` int(11) DEFAULT NULL,
+  `ward_level` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`ward_id`),
+  UNIQUE KEY `uk_ward_number` (`ward_number`) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `registration_category` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_number` varchar(50) NOT NULL,
+  `category_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`category_id`),
+  UNIQUE KEY `uk_category_number` (`category_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patient` (
+  `patient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `registration_category_id` int(11) DEFAULT NULL,
+  `doctor_id` int(11) DEFAULT NULL,
+  `patient_name` varchar(255) NOT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  `diagnosis_description` text DEFAULT NULL,
+  `date_of_consultation` datetime DEFAULT NULL,
+  PRIMARY KEY (`patient_id`),
+  KEY `patient_ibfk_1` (`registration_category_id`),
+  KEY `patient_ibfk_2` (`doctor_id`),
+  CONSTRAINT `patient_ibfk_1` FOREIGN KEY (`registration_category_id`) REFERENCES `registration_category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `patient_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `diagnosis_treatment` (
+  `case_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `doctor_id` int(11) DEFAULT NULL,
+  `diagnosis_treatment_content` text NOT NULL,
+  PRIMARY KEY (`case_id`),
+  KEY `diagnosis_treatment_ibfk_1` (`patient_id`),
+  KEY `diagnosis_treatment_ibfk_2` (`doctor_id`),
+  CONSTRAINT `diagnosis_treatment_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `diagnosis_treatment_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `drug` (
+  `drug_id` int(11) NOT NULL AUTO_INCREMENT,
+  `drug_name` varchar(255) NOT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `price` decimal(10,2) DEFAULT NULL,
+  `barcode` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`drug_id`),
+  UNIQUE KEY `uk_drug_barcode` (`barcode`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `drug_list` (
+  `drug_list_id` int(11) NOT NULL AUTO_INCREMENT,
+  `drug_list_number` varchar(50) NOT NULL,
+  `drug_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`drug_list_id`),
+  UNIQUE KEY `uk_drug_list_number` (`drug_list_number`),
+  KEY `drug_list_ibfk_1` (`drug_id`),
+  CONSTRAINT `drug_list_ibfk_1` FOREIGN KEY (`drug_id`) REFERENCES `drug` (`drug_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

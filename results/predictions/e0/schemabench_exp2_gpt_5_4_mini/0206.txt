@@ -1,0 +1,130 @@
+-- Schema for database: schemabench_0206
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `full_name` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `accounts` (
+  `account_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `account_type` varchar(50) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`account_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `accounts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `posts` (
+  `post_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `media_url` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`post_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `comments` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `post_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`comment_id`),
+  KEY `post_id` (`post_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `likes` (
+  `like_id` int(11) NOT NULL AUTO_INCREMENT,
+  `post_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`like_id`),
+  KEY `post_id` (`post_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `likes_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `likes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `friendship` (
+  `friendship_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `friend_user_id` int(11) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`friendship_id`),
+  KEY `user_id` (`user_id`),
+  KEY `friend_user_id` (`friend_user_id`),
+  CONSTRAINT `friendship_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `friendship_ibfk_2` FOREIGN KEY (`friend_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `messages` (
+  `message_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sender_id` int(11) NOT NULL,
+  `receiver_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `sent_at` datetime NOT NULL,
+  `read_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`message_id`),
+  KEY `sender_id` (`sender_id`),
+  KEY `receiver_id` (`receiver_id`),
+  CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `messages_ibfk_2` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `groups_` (
+  `group_id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_by` int(11) NOT NULL,
+  `group_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`group_id`),
+  KEY `created_by` (`created_by`),
+  CONSTRAINT `groups__ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `group_members` (
+  `group_member_id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `joined_at` datetime NOT NULL,
+  PRIMARY KEY (`group_member_id`),
+  KEY `group_id` (`group_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `group_members_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `groups_` (`group_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `group_members_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `admins` (
+  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `assigned_at` datetime NOT NULL,
+  PRIMARY KEY (`admin_id`),
+  KEY `group_id` (`group_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `admins_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `groups_` (`group_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `admins_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `notifications` (
+  `notification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `notification_type` varchar(100) NOT NULL,
+  `message` varchar(255) NOT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL,
+  `read_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`notification_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

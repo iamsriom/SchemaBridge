@@ -1,0 +1,74 @@
+-- Schema for database: rschema_0237
+
+CREATE TABLE `district` (
+  `district_id` int(11) NOT NULL AUTO_INCREMENT,
+  `district_name` varchar(100) NOT NULL,
+  `district_code` varchar(20) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`district_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `street` (
+  `street_id` int(11) NOT NULL AUTO_INCREMENT,
+  `district_id` int(11) NOT NULL,
+  `street_name` varchar(100) NOT NULL,
+  `street_code` varchar(20) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`street_id`),
+  CONSTRAINT `street_ibfk_1` FOREIGN KEY (`district_id`) REFERENCES `district` (`district_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `house_type` (
+  `type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_name` varchar(100) NOT NULL,
+  `type_code` varchar(20) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `status` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `house` (
+  `house_id` int(11) NOT NULL AUTO_INCREMENT,
+  `street_id` int(11) NOT NULL,
+  `type_id` int(11) NOT NULL,
+  `house_name` varchar(150) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `area` decimal(8,2) DEFAULT NULL,
+  `floor` int(11) DEFAULT NULL,
+  `rooms` int(11) DEFAULT NULL,
+  `status` tinyint(1) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`house_id`),
+  CONSTRAINT `house_ibfk_1` FOREIGN KEY (`street_id`) REFERENCES `street` (`street_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `house_ibfk_2` FOREIGN KEY (`type_id`) REFERENCES `house_type` (`type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `rental_record` (
+  `rental_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `house_id` int(11) NOT NULL,
+  `rental_price` decimal(10,2) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `rental_date` datetime NOT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `status` tinyint(1) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`rental_id`),
+  CONSTRAINT `rental_record_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `rental_record_ibfk_2` FOREIGN KEY (`house_id`) REFERENCES `house` (`house_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

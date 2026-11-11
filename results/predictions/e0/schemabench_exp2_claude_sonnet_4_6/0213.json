@@ -1,0 +1,32 @@
+{
+  "text_number": 213,
+  "id": "SB-213",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "schemabench_0213",
+  "question": "1) Background / Context\nGlobal Super Store requires a structured database to manage its operations efficiently. Currently, all order-related data, including customer details, product information, and shipping specifics, are stored in a single dataset. This approach hampers data analysis and insight extraction. Therefore, a new database model is necessary to segregate and streamline the data for better management and analysis.\n\n 2) Objectives\n- Develop a relational database to organize order-related information into distinct entities.\n- Enable efficient data monitoring, analysis, and insight extraction.\n- Improve data accessibility and management for stakeholders.\n\n 3) Stakeholders & Users\n- Administrators: Manage database and perform data analysis.\n- Sales and Marketing Team: Extract insights and make informed business decisions.\n- Shipping Department: Access shipping details for processing orders.\n- IT Personnel: Maintain and update the database system.\n\n 4) Functional Descriptions\n- Order Management: Track order details including products, customers, and order specifics.\n- Customer Management: Store and retrieve customer information such as name and address.\n- Product Management: Maintain product details including categories and sub-categories.\n- Sales Tracking: Monitor sales performance, including discounts and profits.\n- Shipping Management: Handle shipping logistics, including modes and costs.\n- Address Storage: Store detailed address information for shipping purposes.\n\n 5) Non-Functional Descriptions\n- Scalability: Support large volumes of data efficiently.\n- Performance: Enable fast data retrieval and update operations.\n- Security: Ensure data privacy and protection from unauthorized access.\n- Integrity: Maintain consistency and accuracy of the data across all entities.",
+  "ddl": "-- Schema for database: schemabench_0213\n\nCREATE TABLE `category` (\n  `category_id` int(11) NOT NULL AUTO_INCREMENT,\n  `category_name` varchar(255) NOT NULL,\n  PRIMARY KEY (`category_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sub_category` (\n  `sub_category_id` int(11) NOT NULL AUTO_INCREMENT,\n  `sub_category_name` varchar(255) NOT NULL,\n  `category_id` int(11) NOT NULL,\n  PRIMARY KEY (`sub_category_id`),\n  CONSTRAINT `sub_category_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `product` (\n  `product_id` varchar(50) NOT NULL,\n  `product_name` varchar(500) NOT NULL,\n  `sub_category_id` int(11) NOT NULL,\n  PRIMARY KEY (`product_id`),\n  CONSTRAINT `product_ibfk_1` FOREIGN KEY (`sub_category_id`) REFERENCES `sub_category` (`sub_category_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `address` (\n  `address_id` int(11) NOT NULL AUTO_INCREMENT,\n  `city` varchar(255) NOT NULL,\n  `state` varchar(255) DEFAULT NULL,\n  `country` varchar(255) NOT NULL,\n  `postal_code` varchar(20) DEFAULT NULL,\n  `region` varchar(100) DEFAULT NULL,\n  PRIMARY KEY (`address_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `customer` (\n  `customer_id` varchar(50) NOT NULL,\n  `customer_name` varchar(255) NOT NULL,\n  `segment` varchar(100) NOT NULL,\n  `address_id` int(11) NOT NULL,\n  PRIMARY KEY (`customer_id`),\n  CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `shipping` (\n  `shipping_id` int(11) NOT NULL AUTO_INCREMENT,\n  `ship_mode` varchar(100) NOT NULL,\n  `ship_date` datetime NOT NULL,\n  `shipping_cost` decimal(10,2) NOT NULL DEFAULT '0.00',\n  `address_id` int(11) NOT NULL,\n  PRIMARY KEY (`shipping_id`),\n  CONSTRAINT `shipping_ibfk_1` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `order` (\n  `order_id` varchar(50) NOT NULL,\n  `order_date` datetime NOT NULL,\n  `order_priority` varchar(50) DEFAULT NULL,\n  `customer_id` varchar(50) NOT NULL,\n  `shipping_id` int(11) NOT NULL,\n  PRIMARY KEY (`order_id`),\n  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `order_ibfk_2` FOREIGN KEY (`shipping_id`) REFERENCES `shipping` (`shipping_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `order_item` (\n  `order_item_id` int(11) NOT NULL AUTO_INCREMENT,\n  `order_id` varchar(50) NOT NULL,\n  `product_id` varchar(50) NOT NULL,\n  `quantity` int(11) NOT NULL DEFAULT '1',\n  `sales` decimal(10,2) NOT NULL DEFAULT '0.00',\n  `discount` decimal(5,2) NOT NULL DEFAULT '0.00',\n  `profit` decimal(10,2) NOT NULL DEFAULT '0.00',\n  PRIMARY KEY (`order_item_id`),\n  CONSTRAINT `order_item_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `order_item_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "category",
+      "sub_category",
+      "product",
+      "address",
+      "customer",
+      "shipping",
+      "order",
+      "order_item"
+    ],
+    "columns_by_table": {
+      "category": [],
+      "sub_category": [],
+      "product": [],
+      "address": [],
+      "customer": [],
+      "shipping": [],
+      "order": [],
+      "order_item": []
+    }
+  }
+}

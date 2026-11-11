@@ -1,0 +1,28 @@
+{
+  "text_number": 189,
+  "id": "67552f0a13602ec03b41a7ce",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0189",
+  "question": "Business requirements description for the motor vehicle repair system: A motor vehicle repair service station wants to use a database to manage the repair information of the station, which provides vehicle repair and maintenance services. The service station has multiple repair stations, each station has several repair technicians, and it is required to record the information of the repair technicians, including Technician ID, Technician Name, Technician Contact Number, and Technician Skill Level. Each repair task has a Task ID, Vehicle Information (License Plate Number, Vehicle Model, Vehicle Owner Name, Owner Contact Number), Repair Date, Repair Type, and Repair Duration. After the repair is completed, it is necessary to record the Repair Cost, Repair Effect, and Owner Evaluation. The performance evaluation of the repair technicians is based on the number of repair tasks completed and the satisfaction of the vehicle owners.",
+  "ddl": "-- Schema for database: rschema_0189\n\nCREATE TABLE `repair_station` (\n  `station_id` int(11) NOT NULL AUTO_INCREMENT,\n  `station_name` varchar(255) NOT NULL,\n  `station_address` varchar(255) DEFAULT NULL,\n  `station_phone` varchar(50) DEFAULT NULL,\n  PRIMARY KEY (`station_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `technician` (\n  `technician_id` int(11) NOT NULL AUTO_INCREMENT,\n  `station_id` int(11) NOT NULL,\n  `technician_name` varchar(255) NOT NULL,\n  `technician_contact_number` varchar(50) DEFAULT NULL,\n  `technician_skill_level` varchar(100) DEFAULT NULL,\n  PRIMARY KEY (`technician_id`),\n  CONSTRAINT `technician_ibfk_1` FOREIGN KEY (`station_id`) REFERENCES `repair_station` (`station_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `vehicle` (\n  `vehicle_id` int(11) NOT NULL AUTO_INCREMENT,\n  `license_plate_number` varchar(50) NOT NULL,\n  `vehicle_model` varchar(255) DEFAULT NULL,\n  `vehicle_owner_name` varchar(255) DEFAULT NULL,\n  `owner_contact_number` varchar(50) DEFAULT NULL,\n  PRIMARY KEY (`vehicle_id`),\n  UNIQUE KEY `license_plate_number` (`license_plate_number`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `repair_task` (\n  `task_id` int(11) NOT NULL AUTO_INCREMENT,\n  `vehicle_id` int(11) NOT NULL,\n  `station_id` int(11) NOT NULL,\n  `repair_date` datetime NOT NULL,\n  `repair_type` varchar(255) DEFAULT NULL,\n  `repair_duration` decimal(10,2) DEFAULT NULL,\n  `repair_cost` decimal(10,2) DEFAULT NULL,\n  `repair_effect` varchar(255) DEFAULT NULL,\n  `owner_evaluation` varchar(500) DEFAULT NULL,\n  `owner_satisfaction_score` int(11) DEFAULT NULL,\n  PRIMARY KEY (`task_id`),\n  CONSTRAINT `repair_task_ibfk_1` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicle` (`vehicle_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `repair_task_ibfk_2` FOREIGN KEY (`station_id`) REFERENCES `repair_station` (`station_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `task_technician` (\n  `task_technician_id` int(11) NOT NULL AUTO_INCREMENT,\n  `task_id` int(11) NOT NULL,\n  `technician_id` int(11) NOT NULL,\n  PRIMARY KEY (`task_technician_id`),\n  CONSTRAINT `task_technician_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `repair_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `task_technician_ibfk_2` FOREIGN KEY (`technician_id`) REFERENCES `technician` (`technician_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `technician_performance` (\n  `performance_id` int(11) NOT NULL AUTO_INCREMENT,\n  `technician_id` int(11) NOT NULL,\n  `evaluation_period` varchar(100) DEFAULT NULL,\n  `tasks_completed` int(11) DEFAULT NULL,\n  `average_satisfaction_score` decimal(5,2) DEFAULT NULL,\n  `performance_rating` varchar(100) DEFAULT NULL,\n  PRIMARY KEY (`performance_id`),\n  CONSTRAINT `technician_performance_ibfk_1` FOREIGN KEY (`technician_id`) REFERENCES `technician` (`technician_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "repair_station",
+      "technician",
+      "vehicle",
+      "repair_task",
+      "task_technician",
+      "technician_performance"
+    ],
+    "columns_by_table": {
+      "repair_station": [],
+      "technician": [],
+      "vehicle": [],
+      "repair_task": [],
+      "task_technician": [],
+      "technician_performance": []
+    }
+  }
+}

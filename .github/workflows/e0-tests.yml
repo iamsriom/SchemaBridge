@@ -2,7 +2,7 @@ name: E0 offline tests
 
 on:
   push:
-    branches: [main, e0-direct-api-reproduce]
+    branches: [main, e0-direct-api-reproduce, icde2027-e0-verified]
   pull_request:
     branches: [main]
 
@@ -38,3 +38,30 @@ jobs:
 
       - name: E0 gold-reference validation
         run: python experiments/E0/reproduce_genuine_tables.py --validate-only --skip-pytest
+
+      - name: E0 offline Table V recompute (packaged Direct predictions)
+        run: |
+          python experiments/E0/reproduce_genuine_tables.py --skip-pytest --no-render
+          python - <<'PY'
+          import csv
+          rows = {
+              (r["dataset"], r["model"]): r
+              for r in csv.DictReader(open("results/metrics/reproduced/E0_TABLE_V_FINAL.csv"))
+          }
+          r = rows[("RSchema", "CodeLlama-13B")]
+          # CodeLlama RSchema must match current manuscript to 3dp under genuine protocol.
+          expect = dict(
+              nged=0.583,
+              halluc=0.669,
+              tables=0.554,
+              attributes=0.414,
+              domain=0.115,
+              entity=0.301,
+              referential=0.140,
+          )
+          for k, v in expect.items():
+              got = float(f"{float(r[k]):.3f}")
+              assert got == v, (k, got, v)
+          assert len(rows) >= 5, len(rows)
+          print("CodeLlama-13B RSchema Table V PASS against current manuscript")
+          PY

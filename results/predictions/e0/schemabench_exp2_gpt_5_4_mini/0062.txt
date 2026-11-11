@@ -1,0 +1,53 @@
+-- Schema for database: schemabench_0062
+CREATE TABLE `reaction_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `rate` float NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reactions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `reaction_type_id` int(11) NOT NULL,
+  `reactable_type` varchar(255) NOT NULL,
+  `reactable_id` varchar(255) NOT NULL,
+  `reacter_type` varchar(255) NOT NULL,
+  `reacter_id` varchar(255) NOT NULL,
+  `rate` float NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `reactions_reaction_type_id_index` (`reaction_type_id`),
+  KEY `reactions_reactable_index` (`reactable_type`,`reactable_id`),
+  KEY `reactions_reacter_index` (`reacter_type`,`reacter_id`),
+  CONSTRAINT `reactions_ibfk_1` FOREIGN KEY (`reaction_type_id`) REFERENCES `reaction_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reactable_reaction_type_counts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `reactable_type` varchar(255) NOT NULL,
+  `reactable_id` varchar(255) NOT NULL,
+  `reaction_type_id` int(11) NOT NULL,
+  `count` int(11) NOT NULL DEFAULT 0,
+  `weight` float NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `reactable_reaction_type_counts_unique` (`reactable_type`,`reactable_id`,`reaction_type_id`),
+  KEY `reactable_reaction_type_counts_reaction_type_id_index` (`reaction_type_id`),
+  CONSTRAINT `reactable_reaction_type_counts_ibfk_1` FOREIGN KEY (`reaction_type_id`) REFERENCES `reaction_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reactable_reaction_totals` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `reactable_type` varchar(255) NOT NULL,
+  `reactable_id` varchar(255) NOT NULL,
+  `count` int(11) NOT NULL DEFAULT 0,
+  `weight` float NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `reactable_reaction_totals_unique` (`reactable_type`,`reactable_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

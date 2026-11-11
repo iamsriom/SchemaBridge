@@ -1,0 +1,213 @@
+-- Schema for database: schemabench_0070
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `login` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_digest` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `bio` text DEFAULT NULL,
+  `avatar_url` varchar(255) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `website` varchar(255) DEFAULT NULL,
+  `github` varchar(255) DEFAULT NULL,
+  `twitter` varchar(255) DEFAULT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'user',
+  `topics_count` int(11) NOT NULL DEFAULT 0,
+  `replies_count` int(11) NOT NULL DEFAULT 0,
+  `followers_count` int(11) NOT NULL DEFAULT 0,
+  `following_count` int(11) NOT NULL DEFAULT 0,
+  `notifications_count` int(11) NOT NULL DEFAULT 0,
+  `sso_uid` varchar(255) DEFAULT NULL,
+  `sso_provider` varchar(100) DEFAULT NULL,
+  `auth_token` varchar(255) DEFAULT NULL,
+  `remember_token` varchar(255) DEFAULT NULL,
+  `email_verified` tinyint(1) NOT NULL DEFAULT 0,
+  `blocked` tinyint(1) NOT NULL DEFAULT 0,
+  `last_sign_in_at` datetime DEFAULT NULL,
+  `last_sign_in_ip` varchar(45) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_users_on_login` (`login`),
+  UNIQUE KEY `index_users_on_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `nodes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `topics_count` int(11) NOT NULL DEFAULT 0,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_nodes_on_slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `topics` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `body` mediumtext DEFAULT NULL,
+  `body_html` mediumtext DEFAULT NULL,
+  `user_id` int(11) NOT NULL,
+  `node_id` int(11) NOT NULL,
+  `replies_count` int(11) NOT NULL DEFAULT 0,
+  `followers_count` int(11) NOT NULL DEFAULT 0,
+  `likes_count` int(11) NOT NULL DEFAULT 0,
+  `last_reply_id` int(11) DEFAULT NULL,
+  `last_reply_user_id` int(11) DEFAULT NULL,
+  `last_reply_user_login` varchar(100) DEFAULT NULL,
+  `last_active_at` datetime DEFAULT NULL,
+  `pinned` tinyint(1) NOT NULL DEFAULT 0,
+  `closed` tinyint(1) NOT NULL DEFAULT 0,
+  `deleted` tinyint(1) NOT NULL DEFAULT 0,
+  `excellent` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_topics_on_user_id` (`user_id`),
+  KEY `index_topics_on_node_id` (`node_id`),
+  CONSTRAINT `topics_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `topics_ibfk_2` FOREIGN KEY (`node_id`) REFERENCES `nodes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `replies` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `topic_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `body` mediumtext DEFAULT NULL,
+  `body_html` mediumtext DEFAULT NULL,
+  `likes_count` int(11) NOT NULL DEFAULT 0,
+  `deleted` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_replies_on_topic_id` (`topic_id`),
+  KEY `index_replies_on_user_id` (`user_id`),
+  CONSTRAINT `replies_ibfk_1` FOREIGN KEY (`topic_id`) REFERENCES `topics` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `replies_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `topic_follows` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `topic_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_topic_follows_on_user_id_and_topic_id` (`user_id`, `topic_id`),
+  KEY `index_topic_follows_on_topic_id` (`topic_id`),
+  CONSTRAINT `topic_follows_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `topic_follows_ibfk_2` FOREIGN KEY (`topic_id`) REFERENCES `topics` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `topic_likes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `topic_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_topic_likes_on_user_id_and_topic_id` (`user_id`, `topic_id`),
+  KEY `index_topic_likes_on_topic_id` (`topic_id`),
+  CONSTRAINT `topic_likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `topic_likes_ibfk_2` FOREIGN KEY (`topic_id`) REFERENCES `topics` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reply_likes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `reply_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_reply_likes_on_user_id_and_reply_id` (`user_id`, `reply_id`),
+  KEY `index_reply_likes_on_reply_id` (`reply_id`),
+  CONSTRAINT `reply_likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reply_likes_ibfk_2` FOREIGN KEY (`reply_id`) REFERENCES `replies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_follows` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `follower_id` int(11) NOT NULL,
+  `followed_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_user_follows_on_follower_id_and_followed_id` (`follower_id`, `followed_id`),
+  KEY `index_user_follows_on_followed_id` (`followed_id`),
+  CONSTRAINT `user_follows_ibfk_1` FOREIGN KEY (`follower_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_follows_ibfk_2` FOREIGN KEY (`followed_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `actor_id` int(11) DEFAULT NULL,
+  `notify_type` varchar(100) NOT NULL,
+  `target_type` varchar(100) DEFAULT NULL,
+  `target_id` int(11) DEFAULT NULL,
+  `second_target_type` varchar(100) DEFAULT NULL,
+  `second_target_id` int(11) DEFAULT NULL,
+  `read` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_notifications_on_user_id` (`user_id`),
+  KEY `index_notifications_on_actor_id` (`actor_id`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`actor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `mentions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `mentionable_type` varchar(100) NOT NULL,
+  `mentionable_id` int(11) NOT NULL,
+  `mentioned_by_user_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_mentions_on_user_id` (`user_id`),
+  KEY `index_mentions_on_mentionable` (`mentionable_type`, `mentionable_id`),
+  CONSTRAINT `mentions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `mentions_ibfk_2` FOREIGN KEY (`mentioned_by_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sso_providers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `provider_url` varchar(255) NOT NULL,
+  `secret` varchar(255) NOT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_sso_providers_on_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `api_tokens` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `last_used_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_api_tokens_on_token` (`token`),
+  KEY `index_api_tokens_on_user_id` (`user_id`),
+  CONSTRAINT `api_tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site_settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) NOT NULL,
+  `value` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_site_settings_on_key` (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

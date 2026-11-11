@@ -1,0 +1,77 @@
+-- Schema for database: schemabench_0068
+CREATE TABLE `feature_flags` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT 0,
+  `version` int(11) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_feature_flags_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `feature_flag_rules` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `feature_flag_id` int(11) NOT NULL,
+  `rule_type` varchar(50) NOT NULL,
+  `rule_value` varchar(255) NOT NULL,
+  `percentage` decimal(5,2) DEFAULT NULL,
+  `starts_at` datetime DEFAULT NULL,
+  `ends_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_feature_flag_rules_feature_flag_id` (`feature_flag_id`),
+  CONSTRAINT `feature_flag_rules_ibfk_1` FOREIGN KEY (`feature_flag_id`) REFERENCES `feature_flags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `feature_flag_versions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `feature_flag_id` int(11) NOT NULL,
+  `version_number` int(11) NOT NULL,
+  `snapshot` text NOT NULL,
+  `change_summary` varchar(255) DEFAULT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_feature_flag_versions_feature_flag_id` (`feature_flag_id`),
+  UNIQUE KEY `idx_feature_flag_versions_flag_version` (`feature_flag_id`,`version_number`),
+  CONSTRAINT `feature_flag_versions_ibfk_1` FOREIGN KEY (`feature_flag_id`) REFERENCES `feature_flags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `audit_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `feature_flag_id` int(11) DEFAULT NULL,
+  `action` varchar(100) NOT NULL,
+  `actor` varchar(255) DEFAULT NULL,
+  `details` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_audit_logs_feature_flag_id` (`feature_flag_id`),
+  CONSTRAINT `audit_logs_ibfk_1` FOREIGN KEY (`feature_flag_id`) REFERENCES `feature_flags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `environments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_environments_slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `feature_flag_environments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `feature_flag_id` int(11) NOT NULL,
+  `environment_id` int(11) NOT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_feature_flag_environments_unique` (`feature_flag_id`,`environment_id`),
+  KEY `idx_feature_flag_environments_environment_id` (`environment_id`),
+  CONSTRAINT `feature_flag_environments_ibfk_1` FOREIGN KEY (`feature_flag_id`) REFERENCES `feature_flags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `feature_flag_environments_ibfk_2` FOREIGN KEY (`environment_id`) REFERENCES `environments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

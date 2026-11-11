@@ -1,0 +1,183 @@
+-- Schema for database: schemabench_0051
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `remember_token` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `projects` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `repository` varchar(255) NOT NULL,
+  `branch` varchar(255) NOT NULL DEFAULT 'master',
+  `deploy_path` varchar(255) NOT NULL,
+  `webhook_token` varchar(255) DEFAULT NULL,
+  `health_url` varchar(255) DEFAULT NULL,
+  `slack_webhook` varchar(255) DEFAULT NULL,
+  `slack_channel` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `servers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `port` int(11) NOT NULL DEFAULT 22,
+  `user` varchar(255) NOT NULL,
+  `path` varchar(255) NOT NULL,
+  `deploy_code` tinyint(1) NOT NULL DEFAULT 1,
+  `status` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `servers_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `deployments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `status` int(11) NOT NULL DEFAULT 0,
+  `branch` varchar(255) NOT NULL,
+  `commit` varchar(255) DEFAULT NULL,
+  `committer` varchar(255) DEFAULT NULL,
+  `committer_email` varchar(255) DEFAULT NULL,
+  `commit_url` varchar(255) DEFAULT NULL,
+  `reason` varchar(255) DEFAULT NULL,
+  `started_at` datetime DEFAULT NULL,
+  `finished_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `deployments_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `deployments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `deployment_steps` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `deployment_id` int(11) NOT NULL,
+  `stage` int(11) NOT NULL,
+  `status` int(11) NOT NULL DEFAULT 0,
+  `started_at` datetime DEFAULT NULL,
+  `finished_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `deployment_steps_ibfk_1` FOREIGN KEY (`deployment_id`) REFERENCES `deployments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `deployment_step_servers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `deployment_step_id` int(11) NOT NULL,
+  `server_id` int(11) NOT NULL,
+  `status` int(11) NOT NULL DEFAULT 0,
+  `log` longtext DEFAULT NULL,
+  `started_at` datetime DEFAULT NULL,
+  `finished_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `deployment_step_servers_ibfk_1` FOREIGN KEY (`deployment_step_id`) REFERENCES `deployment_steps` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `deployment_step_servers_ibfk_2` FOREIGN KEY (`server_id`) REFERENCES `servers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `commands` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `script` text NOT NULL,
+  `step` int(11) NOT NULL DEFAULT 0,
+  `user` varchar(255) DEFAULT NULL,
+  `order` int(11) NOT NULL DEFAULT 0,
+  `optional` tinyint(1) NOT NULL DEFAULT 0,
+  `default_on` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `commands_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ssh_keys` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `public_key` text NOT NULL,
+  `private_key` text NOT NULL,
+  `fingerprint` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `ssh_keys_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `heartbeats` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `interval` int(11) NOT NULL DEFAULT 1440,
+  `last_run` datetime DEFAULT NULL,
+  `status` int(11) NOT NULL DEFAULT 0,
+  `token` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `heartbeats_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `config` text NOT NULL,
+  `on_deployment_success` tinyint(1) NOT NULL DEFAULT 1,
+  `on_deployment_failure` tinyint(1) NOT NULL DEFAULT 1,
+  `on_heartbeat_missing` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shared_files` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `file` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `shared_files_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_files` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `path` varchar(255) NOT NULL,
+  `content` longtext DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `project_files_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `variables` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `value` text NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `variables_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

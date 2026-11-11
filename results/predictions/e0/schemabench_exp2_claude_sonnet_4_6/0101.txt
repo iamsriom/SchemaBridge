@@ -1,0 +1,113 @@
+-- Schema for database: schemabench_0101
+
+CREATE TABLE `country` (
+  `country_id` int(11) NOT NULL AUTO_INCREMENT,
+  `country_code` varchar(10) NOT NULL,
+  `country_name` varchar(255) NOT NULL,
+  `region` varchar(255) DEFAULT NULL,
+  `income_group` varchar(100) DEFAULT NULL,
+  `special_notes` text DEFAULT NULL,
+  PRIMARY KEY (`country_id`),
+  UNIQUE KEY `country_code` (`country_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `indicator` (
+  `indicator_id` int(11) NOT NULL AUTO_INCREMENT,
+  `indicator_code` varchar(50) NOT NULL,
+  `indicator_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `unit` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`indicator_id`),
+  UNIQUE KEY `indicator_code` (`indicator_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `forest_area_historical` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `country_id` int(11) NOT NULL,
+  `indicator_id` int(11) NOT NULL,
+  `year` int(4) NOT NULL,
+  `forest_area_pct` decimal(10,4) DEFAULT NULL,
+  `data_source` varchar(255) DEFAULT NULL,
+  `last_updated` datetime DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  UNIQUE KEY `uq_country_indicator_year` (`country_id`, `indicator_id`, `year`),
+  CONSTRAINT `forest_area_historical_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `forest_area_historical_ibfk_2` FOREIGN KEY (`indicator_id`) REFERENCES `indicator` (`indicator_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prediction_model` (
+  `model_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_name` varchar(255) NOT NULL,
+  `model_type` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `version` varchar(50) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `model_parameter` (
+  `parameter_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_id` int(11) NOT NULL,
+  `parameter_name` varchar(255) NOT NULL,
+  `parameter_value` varchar(255) DEFAULT NULL,
+  `data_type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`parameter_id`),
+  CONSTRAINT `model_parameter_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `prediction_model` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prediction_result` (
+  `prediction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `country_id` int(11) NOT NULL,
+  `model_id` int(11) NOT NULL,
+  `prediction_year` int(4) NOT NULL,
+  `predicted_forest_area_pct` decimal(10,4) DEFAULT NULL,
+  `confidence_interval_lower` decimal(10,4) DEFAULT NULL,
+  `confidence_interval_upper` decimal(10,4) DEFAULT NULL,
+  `prediction_error` decimal(10,6) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`prediction_id`),
+  UNIQUE KEY `uq_country_model_year` (`country_id`, `model_id`, `prediction_year`),
+  CONSTRAINT `prediction_result_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `prediction_result_ibfk_2` FOREIGN KEY (`model_id`) REFERENCES `prediction_model` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `model_evaluation` (
+  `evaluation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_id` int(11) NOT NULL,
+  `metric_name` varchar(100) NOT NULL,
+  `metric_value` decimal(15,6) DEFAULT NULL,
+  `evaluation_date` datetime NOT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`evaluation_id`),
+  CONSTRAINT `model_evaluation_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `prediction_model` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `role` varchar(50) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `last_login` datetime DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_query_log` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `query_timestamp` datetime NOT NULL,
+  `country_id` int(11) DEFAULT NULL,
+  `model_id` int(11) DEFAULT NULL,
+  `response_latency_ms` int(11) DEFAULT NULL,
+  `query_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`log_id`),
+  CONSTRAINT `user_query_log_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_query_log_ibfk_2` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `user_query_log_ibfk_3` FOREIGN KEY (`model_id`) REFERENCES `prediction_model` (`model_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

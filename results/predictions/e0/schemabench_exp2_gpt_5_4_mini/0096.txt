@@ -1,0 +1,76 @@
+-- Schema for database: schemabench_0096
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `segment` varchar(100) DEFAULT NULL,
+  `currency` char(3) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `gas_station_chain` (
+  `chain_id` int(11) NOT NULL,
+  `chain_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`chain_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `gas_station` (
+  `gas_station_id` int(11) NOT NULL,
+  `chain_id` int(11) DEFAULT NULL,
+  `station_name` varchar(255) NOT NULL,
+  `city` varchar(255) DEFAULT NULL,
+  `region` varchar(255) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `latitude` decimal(10,6) DEFAULT NULL,
+  `longitude` decimal(10,6) DEFAULT NULL,
+  PRIMARY KEY (`gas_station_id`),
+  KEY `chain_id` (`chain_id`),
+  CONSTRAINT `gas_station_ibfk_1` FOREIGN KEY (`chain_id`) REFERENCES `gas_station_chain` (`chain_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `product_category` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `card` (
+  `card_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `card_number_hash` varchar(255) DEFAULT NULL,
+  `issue_date` date DEFAULT NULL,
+  `expiry_date` date DEFAULT NULL,
+  PRIMARY KEY (`card_id`),
+  KEY `customer_id` (`customer_id`),
+  CONSTRAINT `card_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction_record` (
+  `transaction_id` bigint(20) NOT NULL,
+  `transaction_date` date NOT NULL,
+  `transaction_time` time NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `card_id` int(11) NOT NULL,
+  `gas_station_id` int(11) NOT NULL,
+  `product_id` int(11) DEFAULT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `price` decimal(12,2) NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `card_id` (`card_id`),
+  KEY `gas_station_id` (`gas_station_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `transaction_record_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_record_ibfk_2` FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_record_ibfk_3` FOREIGN KEY (`gas_station_id`) REFERENCES `gas_station` (`gas_station_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_record_ibfk_4` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `monthly_consumption` (
+  `customer_id` int(11) NOT NULL,
+  `consumption_year` int(11) NOT NULL,
+  `consumption_month` int(11) NOT NULL,
+  `total_amount` decimal(14,2) NOT NULL,
+  `transaction_count` int(11) NOT NULL,
+  PRIMARY KEY (`customer_id`,`consumption_year`,`consumption_month`),
+  CONSTRAINT `monthly_consumption_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

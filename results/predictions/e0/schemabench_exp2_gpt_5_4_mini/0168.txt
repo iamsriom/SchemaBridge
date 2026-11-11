@@ -1,0 +1,67 @@
+-- Schema for database: schemabench_0168
+CREATE TABLE `owners` (
+  `owner_id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_name` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patients` (
+  `patient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_id` int(11) NOT NULL,
+  `patient_name` varchar(255) NOT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `species` varchar(100) DEFAULT NULL,
+  `breed` varchar(100) DEFAULT NULL,
+  `sex` char(1) DEFAULT NULL,
+  PRIMARY KEY (`patient_id`),
+  KEY `owner_id` (`owner_id`),
+  CONSTRAINT `patients_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `owners` (`owner_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medical_histories` (
+  `medical_history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `admission_date` datetime NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`medical_history_id`),
+  KEY `patient_id` (`patient_id`),
+  CONSTRAINT `medical_histories_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `treatments` (
+  `treatment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `treatment_name` varchar(255) NOT NULL,
+  `category` varchar(100) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`treatment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `invoices` (
+  `invoice_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `invoice_date` datetime NOT NULL,
+  `payment_status` varchar(50) NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`invoice_id`),
+  KEY `patient_id` (`patient_id`),
+  CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `invoice_items` (
+  `invoice_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `invoice_id` int(11) NOT NULL,
+  `treatment_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `line_total` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`invoice_item_id`),
+  KEY `invoice_id` (`invoice_id`),
+  KEY `treatment_id` (`treatment_id`),
+  CONSTRAINT `invoice_items_ibfk_1` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`invoice_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `invoice_items_ibfk_2` FOREIGN KEY (`treatment_id`) REFERENCES `treatments` (`treatment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

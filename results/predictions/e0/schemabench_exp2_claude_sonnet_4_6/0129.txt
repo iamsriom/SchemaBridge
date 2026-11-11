@@ -1,0 +1,128 @@
+-- Schema for database: schemabench_0129
+
+CREATE TABLE `works` (
+  `work_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `long_title` varchar(512) DEFAULT NULL,
+  `year` int(11) DEFAULT NULL,
+  `genre` varchar(100) DEFAULT NULL,
+  `total_words` int(11) DEFAULT NULL,
+  `total_paragraphs` int(11) DEFAULT NULL,
+  PRIMARY KEY (`work_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `chapters` (
+  `chapter_id` int(11) NOT NULL AUTO_INCREMENT,
+  `work_id` int(11) NOT NULL,
+  `act_number` int(11) DEFAULT NULL,
+  `scene_number` int(11) DEFAULT NULL,
+  `chapter_description` varchar(512) DEFAULT NULL,
+  `section` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`chapter_id`),
+  CONSTRAINT `chapters_ibfk_1` FOREIGN KEY (`work_id`) REFERENCES `works` (`work_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `characters` (
+  `character_id` int(11) NOT NULL AUTO_INCREMENT,
+  `work_id` int(11) NOT NULL,
+  `character_name` varchar(255) NOT NULL,
+  `abbreviation` varchar(50) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`character_id`),
+  CONSTRAINT `characters_ibfk_1` FOREIGN KEY (`work_id`) REFERENCES `works` (`work_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `paragraphs` (
+  `paragraph_id` int(11) NOT NULL AUTO_INCREMENT,
+  `work_id` int(11) NOT NULL,
+  `chapter_id` int(11) NOT NULL,
+  `character_id` int(11) DEFAULT NULL,
+  `plain_text` text NOT NULL,
+  `character_count` int(11) DEFAULT NULL,
+  `word_count` int(11) DEFAULT NULL,
+  `paragraph_number` int(11) DEFAULT NULL,
+  PRIMARY KEY (`paragraph_id`),
+  CONSTRAINT `paragraphs_ibfk_1` FOREIGN KEY (`work_id`) REFERENCES `works` (`work_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `paragraphs_ibfk_2` FOREIGN KEY (`chapter_id`) REFERENCES `chapters` (`chapter_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `paragraphs_ibfk_3` FOREIGN KEY (`character_id`) REFERENCES `characters` (`character_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `lines` (
+  `line_id` int(11) NOT NULL AUTO_INCREMENT,
+  `paragraph_id` int(11) NOT NULL,
+  `chapter_id` int(11) NOT NULL,
+  `work_id` int(11) NOT NULL,
+  `character_id` int(11) DEFAULT NULL,
+  `line_number` int(11) DEFAULT NULL,
+  `plain_text` text NOT NULL,
+  `word_count` int(11) DEFAULT NULL,
+  PRIMARY KEY (`line_id`),
+  CONSTRAINT `lines_ibfk_1` FOREIGN KEY (`paragraph_id`) REFERENCES `paragraphs` (`paragraph_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `lines_ibfk_2` FOREIGN KEY (`chapter_id`) REFERENCES `chapters` (`chapter_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `lines_ibfk_3` FOREIGN KEY (`work_id`) REFERENCES `works` (`work_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `lines_ibfk_4` FOREIGN KEY (`character_id`) REFERENCES `characters` (`character_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `character_work` (
+  `character_work_id` int(11) NOT NULL AUTO_INCREMENT,
+  `character_id` int(11) NOT NULL,
+  `work_id` int(11) NOT NULL,
+  `line_count` int(11) DEFAULT NULL,
+  `word_count` int(11) DEFAULT NULL,
+  PRIMARY KEY (`character_work_id`),
+  CONSTRAINT `character_work_ibfk_1` FOREIGN KEY (`character_id`) REFERENCES `characters` (`character_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `character_work_ibfk_2` FOREIGN KEY (`work_id`) REFERENCES `works` (`work_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prediction_models` (
+  `model_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `algorithm` varchar(255) DEFAULT NULL,
+  `accuracy` decimal(5,4) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `predictions` (
+  `prediction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_id` int(11) NOT NULL,
+  `line_id` int(11) NOT NULL,
+  `predicted_character_id` int(11) NOT NULL,
+  `actual_character_id` int(11) DEFAULT NULL,
+  `confidence_score` decimal(5,4) DEFAULT NULL,
+  `is_correct` tinyint(1) DEFAULT NULL,
+  `predicted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`prediction_id`),
+  CONSTRAINT `predictions_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `prediction_models` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `predictions_ibfk_2` FOREIGN KEY (`line_id`) REFERENCES `lines` (`line_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `predictions_ibfk_3` FOREIGN KEY (`predicted_character_id`) REFERENCES `characters` (`character_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `predictions_ibfk_4` FOREIGN KEY (`actual_character_id`) REFERENCES `characters` (`character_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'student',
+  `created_at` datetime DEFAULT NULL,
+  `last_login` datetime DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `search_queries` (
+  `query_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `query_text` varchar(512) NOT NULL,
+  `query_type` varchar(100) DEFAULT NULL,
+  `result_count` int(11) DEFAULT NULL,
+  `queried_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`query_id`),
+  CONSTRAINT `search_queries_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

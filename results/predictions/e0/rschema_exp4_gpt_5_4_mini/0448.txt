@@ -1,0 +1,143 @@
+-- Schema for database: rschema_0448
+CREATE TABLE `units` (
+  `unit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `unit_name` varchar(255) NOT NULL,
+  `unit_type` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`unit_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `role` varchar(50) NOT NULL,
+  `unit_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_username` (`username`),
+  KEY `users_ibfk_1` (`unit_id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`unit_id`) REFERENCES `units` (`unit_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `experimental_courses` (
+  `course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_name` varchar(255) NOT NULL,
+  `class_time` datetime NOT NULL,
+  `class_location` varchar(255) DEFAULT NULL,
+  `teacher_id` int(11) NOT NULL,
+  PRIMARY KEY (`course_id`),
+  KEY `experimental_courses_ibfk_1` (`teacher_id`),
+  CONSTRAINT `experimental_courses_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_registrations` (
+  `registration_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `registered_at` datetime NOT NULL,
+  PRIMARY KEY (`registration_id`),
+  UNIQUE KEY `uk_course_registrations_course_student` (`course_id`,`student_id`),
+  KEY `course_registrations_ibfk_1` (`course_id`),
+  KEY `course_registrations_ibfk_2` (`student_id`),
+  CONSTRAINT `course_registrations_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `experimental_courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_registrations_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment_categories` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`category_id`),
+  UNIQUE KEY `uk_equipment_categories_name` (`category_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment` (
+  `equipment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_name` varchar(255) NOT NULL,
+  `model` varchar(255) DEFAULT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `manufacturer` varchar(255) DEFAULT NULL,
+  `status` varchar(20) NOT NULL,
+  `acquisition_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`equipment_id`),
+  KEY `equipment_ibfk_1` (`category_id`),
+  CONSTRAINT `equipment_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `equipment_categories` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment_usage_records` (
+  `usage_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `usage_time` datetime NOT NULL,
+  `purpose` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`usage_record_id`),
+  KEY `equipment_usage_records_ibfk_1` (`equipment_id`),
+  KEY `equipment_usage_records_ibfk_2` (`user_id`),
+  CONSTRAINT `equipment_usage_records_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `equipment_usage_records_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `consumable_categories` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`category_id`),
+  UNIQUE KEY `uk_consumable_categories_name` (`category_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `consumables` (
+  `consumable_id` int(11) NOT NULL AUTO_INCREMENT,
+  `consumable_name` varchar(255) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `inventory_quantity` int(11) NOT NULL DEFAULT '0',
+  `status` varchar(20) NOT NULL,
+  PRIMARY KEY (`consumable_id`),
+  KEY `consumables_ibfk_1` (`category_id`),
+  CONSTRAINT `consumables_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `consumable_categories` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `consumable_transactions` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `consumable_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `transaction_type` varchar(20) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `transaction_time` datetime NOT NULL,
+  `remark` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`transaction_id`),
+  KEY `consumable_transactions_ibfk_1` (`consumable_id`),
+  KEY `consumable_transactions_ibfk_2` (`user_id`),
+  CONSTRAINT `consumable_transactions_ibfk_1` FOREIGN KEY (`consumable_id`) REFERENCES `consumables` (`consumable_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `consumable_transactions_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `chemical_categories` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`category_id`),
+  UNIQUE KEY `uk_chemical_categories_name` (`category_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `hazardous_chemicals` (
+  `chemical_id` int(11) NOT NULL AUTO_INCREMENT,
+  `chemical_name` varchar(255) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `inventory_quantity` int(11) NOT NULL DEFAULT '0',
+  `status` varchar(20) NOT NULL,
+  PRIMARY KEY (`chemical_id`),
+  KEY `hazardous_chemicals_ibfk_1` (`category_id`),
+  CONSTRAINT `hazardous_chemicals_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `chemical_categories` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `chemical_transactions` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `chemical_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `transaction_type` varchar(20) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `transaction_time` datetime NOT NULL,
+  `remark` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`transaction_id`),
+  KEY `chemical_transactions_ibfk_1` (`chemical_id`),
+  KEY `chemical_transactions_ibfk_2` (`user_id`),
+  CONSTRAINT `chemical_transactions_ibfk_1` FOREIGN KEY (`chemical_id`) REFERENCES `hazardous_chemicals` (`chemical_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `chemical_transactions_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,46 @@
+-- Schema for database: rschema_0452
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `role` varchar(50) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_user_username` (`username`),
+  UNIQUE KEY `uk_user_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student_info` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `student_name` varchar(255) NOT NULL,
+  `student_number` varchar(100) NOT NULL,
+  `major` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`student_id`),
+  UNIQUE KEY `uk_student_info_student_number` (`student_number`),
+  KEY `student_info_ibfk_1` (`user_id`),
+  CONSTRAINT `student_info_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `certificate_info` (
+  `certificate_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `certificate_name` varchar(255) NOT NULL,
+  `certificate_number` varchar(100) NOT NULL,
+  `issuing_institution` varchar(255) NOT NULL,
+  `issue_date` date NOT NULL,
+  `certificate_description` text DEFAULT NULL,
+  `certificate_hash` varchar(255) NOT NULL,
+  `certificate_status` varchar(50) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`certificate_id`),
+  UNIQUE KEY `uk_certificate_info_certificate_number` (`certificate_number`),
+  UNIQUE KEY `uk_certificate_info_certificate_hash` (`certificate_hash`),
+  KEY `certificate_info_ibfk_1` (`student_id`),
+  CONSTRAINT `certificate_info_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student_info` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

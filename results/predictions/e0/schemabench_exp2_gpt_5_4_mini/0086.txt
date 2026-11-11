@@ -1,0 +1,111 @@
+-- Schema for database: schemabench_0086
+CREATE TABLE `customers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `provider` varchar(50) NOT NULL,
+  `provider_customer_id` varchar(255) NOT NULL,
+  `billing_portal_url` varchar(2048) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `customers_provider_customer_id_unique` (`provider`,`provider_customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `plans` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `provider` varchar(50) NOT NULL,
+  `provider_plan_id` varchar(255) NOT NULL,
+  `interval` varchar(20) NOT NULL,
+  `interval_count` int(11) NOT NULL DEFAULT 1,
+  `price` decimal(10,2) NOT NULL,
+  `currency` char(3) NOT NULL,
+  `seat_based` tinyint(1) NOT NULL DEFAULT 0,
+  `description` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `plans_slug_unique` (`slug`),
+  UNIQUE KEY `plans_provider_plan_id_unique` (`provider`,`provider_plan_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `plan_id` int(11) NOT NULL,
+  `provider` varchar(50) NOT NULL,
+  `provider_subscription_id` varchar(255) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `trial_ends_at` datetime DEFAULT NULL,
+  `starts_at` datetime NOT NULL,
+  `ends_at` datetime DEFAULT NULL,
+  `canceled_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `subscriptions_provider_subscription_id_unique` (`provider`,`provider_subscription_id`),
+  KEY `subscriptions_customer_id_index` (`customer_id`),
+  KEY `subscriptions_plan_id_index` (`plan_id`),
+  CONSTRAINT `subscriptions_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `subscriptions_ibfk_2` FOREIGN KEY (`plan_id`) REFERENCES `plans` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `invoices` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `subscription_id` int(11) DEFAULT NULL,
+  `provider` varchar(50) NOT NULL,
+  `provider_invoice_id` varchar(255) NOT NULL,
+  `invoice_number` varchar(100) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `currency` char(3) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `issued_at` datetime NOT NULL,
+  `due_at` datetime DEFAULT NULL,
+  `paid_at` datetime DEFAULT NULL,
+  `pdf_url` varchar(2048) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `invoices_provider_invoice_id_unique` (`provider`,`provider_invoice_id`),
+  UNIQUE KEY `invoices_invoice_number_unique` (`invoice_number`),
+  KEY `invoices_customer_id_index` (`customer_id`),
+  KEY `invoices_subscription_id_index` (`subscription_id`),
+  CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `invoices_ibfk_2` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment_methods` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `provider` varchar(50) NOT NULL,
+  `provider_payment_method_id` varchar(255) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `brand` varchar(50) DEFAULT NULL,
+  `last_four` char(4) DEFAULT NULL,
+  `exp_month` int(11) DEFAULT NULL,
+  `exp_year` int(11) DEFAULT NULL,
+  `is_default` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `payment_methods_provider_payment_method_id_unique` (`provider`,`provider_payment_method_id`),
+  KEY `payment_methods_customer_id_index` (`customer_id`),
+  CONSTRAINT `payment_methods_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscription_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `subscription_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `unit_price` decimal(10,2) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `subscription_items_subscription_id_index` (`subscription_id`),
+  CONSTRAINT `subscription_items_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

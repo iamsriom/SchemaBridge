@@ -1,0 +1,28 @@
+{
+  "text_number": 18,
+  "id": "SB-018",
+  "llm": "gpt54mini",
+  "model_id": "gpt-5.4-mini",
+  "database": "schemabench_0018",
+  "question": "Background / Context:\nCabot is an open-source, self-hosted infrastructure monitoring platform. It combines features from tools like PagerDuty, Server Density, Pingdom, and Nagios, aiming to reduce cost and complexity. Written in Python using Django and Bootstrap, Cabot allows monitoring of services and sends alerts when issues arise.\n\nObjectives:\nDevelop a monitoring service that allows users to track service performance and receive alerts through various channels such as telephone, SMS, HipChat, or email when issues are detected.\n\nStakeholders & Users:\n- Primary Stakeholders: System Administrators, IT Support Teams\n- Users: On-duty team members responsible for handling incidents and maintaining system health.\n\nFunctional Descriptions:\n1. Service Monitoring: Ability to monitor services like \"Stage Redis server\" or \"Production ElasticSearch cluster.\"\n2. Alert Configuration: Users can configure alerts based on:\n   - Metrics from Graphite\n   - Status codes and response content of web endpoints\n   - Jenkins build statuses\n3. Alert Notification: Notify on-duty teams via telephone, SMS, HipChat, or email without requiring coding.\n4. Integration: Utilize existing data from Graphite/statsd for alert generation.\n5. Web Interface: Provide a user-friendly interface for managing services and alerts.\n\nNon-Functional Descriptions:\n- Scalability: Support for growing infrastructure and increased number of monitored services.\n- Reliability: Ensure accurate alerting and minimal false positives.\n- Usability: Accessible interface that requires no coding skills for operation.\n- Security: Secure handling of sensitive information such as user credentials and service statuses.",
+  "ddl": "-- Schema for database: schemabench_0018\nCREATE TABLE `service` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  `host` varchar(255) DEFAULT NULL,\n  `url` varchar(255) DEFAULT NULL,\n  `check_type` varchar(50) NOT NULL,\n  `graphite_target` varchar(255) DEFAULT NULL,\n  `jenkins_job` varchar(255) DEFAULT NULL,\n  `status_code` varchar(20) DEFAULT NULL,\n  `response_content` varchar(255) DEFAULT NULL,\n  `is_active` tinyint(1) NOT NULL DEFAULT '1',\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\nCREATE TABLE `alert` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `service_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `metric` varchar(255) DEFAULT NULL,\n  `threshold` varchar(50) DEFAULT NULL,\n  `comparison` varchar(20) DEFAULT NULL,\n  `window_minutes` int(11) DEFAULT NULL,\n  `enabled` tinyint(1) NOT NULL DEFAULT '1',\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `service_id` (`service_id`),\n  CONSTRAINT `alert_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\nCREATE TABLE `notification_channel` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `channel_type` varchar(50) NOT NULL,\n  `address` varchar(255) NOT NULL,\n  `is_active` tinyint(1) NOT NULL DEFAULT '1',\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\nCREATE TABLE `alert_notification` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `alert_id` int(11) NOT NULL,\n  `notification_channel_id` int(11) NOT NULL,\n  `on_call_only` tinyint(1) NOT NULL DEFAULT '0',\n  `created_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `alert_id` (`alert_id`),\n  KEY `notification_channel_id` (`notification_channel_id`),\n  CONSTRAINT `alert_notification_ibfk_1` FOREIGN KEY (`alert_id`) REFERENCES `alert` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `alert_notification_ibfk_2` FOREIGN KEY (`notification_channel_id`) REFERENCES `notification_channel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\nCREATE TABLE `team` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\nCREATE TABLE `team_member` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `team_id` int(11) NOT NULL,\n  `member_name` varchar(255) NOT NULL,\n  `email` varchar(255) DEFAULT NULL,\n  `phone_number` varchar(50) DEFAULT NULL,\n  `is_on_duty` tinyint(1) NOT NULL DEFAULT '0',\n  `created_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `team_id` (`team_id`),\n  CONSTRAINT `team_member_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `team` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "service",
+      "alert",
+      "notification_channel",
+      "alert_notification",
+      "team",
+      "team_member"
+    ],
+    "columns_by_table": {
+      "service": [],
+      "alert": [],
+      "notification_channel": [],
+      "alert_notification": [],
+      "team": [],
+      "team_member": []
+    }
+  }
+}

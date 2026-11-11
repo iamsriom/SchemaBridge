@@ -1,0 +1,66 @@
+-- Schema for database: rschema_0456
+
+CREATE TABLE `supermarket` (
+  `supermarket_id` varchar(20) NOT NULL,
+  `supermarket_name` varchar(100) NOT NULL,
+  `supermarket_address` varchar(255) NOT NULL,
+  `manager_phone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`supermarket_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` varchar(20) NOT NULL,
+  `product_name` varchar(100) NOT NULL,
+  `inventory_quantity` int(11) NOT NULL DEFAULT 0,
+  `storage_location` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `distribution_department` (
+  `department_id` varchar(20) NOT NULL,
+  `department_name` varchar(100) NOT NULL,
+  `department_address` varchar(255) DEFAULT NULL,
+  `manager_phone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supply_request` (
+  `supermarket_id` varchar(20) NOT NULL,
+  `product_id` varchar(20) NOT NULL,
+  `request_time` datetime NOT NULL,
+  `requested_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`supermarket_id`, `product_id`, `request_time`),
+  CONSTRAINT `supply_request_ibfk_1` FOREIGN KEY (`supermarket_id`) REFERENCES `supermarket` (`supermarket_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `supply_request_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `distribution_notice` (
+  `notice_id` varchar(20) NOT NULL,
+  `product_id` varchar(20) NOT NULL,
+  `department_id` varchar(20) NOT NULL,
+  `distribution_quantity` int(11) NOT NULL,
+  `distribution_time` datetime NOT NULL,
+  PRIMARY KEY (`notice_id`),
+  CONSTRAINT `distribution_notice_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `distribution_notice_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `distribution_department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `purchase_order` (
+  `purchase_id` varchar(20) NOT NULL,
+  `product_id` varchar(20) NOT NULL,
+  `purchase_date` date NOT NULL,
+  `supplier` varchar(100) NOT NULL,
+  `purchase_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`purchase_id`),
+  CONSTRAINT `purchase_order_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment_order` (
+  `order_id` varchar(20) NOT NULL,
+  `purchase_id` varchar(20) NOT NULL,
+  `payment_amount` decimal(12,2) NOT NULL,
+  `payment_date` date NOT NULL,
+  `payment_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `payment_order_ibfk_1` FOREIGN KEY (`purchase_id`) REFERENCES `purchase_order` (`purchase_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

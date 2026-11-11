@@ -1,0 +1,97 @@
+-- Schema for database: schemabench_0026
+CREATE TABLE `django_content_type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `app_label` varchar(100) NOT NULL,
+  `model` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `django_content_type_app_label_model_uniq` (`app_label`,`model`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `auth_permission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `content_type_id` int(11) NOT NULL,
+  `codename` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `auth_permission_content_type_id_codename_uniq` (`content_type_id`,`codename`),
+  KEY `auth_permission_content_type_id_idx` (`content_type_id`),
+  CONSTRAINT `auth_permission_ibfk_1` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `auth_group` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(150) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `auth_group_name_uniq` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `auth_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `password` varchar(128) NOT NULL,
+  `last_login` datetime DEFAULT NULL,
+  `is_superuser` tinyint(1) NOT NULL,
+  `username` varchar(150) NOT NULL,
+  `first_name` varchar(30) NOT NULL,
+  `last_name` varchar(30) NOT NULL,
+  `email` varchar(254) NOT NULL,
+  `is_staff` tinyint(1) NOT NULL,
+  `is_active` tinyint(1) NOT NULL,
+  `date_joined` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `auth_user_username_uniq` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `auth_user_groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `auth_user_groups_user_id_group_id_uniq` (`user_id`,`group_id`),
+  KEY `auth_user_groups_user_id_idx` (`user_id`),
+  KEY `auth_user_groups_group_id_idx` (`group_id`),
+  CONSTRAINT `auth_user_groups_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `auth_user_groups_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `auth_user_user_permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `auth_user_user_permissions_user_id_permission_id_uniq` (`user_id`,`permission_id`),
+  KEY `auth_user_user_permissions_user_id_idx` (`user_id`),
+  KEY `auth_user_user_permissions_permission_id_idx` (`permission_id`),
+  CONSTRAINT `auth_user_user_permissions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `auth_user_user_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `auth_permission` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `auth_group_permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `auth_group_permissions_group_id_permission_id_uniq` (`group_id`,`permission_id`),
+  KEY `auth_group_permissions_group_id_idx` (`group_id`),
+  KEY `auth_group_permissions_permission_id_idx` (`permission_id`),
+  CONSTRAINT `auth_group_permissions_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `auth_group_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `auth_permission` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `authority_permission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content_type_id` int(11) NOT NULL,
+  `object_id` varchar(255) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `group_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `authority_permission_content_type_id_object_id_permission_id_uniq` (`content_type_id`,`object_id`,`permission_id`,`user_id`,`group_id`),
+  KEY `authority_permission_content_type_id_idx` (`content_type_id`),
+  KEY `authority_permission_permission_id_idx` (`permission_id`),
+  KEY `authority_permission_user_id_idx` (`user_id`),
+  KEY `authority_permission_group_id_idx` (`group_id`),
+  CONSTRAINT `authority_permission_ibfk_1` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `authority_permission_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `auth_permission` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `authority_permission_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `authority_permission_ibfk_4` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

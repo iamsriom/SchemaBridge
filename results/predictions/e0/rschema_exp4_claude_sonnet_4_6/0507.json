@@ -1,0 +1,28 @@
+{
+  "text_number": 507,
+  "id": "67552f0b13602ec03b41aa82",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0507",
+  "question": "The website content system shall record each user's account information (including username, password, role, etc.) and ensure secure access by generating and validating tokens after login or registration. For the content to be managed, the system shall separately store basic information (such as title, type, creation and update time, etc.), text and image content (text, image links, etc.), and video content (video link, thumbnail, video duration, play count, etc.) to enable flexible composition and display. When performing data analysis, the system shall store user video play counts during different time periods to facilitate statistics, recommendations, or adjustments to placement strategies.",
+  "ddl": "-- Schema for database: rschema_0507\n\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `role` varchar(50) NOT NULL DEFAULT 'user',\n  `email` varchar(255) DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `username` (`username`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tokens` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `token` varchar(512) NOT NULL,\n  `type` varchar(50) NOT NULL DEFAULT 'login',\n  `expires_at` datetime DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `is_valid` tinyint(1) NOT NULL DEFAULT 1,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `token` (`token`),\n  CONSTRAINT `tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `content` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `type` varchar(50) NOT NULL,\n  `status` varchar(50) NOT NULL DEFAULT 'draft',\n  `author_id` int(11) DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `content_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `content_text_image` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `content_id` int(11) NOT NULL,\n  `text_body` text DEFAULT NULL,\n  `image_url` varchar(512) DEFAULT NULL,\n  `image_alt` varchar(255) DEFAULT NULL,\n  `sort_order` int(11) NOT NULL DEFAULT 0,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `content_text_image_ibfk_1` FOREIGN KEY (`content_id`) REFERENCES `content` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `content_video` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `content_id` int(11) NOT NULL,\n  `video_url` varchar(512) NOT NULL,\n  `thumbnail_url` varchar(512) DEFAULT NULL,\n  `duration` int(11) DEFAULT NULL,\n  `play_count` int(11) NOT NULL DEFAULT 0,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `content_video_ibfk_1` FOREIGN KEY (`content_id`) REFERENCES `content` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_video_play_stats` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `video_id` int(11) NOT NULL,\n  `period_start` datetime NOT NULL,\n  `period_end` datetime NOT NULL,\n  `play_count` int(11) NOT NULL DEFAULT 0,\n  `created_at` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `user_video_play_stats_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `user_video_play_stats_ibfk_2` FOREIGN KEY (`video_id`) REFERENCES `content_video` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "tokens",
+      "content",
+      "content_text_image",
+      "content_video",
+      "user_video_play_stats"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "tokens": [],
+      "content": [],
+      "content_text_image": [],
+      "content_video": [],
+      "user_video_play_stats": []
+    }
+  }
+}

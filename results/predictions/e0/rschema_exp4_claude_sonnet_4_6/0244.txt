@@ -1,0 +1,85 @@
+-- Schema for database: rschema_0244
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `role` varchar(20) NOT NULL DEFAULT 'user',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `account` (`account`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bus_route` (
+  `route_id` int(11) NOT NULL AUTO_INCREMENT,
+  `route_name` varchar(100) NOT NULL,
+  `start_station` varchar(100) NOT NULL,
+  `end_station` varchar(100) NOT NULL,
+  `price` decimal(10,2) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`route_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `station` (
+  `station_id` int(11) NOT NULL AUTO_INCREMENT,
+  `station_name` varchar(100) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `latitude` decimal(10,7) DEFAULT NULL,
+  `longitude` decimal(10,7) DEFAULT NULL,
+  PRIMARY KEY (`station_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `route_station` (
+  `route_station_id` int(11) NOT NULL AUTO_INCREMENT,
+  `route_id` int(11) NOT NULL,
+  `station_id` int(11) NOT NULL,
+  `stop_order` int(11) NOT NULL,
+  `arrival_time` varchar(20) DEFAULT NULL,
+  `departure_time` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`route_station_id`),
+  CONSTRAINT `route_station_ibfk_1` FOREIGN KEY (`route_id`) REFERENCES `bus_route` (`route_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `route_station_ibfk_2` FOREIGN KEY (`station_id`) REFERENCES `station` (`station_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `announcement` (
+  `announcement_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `category` varchar(50) DEFAULT NULL,
+  `admin_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`announcement_id`),
+  CONSTRAINT `announcement_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `question` (
+  `question_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `route_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'open',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`question_id`),
+  CONSTRAINT `question_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `question_ibfk_2` FOREIGN KEY (`route_id`) REFERENCES `bus_route` (`route_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `answer` (
+  `answer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `question_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`answer_id`),
+  CONSTRAINT `answer_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `question` (`question_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `answer_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

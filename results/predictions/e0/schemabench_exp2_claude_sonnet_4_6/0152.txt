@@ -1,0 +1,107 @@
+-- Schema for database: schemabench_0152
+
+CREATE TABLE `roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `scope` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `abilities` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `entity_id` int(11) DEFAULT NULL,
+  `entity_type` varchar(255) DEFAULT NULL,
+  `only_owned` tinyint(1) NOT NULL DEFAULT 0,
+  `scope` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `email_verified_at` datetime DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `remember_token` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `assigned_roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_id` int(11) NOT NULL,
+  `entity_id` int(11) NOT NULL,
+  `entity_type` varchar(255) NOT NULL,
+  `restricted_to_id` int(11) DEFAULT NULL,
+  `restricted_to_type` varchar(255) DEFAULT NULL,
+  `scope` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `assigned_roles_role_id_foreign` (`role_id`),
+  CONSTRAINT `assigned_roles_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ability_id` int(11) NOT NULL,
+  `entity_id` int(11) NOT NULL,
+  `entity_type` varchar(255) NOT NULL,
+  `forbidden` tinyint(1) NOT NULL DEFAULT 0,
+  `scope` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `permissions_ability_id_foreign` (`ability_id`),
+  CONSTRAINT `permissions_ibfk_1` FOREIGN KEY (`ability_id`) REFERENCES `abilities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role_abilities` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_id` int(11) NOT NULL,
+  `ability_id` int(11) NOT NULL,
+  `forbidden` tinyint(1) NOT NULL DEFAULT 0,
+  `scope` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `role_abilities_role_id_foreign` (`role_id`),
+  KEY `role_abilities_ability_id_foreign` (`ability_id`),
+  CONSTRAINT `role_abilities_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `role_abilities_ibfk_2` FOREIGN KEY (`ability_id`) REFERENCES `abilities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tenants` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `domain` varchar(255) DEFAULT NULL,
+  `scope` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `activity_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `action` varchar(255) NOT NULL,
+  `subject_type` varchar(255) DEFAULT NULL,
+  `subject_id` int(11) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `properties` text DEFAULT NULL,
+  `scope` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `activity_logs_user_id_foreign` (`user_id`),
+  CONSTRAINT `activity_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

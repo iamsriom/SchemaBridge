@@ -1,0 +1,168 @@
+-- Schema for database: schemabench_0010
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `api_key` varchar(255) DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT 1,
+  `level` int(11) NOT NULL DEFAULT 2,
+  `remember_token` varchar(255) DEFAULT NULL,
+  `google_2fa_secret` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`),
+  UNIQUE KEY `users_api_key_unique` (`api_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `component_groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `order` int(11) NOT NULL DEFAULT 0,
+  `collapsed` int(11) NOT NULL DEFAULT 0,
+  `visible` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `components` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `status` int(11) NOT NULL DEFAULT 1,
+  `order` int(11) NOT NULL DEFAULT 0,
+  `group_id` int(11) DEFAULT NULL,
+  `link` varchar(255) DEFAULT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT 1,
+  `meta` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `components_group_id_foreign` (`group_id`),
+  CONSTRAINT `components_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `component_groups` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `incidents` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `component_id` int(11) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `status` int(11) NOT NULL DEFAULT 1,
+  `visible` int(11) NOT NULL DEFAULT 0,
+  `stickied` tinyint(1) NOT NULL DEFAULT 0,
+  `message` text DEFAULT NULL,
+  `scheduled_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `incidents_component_id_foreign` (`component_id`),
+  CONSTRAINT `incidents_ibfk_1` FOREIGN KEY (`component_id`) REFERENCES `components` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `incident_updates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `incident_id` int(11) NOT NULL,
+  `status` int(11) NOT NULL DEFAULT 1,
+  `message` text NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `incident_updates_incident_id_foreign` (`incident_id`),
+  KEY `incident_updates_user_id_foreign` (`user_id`),
+  CONSTRAINT `incident_updates_ibfk_1` FOREIGN KEY (`incident_id`) REFERENCES `incidents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `incident_updates_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `incident_templates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `template` text NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `incident_templates_slug_unique` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `metrics` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `suffix` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `default_value` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `calc_type` int(11) NOT NULL DEFAULT 0,
+  `display_chart` tinyint(1) NOT NULL DEFAULT 1,
+  `order` int(11) NOT NULL DEFAULT 0,
+  `visible` int(11) NOT NULL DEFAULT 0,
+  `threshold` int(11) NOT NULL DEFAULT 5,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `metric_points` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `metric_id` int(11) NOT NULL,
+  `value` decimal(10,2) NOT NULL,
+  `counter` int(11) NOT NULL DEFAULT 1,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `metric_points_metric_id_foreign` (`metric_id`),
+  CONSTRAINT `metric_points_ibfk_1` FOREIGN KEY (`metric_id`) REFERENCES `metrics` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscribers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) DEFAULT NULL,
+  `verify_code` varchar(255) DEFAULT NULL,
+  `verified_at` datetime DEFAULT NULL,
+  `global` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `subscribers_email_unique` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `subscriber_id` int(11) NOT NULL,
+  `component_id` int(11) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `subscriptions_subscriber_id_foreign` (`subscriber_id`),
+  KEY `subscriptions_component_id_foreign` (`component_id`),
+  CONSTRAINT `subscriptions_ibfk_1` FOREIGN KEY (`subscriber_id`) REFERENCES `subscribers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `subscriptions_ibfk_2` FOREIGN KEY (`component_id`) REFERENCES `components` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `data` text DEFAULT NULL,
+  `read_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `notifications_user_id_foreign` (`user_id`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `value` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `settings_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

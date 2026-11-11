@@ -1,0 +1,77 @@
+-- Schema for database: rschema_0416
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
+  `nickname` varchar(255) DEFAULT NULL,
+  `registration_time` datetime NOT NULL,
+  `role` varchar(50) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_username` (`username`),
+  UNIQUE KEY `uk_users_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `companies` (
+  `company_id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_name` varchar(255) NOT NULL,
+  `company_address` varchar(255) DEFAULT NULL,
+  `company_profile` text DEFAULT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `jobs` (
+  `job_id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text DEFAULT NULL,
+  `requirements` text DEFAULT NULL,
+  `job_category` varchar(100) DEFAULT NULL,
+  `salary` varchar(100) DEFAULT NULL,
+  `education_level` varchar(100) DEFAULT NULL,
+  `work_location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`job_id`),
+  KEY `jobs_ibfk_1` (`company_id`),
+  CONSTRAINT `jobs_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resumes` (
+  `resume_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `job_id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `resume_content` text DEFAULT NULL,
+  `submit_time` datetime NOT NULL,
+  PRIMARY KEY (`resume_id`),
+  KEY `resumes_ibfk_1` (`user_id`),
+  KEY `resumes_ibfk_2` (`job_id`),
+  KEY `resumes_ibfk_3` (`company_id`),
+  CONSTRAINT `resumes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `resumes_ibfk_2` FOREIGN KEY (`job_id`) REFERENCES `jobs` (`job_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `resumes_ibfk_3` FOREIGN KEY (`company_id`) REFERENCES `companies` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `conversations` (
+  `conversation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sender_user_id` int(11) NOT NULL,
+  `receiver_user_id` int(11) NOT NULL,
+  `message_content` text NOT NULL,
+  `send_time` datetime NOT NULL,
+  PRIMARY KEY (`conversation_id`),
+  KEY `conversations_ibfk_1` (`sender_user_id`),
+  KEY `conversations_ibfk_2` (`receiver_user_id`),
+  CONSTRAINT `conversations_ibfk_1` FOREIGN KEY (`sender_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `conversations_ibfk_2` FOREIGN KEY (`receiver_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `message_board` (
+  `message_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `message_content` text NOT NULL,
+  `message_time` datetime NOT NULL,
+  PRIMARY KEY (`message_id`),
+  KEY `message_board_ibfk_1` (`user_id`),
+  CONSTRAINT `message_board_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

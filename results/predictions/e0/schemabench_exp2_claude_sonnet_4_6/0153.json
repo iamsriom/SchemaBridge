@@ -1,0 +1,28 @@
+{
+  "text_number": 153,
+  "id": "SB-153",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "schemabench_0153",
+  "question": "Background / Context\n\nThe project involves developing a database system for library management. The system is designed to handle the management of books, staff, members, book issuance, book returns, and fines associated with late returns. It includes six tables—Books, Staffs, Members, IssuedBooks, ReturnBooks, and Fine—to ensure efficient operations and data integrity within the library.\n\nObjectives\n\n- Facilitate the management of library books and their availability.\n- Efficiently manage library membership and staff information.\n- Track the issuance and return of books.\n- Automatically calculate and manage fines for overdue book returns.\n\nStakeholders & Users\n\n- Library Staff: Utilize the system to manage daily operations such as book issuance and returns.\n- Library Members: Borrow and return books, subject to membership status and regulations.\n- Administrators: Oversee operations, data integrity, and system maintenance.\n\nFunctional Descriptions\n\n1. Books Management\n   - Store details about books including title, author, publisher, publication date, ISBN, total copies, and available copies.\n   - Update available copies automatically upon book issuance or return.\n\n2. Staff Management\n   - Store and update details of library staff, including personal information and date of joining.\n\n3. Membership Management\n   - Maintain records of library members, covering personal details and membership status (active or not active).\n\n4. Book Issuance and Return Tracking\n   - Record issuance details including member ID, book ID, issuance date, due date, and staff ID handling the transaction.\n   - Record return details, including the date of return and staff member receiving the book.\n\n5. Fines Management\n   - Calculate fines for late returns based on the number of days overdue, applying a rate per day.\n   - Automatically create fine records linked to returned items.\n\nNon-Functional Descriptions\n\n- Ensure data integrity and consistency across all tables through the use of primary and foreign keys.\n- Maintain high data quality through constraints and validation checks.\n- Provide a scalable design to accommodate future enhancements or increased library activities.",
+  "ddl": "-- Schema for database: schemabench_0153\n\nCREATE TABLE `Books` (\n  `book_id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `author` varchar(255) NOT NULL,\n  `publisher` varchar(255) DEFAULT NULL,\n  `publication_date` date DEFAULT NULL,\n  `isbn` varchar(20) NOT NULL,\n  `total_copies` int(11) NOT NULL DEFAULT '0',\n  `available_copies` int(11) NOT NULL DEFAULT '0',\n  PRIMARY KEY (`book_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Staffs` (\n  `staff_id` int(11) NOT NULL AUTO_INCREMENT,\n  `first_name` varchar(100) NOT NULL,\n  `last_name` varchar(100) NOT NULL,\n  `email` varchar(255) DEFAULT NULL,\n  `phone` varchar(20) DEFAULT NULL,\n  `address` varchar(255) DEFAULT NULL,\n  `date_of_joining` date NOT NULL,\n  PRIMARY KEY (`staff_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Members` (\n  `member_id` int(11) NOT NULL AUTO_INCREMENT,\n  `first_name` varchar(100) NOT NULL,\n  `last_name` varchar(100) NOT NULL,\n  `email` varchar(255) DEFAULT NULL,\n  `phone` varchar(20) DEFAULT NULL,\n  `address` varchar(255) DEFAULT NULL,\n  `membership_status` varchar(20) NOT NULL DEFAULT 'active',\n  `date_of_membership` date NOT NULL,\n  PRIMARY KEY (`member_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `IssuedBooks` (\n  `issue_id` int(11) NOT NULL AUTO_INCREMENT,\n  `member_id` int(11) NOT NULL,\n  `book_id` int(11) NOT NULL,\n  `issue_date` date NOT NULL,\n  `due_date` date NOT NULL,\n  `staff_id` int(11) NOT NULL,\n  PRIMARY KEY (`issue_id`),\n  CONSTRAINT `issuedbooks_ibfk_1` FOREIGN KEY (`member_id`) REFERENCES `Members` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `issuedbooks_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `Books` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `issuedbooks_ibfk_3` FOREIGN KEY (`staff_id`) REFERENCES `Staffs` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `ReturnBooks` (\n  `return_id` int(11) NOT NULL AUTO_INCREMENT,\n  `issue_id` int(11) NOT NULL,\n  `return_date` date NOT NULL,\n  `staff_id` int(11) NOT NULL,\n  PRIMARY KEY (`return_id`),\n  CONSTRAINT `returnbooks_ibfk_1` FOREIGN KEY (`issue_id`) REFERENCES `IssuedBooks` (`issue_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `returnbooks_ibfk_2` FOREIGN KEY (`staff_id`) REFERENCES `Staffs` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `Fine` (\n  `fine_id` int(11) NOT NULL AUTO_INCREMENT,\n  `return_id` int(11) NOT NULL,\n  `days_overdue` int(11) NOT NULL DEFAULT '0',\n  `fine_per_day` decimal(10,2) NOT NULL DEFAULT '0.00',\n  `total_fine` decimal(10,2) NOT NULL DEFAULT '0.00',\n  `fine_status` varchar(20) NOT NULL DEFAULT 'unpaid',\n  PRIMARY KEY (`fine_id`),\n  CONSTRAINT `fine_ibfk_1` FOREIGN KEY (`return_id`) REFERENCES `ReturnBooks` (`return_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "Books",
+      "Staffs",
+      "Members",
+      "IssuedBooks",
+      "ReturnBooks",
+      "Fine"
+    ],
+    "columns_by_table": {
+      "Books": [],
+      "Staffs": [],
+      "Members": [],
+      "IssuedBooks": [],
+      "ReturnBooks": [],
+      "Fine": []
+    }
+  }
+}

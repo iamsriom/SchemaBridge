@@ -1,0 +1,56 @@
+-- Schema for database: rschema_0504
+
+CREATE TABLE `cultural_relic` (
+  `relic_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `year` varchar(50) DEFAULT NULL,
+  `category` varchar(100) DEFAULT NULL,
+  `excavation_site` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`relic_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staff` (
+  `staff_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `gender` char(6) DEFAULT NULL,
+  PRIMARY KEY (`staff_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cultural_relic_exhibition` (
+  `exhibition_id` int(11) NOT NULL AUTO_INCREMENT,
+  `relic_id` int(11) NOT NULL,
+  `exhibition_start_time` datetime NOT NULL,
+  `exhibition_end_time` datetime DEFAULT NULL,
+  `exhibition_location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`exhibition_id`),
+  CONSTRAINT `cultural_relic_exhibition_ibfk_1` FOREIGN KEY (`relic_id`) REFERENCES `cultural_relic` (`relic_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cultural_relic_repair` (
+  `repair_id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_id` int(11) NOT NULL,
+  `relic_id` int(11) NOT NULL,
+  `repair_start_time` datetime NOT NULL,
+  `repair_end_time` datetime DEFAULT NULL,
+  `repair_method` varchar(255) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`repair_id`),
+  CONSTRAINT `cultural_relic_repair_ibfk_1` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cultural_relic_repair_ibfk_2` FOREIGN KEY (`relic_id`) REFERENCES `cultural_relic` (`relic_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cultural_relic_monitoring_record` (
+  `monitoring_id` int(11) NOT NULL AUTO_INCREMENT,
+  `relic_id` int(11) NOT NULL,
+  `monitoring_time` datetime NOT NULL,
+  `person_in_charge_id` int(11) NOT NULL,
+  `temperature` decimal(5,2) DEFAULT NULL,
+  `humidity` decimal(5,2) DEFAULT NULL,
+  `light` decimal(10,2) DEFAULT NULL,
+  `air_quality` varchar(100) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`monitoring_id`),
+  CONSTRAINT `cultural_relic_monitoring_record_ibfk_1` FOREIGN KEY (`relic_id`) REFERENCES `cultural_relic` (`relic_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cultural_relic_monitoring_record_ibfk_2` FOREIGN KEY (`person_in_charge_id`) REFERENCES `staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

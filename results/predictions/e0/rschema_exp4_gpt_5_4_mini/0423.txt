@@ -1,0 +1,141 @@
+-- Schema for database: rschema_0423
+CREATE TABLE `course` (
+  `course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_name` varchar(255) NOT NULL,
+  `course_description` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`course_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_detail` (
+  `course_id` int(11) NOT NULL,
+  `lesson_count` int(11) NOT NULL DEFAULT 0,
+  `total_duration` int(11) NOT NULL DEFAULT 0,
+  `difficulty_level` varchar(50) DEFAULT NULL,
+  `course_category` varchar(100) DEFAULT NULL,
+  `target_audience` varchar(255) DEFAULT NULL,
+  `recommendation_status` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`course_id`),
+  CONSTRAINT `course_detail_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `chapter` (
+  `chapter_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_id` int(11) NOT NULL,
+  `chapter_name` varchar(255) NOT NULL,
+  `chapter_description` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`chapter_id`),
+  KEY `chapter_ibfk_1` (`course_id`),
+  CONSTRAINT `chapter_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `chapter_detail` (
+  `chapter_id` int(11) NOT NULL,
+  `video_url` varchar(500) DEFAULT NULL,
+  `course_materials` text DEFAULT NULL,
+  `duration` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`chapter_id`),
+  CONSTRAINT `chapter_detail_ibfk_1` FOREIGN KEY (`chapter_id`) REFERENCES `chapter` (`chapter_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `chapter_sequence` (
+  `chapter_id` int(11) NOT NULL,
+  `previous_chapter_id` int(11) DEFAULT NULL,
+  `next_chapter_id` int(11) DEFAULT NULL,
+  `parent_chapter_id` int(11) DEFAULT NULL,
+  `chapter_order` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`chapter_id`),
+  KEY `chapter_sequence_ibfk_1` (`previous_chapter_id`),
+  KEY `chapter_sequence_ibfk_2` (`next_chapter_id`),
+  KEY `chapter_sequence_ibfk_3` (`parent_chapter_id`),
+  CONSTRAINT `chapter_sequence_ibfk_1` FOREIGN KEY (`previous_chapter_id`) REFERENCES `chapter` (`chapter_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `chapter_sequence_ibfk_2` FOREIGN KEY (`next_chapter_id`) REFERENCES `chapter` (`chapter_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `chapter_sequence_ibfk_3` FOREIGN KEY (`parent_chapter_id`) REFERENCES `chapter` (`chapter_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `chapter_sequence_ibfk_4` FOREIGN KEY (`chapter_id`) REFERENCES `chapter` (`chapter_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `instructor` (
+  `instructor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `instructor_name` varchar(255) NOT NULL,
+  `avatar` varchar(500) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`instructor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `instructor_detail` (
+  `instructor_id` int(11) NOT NULL,
+  `teaching_experience` text DEFAULT NULL,
+  `professional_field` varchar(255) DEFAULT NULL,
+  `personal_profile` text DEFAULT NULL,
+  PRIMARY KEY (`instructor_id`),
+  CONSTRAINT `instructor_detail_ibfk_1` FOREIGN KEY (`instructor_id`) REFERENCES `instructor` (`instructor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `instructor_course` (
+  `instructor_course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `instructor_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `teaching_role` varchar(100) DEFAULT NULL,
+  `rating` decimal(3,2) DEFAULT NULL,
+  `student_feedback` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`instructor_course_id`),
+  KEY `instructor_course_ibfk_1` (`instructor_id`),
+  KEY `instructor_course_ibfk_2` (`course_id`),
+  CONSTRAINT `instructor_course_ibfk_1` FOREIGN KEY (`instructor_id`) REFERENCES `instructor` (`instructor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `instructor_course_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_name` varchar(255) NOT NULL,
+  `avatar` varchar(500) DEFAULT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `registered_at` datetime DEFAULT NULL,
+  `account_status` varchar(50) DEFAULT NULL,
+  `membership_level` varchar(50) DEFAULT NULL,
+  `points` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student_learning_progress` (
+  `progress_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `current_chapter_id` int(11) DEFAULT NULL,
+  `last_learning_time` datetime DEFAULT NULL,
+  `course_progress` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `total_learning_duration` int(11) NOT NULL DEFAULT 0,
+  `course_completion_rate` decimal(5,2) NOT NULL DEFAULT 0.00,
+  PRIMARY KEY (`progress_id`),
+  KEY `student_learning_progress_ibfk_1` (`student_id`),
+  KEY `student_learning_progress_ibfk_2` (`course_id`),
+  KEY `student_learning_progress_ibfk_3` (`current_chapter_id`),
+  CONSTRAINT `student_learning_progress_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `student_learning_progress_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `student_learning_progress_ibfk_3` FOREIGN KEY (`current_chapter_id`) REFERENCES `chapter` (`chapter_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student_viewing_record` (
+  `viewing_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `chapter_id` int(11) NOT NULL,
+  `viewing_duration` int(11) NOT NULL DEFAULT 0,
+  `view_count` int(11) NOT NULL DEFAULT 0,
+  `completion_status` varchar(50) DEFAULT NULL,
+  `last_viewed_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`viewing_record_id`),
+  KEY `student_viewing_record_ibfk_1` (`student_id`),
+  KEY `student_viewing_record_ibfk_2` (`course_id`),
+  KEY `student_viewing_record_ibfk_3` (`chapter_id`),
+  CONSTRAINT `student_viewing_record_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `student_viewing_record_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `student_viewing_record_ibfk_3` FOREIGN KEY (`chapter_id`) REFERENCES `chapter` (`chapter_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,106 @@
+-- Schema for database: rschema_0442
+
+CREATE TABLE `medical_institution` (
+  `institution_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(500) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`institution_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `institution_id` int(11) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`department_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`institution_id`) REFERENCES `medical_institution` (`institution_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `personnel` (
+  `personnel_id` int(11) NOT NULL AUTO_INCREMENT,
+  `institution_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `role` varchar(100) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`personnel_id`),
+  CONSTRAINT `personnel_ibfk_1` FOREIGN KEY (`institution_id`) REFERENCES `medical_institution` (`institution_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vehicle` (
+  `vehicle_id` int(11) NOT NULL AUTO_INCREMENT,
+  `institution_id` int(11) NOT NULL,
+  `license_plate` varchar(50) NOT NULL,
+  `model` varchar(100) DEFAULT NULL,
+  `capacity` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`vehicle_id`),
+  CONSTRAINT `vehicle_ibfk_1` FOREIGN KEY (`institution_id`) REFERENCES `medical_institution` (`institution_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medical_waste` (
+  `waste_id` int(11) NOT NULL AUTO_INCREMENT,
+  `institution_id` int(11) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `collector_id` int(11) NOT NULL,
+  `waste_type` varchar(100) NOT NULL,
+  `weight` decimal(10,2) DEFAULT NULL,
+  `generation_time` datetime NOT NULL,
+  `collection_time` datetime DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`waste_id`),
+  CONSTRAINT `medical_waste_ibfk_1` FOREIGN KEY (`institution_id`) REFERENCES `medical_institution` (`institution_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `medical_waste_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `medical_waste_ibfk_3` FOREIGN KEY (`collector_id`) REFERENCES `personnel` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `traceability_code` (
+  `trace_id` int(11) NOT NULL AUTO_INCREMENT,
+  `waste_id` int(11) NOT NULL,
+  `trace_code` varchar(100) NOT NULL,
+  `generation_time` datetime NOT NULL,
+  PRIMARY KEY (`trace_id`),
+  UNIQUE KEY `trace_code` (`trace_code`),
+  CONSTRAINT `traceability_code_ibfk_1` FOREIGN KEY (`waste_id`) REFERENCES `medical_waste` (`waste_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `waste_inbound` (
+  `inbound_id` int(11) NOT NULL AUTO_INCREMENT,
+  `batch_number` varchar(100) NOT NULL,
+  `expected_quantity` int(11) DEFAULT NULL,
+  `actual_quantity` int(11) DEFAULT NULL,
+  `expected_weight` decimal(10,2) DEFAULT NULL,
+  `actual_weight` decimal(10,2) DEFAULT NULL,
+  `inbound_time` datetime NOT NULL,
+  `collector_id` int(11) NOT NULL,
+  `confirmer_id` int(11) NOT NULL,
+  PRIMARY KEY (`inbound_id`),
+  CONSTRAINT `waste_inbound_ibfk_1` FOREIGN KEY (`collector_id`) REFERENCES `personnel` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `waste_inbound_ibfk_2` FOREIGN KEY (`confirmer_id`) REFERENCES `personnel` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `waste_outbound` (
+  `outbound_id` int(11) NOT NULL AUTO_INCREMENT,
+  `batch_number` varchar(100) NOT NULL,
+  `outbound_quantity` int(11) DEFAULT NULL,
+  `outbound_weight` decimal(10,2) DEFAULT NULL,
+  `outbound_time` datetime NOT NULL,
+  `transporter_id` int(11) NOT NULL,
+  `confirmer_id` int(11) NOT NULL,
+  PRIMARY KEY (`outbound_id`),
+  CONSTRAINT `waste_outbound_ibfk_1` FOREIGN KEY (`transporter_id`) REFERENCES `personnel` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `waste_outbound_ibfk_2` FOREIGN KEY (`confirmer_id`) REFERENCES `personnel` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transportation` (
+  `transport_id` int(11) NOT NULL AUTO_INCREMENT,
+  `outbound_id` int(11) NOT NULL,
+  `vehicle_id` int(11) NOT NULL,
+  `transporter_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `recipient` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`transport_id`),
+  CONSTRAINT `transportation_ibfk_1` FOREIGN KEY (`outbound_id`) REFERENCES `waste_outbound` (`outbound_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transportation_ibfk_2` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicle` (`vehicle_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transportation_ibfk_3` FOREIGN KEY (`transporter_id`) REFERENCES `personnel` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

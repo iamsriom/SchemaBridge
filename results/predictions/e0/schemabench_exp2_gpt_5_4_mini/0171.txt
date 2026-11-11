@@ -1,0 +1,76 @@
+-- Schema for database: schemabench_0171
+CREATE TABLE `counterparty` (
+  `counterparty_id` int(11) NOT NULL AUTO_INCREMENT,
+  `counterparty_name` varchar(255) NOT NULL,
+  `exposure_limit` decimal(18,2) NOT NULL,
+  `contact_email` varchar(255) DEFAULT NULL,
+  `contact_phone` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`counterparty_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `instrument` (
+  `instrument_id` int(11) NOT NULL AUTO_INCREMENT,
+  `instrument_name` varchar(255) NOT NULL,
+  `instrument_type` varchar(100) NOT NULL,
+  `maturity_date` date DEFAULT NULL,
+  `settlement_type` varchar(50) NOT NULL,
+  `currency_code` char(3) NOT NULL,
+  PRIMARY KEY (`instrument_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trader` (
+  `trader_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `department` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`trader_id`),
+  UNIQUE KEY `uk_trader_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trade_status` (
+  `status_id` int(11) NOT NULL AUTO_INCREMENT,
+  `status_name` varchar(50) NOT NULL,
+  `status_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`status_id`),
+  UNIQUE KEY `uk_trade_status_name` (`status_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trade` (
+  `trade_id` int(11) NOT NULL AUTO_INCREMENT,
+  `portfolio_code` varchar(50) NOT NULL,
+  `trade_date` date NOT NULL,
+  `execution_datetime` datetime NOT NULL,
+  `instrument_id` int(11) NOT NULL,
+  `counterparty_id` int(11) NOT NULL,
+  `trader_id` int(11) NOT NULL,
+  `status_id` int(11) NOT NULL,
+  `quantity` decimal(18,4) NOT NULL,
+  `price` decimal(18,4) NOT NULL,
+  `settlement_date` date DEFAULT NULL,
+  `trade_reference` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`trade_id`),
+  KEY `trade_ibfk_1` (`instrument_id`),
+  KEY `trade_ibfk_2` (`counterparty_id`),
+  KEY `trade_ibfk_3` (`trader_id`),
+  KEY `trade_ibfk_4` (`status_id`),
+  CONSTRAINT `trade_ibfk_1` FOREIGN KEY (`instrument_id`) REFERENCES `instrument` (`instrument_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trade_ibfk_2` FOREIGN KEY (`counterparty_id`) REFERENCES `counterparty` (`counterparty_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trade_ibfk_3` FOREIGN KEY (`trader_id`) REFERENCES `trader` (`trader_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trade_ibfk_4` FOREIGN KEY (`status_id`) REFERENCES `trade_status` (`status_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trade_audit_log` (
+  `audit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `trade_id` int(11) NOT NULL,
+  `action_type` varchar(50) NOT NULL,
+  `action_timestamp` datetime NOT NULL,
+  `performed_by` int(11) DEFAULT NULL,
+  `details` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`audit_id`),
+  KEY `trade_audit_log_ibfk_1` (`trade_id`),
+  KEY `trade_audit_log_ibfk_2` (`performed_by`),
+  CONSTRAINT `trade_audit_log_ibfk_1` FOREIGN KEY (`trade_id`) REFERENCES `trade` (`trade_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trade_audit_log_ibfk_2` FOREIGN KEY (`performed_by`) REFERENCES `trader` (`trader_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

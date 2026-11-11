@@ -1,0 +1,158 @@
+-- Schema for database: schemabench_0086
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `email_verified_at` datetime DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `remember_token` varchar(100) DEFAULT NULL,
+  `stripe_id` varchar(255) DEFAULT NULL,
+  `pm_type` varchar(255) DEFAULT NULL,
+  `pm_last_four` varchar(4) DEFAULT NULL,
+  `trial_ends_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`),
+  KEY `users_stripe_id_index` (`stripe_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscription_plans` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `price_monthly` decimal(10,2) DEFAULT NULL,
+  `price_yearly` decimal(10,2) DEFAULT NULL,
+  `stripe_monthly_price_id` varchar(255) DEFAULT NULL,
+  `stripe_yearly_price_id` varchar(255) DEFAULT NULL,
+  `paddle_monthly_plan_id` varchar(255) DEFAULT NULL,
+  `paddle_yearly_plan_id` varchar(255) DEFAULT NULL,
+  `per_seat` tinyint(1) NOT NULL DEFAULT 0,
+  `max_seats` int(11) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `subscription_plans_slug_unique` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `stripe_id` varchar(255) DEFAULT NULL,
+  `stripe_status` varchar(255) DEFAULT NULL,
+  `stripe_price` varchar(255) DEFAULT NULL,
+  `paddle_id` varchar(255) DEFAULT NULL,
+  `paddle_status` varchar(255) DEFAULT NULL,
+  `paddle_plan` varchar(255) DEFAULT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `billing_cycle` varchar(20) NOT NULL DEFAULT 'monthly',
+  `trial_ends_at` datetime DEFAULT NULL,
+  `paused_from` datetime DEFAULT NULL,
+  `ends_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `subscriptions_user_id_stripe_status_index` (`user_id`, `stripe_status`),
+  CONSTRAINT `subscriptions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscription_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `subscription_id` int(11) NOT NULL,
+  `stripe_id` varchar(255) DEFAULT NULL,
+  `stripe_product` varchar(255) DEFAULT NULL,
+  `stripe_price` varchar(255) DEFAULT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `subscription_items_subscription_id_stripe_price_unique` (`subscription_id`, `stripe_price`),
+  CONSTRAINT `subscription_items_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `invoices` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `subscription_id` int(11) DEFAULT NULL,
+  `provider` varchar(50) NOT NULL DEFAULT 'stripe',
+  `provider_invoice_id` varchar(255) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `currency` char(3) NOT NULL DEFAULT 'USD',
+  `subtotal` int(11) NOT NULL DEFAULT 0,
+  `tax` int(11) NOT NULL DEFAULT 0,
+  `total` int(11) NOT NULL DEFAULT 0,
+  `invoice_date` datetime NOT NULL,
+  `due_date` datetime DEFAULT NULL,
+  `paid_at` datetime DEFAULT NULL,
+  `pdf_url` varchar(255) DEFAULT NULL,
+  `emailed_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `invoices_user_id_index` (`user_id`),
+  KEY `invoices_subscription_id_index` (`subscription_id`),
+  CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `invoices_ibfk_2` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment_methods` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `provider` varchar(50) NOT NULL DEFAULT 'stripe',
+  `provider_payment_method_id` varchar(255) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `last_four` varchar(4) DEFAULT NULL,
+  `brand` varchar(50) DEFAULT NULL,
+  `exp_month` tinyint(2) DEFAULT NULL,
+  `exp_year` smallint(4) DEFAULT NULL,
+  `is_default` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `payment_methods_user_id_index` (`user_id`),
+  CONSTRAINT `payment_methods_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `teams_slug_unique` (`slug`),
+  KEY `teams_owner_id_index` (`owner_id`),
+  CONSTRAINT `teams_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `team_members` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'member',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `team_members_team_id_user_id_unique` (`team_id`, `user_id`),
+  KEY `team_members_user_id_index` (`user_id`),
+  CONSTRAINT `team_members_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `team_members_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `webhook_events` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `provider` varchar(50) NOT NULL,
+  `event_id` varchar(255) NOT NULL,
+  `event_type` varchar(255) NOT NULL,
+  `payload` json NOT NULL,
+  `processed_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `webhook_events_provider_event_id_unique` (`provider`, `event_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

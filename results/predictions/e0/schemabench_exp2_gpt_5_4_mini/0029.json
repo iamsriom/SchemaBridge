@@ -1,0 +1,252 @@
+{
+  "text_number": 29,
+  "id": "SB-029",
+  "llm": "gpt54mini",
+  "model_id": "gpt-5.4-mini",
+  "database": "schemabench_0029",
+  "question": "Background / Context\n\nThis project involves the development of a Django application designed to manage `robots.txt` files. These files use the Robots Exclusion Protocol to instruct web crawlers on which parts of a website can be accessed. The application is intended to complement the Django Sitemap contrib app by providing a straightforward interface for managing these files.\n\nObjectives\n\nThe primary objective is to create a user-friendly application that allows website administrators to easily manage and customize `robots.txt` rules for different sites. This includes defining rules for which URLs can or cannot be accessed by web robots and specifying crawl delays.\n\nStakeholders & Users\n\n- Website Administrators: Primary users who will manage `robots.txt` files.\n- Developers: Use this app to enhance website SEO management alongside other Django tools.\n- Web Crawlers / Robots: Indirect users affected by the `robots.txt` configurations.\n\nFunctional Descriptions\n\n1. Rule Management: Enable the creation, editing, and deletion of rules defining which web crawlers can access specific parts of a website.\n2. Crawl Delay Configuration: Allow setting of crawl delays for different web robots to manage server load.\n3. Allowed URLs: Maintain a list of URL patterns that are accessible to specified web crawlers.\n4. Disallowed URLs: Manage URL patterns that are restricted from crawler access.\n5. Site Association: Allow rules to be associated with specific sites within the Django framework.\n\nNon-Functional Descriptions\n\n- Usability: The application should provide an intuitive and simple interface for managing `robots.txt` rules.\n- Compatibility: Must integrate seamlessly with existing Django applications, especially the Django Sitemap contrib app.\n- Scalability: Should efficiently handle rule management for multiple sites and extensive URL pattern lists.",
+  "ddl": "-- Schema for database: schemabench_0029\nCREATE TABLE `site` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `domain` varchar(100) NOT NULL,\n  `name` varchar(50) NOT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `site_domain_uniq` (`domain`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `robots_txt_rule` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `site_id` int(11) NOT NULL,\n  `user_agent` varchar(255) NOT NULL,\n  `crawl_delay` int(11) DEFAULT NULL,\n  `order` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `robots_txt_rule_site_id_idx` (`site_id`),\n  CONSTRAINT `robots_txt_rule_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `site` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `robots_txt_allowed_url` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `rule_id` int(11) NOT NULL,\n  `path` varchar(255) NOT NULL,\n  `order` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `robots_txt_allowed_url_rule_id_idx` (`rule_id`),\n  CONSTRAINT `robots_txt_allowed_url_ibfk_1` FOREIGN KEY (`rule_id`) REFERENCES `robots_txt_rule` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `robots_txt_disallowed_url` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `rule_id` int(11) NOT NULL,\n  `path` varchar(255) NOT NULL,\n  `order` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `robots_txt_disallowed_url_rule_id_idx` (`rule_id`),\n  CONSTRAINT `robots_txt_disallowed_url_ibfk_1` FOREIGN KEY (`rule_id`) REFERENCES `robots_txt_rule` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "schemabench_0029",
+    "tables": [
+      "site",
+      "robots_txt_rule",
+      "robots_txt_allowed_url",
+      "robots_txt_disallowed_url"
+    ],
+    "columns_by_table": {
+      "site": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "auto_increment",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "domain",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 100,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(100)",
+          "COLUMN_KEY": "UNI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "name",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 50,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(50)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "robots_txt_rule": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "auto_increment",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "site_id",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "MUL",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "user_agent",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "crawl_delay",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "order",
+          "ORDINAL_POSITION": 5,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "robots_txt_allowed_url": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "auto_increment",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "rule_id",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "MUL",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "path",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "order",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "robots_txt_disallowed_url": [
+        {
+          "COLUMN_NAME": "id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "auto_increment",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "rule_id",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "MUL",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "path",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "order",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ]
+    }
+  }
+}

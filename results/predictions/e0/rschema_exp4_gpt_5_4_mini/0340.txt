@@ -1,0 +1,59 @@
+-- Schema for database: rschema_0340
+CREATE TABLE `application` (
+  `application_id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`application_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `language` (
+  `language_id` int(11) NOT NULL AUTO_INCREMENT,
+  `iso_code` varchar(10) NOT NULL,
+  `language_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`language_id`),
+  UNIQUE KEY `uk_language_iso_code` (`iso_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `country` (
+  `country_id` int(11) NOT NULL AUTO_INCREMENT,
+  `iso_code` varchar(10) NOT NULL,
+  `country_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`country_id`),
+  UNIQUE KEY `uk_country_iso_code` (`iso_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resource_file` (
+  `resource_file_id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_id` int(11) NOT NULL,
+  `file_path` varchar(500) NOT NULL,
+  `base_name` varchar(255) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `country_id` int(11) DEFAULT NULL,
+  `version` varchar(50) NOT NULL,
+  PRIMARY KEY (`resource_file_id`),
+  KEY `resource_file_ibfk_1` (`application_id`),
+  KEY `resource_file_ibfk_2` (`language_id`),
+  KEY `resource_file_ibfk_3` (`country_id`),
+  CONSTRAINT `resource_file_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `application` (`application_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `resource_file_ibfk_2` FOREIGN KEY (`language_id`) REFERENCES `language` (`language_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `resource_file_ibfk_3` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resource_key` (
+  `resource_key_id` int(11) NOT NULL AUTO_INCREMENT,
+  `resource_file_id` int(11) NOT NULL,
+  `key_name` varchar(255) NOT NULL,
+  `key_version` varchar(50) NOT NULL,
+  PRIMARY KEY (`resource_key_id`),
+  KEY `resource_key_ibfk_1` (`resource_file_id`),
+  CONSTRAINT `resource_key_ibfk_1` FOREIGN KEY (`resource_file_id`) REFERENCES `resource_file` (`resource_file_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resource_value` (
+  `resource_value_id` int(11) NOT NULL AUTO_INCREMENT,
+  `resource_key_id` int(11) NOT NULL,
+  `value_content` text NOT NULL,
+  `value_version` varchar(50) NOT NULL,
+  PRIMARY KEY (`resource_value_id`),
+  KEY `resource_value_ibfk_1` (`resource_key_id`),
+  CONSTRAINT `resource_value_ibfk_1` FOREIGN KEY (`resource_key_id`) REFERENCES `resource_key` (`resource_key_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

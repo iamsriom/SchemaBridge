@@ -1,0 +1,34 @@
+{
+  "text_number": 245,
+  "id": "67552f0a13602ec03b41a9f1",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0245",
+  "question": "System Requirements Function Description\n\nAccording to the provided file content, Weishu is a novel reading system based on WeChat applet, and the main functional modules are as follows:\n\n1: My bookshelf: Users can add their favorite novels to the bookshelf for subsequent reading.\n\n2: Bookstore: Provides browsing and search functions for various novels, and users can find their favorite novels.\n\n3: Personal Center: Users can view and manage personal information, such as changing passwords, viewing bookshelves, etc.\n\n4: H5 reader: Provides online reading function and supports reading novel content directly in WeChat applet.\n\n5: Login and registration: Users can manage their accounts through registration and login functions.\n\n6: Book reviews: Users can comment on novels and share their reading experience.\n\n7: Book rankings: Display popular novel rankings to help users discover popular books.",
+  "ddl": "-- Schema for database: rschema_0245\n\nCREATE TABLE `user` (\n  `user_id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(50) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `nickname` varchar(50) DEFAULT NULL,\n  `avatar` varchar(255) DEFAULT NULL,\n  `email` varchar(100) DEFAULT NULL,\n  `phone` varchar(20) DEFAULT NULL,\n  `register_time` datetime NOT NULL,\n  `last_login_time` datetime DEFAULT NULL,\n  `status` tinyint(1) NOT NULL DEFAULT '1',\n  PRIMARY KEY (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `category` (\n  `category_id` int(11) NOT NULL AUTO_INCREMENT,\n  `category_name` varchar(50) NOT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  `sort_order` int(11) DEFAULT NULL,\n  PRIMARY KEY (`category_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `novel` (\n  `novel_id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(100) NOT NULL,\n  `author` varchar(50) NOT NULL,\n  `category_id` int(11) DEFAULT NULL,\n  `cover_image` varchar(255) DEFAULT NULL,\n  `description` text DEFAULT NULL,\n  `total_chapters` int(11) DEFAULT '0',\n  `total_words` int(11) DEFAULT '0',\n  `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0:ongoing,1:completed',\n  `publish_time` datetime DEFAULT NULL,\n  `update_time` datetime DEFAULT NULL,\n  `view_count` int(11) DEFAULT '0',\n  `collect_count` int(11) DEFAULT '0',\n  `rank_score` decimal(10,2) DEFAULT '0.00',\n  PRIMARY KEY (`novel_id`),\n  CONSTRAINT `novel_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `chapter` (\n  `chapter_id` int(11) NOT NULL AUTO_INCREMENT,\n  `novel_id` int(11) NOT NULL,\n  `chapter_number` int(11) NOT NULL,\n  `chapter_title` varchar(100) NOT NULL,\n  `content` longtext DEFAULT NULL,\n  `word_count` int(11) DEFAULT '0',\n  `publish_time` datetime DEFAULT NULL,\n  `is_free` tinyint(1) NOT NULL DEFAULT '1',\n  PRIMARY KEY (`chapter_id`),\n  CONSTRAINT `chapter_ibfk_1` FOREIGN KEY (`novel_id`) REFERENCES `novel` (`novel_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `bookshelf` (\n  `bookshelf_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `novel_id` int(11) NOT NULL,\n  `add_time` datetime NOT NULL,\n  `last_read_chapter_id` int(11) DEFAULT NULL,\n  `last_read_time` datetime DEFAULT NULL,\n  PRIMARY KEY (`bookshelf_id`),\n  CONSTRAINT `bookshelf_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `bookshelf_ibfk_2` FOREIGN KEY (`novel_id`) REFERENCES `novel` (`novel_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `bookshelf_ibfk_3` FOREIGN KEY (`last_read_chapter_id`) REFERENCES `chapter` (`chapter_id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `read_history` (\n  `history_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `novel_id` int(11) NOT NULL,\n  `chapter_id` int(11) NOT NULL,\n  `read_time` datetime NOT NULL,\n  `read_progress` decimal(5,2) DEFAULT '0.00' COMMENT 'percentage of chapter read',\n  PRIMARY KEY (`history_id`),\n  CONSTRAINT `read_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `read_history_ibfk_2` FOREIGN KEY (`novel_id`) REFERENCES `novel` (`novel_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `read_history_ibfk_3` FOREIGN KEY (`chapter_id`) REFERENCES `chapter` (`chapter_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `review` (\n  `review_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `novel_id` int(11) NOT NULL,\n  `content` text NOT NULL,\n  `rating` tinyint(1) DEFAULT NULL COMMENT '1-5 stars',\n  `like_count` int(11) DEFAULT '0',\n  `create_time` datetime NOT NULL,\n  `update_time` datetime DEFAULT NULL,\n  `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0:hidden,1:visible',\n  PRIMARY KEY (`review_id`),\n  CONSTRAINT `review_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `review_ibfk_2` FOREIGN KEY (`novel_id`) REFERENCES `novel` (`novel_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `ranking` (\n  `ranking_id` int(11) NOT NULL AUTO_INCREMENT,\n  `ranking_type` varchar(50) NOT NULL COMMENT 'e.g. weekly,monthly,all_time',\n  `novel_id` int(11) NOT NULL,\n  `rank_position` int(11) NOT NULL,\n  `score` decimal(10,2) DEFAULT '0.00',\n  `update_time` datetime NOT NULL,\n  PRIMARY KEY (`ranking_id`),\n  CONSTRAINT `ranking_ibfk_1` FOREIGN KEY (`novel_id`) REFERENCES `novel` (`novel_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `search_log` (\n  `search_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) DEFAULT NULL,\n  `keyword` varchar(100) NOT NULL,\n  `search_time` datetime NOT NULL,\n  `result_count` int(11) DEFAULT '0',\n  PRIMARY KEY (`search_id`),\n  CONSTRAINT `search_log_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "user",
+      "category",
+      "novel",
+      "chapter",
+      "bookshelf",
+      "read_history",
+      "review",
+      "ranking",
+      "search_log"
+    ],
+    "columns_by_table": {
+      "user": [],
+      "category": [],
+      "novel": [],
+      "chapter": [],
+      "bookshelf": [],
+      "read_history": [],
+      "review": [],
+      "ranking": [],
+      "search_log": []
+    }
+  }
+}

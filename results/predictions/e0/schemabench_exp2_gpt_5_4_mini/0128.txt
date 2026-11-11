@@ -1,0 +1,38 @@
+-- Schema for database: schemabench_0128
+CREATE TABLE `businesses` (
+  `business_id` int(11) NOT NULL,
+  `business_name` varchar(255) NOT NULL,
+  `owner_name` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(50) DEFAULT NULL,
+  `zip_code` varchar(20) DEFAULT NULL,
+  `phone_number` varchar(30) DEFAULT NULL,
+  `latitude` decimal(10,7) DEFAULT NULL,
+  `longitude` decimal(10,7) DEFAULT NULL,
+  PRIMARY KEY (`business_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `inspections` (
+  `inspection_id` int(11) NOT NULL,
+  `business_id` int(11) NOT NULL,
+  `inspection_date` datetime NOT NULL,
+  `inspection_type` varchar(100) NOT NULL,
+  `score` int(11) DEFAULT NULL,
+  `inspection_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`inspection_id`),
+  KEY `business_id` (`business_id`),
+  CONSTRAINT `inspections_ibfk_1` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`business_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `violations` (
+  `violation_id` int(11) NOT NULL,
+  `inspection_id` int(11) NOT NULL,
+  `business_id` int(11) NOT NULL,
+  `violation_type` varchar(255) NOT NULL,
+  `risk_category` varchar(50) DEFAULT NULL,
+  `violation_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`violation_id`),
+  KEY `inspection_id` (`inspection_id`),
+  KEY `business_id` (`business_id`),
+  CONSTRAINT `violations_ibfk_1` FOREIGN KEY (`inspection_id`) REFERENCES `inspections` (`inspection_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `violations_ibfk_2` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`business_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

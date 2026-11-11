@@ -1,0 +1,30 @@
+{
+  "text_number": 357,
+  "id": "67552f0a13602ec03b41a92e",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0357",
+  "question": "The database requirement description for an automobile rental company management system is as follows: The system manages multiple rental locations, each with name, address, telephone, and business hours information. Each location offers different categories of vehicles, including category name and rental prices during weekdays and weekends. Additionally, each location will have multiple specific vehicles, the information for these vehicles includes license plate number, brand, model, photo, and the associated location. Users can register accounts through the system, providing email, name, address, telephone, postal code, city, and can link credit card information for convenient rental payments. Users can reserve vehicles on specified dates, requiring the user's email, license plate number, reservation date, and return date during reservation. The system also manages news and featured content, posting news related to rental services and promotional activities. Through these functionalities, users can inquire about vehicles, locations, and prices, and the system also collects data on vehicle rentals to support the company's operational decisions.",
+  "ddl": "-- Schema for database: rschema_0357\n\nCREATE TABLE `location` (\n  `location_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `address` varchar(255) NOT NULL,\n  `telephone` varchar(50) NOT NULL,\n  `business_hours` varchar(255) NOT NULL,\n  PRIMARY KEY (`location_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `vehicle_category` (\n  `category_id` int(11) NOT NULL AUTO_INCREMENT,\n  `location_id` int(11) NOT NULL,\n  `category_name` varchar(255) NOT NULL,\n  `weekday_price` decimal(10,2) NOT NULL,\n  `weekend_price` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`category_id`),\n  CONSTRAINT `vehicle_category_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `vehicle` (\n  `license_plate` varchar(50) NOT NULL,\n  `location_id` int(11) NOT NULL,\n  `category_id` int(11) DEFAULT NULL,\n  `brand` varchar(100) NOT NULL,\n  `model` varchar(100) NOT NULL,\n  `photo` varchar(500) DEFAULT NULL,\n  PRIMARY KEY (`license_plate`),\n  CONSTRAINT `vehicle_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `vehicle_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `vehicle_category` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user` (\n  `email` varchar(255) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `address` varchar(255) DEFAULT NULL,\n  `telephone` varchar(50) DEFAULT NULL,\n  `postal_code` varchar(20) DEFAULT NULL,\n  `city` varchar(100) DEFAULT NULL,\n  `password_hash` varchar(255) NOT NULL,\n  PRIMARY KEY (`email`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `credit_card` (\n  `card_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_email` varchar(255) NOT NULL,\n  `card_number` varchar(50) NOT NULL,\n  `cardholder_name` varchar(255) NOT NULL,\n  `expiry_date` varchar(10) NOT NULL,\n  `card_type` varchar(50) DEFAULT NULL,\n  PRIMARY KEY (`card_id`),\n  CONSTRAINT `credit_card_ibfk_1` FOREIGN KEY (`user_email`) REFERENCES `user` (`email`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `reservation` (\n  `reservation_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_email` varchar(255) NOT NULL,\n  `license_plate` varchar(50) NOT NULL,\n  `reservation_date` datetime NOT NULL,\n  `return_date` datetime NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`reservation_id`),\n  CONSTRAINT `reservation_ibfk_1` FOREIGN KEY (`user_email`) REFERENCES `user` (`email`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `reservation_ibfk_2` FOREIGN KEY (`license_plate`) REFERENCES `vehicle` (`license_plate`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `news` (\n  `news_id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `content` text NOT NULL,\n  `category` varchar(100) DEFAULT NULL,\n  `published_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `is_featured` tinyint(1) NOT NULL DEFAULT 0,\n  PRIMARY KEY (`news_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "location",
+      "vehicle_category",
+      "vehicle",
+      "user",
+      "credit_card",
+      "reservation",
+      "news"
+    ],
+    "columns_by_table": {
+      "location": [],
+      "vehicle_category": [],
+      "vehicle": [],
+      "user": [],
+      "credit_card": [],
+      "reservation": [],
+      "news": []
+    }
+  }
+}

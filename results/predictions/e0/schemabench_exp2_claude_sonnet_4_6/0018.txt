@@ -1,0 +1,148 @@
+-- Schema for database: schemabench_0018
+
+CREATE TABLE `auth_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(150) NOT NULL,
+  `first_name` varchar(30) NOT NULL DEFAULT '',
+  `last_name` varchar(150) NOT NULL DEFAULT '',
+  `email` varchar(254) NOT NULL DEFAULT '',
+  `password` varchar(128) NOT NULL,
+  `is_staff` tinyint(1) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `is_superuser` tinyint(1) NOT NULL DEFAULT 0,
+  `date_joined` datetime NOT NULL,
+  `last_login` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cabotapp_userprofile` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `hipchat_alias` varchar(50) DEFAULT NULL,
+  `fallback_alert_user` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `cabotapp_userprofile_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cabotapp_shift` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `start` datetime NOT NULL,
+  `end` datetime NOT NULL,
+  `uid` varchar(255) DEFAULT NULL,
+  `deleted` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `cabotapp_shift_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cabotapp_service` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `url` varchar(2048) DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'passing',
+  `old_status` varchar(50) NOT NULL DEFAULT 'passing',
+  `last_alert_sent` datetime DEFAULT NULL,
+  `alerts_enabled` tinyint(1) NOT NULL DEFAULT 1,
+  `hackpad_id` varchar(255) DEFAULT NULL,
+  `runbook_link` varchar(2048) DEFAULT NULL,
+  `notes` longtext DEFAULT NULL,
+  `hipchat_instance_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cabotapp_service_users_to_notify` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `cabotapp_service_users_to_notify_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `cabotapp_service` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cabotapp_service_users_to_notify_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cabotapp_alertplugin` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT 1,
+  `plugin_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cabotapp_service_alerts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `alertplugin_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `cabotapp_service_alerts_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `cabotapp_service` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cabotapp_service_alerts_ibfk_2` FOREIGN KEY (`alertplugin_id`) REFERENCES `cabotapp_alertplugin` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cabotapp_statuscheck` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `check_type` varchar(50) NOT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT 1,
+  `importance` varchar(30) NOT NULL DEFAULT 'ERROR',
+  `frequency` int(11) NOT NULL DEFAULT 5,
+  `debounce` int(11) NOT NULL DEFAULT 0,
+  `status_value` varchar(50) DEFAULT NULL,
+  `last_run` datetime DEFAULT NULL,
+  `calculated_status` varchar(50) NOT NULL DEFAULT 'passing',
+  `metric` varchar(255) DEFAULT NULL,
+  `check_type_detail` varchar(100) DEFAULT NULL,
+  `url` varchar(2048) DEFAULT NULL,
+  `username` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `text_match` varchar(255) DEFAULT NULL,
+  `status_code` varchar(10) DEFAULT NULL,
+  `timeout` int(11) DEFAULT NULL,
+  `verify_ssl_certificate` tinyint(1) NOT NULL DEFAULT 1,
+  `max_queued_build_time` int(11) DEFAULT NULL,
+  `jenkins_config` varchar(255) DEFAULT NULL,
+  `expected_num_hosts` int(11) DEFAULT NULL,
+  `allowed_num_failures` int(11) DEFAULT NULL,
+  `graphite_metric` varchar(255) DEFAULT NULL,
+  `check_operator` varchar(10) DEFAULT NULL,
+  `value` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cabotapp_service_status_checks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `statuscheck_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `cabotapp_service_status_checks_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `cabotapp_service` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cabotapp_service_status_checks_ibfk_2` FOREIGN KEY (`statuscheck_id`) REFERENCES `cabotapp_statuscheck` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cabotapp_statuscheckresult` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `check_id` int(11) NOT NULL,
+  `time` datetime NOT NULL,
+  `time_complete` datetime DEFAULT NULL,
+  `raw_data` longtext DEFAULT NULL,
+  `succeeded` tinyint(1) NOT NULL DEFAULT 0,
+  `error` longtext DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `cabotapp_statuscheckresult_ibfk_1` FOREIGN KEY (`check_id`) REFERENCES `cabotapp_statuscheck` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cabotapp_alertacknowledgement` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `time` datetime NOT NULL,
+  `cancelled_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `cabotapp_alertacknowledgement_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `cabotapp_service` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cabotapp_alertacknowledgement_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cabotapp_hipchatinstance` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `server_url` varchar(2048) NOT NULL,
+  `api_token` varchar(255) NOT NULL,
+  `room_id` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

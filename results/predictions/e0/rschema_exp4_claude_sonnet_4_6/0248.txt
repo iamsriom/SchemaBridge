@@ -1,0 +1,129 @@
+-- Schema for database: rschema_0248
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `registration_time` datetime NOT NULL,
+  `last_login_time` datetime DEFAULT NULL,
+  `role` varchar(50) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `book` (
+  `book_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `author` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`book_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `article` (
+  `article_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `author` varchar(255) NOT NULL,
+  `publish_time` datetime NOT NULL,
+  PRIMARY KEY (`article_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `activity` (
+  `activity_id` int(11) NOT NULL AUTO_INCREMENT,
+  `activity_name` varchar(255) NOT NULL,
+  `activity_time` datetime NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`activity_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `video_interview` (
+  `video_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `video_link` varchar(500) NOT NULL,
+  `publish_time` datetime NOT NULL,
+  PRIMARY KEY (`video_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_activity` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `activity_id` int(11) NOT NULL,
+  `join_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `user_activity_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_activity_ibfk_2` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_video_interview` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `video_id` int(11) NOT NULL,
+  `watch_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `user_video_interview_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_video_interview_ibfk_2` FOREIGN KEY (`video_id`) REFERENCES `video_interview` (`video_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `book_comment` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `comment_content` text NOT NULL,
+  `comment_time` datetime NOT NULL,
+  PRIMARY KEY (`comment_id`),
+  CONSTRAINT `book_comment_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `book_comment_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `book` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `book_recommendation` (
+  `recommendation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `recommendation_time` datetime NOT NULL,
+  `reason` text DEFAULT NULL,
+  PRIMARY KEY (`recommendation_id`),
+  CONSTRAINT `book_recommendation_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `book_recommendation_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `book` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `article_comment` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `article_id` int(11) NOT NULL,
+  `comment_content` text NOT NULL,
+  `comment_time` datetime NOT NULL,
+  PRIMARY KEY (`comment_id`),
+  CONSTRAINT `article_comment_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `article_comment_ibfk_2` FOREIGN KEY (`article_id`) REFERENCES `article` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `article_recommendation` (
+  `recommendation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `article_id` int(11) NOT NULL,
+  `recommendation_time` datetime NOT NULL,
+  `reason` text DEFAULT NULL,
+  PRIMARY KEY (`recommendation_id`),
+  CONSTRAINT `article_recommendation_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `article_recommendation_ibfk_2` FOREIGN KEY (`article_id`) REFERENCES `article` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `lottery_activity` (
+  `lottery_id` int(11) NOT NULL AUTO_INCREMENT,
+  `activity_id` int(11) NOT NULL,
+  `lottery_name` varchar(255) NOT NULL,
+  `lottery_time` datetime NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`lottery_id`),
+  CONSTRAINT `lottery_activity_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `lottery_winner` (
+  `winner_id` int(11) NOT NULL AUTO_INCREMENT,
+  `lottery_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `gift` varchar(255) NOT NULL,
+  `win_time` datetime NOT NULL,
+  PRIMARY KEY (`winner_id`),
+  CONSTRAINT `lottery_winner_ibfk_1` FOREIGN KEY (`lottery_id`) REFERENCES `lottery_activity` (`lottery_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `lottery_winner_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

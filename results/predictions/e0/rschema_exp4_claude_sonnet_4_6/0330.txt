@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0330
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'active',
+  `email` varchar(255) NOT NULL,
+  `display_name` varchar(255) DEFAULT NULL,
+  `language_tag` varchar(50) DEFAULT NULL,
+  `time_zone` varchar(100) DEFAULT NULL,
+  `date_format` varchar(50) DEFAULT NULL,
+  `datetime_format` varchar(50) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_identity_keys` (
+  `identity_key_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `auth_scheme` varchar(100) NOT NULL,
+  `identity_key_value` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`identity_key_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `user_identity_keys_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `roles` (
+  `role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_name` varchar(255) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`role_id`),
+  UNIQUE KEY `role_name` (`role_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_roles` (
+  `user_role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `assigned_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_role_id`),
+  UNIQUE KEY `user_role_unique` (`user_id`, `role_id`),
+  KEY `user_id` (`user_id`),
+  KEY `role_id` (`role_id`),
+  CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

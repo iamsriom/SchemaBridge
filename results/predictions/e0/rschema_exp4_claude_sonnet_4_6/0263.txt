@@ -1,0 +1,144 @@
+-- Schema for database: rschema_0263
+
+CREATE TABLE `student` (
+  `student_id` varchar(20) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `lecturer` (
+  `lecturer_id` varchar(20) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`lecturer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teaching_staff` (
+  `staff_id` varchar(20) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`staff_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course` (
+  `course_id` varchar(20) NOT NULL,
+  `course_name` varchar(255) NOT NULL,
+  `lecturer_id` varchar(20) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`course_id`),
+  CONSTRAINT `course_ibfk_1` FOREIGN KEY (`lecturer_id`) REFERENCES `lecturer` (`lecturer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `assignment` (
+  `assignment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_id` varchar(20) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `due_date` datetime DEFAULT NULL,
+  `total_score` decimal(6,2) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`assignment_id`),
+  CONSTRAINT `assignment_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `homework_submission` (
+  `submission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `assignment_id` int(11) NOT NULL,
+  `student_id` varchar(20) NOT NULL,
+  `file_path` varchar(500) DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `submitted_at` datetime DEFAULT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'ungraded',
+  `student_notified` tinyint(1) DEFAULT 0,
+  `lecturer_notified` tinyint(1) DEFAULT 0,
+  PRIMARY KEY (`submission_id`),
+  CONSTRAINT `homework_submission_ibfk_1` FOREIGN KEY (`assignment_id`) REFERENCES `assignment` (`assignment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `homework_submission_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `question` (
+  `question_id` int(11) NOT NULL AUTO_INCREMENT,
+  `assignment_id` int(11) NOT NULL,
+  `question_number` int(11) NOT NULL,
+  `question_text` text DEFAULT NULL,
+  `max_score` decimal(6,2) DEFAULT NULL,
+  `format_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`question_id`),
+  CONSTRAINT `question_ibfk_1` FOREIGN KEY (`assignment_id`) REFERENCES `assignment` (`assignment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `graded_homework` (
+  `grade_id` int(11) NOT NULL AUTO_INCREMENT,
+  `submission_id` int(11) NOT NULL,
+  `lecturer_id` varchar(20) NOT NULL,
+  `total_score` decimal(6,2) DEFAULT NULL,
+  `overall_evaluation` text DEFAULT NULL,
+  `graded_file_path` varchar(500) DEFAULT NULL,
+  `graded_at` datetime DEFAULT NULL,
+  `uploaded_at` datetime DEFAULT NULL,
+  `student_notified` tinyint(1) DEFAULT 0,
+  PRIMARY KEY (`grade_id`),
+  CONSTRAINT `graded_homework_ibfk_1` FOREIGN KEY (`submission_id`) REFERENCES `homework_submission` (`submission_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `graded_homework_ibfk_2` FOREIGN KEY (`lecturer_id`) REFERENCES `lecturer` (`lecturer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `question_grade` (
+  `question_grade_id` int(11) NOT NULL AUTO_INCREMENT,
+  `grade_id` int(11) NOT NULL,
+  `question_id` int(11) NOT NULL,
+  `score` decimal(6,2) DEFAULT NULL,
+  `comment` text DEFAULT NULL,
+  PRIMARY KEY (`question_grade_id`),
+  CONSTRAINT `question_grade_ibfk_1` FOREIGN KEY (`grade_id`) REFERENCES `graded_homework` (`grade_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `question_grade_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `question` (`question_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student_score_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` varchar(20) NOT NULL,
+  `grade_id` int(11) NOT NULL,
+  `assignment_id` int(11) NOT NULL,
+  `total_score` decimal(6,2) DEFAULT NULL,
+  `overall_evaluation` text DEFAULT NULL,
+  `recorded_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `student_score_record_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `student_score_record_ibfk_2` FOREIGN KEY (`grade_id`) REFERENCES `graded_homework` (`grade_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `student_score_record_ibfk_3` FOREIGN KEY (`assignment_id`) REFERENCES `assignment` (`assignment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notification` (
+  `notification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `recipient_type` varchar(20) NOT NULL,
+  `recipient_id` varchar(20) NOT NULL,
+  `message` text DEFAULT NULL,
+  `notification_type` varchar(50) DEFAULT NULL,
+  `related_submission_id` int(11) DEFAULT NULL,
+  `is_read` tinyint(1) DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`notification_id`),
+  CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`related_submission_id`) REFERENCES `homework_submission` (`submission_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `random_inspection` (
+  `inspection_id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_id` varchar(20) NOT NULL,
+  `grade_id` int(11) NOT NULL,
+  `inspection_opinion` text DEFAULT NULL,
+  `inspection_report` text DEFAULT NULL,
+  `inspected_at` datetime DEFAULT NULL,
+  `report_sent_to_lecturer` tinyint(1) DEFAULT 0,
+  `lecturer_id` varchar(20) NOT NULL,
+  PRIMARY KEY (`inspection_id`),
+  CONSTRAINT `random_inspection_ibfk_1` FOREIGN KEY (`staff_id`) REFERENCES `teaching_staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `random_inspection_ibfk_2` FOREIGN KEY (`grade_id`) REFERENCES `graded_homework` (`grade_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `random_inspection_ibfk_3` FOREIGN KEY (`lecturer_id`) REFERENCES `lecturer` (`lecturer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

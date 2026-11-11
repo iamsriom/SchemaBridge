@@ -1,0 +1,123 @@
+-- Schema for database: schemabench_0078
+
+CREATE TABLE `customers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_type` varchar(255) NOT NULL,
+  `owner_id` int(11) NOT NULL,
+  `processor` varchar(255) NOT NULL,
+  `processor_id` varchar(255) DEFAULT NULL,
+  `default` tinyint(1) NOT NULL DEFAULT 0,
+  `data` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment_methods` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `processor_id` varchar(255) NOT NULL,
+  `default` tinyint(1) NOT NULL DEFAULT 0,
+  `type` varchar(255) DEFAULT NULL,
+  `brand` varchar(255) DEFAULT NULL,
+  `last4` varchar(4) DEFAULT NULL,
+  `exp_month` int(11) DEFAULT NULL,
+  `exp_year` int(11) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `bank` varchar(255) DEFAULT NULL,
+  `data` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `payment_methods_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `processor_id` varchar(255) NOT NULL,
+  `processor_plan` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `status` varchar(255) NOT NULL,
+  `trial_ends_at` datetime DEFAULT NULL,
+  `ends_at` datetime DEFAULT NULL,
+  `current_period_start` datetime DEFAULT NULL,
+  `current_period_end` datetime DEFAULT NULL,
+  `metered` tinyint(1) DEFAULT NULL,
+  `pause_behavior` varchar(255) DEFAULT NULL,
+  `pause_resumes_at` datetime DEFAULT NULL,
+  `application_fee_percent` decimal(8,2) DEFAULT NULL,
+  `metadata` text DEFAULT NULL,
+  `data` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `subscriptions_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscription_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `subscription_id` int(11) NOT NULL,
+  `processor_id` varchar(255) DEFAULT NULL,
+  `processor_plan` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `metered` tinyint(1) DEFAULT NULL,
+  `data` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `subscription_items_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `charges` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `processor_id` varchar(255) NOT NULL,
+  `amount` int(11) NOT NULL,
+  `amount_refunded` int(11) DEFAULT NULL,
+  `currency` varchar(10) DEFAULT NULL,
+  `application_fee_amount` int(11) DEFAULT NULL,
+  `refunded` tinyint(1) NOT NULL DEFAULT 0,
+  `stripe_receipt` varchar(255) DEFAULT NULL,
+  `invoice_id` varchar(255) DEFAULT NULL,
+  `subscription_id` int(11) DEFAULT NULL,
+  `payment_method_type` varchar(255) DEFAULT NULL,
+  `brand` varchar(255) DEFAULT NULL,
+  `last4` varchar(4) DEFAULT NULL,
+  `exp_month` int(11) DEFAULT NULL,
+  `exp_year` int(11) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `bank` varchar(255) DEFAULT NULL,
+  `data` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `charges_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `charges_ibfk_2` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `checkouts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `processor_id` varchar(255) NOT NULL,
+  `total` int(11) DEFAULT NULL,
+  `currency` varchar(10) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `data` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `checkouts_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `webhooks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `processor` varchar(255) NOT NULL,
+  `event` varchar(255) NOT NULL,
+  `payload` text DEFAULT NULL,
+  `processed_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

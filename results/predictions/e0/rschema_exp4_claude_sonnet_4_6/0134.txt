@@ -1,0 +1,90 @@
+-- Schema for database: rschema_0134
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `real_name` varchar(100) DEFAULT NULL,
+  `role` varchar(20) NOT NULL DEFAULT 'tenant',
+  `avatar` varchar(255) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `houses` (
+  `house_id` int(11) NOT NULL AUTO_INCREMENT,
+  `landlord_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `house_type` varchar(50) DEFAULT NULL,
+  `area` decimal(10,2) DEFAULT NULL,
+  `floor` int(11) DEFAULT NULL,
+  `total_floors` int(11) DEFAULT NULL,
+  `bedrooms` int(11) DEFAULT NULL,
+  `living_rooms` int(11) DEFAULT NULL,
+  `bathrooms` int(11) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `price_unit` varchar(20) NOT NULL DEFAULT 'month',
+  `province` varchar(100) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `district` varchar(100) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `facilities` varchar(500) DEFAULT NULL,
+  `images` text DEFAULT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'available',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`house_id`),
+  CONSTRAINT `houses_ibfk_1` FOREIGN KEY (`landlord_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_no` varchar(64) NOT NULL,
+  `tenant_id` int(11) NOT NULL,
+  `house_id` int(11) NOT NULL,
+  `landlord_id` int(11) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  `total_price` decimal(10,2) NOT NULL,
+  `payment_status` varchar(20) NOT NULL DEFAULT 'unpaid',
+  `payment_time` datetime DEFAULT NULL,
+  `payment_method` varchar(50) DEFAULT NULL,
+  `order_status` varchar(20) NOT NULL DEFAULT 'pending',
+  `remark` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  UNIQUE KEY `order_no` (`order_no`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`tenant_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`house_id`) REFERENCES `houses` (`house_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_3` FOREIGN KEY (`landlord_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `demands` (
+  `demand_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `house_type` varchar(50) DEFAULT NULL,
+  `min_area` decimal(10,2) DEFAULT NULL,
+  `max_area` decimal(10,2) DEFAULT NULL,
+  `min_price` decimal(10,2) DEFAULT NULL,
+  `max_price` decimal(10,2) DEFAULT NULL,
+  `province` varchar(100) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `district` varchar(100) DEFAULT NULL,
+  `bedrooms` int(11) DEFAULT NULL,
+  `facilities` varchar(500) DEFAULT NULL,
+  `expected_move_in` datetime DEFAULT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'open',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`demand_id`),
+  CONSTRAINT `demands_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

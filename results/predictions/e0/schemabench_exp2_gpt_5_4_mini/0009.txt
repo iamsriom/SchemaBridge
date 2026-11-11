@@ -1,0 +1,135 @@
+-- Schema for database: schemabench_0009
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `full_name` varchar(255) DEFAULT NULL,
+  `role` varchar(50) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_username_unique` (`username`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `assets` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `asset_tag` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `asset_type` varchar(100) NOT NULL,
+  `serial_number` varchar(255) DEFAULT NULL,
+  `purchase_date` date DEFAULT NULL,
+  `purchase_cost` decimal(10,2) DEFAULT NULL,
+  `status` varchar(100) NOT NULL,
+  `assigned_user_id` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `assets_asset_tag_unique` (`asset_tag`),
+  KEY `assets_assigned_user_id_index` (`assigned_user_id`),
+  CONSTRAINT `assets_ibfk_1` FOREIGN KEY (`assigned_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `licenses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `license_name` varchar(255) NOT NULL,
+  `license_key` varchar(255) NOT NULL,
+  `seats_total` int(11) NOT NULL,
+  `seats_assigned` int(11) NOT NULL DEFAULT '0',
+  `purchase_date` date DEFAULT NULL,
+  `expiration_date` date DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `licenses_license_key_unique` (`license_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `license_seats` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `license_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `asset_id` int(11) DEFAULT NULL,
+  `assigned_at` datetime NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `license_seats_license_id_index` (`license_id`),
+  KEY `license_seats_user_id_index` (`user_id`),
+  KEY `license_seats_asset_id_index` (`asset_id`),
+  CONSTRAINT `license_seats_ibfk_1` FOREIGN KEY (`license_id`) REFERENCES `licenses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `license_seats_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `license_seats_ibfk_3` FOREIGN KEY (`asset_id`) REFERENCES `assets` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permission_groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `permission_groups_group_name_unique` (`group_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_permission_groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `permission_group_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_permission_groups_user_id_index` (`user_id`),
+  KEY `user_permission_groups_permission_group_id_index` (`permission_group_id`),
+  CONSTRAINT `user_permission_groups_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_permission_groups_ibfk_2` FOREIGN KEY (`permission_group_id`) REFERENCES `permission_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `custom_fields` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `field_name` varchar(255) NOT NULL,
+  `field_type` varchar(100) NOT NULL,
+  `is_required` tinyint(1) NOT NULL DEFAULT '0',
+  `default_value` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `custom_fields_field_name_unique` (`field_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `asset_custom_field_values` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `asset_id` int(11) NOT NULL,
+  `custom_field_id` int(11) NOT NULL,
+  `field_value` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `asset_custom_field_values_asset_id_index` (`asset_id`),
+  KEY `asset_custom_field_values_custom_field_id_index` (`custom_field_id`),
+  CONSTRAINT `asset_custom_field_values_ibfk_1` FOREIGN KEY (`asset_id`) REFERENCES `assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `asset_custom_field_values_ibfk_2` FOREIGN KEY (`custom_field_id`) REFERENCES `custom_fields` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `notification_type` varchar(100) NOT NULL,
+  `channel` varchar(50) NOT NULL,
+  `recipient` varchar(255) DEFAULT NULL,
+  `message` text NOT NULL,
+  `is_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `system_settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `setting_key` varchar(255) NOT NULL,
+  `setting_value` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `system_settings_setting_key_unique` (`setting_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

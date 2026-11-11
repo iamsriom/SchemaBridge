@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0351
+CREATE TABLE `object_class` (
+  `class_id` int(11) NOT NULL AUTO_INCREMENT,
+  `class_name` varchar(255) NOT NULL,
+  `class_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`class_id`),
+  UNIQUE KEY `class_name` (`class_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `object_owner` (
+  `owner_id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `secured_object` (
+  `object_id` int(11) NOT NULL AUTO_INCREMENT,
+  `class_id` int(11) NOT NULL,
+  `object_uid` varchar(255) NOT NULL,
+  `parent_object_id` int(11) DEFAULT NULL,
+  `owner_id` int(11) NOT NULL,
+  `object_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`object_id`),
+  UNIQUE KEY `class_uid` (`class_id`,`object_uid`),
+  KEY `class_id` (`class_id`),
+  KEY `parent_object_id` (`parent_object_id`),
+  KEY `owner_id` (`owner_id`),
+  CONSTRAINT `secured_object_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `object_class` (`class_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `secured_object_ibfk_2` FOREIGN KEY (`parent_object_id`) REFERENCES `secured_object` (`object_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `secured_object_ibfk_3` FOREIGN KEY (`owner_id`) REFERENCES `object_owner` (`owner_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `access_principal` (
+  `principal_id` int(11) NOT NULL AUTO_INCREMENT,
+  `principal_type` varchar(20) NOT NULL,
+  `principal_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`principal_id`),
+  UNIQUE KEY `principal_type_name` (`principal_type`,`principal_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `access_permission` (
+  `permission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `principal_id` int(11) NOT NULL,
+  `authorized_object_id` int(11) NOT NULL,
+  `permission_name` varchar(255) NOT NULL,
+  `allow_success_audit` tinyint(1) NOT NULL DEFAULT '0',
+  `allow_failure_audit` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`permission_id`),
+  KEY `principal_id` (`principal_id`),
+  KEY `authorized_object_id` (`authorized_object_id`),
+  CONSTRAINT `access_permission_ibfk_1` FOREIGN KEY (`principal_id`) REFERENCES `access_principal` (`principal_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `access_permission_ibfk_2` FOREIGN KEY (`authorized_object_id`) REFERENCES `secured_object` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

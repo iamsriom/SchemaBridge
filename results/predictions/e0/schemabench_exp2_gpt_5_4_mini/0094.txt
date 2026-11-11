@@ -1,0 +1,61 @@
+-- Schema for database: schemabench_0094
+CREATE TABLE `molecules` (
+  `molecule_id` int(11) NOT NULL AUTO_INCREMENT,
+  `compound_name` varchar(255) NOT NULL,
+  `half_life_hours` decimal(10,4) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `atoms` (
+  `atom_id` int(11) NOT NULL AUTO_INCREMENT,
+  `molecule_id` int(11) NOT NULL,
+  `atom_index` int(11) NOT NULL,
+  `element_symbol` varchar(10) NOT NULL,
+  `atomic_number` int(11) DEFAULT NULL,
+  `formal_charge` int(11) DEFAULT NULL,
+  `x_coord` decimal(12,6) DEFAULT NULL,
+  `y_coord` decimal(12,6) DEFAULT NULL,
+  `z_coord` decimal(12,6) DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  KEY `atoms_ibfk_1` (`molecule_id`),
+  CONSTRAINT `atoms_ibfk_1` FOREIGN KEY (`molecule_id`) REFERENCES `molecules` (`molecule_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bonds` (
+  `bond_id` int(11) NOT NULL AUTO_INCREMENT,
+  `molecule_id` int(11) NOT NULL,
+  `atom1_id` int(11) NOT NULL,
+  `atom2_id` int(11) NOT NULL,
+  `bond_order` int(11) NOT NULL,
+  `bond_type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  KEY `bonds_ibfk_1` (`molecule_id`),
+  KEY `bonds_ibfk_2` (`atom1_id`),
+  KEY `bonds_ibfk_3` (`atom2_id`),
+  CONSTRAINT `bonds_ibfk_1` FOREIGN KEY (`molecule_id`) REFERENCES `molecules` (`molecule_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bonds_ibfk_2` FOREIGN KEY (`atom1_id`) REFERENCES `atoms` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bonds_ibfk_3` FOREIGN KEY (`atom2_id`) REFERENCES `atoms` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `molecular_groups` (
+  `group_id` int(11) NOT NULL AUTO_INCREMENT,
+  `molecule_id` int(11) NOT NULL,
+  `group_name` varchar(255) NOT NULL,
+  `group_type` varchar(100) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`group_id`),
+  KEY `molecular_groups_ibfk_1` (`molecule_id`),
+  CONSTRAINT `molecular_groups_ibfk_1` FOREIGN KEY (`molecule_id`) REFERENCES `molecules` (`molecule_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `group_atoms` (
+  `group_atom_id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL,
+  `atom_id` int(11) NOT NULL,
+  PRIMARY KEY (`group_atom_id`),
+  KEY `group_atoms_ibfk_1` (`group_id`),
+  KEY `group_atoms_ibfk_2` (`atom_id`),
+  CONSTRAINT `group_atoms_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `molecular_groups` (`group_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `group_atoms_ibfk_2` FOREIGN KEY (`atom_id`) REFERENCES `atoms` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

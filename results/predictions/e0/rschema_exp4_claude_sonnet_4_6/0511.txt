@@ -1,0 +1,57 @@
+-- Schema for database: rschema_0511
+
+CREATE TABLE `department` (
+  `dept_id` varchar(20) NOT NULL,
+  `dept_name` varchar(100) NOT NULL,
+  `dept_head` varchar(50) DEFAULT NULL,
+  `dept_phone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`dept_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `owner` (
+  `owner_id` varchar(20) NOT NULL,
+  `owner_name` varchar(50) NOT NULL,
+  `room_number` varchar(30) NOT NULL,
+  `house_area` decimal(10,2) DEFAULT NULL,
+  `work_unit` varchar(100) DEFAULT NULL,
+  `contact_phone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `emp_id` varchar(20) NOT NULL,
+  `emp_name` varchar(50) NOT NULL,
+  `birth_date` date DEFAULT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `address` varchar(200) DEFAULT NULL,
+  `contact_phone` varchar(20) DEFAULT NULL,
+  `dept_id` varchar(20) NOT NULL,
+  `position` varchar(20) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`emp_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`dept_id`) REFERENCES `department` (`dept_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `charge_record` (
+  `charge_id` int(11) NOT NULL AUTO_INCREMENT,
+  `room_number` varchar(30) NOT NULL,
+  `owner_id` varchar(20) NOT NULL,
+  `charge_date` date NOT NULL,
+  `charge_type` varchar(50) NOT NULL,
+  `quantity` decimal(10,3) DEFAULT NULL,
+  `charge_amount` decimal(10,2) NOT NULL,
+  `emp_id` varchar(20) NOT NULL,
+  PRIMARY KEY (`charge_id`),
+  CONSTRAINT `charge_record_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `owner` (`owner_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `charge_record_ibfk_2` FOREIGN KEY (`emp_id`) REFERENCES `employee` (`emp_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `charge_slip` (
+  `slip_id` int(11) NOT NULL AUTO_INCREMENT,
+  `charge_id` int(11) NOT NULL,
+  `slip_date` datetime NOT NULL,
+  `charge_status` varchar(20) NOT NULL DEFAULT 'unpaid',
+  `remark` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`slip_id`),
+  CONSTRAINT `charge_slip_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `charge_record` (`charge_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

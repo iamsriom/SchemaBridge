@@ -1,0 +1,66 @@
+-- Schema for database: rschema_0316
+
+CREATE TABLE `category` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `category_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ebook` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `cover` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `total_reads` int(11) NOT NULL DEFAULT '0',
+  `total_likes` int(11) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `category_id` (`category_id`),
+  CONSTRAINT `ebook_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `document` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ebook_id` int(11) NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` longtext DEFAULT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ebook_id` (`ebook_id`),
+  KEY `parent_id` (`parent_id`),
+  CONSTRAINT `document_ibfk_1` FOREIGN KEY (`ebook_id`) REFERENCES `ebook` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `document_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `document` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ebook_stats` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ebook_id` int(11) NOT NULL,
+  `stat_date` date NOT NULL,
+  `reads` int(11) NOT NULL DEFAULT '0',
+  `likes` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `ebook_id` (`ebook_id`),
+  CONSTRAINT `ebook_stats_ibfk_1` FOREIGN KEY (`ebook_id`) REFERENCES `ebook` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

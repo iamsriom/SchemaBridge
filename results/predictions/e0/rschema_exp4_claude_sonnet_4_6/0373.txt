@@ -1,0 +1,164 @@
+-- Schema for database: rschema_0373
+
+CREATE TABLE `organization` (
+  `org_id` int(11) NOT NULL AUTO_INCREMENT,
+  `org_code` varchar(50) NOT NULL,
+  `org_name` varchar(255) NOT NULL,
+  `org_type` varchar(100) DEFAULT NULL,
+  `parent_org_id` int(11) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`org_id`),
+  CONSTRAINT `organization_ibfk_1` FOREIGN KEY (`parent_org_id`) REFERENCES `organization` (`org_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fund_source` (
+  `fund_source_id` int(11) NOT NULL AUTO_INCREMENT,
+  `fund_source_code` varchar(50) NOT NULL,
+  `fund_source_name` varchar(255) NOT NULL,
+  `fund_type` varchar(100) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`fund_source_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `budget_level` (
+  `budget_level_id` int(11) NOT NULL AUTO_INCREMENT,
+  `level_code` varchar(50) NOT NULL,
+  `level_name` varchar(255) NOT NULL,
+  `level_order` int(11) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`budget_level_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `objective` (
+  `objective_id` int(11) NOT NULL AUTO_INCREMENT,
+  `objective_code` varchar(50) NOT NULL,
+  `objective_name` varchar(255) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`objective_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project` (
+  `project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_code` varchar(50) NOT NULL,
+  `project_name` varchar(255) NOT NULL,
+  `org_id` int(11) NOT NULL,
+  `budget_level_id` int(11) NOT NULL,
+  `objective_id` int(11) DEFAULT NULL,
+  `start_date` datetime DEFAULT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'active',
+  `description` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`project_id`),
+  CONSTRAINT `project_ibfk_1` FOREIGN KEY (`org_id`) REFERENCES `organization` (`org_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_ibfk_2` FOREIGN KEY (`budget_level_id`) REFERENCES `budget_level` (`budget_level_id`) ON UPDATE CASCADE,
+  CONSTRAINT `project_ibfk_3` FOREIGN KEY (`objective_id`) REFERENCES `objective` (`objective_id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `activity` (
+  `activity_id` int(11) NOT NULL AUTO_INCREMENT,
+  `activity_code` varchar(50) NOT NULL,
+  `activity_name` varchar(255) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `objective_id` int(11) DEFAULT NULL,
+  `start_date` datetime DEFAULT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'active',
+  `description` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`activity_id`),
+  CONSTRAINT `activity_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `activity_ibfk_2` FOREIGN KEY (`objective_id`) REFERENCES `objective` (`objective_id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `budget` (
+  `budget_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `activity_id` int(11) DEFAULT NULL,
+  `fund_source_id` int(11) NOT NULL,
+  `budget_level_id` int(11) NOT NULL,
+  `fiscal_year` char(6) NOT NULL,
+  `total_amount` decimal(18,2) NOT NULL DEFAULT 0.00,
+  `allocated_amount` decimal(18,2) NOT NULL DEFAULT 0.00,
+  `remaining_amount` decimal(18,2) NOT NULL DEFAULT 0.00,
+  `allocation_ratio` decimal(10,4) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`budget_id`),
+  CONSTRAINT `budget_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `budget_ibfk_2` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`activity_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `budget_ibfk_3` FOREIGN KEY (`fund_source_id`) REFERENCES `fund_source` (`fund_source_id`) ON UPDATE CASCADE,
+  CONSTRAINT `budget_ibfk_4` FOREIGN KEY (`budget_level_id`) REFERENCES `budget_level` (`budget_level_id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fund_allocation` (
+  `allocation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `budget_id` int(11) NOT NULL,
+  `org_id` int(11) NOT NULL,
+  `fund_source_id` int(11) NOT NULL,
+  `objective_id` int(11) DEFAULT NULL,
+  `allocation_amount` decimal(18,2) NOT NULL DEFAULT 0.00,
+  `allocation_ratio` decimal(10,4) DEFAULT NULL,
+  `allocation_date` datetime NOT NULL,
+  `fiscal_year` char(6) NOT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`allocation_id`),
+  CONSTRAINT `fund_allocation_ibfk_1` FOREIGN KEY (`budget_id`) REFERENCES `budget` (`budget_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fund_allocation_ibfk_2` FOREIGN KEY (`org_id`) REFERENCES `organization` (`org_id`) ON UPDATE CASCADE,
+  CONSTRAINT `fund_allocation_ibfk_3` FOREIGN KEY (`fund_source_id`) REFERENCES `fund_source` (`fund_source_id`) ON UPDATE CASCADE,
+  CONSTRAINT `fund_allocation_ibfk_4` FOREIGN KEY (`objective_id`) REFERENCES `objective` (`objective_id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_change_history` (
+  `change_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `change_type` varchar(100) NOT NULL,
+  `field_changed` varchar(100) DEFAULT NULL,
+  `old_value` varchar(500) DEFAULT NULL,
+  `new_value` varchar(500) DEFAULT NULL,
+  `change_reason` varchar(500) DEFAULT NULL,
+  `changed_by` varchar(100) DEFAULT NULL,
+  `changed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`change_id`),
+  CONSTRAINT `project_change_history_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `budget_change_history` (
+  `budget_change_id` int(11) NOT NULL AUTO_INCREMENT,
+  `budget_id` int(11) NOT NULL,
+  `change_type` varchar(100) NOT NULL,
+  `field_changed` varchar(100) DEFAULT NULL,
+  `old_value` varchar(500) DEFAULT NULL,
+  `new_value` varchar(500) DEFAULT NULL,
+  `change_reason` varchar(500) DEFAULT NULL,
+  `changed_by` varchar(100) DEFAULT NULL,
+  `changed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`budget_change_id`),
+  CONSTRAINT `budget_change_history_ibfk_1` FOREIGN KEY (`budget_id`) REFERENCES `budget` (`budget_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `multi_level_code` (
+  `code_id` int(11) NOT NULL AUTO_INCREMENT,
+  `code_value` varchar(100) NOT NULL,
+  `code_name` varchar(255) NOT NULL,
+  `code_category` varchar(100) NOT NULL,
+  `budget_level_id` int(11) DEFAULT NULL,
+  `parent_code_id` int(11) DEFAULT NULL,
+  `level_order` int(11) NOT NULL DEFAULT 1,
+  `description` varchar(500) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`code_id`),
+  CONSTRAINT `multi_level_code_ibfk_1` FOREIGN KEY (`budget_level_id`) REFERENCES `budget_level` (`budget_level_id`) ON UPDATE CASCADE,
+  CONSTRAINT `multi_level_code_ibfk_2` FOREIGN KEY (`parent_code_id`) REFERENCES `multi_level_code` (`code_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

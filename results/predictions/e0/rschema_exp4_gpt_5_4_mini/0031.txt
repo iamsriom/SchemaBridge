@@ -1,0 +1,42 @@
+-- Schema for database: rschema_0031
+CREATE TABLE `moving_team` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `mover` (
+  `mover_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_id` int(11) NOT NULL,
+  `mover_name` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`mover_id`),
+  KEY `team_id` (`team_id`),
+  CONSTRAINT `mover_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `moving_team` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `moving_task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_id` int(11) NOT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  `customer_phone_number` varchar(20) NOT NULL,
+  `moving_date` date NOT NULL,
+  `starting_address` varchar(255) NOT NULL,
+  `destination_address` varchar(255) NOT NULL,
+  `quantity_of_items_moved` int(11) NOT NULL,
+  `moving_cost` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`task_id`),
+  KEY `team_id` (`team_id`),
+  CONSTRAINT `moving_task_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `moving_team` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_feedback` (
+  `feedback_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `customer_satisfaction` int(11) NOT NULL,
+  `feedback_comment` varchar(1000) DEFAULT NULL,
+  `recorded_at` datetime NOT NULL,
+  PRIMARY KEY (`feedback_id`),
+  KEY `task_id` (`task_id`),
+  CONSTRAINT `customer_feedback_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `moving_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

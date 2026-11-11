@@ -1,0 +1,89 @@
+-- Schema for database: schemabench_0104
+
+CREATE TABLE `incidents` (
+  `incident_id` int(11) NOT NULL AUTO_INCREMENT,
+  `incident_date` datetime DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `division` varchar(100) DEFAULT NULL,
+  `street_address` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(50) DEFAULT NULL,
+  `zip_code` varchar(20) DEFAULT NULL,
+  `subject_status` varchar(100) DEFAULT NULL,
+  `subject_weapon` varchar(100) DEFAULT NULL,
+  `narrative` text DEFAULT NULL,
+  `summary_url` varchar(500) DEFAULT NULL,
+  `document_url` varchar(500) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`incident_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `officers` (
+  `officer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) DEFAULT NULL,
+  `last_name` varchar(100) DEFAULT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `race` varchar(50) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `years_on_force` int(11) DEFAULT NULL,
+  `rank` varchar(100) DEFAULT NULL,
+  `badge_number` varchar(50) DEFAULT NULL,
+  `department` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`officer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subjects` (
+  `subject_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) DEFAULT NULL,
+  `last_name` varchar(100) DEFAULT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `race` varchar(50) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `status` varchar(100) DEFAULT NULL,
+  `weapon` varchar(100) DEFAULT NULL,
+  `injury_description` varchar(255) DEFAULT NULL,
+  `deceased` tinyint(1) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`subject_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `incident_officers` (
+  `incident_officer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `incident_id` int(11) NOT NULL,
+  `officer_id` int(11) NOT NULL,
+  `role` varchar(100) DEFAULT NULL,
+  `shots_fired` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`incident_officer_id`),
+  CONSTRAINT `incident_officers_ibfk_1` FOREIGN KEY (`incident_id`) REFERENCES `incidents` (`incident_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `incident_officers_ibfk_2` FOREIGN KEY (`officer_id`) REFERENCES `officers` (`officer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `incident_subjects` (
+  `incident_subject_id` int(11) NOT NULL AUTO_INCREMENT,
+  `incident_id` int(11) NOT NULL,
+  `subject_id` int(11) NOT NULL,
+  `subject_status` varchar(100) DEFAULT NULL,
+  `subject_weapon` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`incident_subject_id`),
+  CONSTRAINT `incident_subjects_ibfk_1` FOREIGN KEY (`incident_id`) REFERENCES `incidents` (`incident_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `incident_subjects_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`subject_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reports` (
+  `report_id` int(11) NOT NULL AUTO_INCREMENT,
+  `incident_id` int(11) NOT NULL,
+  `report_title` varchar(255) DEFAULT NULL,
+  `summary` text DEFAULT NULL,
+  `document_url` varchar(500) DEFAULT NULL,
+  `is_public` tinyint(1) DEFAULT NULL,
+  `generated_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`report_id`),
+  CONSTRAINT `reports_ibfk_1` FOREIGN KEY (`incident_id`) REFERENCES `incidents` (`incident_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

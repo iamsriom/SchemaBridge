@@ -1,0 +1,133 @@
+-- Schema for database: schemabench_0145
+CREATE TABLE `pokemon_types` (
+  `pokemon_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_name` varchar(50) NOT NULL,
+  PRIMARY KEY (`pokemon_type_id`),
+  UNIQUE KEY `type_name` (`type_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `type_effectiveness` (
+  `type_effectiveness_id` int(11) NOT NULL AUTO_INCREMENT,
+  `attacking_type_id` int(11) NOT NULL,
+  `defending_type_id` int(11) NOT NULL,
+  `effectiveness_multiplier` decimal(4,2) NOT NULL,
+  PRIMARY KEY (`type_effectiveness_id`),
+  KEY `attacking_type_id` (`attacking_type_id`),
+  KEY `defending_type_id` (`defending_type_id`),
+  CONSTRAINT `type_effectiveness_ibfk_1` FOREIGN KEY (`attacking_type_id`) REFERENCES `pokemon_types` (`pokemon_type_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `type_effectiveness_ibfk_2` FOREIGN KEY (`defending_type_id`) REFERENCES `pokemon_types` (`pokemon_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_habitats` (
+  `habitat_id` int(11) NOT NULL AUTO_INCREMENT,
+  `habitat_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`habitat_id`),
+  UNIQUE KEY `habitat_name` (`habitat_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_versions` (
+  `version_id` int(11) NOT NULL AUTO_INCREMENT,
+  `version_name` varchar(100) NOT NULL,
+  `generation` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`version_id`),
+  UNIQUE KEY `version_name` (`version_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_species` (
+  `species_id` int(11) NOT NULL AUTO_INCREMENT,
+  `national_dex_number` int(11) NOT NULL,
+  `species_name` varchar(100) NOT NULL,
+  `height` decimal(5,2) NOT NULL,
+  `weight` decimal(6,2) NOT NULL,
+  `base_experience` int(11) DEFAULT NULL,
+  `habitat_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`species_id`),
+  UNIQUE KEY `national_dex_number` (`national_dex_number`),
+  UNIQUE KEY `species_name` (`species_name`),
+  KEY `habitat_id` (`habitat_id`),
+  CONSTRAINT `pokemon_species_ibfk_1` FOREIGN KEY (`habitat_id`) REFERENCES `pokemon_habitats` (`habitat_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon` (
+  `pokemon_id` int(11) NOT NULL AUTO_INCREMENT,
+  `species_id` int(11) NOT NULL,
+  `pokemon_name` varchar(100) NOT NULL,
+  `height` decimal(5,2) NOT NULL,
+  `weight` decimal(6,2) NOT NULL,
+  `base_experience` int(11) DEFAULT NULL,
+  PRIMARY KEY (`pokemon_id`),
+  UNIQUE KEY `pokemon_name` (`pokemon_name`),
+  KEY `species_id` (`species_id`),
+  CONSTRAINT `pokemon_ibfk_1` FOREIGN KEY (`species_id`) REFERENCES `pokemon_species` (`species_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_stats` (
+  `pokemon_stat_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pokemon_id` int(11) NOT NULL,
+  `hp` int(11) NOT NULL,
+  `attack` int(11) NOT NULL,
+  `defense` int(11) NOT NULL,
+  `special_attack` int(11) NOT NULL,
+  `special_defense` int(11) NOT NULL,
+  `speed` int(11) NOT NULL,
+  PRIMARY KEY (`pokemon_stat_id`),
+  UNIQUE KEY `pokemon_id` (`pokemon_id`),
+  CONSTRAINT `pokemon_stats_ibfk_1` FOREIGN KEY (`pokemon_id`) REFERENCES `pokemon` (`pokemon_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `abilities` (
+  `ability_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ability_name` varchar(100) NOT NULL,
+  `ability_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`ability_id`),
+  UNIQUE KEY `ability_name` (`ability_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_abilities` (
+  `pokemon_ability_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pokemon_id` int(11) NOT NULL,
+  `ability_id` int(11) NOT NULL,
+  `is_hidden` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`pokemon_ability_id`),
+  KEY `pokemon_id` (`pokemon_id`),
+  KEY `ability_id` (`ability_id`),
+  CONSTRAINT `pokemon_abilities_ibfk_1` FOREIGN KEY (`pokemon_id`) REFERENCES `pokemon` (`pokemon_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pokemon_abilities_ibfk_2` FOREIGN KEY (`ability_id`) REFERENCES `abilities` (`ability_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `moves` (
+  `move_id` int(11) NOT NULL AUTO_INCREMENT,
+  `move_name` varchar(100) NOT NULL,
+  `power` int(11) DEFAULT NULL,
+  `accuracy` int(11) DEFAULT NULL,
+  `move_type_id` int(11) NOT NULL,
+  PRIMARY KEY (`move_id`),
+  UNIQUE KEY `move_name` (`move_name`),
+  KEY `move_type_id` (`move_type_id`),
+  CONSTRAINT `moves_ibfk_1` FOREIGN KEY (`move_type_id`) REFERENCES `pokemon_types` (`pokemon_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `evolution_chains` (
+  `evolution_chain_id` int(11) NOT NULL AUTO_INCREMENT,
+  `from_species_id` int(11) NOT NULL,
+  `to_species_id` int(11) NOT NULL,
+  `evolution_level` int(11) DEFAULT NULL,
+  `evolution_condition` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`evolution_chain_id`),
+  KEY `from_species_id` (`from_species_id`),
+  KEY `to_species_id` (`to_species_id`),
+  CONSTRAINT `evolution_chains_ibfk_1` FOREIGN KEY (`from_species_id`) REFERENCES `pokemon_species` (`species_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `evolution_chains_ibfk_2` FOREIGN KEY (`to_species_id`) REFERENCES `pokemon_species` (`species_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pokemon_version_groups` (
+  `pokemon_version_group_id` int(11) NOT NULL AUTO_INCREMENT,
+  `species_id` int(11) NOT NULL,
+  `version_id` int(11) NOT NULL,
+  `classification` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`pokemon_version_group_id`),
+  KEY `species_id` (`species_id`),
+  KEY `version_id` (`version_id`),
+  CONSTRAINT `pokemon_version_groups_ibfk_1` FOREIGN KEY (`species_id`) REFERENCES `pokemon_species` (`species_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pokemon_version_groups_ibfk_2` FOREIGN KEY (`version_id`) REFERENCES `pokemon_versions` (`version_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

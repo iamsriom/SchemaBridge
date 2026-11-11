@@ -1,0 +1,126 @@
+-- Schema for database: schemabench_0162
+CREATE TABLE `countries` (
+  `country_id` int(11) NOT NULL AUTO_INCREMENT,
+  `country_name` varchar(100) NOT NULL,
+  `country_code` char(2) NOT NULL,
+  PRIMARY KEY (`country_id`),
+  UNIQUE KEY `country_code` (`country_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `regions` (
+  `region_id` int(11) NOT NULL AUTO_INCREMENT,
+  `country_id` int(11) NOT NULL,
+  `region_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`region_id`),
+  KEY `country_id` (`country_id`),
+  CONSTRAINT `regions_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `countries` (`country_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cities` (
+  `city_id` int(11) NOT NULL AUTO_INCREMENT,
+  `region_id` int(11) NOT NULL,
+  `city_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`city_id`),
+  KEY `region_id` (`region_id`),
+  CONSTRAINT `cities_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `regions` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(30) DEFAULT NULL,
+  `city_id` int(11) DEFAULT NULL,
+  `address_line1` varchar(255) DEFAULT NULL,
+  `address_line2` varchar(255) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`customer_id`),
+  UNIQUE KEY `email` (`email`),
+  KEY `city_id` (`city_id`),
+  CONSTRAINT `customers_ibfk_1` FOREIGN KEY (`city_id`) REFERENCES `cities` (`city_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_categories` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(150) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`category_id`),
+  UNIQUE KEY `category_name` (`category_name`) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_id` int(11) NOT NULL,
+  `sku` varchar(50) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `brand` varchar(100) DEFAULT NULL,
+  `unit_cost` decimal(12,2) NOT NULL,
+  `unit_price` decimal(12,2) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`product_id`),
+  UNIQUE KEY `sku` (`sku`),
+  KEY `category_id` (`category_id`),
+  CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `product_categories` (`category_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `order_date` datetime NOT NULL,
+  `order_status` varchar(50) NOT NULL,
+  `sales_channel` varchar(50) DEFAULT NULL,
+  `currency_code` char(3) NOT NULL,
+  `order_total` decimal(14,2) NOT NULL DEFAULT '0.00',
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `customer_id` (`customer_id`),
+  CONSTRAINT `sales_orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_order_items` (
+  `order_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(12,2) NOT NULL,
+  `discount_amount` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `line_total` decimal(14,2) NOT NULL,
+  PRIMARY KEY (`order_item_id`),
+  KEY `order_id` (`order_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `sales_order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `sales_orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_import_jobs` (
+  `job_id` int(11) NOT NULL AUTO_INCREMENT,
+  `source_system` varchar(100) NOT NULL,
+  `file_name` varchar(255) DEFAULT NULL,
+  `import_status` varchar(50) NOT NULL,
+  `started_at` datetime NOT NULL,
+  `completed_at` datetime DEFAULT NULL,
+  `rows_imported` int(11) NOT NULL DEFAULT '0',
+  `error_message` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`job_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `analytics_exports` (
+  `export_id` int(11) NOT NULL AUTO_INCREMENT,
+  `export_name` varchar(255) NOT NULL,
+  `target_system` varchar(100) NOT NULL,
+  `export_format` varchar(20) NOT NULL,
+  `requested_at` datetime NOT NULL,
+  `completed_at` datetime DEFAULT NULL,
+  `export_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`export_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ml_feature_sets` (
+  `feature_set_id` int(11) NOT NULL AUTO_INCREMENT,
+  `feature_set_name` varchar(255) NOT NULL,
+  `description` varchar(1000) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`feature_set_id`),
+  UNIQUE KEY `feature_set_name` (`feature_set_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

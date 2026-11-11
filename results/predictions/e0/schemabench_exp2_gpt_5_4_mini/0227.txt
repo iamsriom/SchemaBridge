@@ -1,0 +1,140 @@
+-- Schema for database: schemabench_0227
+CREATE TABLE `airline` (
+  `airline_id` int(11) NOT NULL AUTO_INCREMENT,
+  `airline_name` varchar(255) NOT NULL,
+  `headquarters` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`airline_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `airport` (
+  `airport_id` int(11) NOT NULL AUTO_INCREMENT,
+  `abbreviation` char(3) NOT NULL,
+  `airport_name` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`airport_id`),
+  UNIQUE KEY `airport_abbreviation_uniq` (`abbreviation`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `airplane_model` (
+  `model_id` int(11) NOT NULL AUTO_INCREMENT,
+  `manufacturer` varchar(255) NOT NULL,
+  `model_name` varchar(255) NOT NULL,
+  `capacity` int(11) NOT NULL,
+  PRIMARY KEY (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `airplane` (
+  `airplane_id` int(11) NOT NULL AUTO_INCREMENT,
+  `airline_id` int(11) NOT NULL,
+  `model_id` int(11) NOT NULL,
+  `tail_number` varchar(50) NOT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`airplane_id`),
+  UNIQUE KEY `airplane_tail_number_uniq` (`tail_number`),
+  KEY `airplane_ibfk_1` (`airline_id`),
+  KEY `airplane_ibfk_2` (`model_id`),
+  CONSTRAINT `airplane_ibfk_1` FOREIGN KEY (`airline_id`) REFERENCES `airline` (`airline_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `airplane_ibfk_2` FOREIGN KEY (`model_id`) REFERENCES `airplane_model` (`model_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flight_schedule` (
+  `schedule_id` int(11) NOT NULL AUTO_INCREMENT,
+  `airline_id` int(11) NOT NULL,
+  `flight_number` varchar(20) NOT NULL,
+  `origin_airport_id` int(11) NOT NULL,
+  `destination_airport_id` int(11) NOT NULL,
+  `departure_time` datetime NOT NULL,
+  `arrival_time` datetime NOT NULL,
+  PRIMARY KEY (`schedule_id`),
+  UNIQUE KEY `flight_schedule_flight_number_uniq` (`flight_number`),
+  KEY `flight_schedule_ibfk_1` (`airline_id`),
+  KEY `flight_schedule_ibfk_2` (`origin_airport_id`),
+  KEY `flight_schedule_ibfk_3` (`destination_airport_id`),
+  CONSTRAINT `flight_schedule_ibfk_1` FOREIGN KEY (`airline_id`) REFERENCES `airline` (`airline_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_schedule_ibfk_2` FOREIGN KEY (`origin_airport_id`) REFERENCES `airport` (`airport_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `flight_schedule_ibfk_3` FOREIGN KEY (`destination_airport_id`) REFERENCES `airport` (`airport_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flight_instance` (
+  `instance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `schedule_id` int(11) NOT NULL,
+  `airplane_id` int(11) NOT NULL,
+  `instance_date` date NOT NULL,
+  `registered_passengers` int(11) DEFAULT NULL,
+  PRIMARY KEY (`instance_id`),
+  KEY `flight_instance_ibfk_1` (`schedule_id`),
+  KEY `flight_instance_ibfk_2` (`airplane_id`),
+  CONSTRAINT `flight_instance_ibfk_1` FOREIGN KEY (`schedule_id`) REFERENCES `flight_schedule` (`schedule_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_instance_ibfk_2` FOREIGN KEY (`airplane_id`) REFERENCES `airplane` (`airplane_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `crew_member` (
+  `crew_member_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `faa_number` varchar(50) NOT NULL,
+  `role` varchar(100) NOT NULL,
+  `faa_verified` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`crew_member_id`),
+  UNIQUE KEY `crew_member_faa_number_uniq` (`faa_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flight_crew_assignment` (
+  `assignment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `instance_id` int(11) NOT NULL,
+  `crew_member_id` int(11) NOT NULL,
+  `assigned_role` varchar(100) NOT NULL,
+  PRIMARY KEY (`assignment_id`),
+  UNIQUE KEY `flight_crew_assignment_uniq` (`instance_id`,`crew_member_id`),
+  KEY `flight_crew_assignment_ibfk_2` (`crew_member_id`),
+  CONSTRAINT `flight_crew_assignment_ibfk_1` FOREIGN KEY (`instance_id`) REFERENCES `flight_instance` (`instance_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_crew_assignment_ibfk_2` FOREIGN KEY (`crew_member_id`) REFERENCES `crew_member` (`crew_member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `amenity` (
+  `amenity_id` int(11) NOT NULL AUTO_INCREMENT,
+  `amenity_name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`amenity_id`),
+  UNIQUE KEY `amenity_name_uniq` (`amenity_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flight_charge` (
+  `charge_id` int(11) NOT NULL AUTO_INCREMENT,
+  `schedule_id` int(11) NOT NULL,
+  `amenity_id` int(11) NOT NULL,
+  `charge_amount` decimal(10,2) NOT NULL,
+  `charge_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`charge_id`),
+  UNIQUE KEY `flight_charge_uniq` (`schedule_id`,`amenity_id`),
+  KEY `flight_charge_ibfk_2` (`amenity_id`),
+  CONSTRAINT `flight_charge_ibfk_1` FOREIGN KEY (`schedule_id`) REFERENCES `flight_schedule` (`schedule_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_charge_ibfk_2` FOREIGN KEY (`amenity_id`) REFERENCES `amenity` (`amenity_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `incident_report` (
+  `incident_id` int(11) NOT NULL AUTO_INCREMENT,
+  `instance_id` int(11) NOT NULL,
+  `reported_by_crew_member_id` int(11) NOT NULL,
+  `incident_type` varchar(100) NOT NULL,
+  `incident_description` text NOT NULL,
+  `reported_at` datetime NOT NULL,
+  PRIMARY KEY (`incident_id`),
+  KEY `incident_report_ibfk_1` (`instance_id`),
+  KEY `incident_report_ibfk_2` (`reported_by_crew_member_id`),
+  CONSTRAINT `incident_report_ibfk_1` FOREIGN KEY (`instance_id`) REFERENCES `flight_instance` (`instance_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `incident_report_ibfk_2` FOREIGN KEY (`reported_by_crew_member_id`) REFERENCES `crew_member` (`crew_member_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `personnel_report` (
+  `personnel_report_id` int(11) NOT NULL AUTO_INCREMENT,
+  `incident_id` int(11) NOT NULL,
+  `crew_member_id` int(11) NOT NULL,
+  `report_details` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`personnel_report_id`),
+  KEY `personnel_report_ibfk_1` (`incident_id`),
+  KEY `personnel_report_ibfk_2` (`crew_member_id`),
+  CONSTRAINT `personnel_report_ibfk_1` FOREIGN KEY (`incident_id`) REFERENCES `incident_report` (`incident_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `personnel_report_ibfk_2` FOREIGN KEY (`crew_member_id`) REFERENCES `crew_member` (`crew_member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

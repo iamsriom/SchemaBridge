@@ -1,0 +1,99 @@
+-- Schema for database: rschema_0479
+
+CREATE TABLE `subsidiary` (
+  `subsidiary_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `manager_id` int(11) DEFAULT NULL,
+  `contact_address` varchar(500) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`subsidiary_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(500) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `subsidiary_id` int(11) NOT NULL,
+  `supervisor_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`department_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`subsidiary_id`) REFERENCES `subsidiary` (`subsidiary_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  `department_id` int(11) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_family_member` (
+  `family_member_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `member_name` varchar(255) NOT NULL,
+  `relationship` varchar(100) NOT NULL,
+  PRIMARY KEY (`family_member_id`),
+  CONSTRAINT `employee_family_member_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+ALTER TABLE `subsidiary` ADD CONSTRAINT `subsidiary_ibfk_1` FOREIGN KEY (`manager_id`) REFERENCES `employee` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE `department` ADD CONSTRAINT `department_ibfk_2` FOREIGN KEY (`supervisor_id`) REFERENCES `employee` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+CREATE TABLE `user_account` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `role` varchar(50) NOT NULL COMMENT 'e.g. admin, agent, employee',
+  `employee_id` int(11) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`),
+  CONSTRAINT `user_account_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `identity_verification` (
+  `verification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `verification_method` varchar(100) DEFAULT NULL,
+  `verified_at` datetime DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'pending' COMMENT 'pending, verified, failed',
+  `token` varchar(255) DEFAULT NULL,
+  `expires_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`verification_id`),
+  CONSTRAINT `identity_verification_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_account` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `real_estate` (
+  `property_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `address` varchar(500) NOT NULL,
+  `price` decimal(15,2) DEFAULT NULL,
+  `area` decimal(10,2) DEFAULT NULL,
+  `property_type` varchar(100) DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'pending' COMMENT 'pending, approved, rejected, removed',
+  `agent_id` int(11) NOT NULL,
+  `approved_by` int(11) DEFAULT NULL,
+  `approved_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `is_for_sale` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`property_id`),
+  CONSTRAINT `real_estate_ibfk_1` FOREIGN KEY (`agent_id`) REFERENCES `user_account` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `real_estate_ibfk_2` FOREIGN KEY (`approved_by`) REFERENCES `user_account` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `real_estate_export_log` (
+  `export_id` int(11) NOT NULL AUTO_INCREMENT,
+  `exported_by` int(11) NOT NULL,
+  `exported_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `export_note` text DEFAULT NULL,
+  `file_path` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`export_id`),
+  CONSTRAINT `real_estate_export_log_ibfk_1` FOREIGN KEY (`exported_by`) REFERENCES `user_account` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

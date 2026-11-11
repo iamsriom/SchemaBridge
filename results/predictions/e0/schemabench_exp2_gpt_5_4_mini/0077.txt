@@ -1,0 +1,82 @@
+-- Schema for database: schemabench_0077
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `password_digest` varchar(255) NOT NULL,
+  `admin` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_users_on_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `components` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'operational',
+  `position` int(11) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `incidents` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'investigating',
+  `impact` varchar(50) NOT NULL DEFAULT 'minor',
+  `started_at` datetime NOT NULL,
+  `resolved_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `incident_updates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `incident_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `message` text NOT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_incident_updates_on_incident_id` (`incident_id`),
+  KEY `index_incident_updates_on_user_id` (`user_id`),
+  CONSTRAINT `incident_updates_ibfk_1` FOREIGN KEY (`incident_id`) REFERENCES `incidents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `incident_updates_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `maintenances` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'scheduled',
+  `starts_at` datetime NOT NULL,
+  `ends_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `maintenance_updates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `maintenance_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `message` text NOT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_maintenance_updates_on_maintenance_id` (`maintenance_id`),
+  KEY `index_maintenance_updates_on_user_id` (`user_id`),
+  CONSTRAINT `maintenance_updates_ibfk_1` FOREIGN KEY (`maintenance_id`) REFERENCES `maintenances` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_updates_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `subscribers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `confirmed` tinyint(1) NOT NULL DEFAULT '0',
+  `confirmation_token` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_subscribers_on_email` (`email`),
+  UNIQUE KEY `index_subscribers_on_confirmation_token` (`confirmation_token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

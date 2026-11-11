@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0387
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  `credit_card_number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `airline` (
+  `airline_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`airline_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flight` (
+  `flight_id` int(11) NOT NULL AUTO_INCREMENT,
+  `flight_number` varchar(50) NOT NULL,
+  `destination` varchar(255) NOT NULL,
+  `departure_time` datetime NOT NULL,
+  `arrival_time` datetime NOT NULL,
+  `airline_id` int(11) NOT NULL,
+  PRIMARY KEY (`flight_id`),
+  CONSTRAINT `flight_ibfk_1` FOREIGN KEY (`airline_id`) REFERENCES `airline` (`airline_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reservation` (
+  `reservation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `reservation_number` varchar(50) NOT NULL,
+  `reservation_date` date NOT NULL,
+  `reservation_time` time NOT NULL,
+  `number_of_tickets` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `flight_id` int(11) NOT NULL,
+  PRIMARY KEY (`reservation_id`),
+  CONSTRAINT `reservation_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reservation_ibfk_2` FOREIGN KEY (`flight_id`) REFERENCES `flight` (`flight_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment` (
+  `payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `payment_amount` decimal(10,2) NOT NULL,
+  `payment_date` date NOT NULL,
+  `payment_method` varchar(50) NOT NULL,
+  `reservation_id` int(11) NOT NULL,
+  PRIMARY KEY (`payment_id`),
+  CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`reservation_id`) REFERENCES `reservation` (`reservation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

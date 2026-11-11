@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0482
+
+CREATE TABLE `client` (
+  `client_number` varchar(20) NOT NULL,
+  `client_name` varchar(100) NOT NULL,
+  `client_type` varchar(50) DEFAULT NULL,
+  `discount_rate` decimal(5,2) DEFAULT NULL,
+  `contact_person` varchar(100) DEFAULT NULL,
+  `contact_phone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`client_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_number` varchar(20) NOT NULL,
+  `department_name` varchar(100) NOT NULL,
+  `supervisor` varchar(100) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`department_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_number` varchar(20) NOT NULL,
+  `employee_name` varchar(100) NOT NULL,
+  `position` varchar(50) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `home_address` varchar(255) DEFAULT NULL,
+  `department_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`employee_number`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_number`) REFERENCES `department` (`department_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vehicle` (
+  `license_plate_number` varchar(20) NOT NULL,
+  `model` varchar(100) DEFAULT NULL,
+  `color` varchar(50) DEFAULT NULL,
+  `vehicle_category` varchar(50) DEFAULT NULL,
+  `client_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`license_plate_number`),
+  CONSTRAINT `vehicle_ibfk_1` FOREIGN KEY (`client_number`) REFERENCES `client` (`client_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_order` (
+  `order_number` varchar(20) NOT NULL,
+  `license_plate_number` varchar(20) NOT NULL,
+  `maintenance_content` text DEFAULT NULL,
+  `man_hours` decimal(10,2) DEFAULT NULL,
+  `employee_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`order_number`),
+  CONSTRAINT `maintenance_order_ibfk_1` FOREIGN KEY (`license_plate_number`) REFERENCES `vehicle` (`license_plate_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_order_ibfk_2` FOREIGN KEY (`employee_number`) REFERENCES `employee` (`employee_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,62 @@
+-- Schema for database: schemabench_0054
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `api_keys` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `api_key` varchar(255) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `last_used_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `api_keys_api_key_unique` (`api_key`),
+  KEY `api_keys_user_id_index` (`user_id`),
+  CONSTRAINT `api_keys_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `screenshots` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `api_key_id` int(11) NOT NULL,
+  `target_url` varchar(2048) NOT NULL,
+  `response_format` varchar(20) NOT NULL,
+  `file_path` varchar(1024) DEFAULT NULL,
+  `base64_data` longtext DEFAULT NULL,
+  `expires_at` datetime NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `screenshots_user_id_index` (`user_id`),
+  KEY `screenshots_api_key_id_index` (`api_key_id`),
+  CONSTRAINT `screenshots_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `screenshots_ibfk_2` FOREIGN KEY (`api_key_id`) REFERENCES `api_keys` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `api_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `api_key_id` int(11) NOT NULL,
+  `screenshot_id` int(11) DEFAULT NULL,
+  `request_url` varchar(2048) NOT NULL,
+  `request_method` varchar(20) NOT NULL,
+  `response_status` int(11) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `api_logs_user_id_index` (`user_id`),
+  KEY `api_logs_api_key_id_index` (`api_key_id`),
+  KEY `api_logs_screenshot_id_index` (`screenshot_id`),
+  CONSTRAINT `api_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `api_logs_ibfk_2` FOREIGN KEY (`api_key_id`) REFERENCES `api_keys` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `api_logs_ibfk_3` FOREIGN KEY (`screenshot_id`) REFERENCES `screenshots` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

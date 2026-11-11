@@ -1,0 +1,153 @@
+-- Schema for database: schemabench_0050
+
+CREATE TABLE `teams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `token` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `remember_token` varchar(100) DEFAULT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  `role` varchar(50) DEFAULT NULL,
+  `api_token` varchar(255) DEFAULT NULL,
+  `locale` varchar(10) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tickets` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `requester_name` varchar(255) NOT NULL,
+  `requester_email` varchar(255) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `body` text DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT 1,
+  `priority` tinyint(4) NOT NULL DEFAULT 1,
+  `team_id` int(11) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `merged_with` int(11) DEFAULT NULL,
+  `issue_tracker_url` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tickets_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `tickets_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticket_comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `body` text NOT NULL,
+  `is_internal` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `ticket_comments_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticket_comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticket_tags` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(11) NOT NULL,
+  `tag` varchar(100) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `ticket_tags_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticket_attachments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(11) NOT NULL,
+  `comment_id` int(11) DEFAULT NULL,
+  `filename` varchar(255) NOT NULL,
+  `path` varchar(255) NOT NULL,
+  `mime_type` varchar(100) DEFAULT NULL,
+  `size` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `ticket_attachments_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticket_attachments_ibfk_2` FOREIGN KEY (`comment_id`) REFERENCES `ticket_comments` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `leads` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `company` varchar(255) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT 1,
+  `notes` text DEFAULT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `leads_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `leads_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `lead_notes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `lead_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `body` text NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `lead_notes_ibfk_1` FOREIGN KEY (`lead_id`) REFERENCES `leads` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `lead_notes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) NOT NULL,
+  `value` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `email_accounts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_id` int(11) DEFAULT NULL,
+  `host` varchar(255) NOT NULL,
+  `port` int(11) DEFAULT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `encryption` varchar(20) DEFAULT NULL,
+  `last_polled_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `email_accounts_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_id` int(11) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `report_date` date NOT NULL,
+  `tickets_opened` int(11) NOT NULL DEFAULT 0,
+  `tickets_closed` int(11) NOT NULL DEFAULT 0,
+  `avg_response_time` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `reports_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `reports_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

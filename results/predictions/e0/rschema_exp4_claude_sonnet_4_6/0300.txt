@@ -1,0 +1,49 @@
+-- Schema for database: rschema_0300
+
+CREATE TABLE `supply_project` (
+  `project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_number` varchar(64) NOT NULL,
+  `material_code` varchar(64) NOT NULL,
+  `material_description` varchar(255) DEFAULT NULL,
+  `quantity` decimal(15,4) NOT NULL,
+  `unit` varchar(32) DEFAULT NULL,
+  `cost` decimal(15,2) NOT NULL,
+  `charge_amount` decimal(15,2) NOT NULL,
+  `creation_date` datetime NOT NULL,
+  `closing_date` datetime DEFAULT NULL,
+  `bill_number` varchar(64) DEFAULT NULL,
+  `status` varchar(32) DEFAULT NULL,
+  `remarks` varchar(512) DEFAULT NULL,
+  PRIMARY KEY (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bill` (
+  `bill_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `bill_number` varchar(64) NOT NULL,
+  `material_code` varchar(64) NOT NULL,
+  `material_description` varchar(255) DEFAULT NULL,
+  `quantity` decimal(15,4) NOT NULL,
+  `unit` varchar(32) DEFAULT NULL,
+  `cost` decimal(15,2) NOT NULL,
+  `charge_amount` decimal(15,2) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `remarks` varchar(512) DEFAULT NULL,
+  PRIMARY KEY (`bill_id`),
+  CONSTRAINT `bill_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `supply_project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bill_verification_error` (
+  `error_id` int(11) NOT NULL AUTO_INCREMENT,
+  `bill_id` int(11) NOT NULL,
+  `error_code` varchar(64) DEFAULT NULL,
+  `error_description` varchar(512) DEFAULT NULL,
+  `error_type` varchar(64) DEFAULT NULL,
+  `handling_status` varchar(32) DEFAULT NULL,
+  `handling_remarks` varchar(512) DEFAULT NULL,
+  `detected_at` datetime NOT NULL,
+  `resolved_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`error_id`),
+  CONSTRAINT `bill_verification_error_ibfk_1` FOREIGN KEY (`bill_id`) REFERENCES `bill` (`bill_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

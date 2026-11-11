@@ -1,0 +1,30 @@
+{
+  "text_number": 158,
+  "id": "67552f0b13602ec03b41aa24",
+  "llm": "gpt54mini",
+  "model_id": "gpt-5.4-mini",
+  "database": "rschema_0158",
+  "question": "The online examination system shall include functions such as user management, question bank management, and exam management.\nThe system shall have different user roles, such as student, teacher, and administrator. Each user shall have a unique ID, real name, contact information, and other details.\nThe question bank shall contain various questions. Each question shall have a difficulty level, content, options, correct answer, explanation, and belong to a category.\nAdministrators shall be able to create exams, set the exam name, description, time range, status, and select questions from the question bank to include in the exam, specifying the order of the questions.\nStudents shall be able to take exams. After submitting answers, the system shall record the exam score and the answer status for each question, including the user's answer and whether it is correct.\nThe exam score shall include the student's score and submission time.",
+  "ddl": "-- Schema for database: rschema_0158\nCREATE TABLE `users` (\n  `user_id` int(11) NOT NULL AUTO_INCREMENT,\n  `role` varchar(20) NOT NULL,\n  `username` varchar(100) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `real_name` varchar(100) NOT NULL,\n  `contact_info` varchar(255) DEFAULT NULL,\n  `email` varchar(255) DEFAULT NULL,\n  `phone` varchar(50) DEFAULT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`user_id`),\n  UNIQUE KEY `uk_users_username` (`username`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `question_categories` (\n  `category_id` int(11) NOT NULL AUTO_INCREMENT,\n  `category_name` varchar(100) NOT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`category_id`),\n  UNIQUE KEY `uk_question_categories_category_name` (`category_name`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `questions` (\n  `question_id` int(11) NOT NULL AUTO_INCREMENT,\n  `category_id` int(11) NOT NULL,\n  `difficulty_level` varchar(20) NOT NULL,\n  `content` text NOT NULL,\n  `options` text DEFAULT NULL,\n  `correct_answer` varchar(255) NOT NULL,\n  `explanation` text DEFAULT NULL,\n  `created_by` int(11) DEFAULT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`question_id`),\n  KEY `idx_questions_category_id` (`category_id`),\n  KEY `idx_questions_created_by` (`created_by`),\n  CONSTRAINT `questions_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `question_categories` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `questions_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `exams` (\n  `exam_id` int(11) NOT NULL AUTO_INCREMENT,\n  `exam_name` varchar(255) NOT NULL,\n  `description` text DEFAULT NULL,\n  `start_time` datetime NOT NULL,\n  `end_time` datetime NOT NULL,\n  `status` varchar(20) NOT NULL,\n  `created_by` int(11) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`exam_id`),\n  KEY `idx_exams_created_by` (`created_by`),\n  CONSTRAINT `exams_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `exam_questions` (\n  `exam_question_id` int(11) NOT NULL AUTO_INCREMENT,\n  `exam_id` int(11) NOT NULL,\n  `question_id` int(11) NOT NULL,\n  `question_order` int(11) NOT NULL,\n  PRIMARY KEY (`exam_question_id`),\n  UNIQUE KEY `uk_exam_questions_exam_question` (`exam_id`,`question_id`),\n  UNIQUE KEY `uk_exam_questions_exam_order` (`exam_id`,`question_order`),\n  KEY `idx_exam_questions_question_id` (`question_id`),\n  CONSTRAINT `exam_questions_ibfk_1` FOREIGN KEY (`exam_id`) REFERENCES `exams` (`exam_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `exam_questions_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `questions` (`question_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `exam_submissions` (\n  `submission_id` int(11) NOT NULL AUTO_INCREMENT,\n  `exam_id` int(11) NOT NULL,\n  `student_id` int(11) NOT NULL,\n  `score` decimal(5,2) NOT NULL DEFAULT '0.00',\n  `submitted_at` datetime NOT NULL,\n  PRIMARY KEY (`submission_id`),\n  UNIQUE KEY `uk_exam_submissions_exam_student` (`exam_id`,`student_id`),\n  KEY `idx_exam_submissions_student_id` (`student_id`),\n  CONSTRAINT `exam_submissions_ibfk_1` FOREIGN KEY (`exam_id`) REFERENCES `exams` (`exam_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `exam_submissions_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `submission_answers` (\n  `answer_id` int(11) NOT NULL AUTO_INCREMENT,\n  `submission_id` int(11) NOT NULL,\n  `question_id` int(11) NOT NULL,\n  `user_answer` varchar(255) DEFAULT NULL,\n  `is_correct` tinyint(1) NOT NULL DEFAULT '0',\n  PRIMARY KEY (`answer_id`),\n  UNIQUE KEY `uk_submission_answers_submission_question` (`submission_id`,`question_id`),\n  KEY `idx_submission_answers_question_id` (`question_id`),\n  CONSTRAINT `submission_answers_ibfk_1` FOREIGN KEY (`submission_id`) REFERENCES `exam_submissions` (`submission_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `submission_answers_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `questions` (`question_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "question_categories",
+      "questions",
+      "exams",
+      "exam_questions",
+      "exam_submissions",
+      "submission_answers"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "question_categories": [],
+      "questions": [],
+      "exams": [],
+      "exam_questions": [],
+      "exam_submissions": [],
+      "submission_answers": []
+    }
+  }
+}

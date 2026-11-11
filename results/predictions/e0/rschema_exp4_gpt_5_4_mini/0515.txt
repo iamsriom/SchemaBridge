@@ -1,0 +1,134 @@
+-- Schema for database: rschema_0515
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `phone_number` varchar(20) NOT NULL,
+  `verification_code` varchar(20) DEFAULT NULL,
+  `credit_status` varchar(50) NOT NULL DEFAULT 'normal',
+  `user_status` varchar(50) NOT NULL DEFAULT 'active',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_phone_number` (`phone_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `merchants` (
+  `merchant_id` int(11) NOT NULL AUTO_INCREMENT,
+  `merchant_name` varchar(255) NOT NULL,
+  `contact_phone` varchar(20) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`merchant_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bikes` (
+  `bike_id` int(11) NOT NULL AUTO_INCREMENT,
+  `merchant_id` int(11) NOT NULL,
+  `bike_code` varchar(64) NOT NULL,
+  `qr_code` varchar(255) NOT NULL,
+  `unlock_password` varchar(50) NOT NULL,
+  `latitude` decimal(10,7) DEFAULT NULL,
+  `longitude` decimal(10,7) DEFAULT NULL,
+  `location_description` varchar(255) DEFAULT NULL,
+  `bike_status` varchar(50) NOT NULL DEFAULT 'available',
+  `last_reported_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`bike_id`),
+  UNIQUE KEY `uk_bikes_bike_code` (`bike_code`),
+  UNIQUE KEY `uk_bikes_qr_code` (`qr_code`),
+  KEY `bikes_ibfk_1` (`merchant_id`),
+  CONSTRAINT `bikes_ibfk_1` FOREIGN KEY (`merchant_id`) REFERENCES `merchants` (`merchant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `billing_rules` (
+  `rule_id` int(11) NOT NULL AUTO_INCREMENT,
+  `merchant_id` int(11) NOT NULL,
+  `rule_name` varchar(255) NOT NULL,
+  `base_fee` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `per_minute_fee` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `per_km_fee` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `free_minutes` int(11) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`rule_id`),
+  KEY `billing_rules_ibfk_1` (`merchant_id`),
+  CONSTRAINT `billing_rules_ibfk_1` FOREIGN KEY (`merchant_id`) REFERENCES `merchants` (`merchant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trips` (
+  `trip_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `bike_id` int(11) NOT NULL,
+  `rule_id` int(11) DEFAULT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `start_latitude` decimal(10,7) DEFAULT NULL,
+  `start_longitude` decimal(10,7) DEFAULT NULL,
+  `end_latitude` decimal(10,7) DEFAULT NULL,
+  `end_longitude` decimal(10,7) DEFAULT NULL,
+  `trajectory` longtext DEFAULT NULL,
+  `distance_km` decimal(10,3) NOT NULL DEFAULT '0.000',
+  `duration_minutes` int(11) NOT NULL DEFAULT 0,
+  `fee_amount` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `payment_status` varchar(50) NOT NULL DEFAULT 'unpaid',
+  `trip_status` varchar(50) NOT NULL DEFAULT 'ongoing',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`trip_id`),
+  KEY `trips_ibfk_1` (`user_id`),
+  KEY `trips_ibfk_2` (`bike_id`),
+  KEY `trips_ibfk_3` (`rule_id`),
+  CONSTRAINT `trips_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trips_ibfk_2` FOREIGN KEY (`bike_id`) REFERENCES `bikes` (`bike_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trips_ibfk_3` FOREIGN KEY (`rule_id`) REFERENCES `billing_rules` (`rule_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bike_location_logs` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `trip_id` int(11) NOT NULL,
+  `bike_id` int(11) NOT NULL,
+  `latitude` decimal(10,7) NOT NULL,
+  `longitude` decimal(10,7) NOT NULL,
+  `recorded_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`log_id`),
+  KEY `bike_location_logs_ibfk_1` (`trip_id`),
+  KEY `bike_location_logs_ibfk_2` (`bike_id`),
+  CONSTRAINT `bike_location_logs_ibfk_1` FOREIGN KEY (`trip_id`) REFERENCES `trips` (`trip_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bike_location_logs_ibfk_2` FOREIGN KEY (`bike_id`) REFERENCES `bikes` (`bike_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bike_reports` (
+  `report_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `bike_id` int(11) NOT NULL,
+  `trip_id` int(11) DEFAULT NULL,
+  `report_type` varchar(100) NOT NULL,
+  `report_content` text NOT NULL,
+  `report_status` varchar(50) NOT NULL DEFAULT 'pending',
+  `handled_by_merchant_id` int(11) DEFAULT NULL,
+  `handled_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`report_id`),
+  KEY `bike_reports_ibfk_1` (`user_id`),
+  KEY `bike_reports_ibfk_2` (`bike_id`),
+  KEY `bike_reports_ibfk_3` (`trip_id`),
+  KEY `bike_reports_ibfk_4` (`handled_by_merchant_id`),
+  CONSTRAINT `bike_reports_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bike_reports_ibfk_2` FOREIGN KEY (`bike_id`) REFERENCES `bikes` (`bike_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bike_reports_ibfk_3` FOREIGN KEY (`trip_id`) REFERENCES `trips` (`trip_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `bike_reports_ibfk_4` FOREIGN KEY (`handled_by_merchant_id`) REFERENCES `merchants` (`merchant_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_credit_logs` (
+  `credit_log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `merchant_id` int(11) DEFAULT NULL,
+  `change_amount` int(11) NOT NULL,
+  `reason` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`credit_log_id`),
+  KEY `user_credit_logs_ibfk_1` (`user_id`),
+  KEY `user_credit_logs_ibfk_2` (`merchant_id`),
+  CONSTRAINT `user_credit_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_credit_logs_ibfk_2` FOREIGN KEY (`merchant_id`) REFERENCES `merchants` (`merchant_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

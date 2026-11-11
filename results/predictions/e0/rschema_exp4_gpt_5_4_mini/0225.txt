@@ -1,0 +1,57 @@
+-- Schema for database: rschema_0225
+CREATE TABLE `companies` (
+  `company_id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_name` varchar(255) NOT NULL,
+  `authorization_token` varchar(255) NOT NULL,
+  `authorization_token_hash` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`company_id`),
+  UNIQUE KEY `uk_companies_authorization_token` (`authorization_token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `full_name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `password_salt` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `permission_level` varchar(100) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_username` (`username`),
+  KEY `users_ibfk_1` (`company_id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `request_logs` (
+  `request_log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `request_id` varchar(255) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `request_timestamp` datetime NOT NULL,
+  `request_data` longtext DEFAULT NULL,
+  `compression_result` longtext DEFAULT NULL,
+  `probe_information` longtext DEFAULT NULL,
+  PRIMARY KEY (`request_log_id`),
+  UNIQUE KEY `uk_request_logs_request_id` (`request_id`),
+  KEY `request_logs_ibfk_1` (`user_id`),
+  CONSTRAINT `request_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_feedback` (
+  `feedback_id` int(11) NOT NULL AUTO_INCREMENT,
+  `request_log_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `rating` int(11) NOT NULL,
+  `comments` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`feedback_id`),
+  KEY `user_feedback_ibfk_1` (`request_log_id`),
+  KEY `user_feedback_ibfk_2` (`user_id`),
+  CONSTRAINT `user_feedback_ibfk_1` FOREIGN KEY (`request_log_id`) REFERENCES `request_logs` (`request_log_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_feedback_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

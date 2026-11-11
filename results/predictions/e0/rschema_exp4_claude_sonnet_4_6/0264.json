@@ -1,0 +1,28 @@
+{
+  "text_number": 264,
+  "id": "67552f0b13602ec03b41ab18",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0264",
+  "question": "Requirement function description:\n1. Department management: The hotel has multiple departments, each department can have multiple employees, and each employee belongs to only one department; each department has only one manager who is responsible for managing the department.\n2. Employee management: Employee information includes employee number, name, position, phone number, and salary. The employee number uniquely identifies a tuple in the employee relationship. Positions include manager and salesperson.\n3. Room management: Room information includes room number, room type, charging standard, and check-in status. The room number uniquely identifies a tuple in the room relationship. Different room types have different charging standards.\n4. Customer management: Customer information includes customer number, unit name, contact person, contact number, and contact address. The customer number uniquely identifies a tuple in the customer relationship.\n5. Reservation management: When a customer reserves a room, he needs to fill in a reservation application. The reservation application information includes application number, customer number, check-in time, number of days, room type, and number of rooms. The application number uniquely identifies a tuple in the reservation application. A customer can have multiple reservation applications, but one reservation application corresponds to a unique customer.\n6. Arrangement management: The salesperson is responsible for arranging the room according to the customer's reservation application. The arrangement information includes the room number, customer name, gender, ID number, check-in time, number of days, and telephone number. The room number, ID number, and check-in time uniquely identify one arrangement. One salesperson can arrange multiple reservation applications. One reservation application can only be arranged by one salesperson, and multiple rooms of the same type can be arranged.",
+  "ddl": "-- Schema for database: rschema_0264\n\nCREATE TABLE `department` (\n  `dept_id` int(11) NOT NULL AUTO_INCREMENT,\n  `dept_name` varchar(255) NOT NULL,\n  `manager_emp_id` int(11) DEFAULT NULL,\n  PRIMARY KEY (`dept_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `employee` (\n  `emp_id` int(11) NOT NULL AUTO_INCREMENT,\n  `emp_name` varchar(255) NOT NULL,\n  `position` varchar(50) NOT NULL,\n  `phone` varchar(20) DEFAULT NULL,\n  `salary` decimal(10,2) DEFAULT NULL,\n  `dept_id` int(11) NOT NULL,\n  PRIMARY KEY (`emp_id`),\n  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`dept_id`) REFERENCES `department` (`dept_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nALTER TABLE `department` ADD CONSTRAINT `department_ibfk_1` FOREIGN KEY (`manager_emp_id`) REFERENCES `employee` (`emp_id`) ON DELETE SET NULL ON UPDATE CASCADE;\n\nCREATE TABLE `room` (\n  `room_id` int(11) NOT NULL AUTO_INCREMENT,\n  `room_type` varchar(100) NOT NULL,\n  `charge_standard` decimal(10,2) NOT NULL,\n  `checkin_status` varchar(50) NOT NULL,\n  PRIMARY KEY (`room_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `customer` (\n  `customer_id` int(11) NOT NULL AUTO_INCREMENT,\n  `unit_name` varchar(255) DEFAULT NULL,\n  `contact_person` varchar(255) NOT NULL,\n  `contact_phone` varchar(20) DEFAULT NULL,\n  `contact_address` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`customer_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `reservation` (\n  `application_id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_id` int(11) NOT NULL,\n  `checkin_time` datetime NOT NULL,\n  `num_days` int(11) NOT NULL,\n  `room_type` varchar(100) NOT NULL,\n  `num_rooms` int(11) NOT NULL,\n  PRIMARY KEY (`application_id`),\n  CONSTRAINT `reservation_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `arrangement` (\n  `room_id` int(11) NOT NULL,\n  `id_number` varchar(50) NOT NULL,\n  `checkin_time` datetime NOT NULL,\n  `customer_name` varchar(255) NOT NULL,\n  `gender` char(6) DEFAULT NULL,\n  `num_days` int(11) NOT NULL,\n  `telephone` varchar(20) DEFAULT NULL,\n  `application_id` int(11) NOT NULL,\n  `salesperson_id` int(11) NOT NULL,\n  PRIMARY KEY (`room_id`, `id_number`, `checkin_time`),\n  CONSTRAINT `arrangement_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `room` (`room_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `arrangement_ibfk_2` FOREIGN KEY (`application_id`) REFERENCES `reservation` (`application_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `arrangement_ibfk_3` FOREIGN KEY (`salesperson_id`) REFERENCES `employee` (`emp_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "department",
+      "employee",
+      "room",
+      "customer",
+      "reservation",
+      "arrangement"
+    ],
+    "columns_by_table": {
+      "department": [],
+      "employee": [],
+      "room": [],
+      "customer": [],
+      "reservation": [],
+      "arrangement": []
+    }
+  }
+}

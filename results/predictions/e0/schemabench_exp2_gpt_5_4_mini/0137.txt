@@ -1,0 +1,35 @@
+-- Schema for database: schemabench_0137
+CREATE TABLE `utube_state` (
+  `state_id` int(11) NOT NULL AUTO_INCREMENT,
+  `value1` int(11) NOT NULL,
+  `value2` int(11) NOT NULL,
+  `direction` varchar(20) NOT NULL,
+  `is_legal` tinyint(1) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`state_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `utube_rule` (
+  `rule_id` int(11) NOT NULL AUTO_INCREMENT,
+  `rule_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `condition_expression` text NOT NULL,
+  `is_active` tinyint(1) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`rule_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `state_rule_evaluation` (
+  `evaluation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `state_id` int(11) NOT NULL,
+  `rule_id` int(11) NOT NULL,
+  `matched` tinyint(1) NOT NULL,
+  `evaluated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`evaluation_id`),
+  KEY `state_rule_evaluation_ibfk_1` (`state_id`),
+  KEY `state_rule_evaluation_ibfk_2` (`rule_id`),
+  CONSTRAINT `state_rule_evaluation_ibfk_1` FOREIGN KEY (`state_id`) REFERENCES `utube_state` (`state_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `state_rule_evaluation_ibfk_2` FOREIGN KEY (`rule_id`) REFERENCES `utube_rule` (`rule_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

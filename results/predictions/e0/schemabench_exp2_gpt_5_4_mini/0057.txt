@@ -1,0 +1,71 @@
+-- Schema for database: schemabench_0057
+CREATE TABLE `roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `display_name` varchar(255) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `guard_name` varchar(255) NOT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `roles_team_id_index` (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `display_name` varchar(255) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `guard_name` varchar(255) NOT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `permissions_team_id_index` (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `user_type` varchar(255) NOT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `role_user_role_id_index` (`role_id`),
+  KEY `role_user_user_index` (`user_id`,`user_type`),
+  KEY `role_user_team_id_index` (`team_id`),
+  CONSTRAINT `role_user_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permission_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `permission_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `user_type` varchar(255) NOT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `permission_user_permission_id_index` (`permission_id`),
+  KEY `permission_user_user_index` (`user_id`,`user_type`),
+  KEY `permission_user_team_id_index` (`team_id`),
+  CONSTRAINT `permission_user_ibfk_1` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permission_role` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `permission_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `permission_role_permission_id_index` (`permission_id`),
+  KEY `permission_role_role_id_index` (`role_id`),
+  KEY `permission_role_team_id_index` (`team_id`),
+  CONSTRAINT `permission_role_ibfk_1` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `permission_role_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

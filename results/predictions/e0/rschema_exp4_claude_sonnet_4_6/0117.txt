@@ -1,0 +1,49 @@
+-- Schema for database: rschema_0117
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `record_name` varchar(255) NOT NULL,
+  `record_content` text DEFAULT NULL,
+  `creator_id` int(11) NOT NULL,
+  `last_operator_id` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `data_record_ibfk_1` FOREIGN KEY (`creator_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `data_record_ibfk_2` FOREIGN KEY (`last_operator_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `operation_log` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `record_id` int(11) NOT NULL,
+  `operator_id` int(11) NOT NULL,
+  `operation_type` varchar(50) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  `operation_content` text DEFAULT NULL,
+  PRIMARY KEY (`log_id`),
+  CONSTRAINT `operation_log_ibfk_1` FOREIGN KEY (`record_id`) REFERENCES `data_record` (`record_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `operation_log_ibfk_2` FOREIGN KEY (`operator_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_operation_history` (
+  `history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `record_id` int(11) NOT NULL,
+  `operation_type` varchar(50) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `operation_content` text DEFAULT NULL,
+  PRIMARY KEY (`history_id`),
+  CONSTRAINT `user_operation_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_operation_history_ibfk_2` FOREIGN KEY (`record_id`) REFERENCES `data_record` (`record_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

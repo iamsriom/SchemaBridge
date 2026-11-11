@@ -1,0 +1,76 @@
+-- Schema for database: schemabench_0158
+
+CREATE TABLE `installations` (
+  `installation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `environment` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`installation_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `laborcodes` (
+  `laborcode_id` int(11) NOT NULL AUTO_INCREMENT,
+  `installation_id` int(11) NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`laborcode_id`),
+  CONSTRAINT `laborcodes_ibfk_1` FOREIGN KEY (`installation_id`) REFERENCES `installations` (`installation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `billingcodes` (
+  `billingcode_id` int(11) NOT NULL AUTO_INCREMENT,
+  `installation_id` int(11) NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `rate` decimal(10,2) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`billingcode_id`),
+  CONSTRAINT `billingcodes_ibfk_1` FOREIGN KEY (`installation_id`) REFERENCES `installations` (`installation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tickets` (
+  `ticket_id` int(11) NOT NULL AUTO_INCREMENT,
+  `installation_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'open',
+  PRIMARY KEY (`ticket_id`),
+  CONSTRAINT `tickets_ibfk_1` FOREIGN KEY (`installation_id`) REFERENCES `installations` (`installation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reports` (
+  `report_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(11) DEFAULT NULL,
+  `installation_id` int(11) NOT NULL,
+  `laborcode_id` int(11) NOT NULL,
+  `billingcode_id` int(11) DEFAULT NULL,
+  `user_id` varchar(100) NOT NULL,
+  `work_date` datetime NOT NULL,
+  `hours_worked` decimal(5,2) NOT NULL,
+  `notes` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `submitted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`report_id`),
+  CONSTRAINT `reports_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`ticket_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `reports_ibfk_2` FOREIGN KEY (`installation_id`) REFERENCES `installations` (`installation_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reports_ibfk_3` FOREIGN KEY (`laborcode_id`) REFERENCES `laborcodes` (`laborcode_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reports_ibfk_4` FOREIGN KEY (`billingcode_id`) REFERENCES `billingcodes` (`billingcode_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shell` (
+  `shell_id` int(11) NOT NULL AUTO_INCREMENT,
+  `installation_id` int(11) NOT NULL,
+  `theme` varchar(100) DEFAULT NULL,
+  `menu_item_label` varchar(255) DEFAULT NULL,
+  `menu_item_url` varchar(255) DEFAULT NULL,
+  `menu_item_icon` varchar(100) DEFAULT NULL,
+  `menu_item_order` int(11) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`shell_id`),
+  CONSTRAINT `shell_ibfk_1` FOREIGN KEY (`installation_id`) REFERENCES `installations` (`installation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

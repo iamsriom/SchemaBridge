@@ -1,0 +1,68 @@
+-- Schema for database: schemabench_0087
+CREATE TABLE `customers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `billable_type` varchar(255) NOT NULL,
+  `billable_id` bigint(20) NOT NULL,
+  `paddle_id` varchar(255) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `country` char(2) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `state` varchar(255) DEFAULT NULL,
+  `city` varchar(255) DEFAULT NULL,
+  `vat_id` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `customers_paddle_id_unique` (`paddle_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `paddle_id` varchar(255) NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `price_id` varchar(255) DEFAULT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `trial_ends_at` datetime DEFAULT NULL,
+  `paused_at` datetime DEFAULT NULL,
+  `ends_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `subscriptions_paddle_id_unique` (`paddle_id`),
+  KEY `subscriptions_customer_id_index` (`customer_id`),
+  CONSTRAINT `subscriptions_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscription_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `subscription_id` int(11) NOT NULL,
+  `price_id` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `subscription_items_subscription_id_index` (`subscription_id`),
+  CONSTRAINT `subscription_items_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `receipts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `paddle_id` varchar(255) NOT NULL,
+  `receipt_number` varchar(255) DEFAULT NULL,
+  `currency` char(3) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `tax` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `total` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `issued_at` datetime NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `receipts_paddle_id_unique` (`paddle_id`),
+  KEY `receipts_customer_id_index` (`customer_id`),
+  CONSTRAINT `receipts_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,68 @@
+-- Schema for database: schemabench_0076
+CREATE TABLE `servers` (
+  `server_id` int(11) NOT NULL AUTO_INCREMENT,
+  `server_name` varchar(255) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `ssh_user` varchar(255) NOT NULL,
+  `ssh_port` int(11) NOT NULL DEFAULT 22,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`server_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `checks` (
+  `check_id` int(11) NOT NULL AUTO_INCREMENT,
+  `check_name` varchar(255) NOT NULL,
+  `check_type` varchar(100) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `is_custom` tinyint(1) NOT NULL DEFAULT 0,
+  `default_threshold` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`check_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `server_checks` (
+  `server_check_id` int(11) NOT NULL AUTO_INCREMENT,
+  `server_id` int(11) NOT NULL,
+  `check_id` int(11) NOT NULL,
+  `is_enabled` tinyint(1) NOT NULL DEFAULT 1,
+  `schedule_cron` varchar(100) NOT NULL,
+  `threshold_value` varchar(255) DEFAULT NULL,
+  `last_run_at` datetime DEFAULT NULL,
+  `last_status` varchar(20) DEFAULT NULL,
+  `last_output` text,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`server_check_id`),
+  KEY `server_checks_ibfk_1` (`server_id`),
+  KEY `server_checks_ibfk_2` (`check_id`),
+  CONSTRAINT `server_checks_ibfk_1` FOREIGN KEY (`server_id`) REFERENCES `servers` (`server_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `server_checks_ibfk_2` FOREIGN KEY (`check_id`) REFERENCES `checks` (`check_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `check_results` (
+  `result_id` int(11) NOT NULL AUTO_INCREMENT,
+  `server_check_id` int(11) NOT NULL,
+  `run_at` datetime NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `output` text,
+  `duration_ms` int(11) DEFAULT NULL,
+  `threshold_breached` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`result_id`),
+  KEY `check_results_ibfk_1` (`server_check_id`),
+  CONSTRAINT `check_results_ibfk_1` FOREIGN KEY (`server_check_id`) REFERENCES `server_checks` (`server_check_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `alerts` (
+  `alert_id` int(11) NOT NULL AUTO_INCREMENT,
+  `result_id` int(11) NOT NULL,
+  `alert_type` varchar(100) NOT NULL,
+  `message` varchar(1000) NOT NULL,
+  `severity` varchar(20) NOT NULL,
+  `is_resolved` tinyint(1) NOT NULL DEFAULT 0,
+  `sent_at` datetime DEFAULT NULL,
+  `resolved_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`alert_id`),
+  KEY `alerts_ibfk_1` (`result_id`),
+  CONSTRAINT `alerts_ibfk_1` FOREIGN KEY (`result_id`) REFERENCES `check_results` (`result_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

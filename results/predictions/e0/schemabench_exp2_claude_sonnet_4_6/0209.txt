@@ -1,0 +1,100 @@
+-- Schema for database: schemabench_0209
+
+CREATE TABLE `departments` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(255) NOT NULL,
+  `department_code` varchar(20) NOT NULL,
+  `head_of_department` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `students` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `date_of_birth` datetime DEFAULT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` varchar(500) DEFAULT NULL,
+  `enrollment_date` datetime DEFAULT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`student_id`),
+  CONSTRAINT `students_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teachers` (
+  `teacher_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `hire_date` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`teacher_id`),
+  CONSTRAINT `teachers_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `courses` (
+  `course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_name` varchar(255) NOT NULL,
+  `course_code` varchar(20) NOT NULL,
+  `description` varchar(1000) DEFAULT NULL,
+  `credits` int(11) DEFAULT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`course_id`),
+  CONSTRAINT `courses_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `classes` (
+  `class_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_id` int(11) NOT NULL,
+  `teacher_id` int(11) DEFAULT NULL,
+  `room` varchar(100) DEFAULT NULL,
+  `schedule` varchar(255) DEFAULT NULL,
+  `start_date` datetime DEFAULT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`class_id`),
+  CONSTRAINT `classes_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `classes_ibfk_2` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`teacher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `enrollments` (
+  `enrollment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `class_id` int(11) NOT NULL,
+  `enrollment_date` datetime DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`enrollment_id`),
+  CONSTRAINT `enrollments_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `enrollments_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `classes` (`class_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `grades` (
+  `grade_id` int(11) NOT NULL AUTO_INCREMENT,
+  `enrollment_id` int(11) NOT NULL,
+  `obtained_marks` decimal(5,2) DEFAULT NULL,
+  `total_marks` decimal(5,2) DEFAULT NULL,
+  `grade_letter` varchar(5) DEFAULT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  `graded_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`grade_id`),
+  CONSTRAINT `grades_ibfk_1` FOREIGN KEY (`enrollment_id`) REFERENCES `enrollments` (`enrollment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attendance` (
+  `attendance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `enrollment_id` int(11) NOT NULL,
+  `attendance_date` datetime NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`attendance_id`),
+  CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`enrollment_id`) REFERENCES `enrollments` (`enrollment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

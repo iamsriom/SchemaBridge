@@ -1,0 +1,83 @@
+-- Schema for database: rschema_0145
+CREATE TABLE `procurement_personnel` (
+  `procurement_personnel_id` int(11) NOT NULL AUTO_INCREMENT,
+  `person_name` varchar(255) NOT NULL,
+  `contact_details` varchar(255) DEFAULT NULL,
+  `department_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`procurement_personnel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `warehouse` (
+  `warehouse_id` int(11) NOT NULL AUTO_INCREMENT,
+  `warehouse_name` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `lease_start_date` date DEFAULT NULL,
+  `lease_end_date` date DEFAULT NULL,
+  PRIMARY KEY (`warehouse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `warehouse_personnel` (
+  `warehouse_personnel_id` int(11) NOT NULL AUTO_INCREMENT,
+  `person_name` varchar(255) NOT NULL,
+  `contact_details` varchar(255) DEFAULT NULL,
+  `warehouse_id` int(11) NOT NULL,
+  PRIMARY KEY (`warehouse_personnel_id`),
+  KEY `warehouse_personnel_ibfk_1` (`warehouse_id`),
+  CONSTRAINT `warehouse_personnel_ibfk_1` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_personnel` (
+  `sales_personnel_id` int(11) NOT NULL AUTO_INCREMENT,
+  `person_name` varchar(255) NOT NULL,
+  `contact_details` varchar(255) DEFAULT NULL,
+  `department_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`sales_personnel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(255) NOT NULL,
+  `contact_details` varchar(255) DEFAULT NULL,
+  `shipping_address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `solid_state_drive` (
+  `ssd_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_name` varchar(255) NOT NULL,
+  `capacity_gb` int(11) NOT NULL,
+  `purchase_date` date DEFAULT NULL,
+  `procurement_personnel_id` int(11) NOT NULL,
+  `warehouse_id` int(11) NOT NULL,
+  PRIMARY KEY (`ssd_id`),
+  KEY `solid_state_drive_ibfk_1` (`procurement_personnel_id`),
+  KEY `solid_state_drive_ibfk_2` (`warehouse_id`),
+  CONSTRAINT `solid_state_drive_ibfk_1` FOREIGN KEY (`procurement_personnel_id`) REFERENCES `procurement_personnel` (`procurement_personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `solid_state_drive_ibfk_2` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_order` (
+  `sales_order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_date` datetime NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `sales_personnel_id` int(11) NOT NULL,
+  `shipment_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`sales_order_id`),
+  KEY `sales_order_ibfk_1` (`customer_id`),
+  KEY `sales_order_ibfk_2` (`sales_personnel_id`),
+  CONSTRAINT `sales_order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_order_ibfk_2` FOREIGN KEY (`sales_personnel_id`) REFERENCES `sales_personnel` (`sales_personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_order_item` (
+  `sales_order_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sales_order_id` int(11) NOT NULL,
+  `ssd_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`sales_order_item_id`),
+  KEY `sales_order_item_ibfk_1` (`sales_order_id`),
+  KEY `sales_order_item_ibfk_2` (`ssd_id`),
+  CONSTRAINT `sales_order_item_ibfk_1` FOREIGN KEY (`sales_order_id`) REFERENCES `sales_order` (`sales_order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_order_item_ibfk_2` FOREIGN KEY (`ssd_id`) REFERENCES `solid_state_drive` (`ssd_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

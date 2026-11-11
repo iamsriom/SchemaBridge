@@ -1,0 +1,135 @@
+-- Schema for database: schemabench_0098
+
+CREATE TABLE `player` (
+  `player_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `full_name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `elo_rating` int(11) NOT NULL DEFAULT '1200',
+  `country` varchar(100) DEFAULT NULL,
+  `birth_date` date DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`player_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `event` (
+  `event_id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_name` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `organizer` varchar(255) DEFAULT NULL,
+  `time_control` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`event_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `opening` (
+  `opening_id` int(11) NOT NULL AUTO_INCREMENT,
+  `eco_code` char(3) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `moves` text NOT NULL,
+  `category` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`opening_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `opening_variation` (
+  `variation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `opening_id` int(11) NOT NULL,
+  `variation_name` varchar(255) NOT NULL,
+  `moves` text NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`variation_id`),
+  CONSTRAINT `opening_variation_ibfk_1` FOREIGN KEY (`opening_id`) REFERENCES `opening` (`opening_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `game` (
+  `game_id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_id` int(11) DEFAULT NULL,
+  `white_player_id` int(11) NOT NULL,
+  `black_player_id` int(11) NOT NULL,
+  `opening_id` int(11) DEFAULT NULL,
+  `variation_id` int(11) DEFAULT NULL,
+  `white_elo` int(11) DEFAULT NULL,
+  `black_elo` int(11) DEFAULT NULL,
+  `result` varchar(10) NOT NULL COMMENT '1-0, 0-1, 1/2-1/2',
+  `num_moves` int(11) DEFAULT NULL,
+  `pgn` longtext DEFAULT NULL,
+  `termination` varchar(100) DEFAULT NULL,
+  `played_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`game_id`),
+  CONSTRAINT `game_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `event` (`event_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `game_ibfk_2` FOREIGN KEY (`white_player_id`) REFERENCES `player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `game_ibfk_3` FOREIGN KEY (`black_player_id`) REFERENCES `player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `game_ibfk_4` FOREIGN KEY (`opening_id`) REFERENCES `opening` (`opening_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `game_ibfk_5` FOREIGN KEY (`variation_id`) REFERENCES `opening_variation` (`variation_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `game_move` (
+  `move_id` int(11) NOT NULL AUTO_INCREMENT,
+  `game_id` int(11) NOT NULL,
+  `move_number` int(11) NOT NULL,
+  `color` char(5) NOT NULL COMMENT 'white or black',
+  `move_notation` varchar(20) NOT NULL,
+  `fen_after` varchar(255) DEFAULT NULL,
+  `eval_score` decimal(6,2) DEFAULT NULL,
+  PRIMARY KEY (`move_id`),
+  CONSTRAINT `game_move_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `game` (`game_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prediction` (
+  `prediction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `white_player_id` int(11) NOT NULL,
+  `black_player_id` int(11) NOT NULL,
+  `opening_id` int(11) DEFAULT NULL,
+  `variation_id` int(11) DEFAULT NULL,
+  `white_elo` int(11) NOT NULL,
+  `black_elo` int(11) NOT NULL,
+  `predicted_result` varchar(10) NOT NULL COMMENT '1-0, 0-1, 1/2-1/2',
+  `white_win_probability` decimal(5,4) DEFAULT NULL,
+  `black_win_probability` decimal(5,4) DEFAULT NULL,
+  `draw_probability` decimal(5,4) DEFAULT NULL,
+  `model_version` varchar(50) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`prediction_id`),
+  CONSTRAINT `prediction_ibfk_1` FOREIGN KEY (`white_player_id`) REFERENCES `player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `prediction_ibfk_2` FOREIGN KEY (`black_player_id`) REFERENCES `player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `prediction_ibfk_3` FOREIGN KEY (`opening_id`) REFERENCES `opening` (`opening_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `prediction_ibfk_4` FOREIGN KEY (`variation_id`) REFERENCES `opening_variation` (`variation_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `player_statistics` (
+  `stat_id` int(11) NOT NULL AUTO_INCREMENT,
+  `player_id` int(11) NOT NULL,
+  `total_games` int(11) NOT NULL DEFAULT '0',
+  `wins` int(11) NOT NULL DEFAULT '0',
+  `losses` int(11) NOT NULL DEFAULT '0',
+  `draws` int(11) NOT NULL DEFAULT '0',
+  `win_rate` decimal(5,4) DEFAULT NULL,
+  `avg_game_length` decimal(6,2) DEFAULT NULL,
+  `most_used_opening_id` int(11) DEFAULT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`stat_id`),
+  CONSTRAINT `player_statistics_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `player` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `player_statistics_ibfk_2` FOREIGN KEY (`most_used_opening_id`) REFERENCES `opening` (`opening_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `opening_statistics` (
+  `opening_stat_id` int(11) NOT NULL AUTO_INCREMENT,
+  `opening_id` int(11) NOT NULL,
+  `total_games` int(11) NOT NULL DEFAULT '0',
+  `white_wins` int(11) NOT NULL DEFAULT '0',
+  `black_wins` int(11) NOT NULL DEFAULT '0',
+  `draws` int(11) NOT NULL DEFAULT '0',
+  `white_win_rate` decimal(5,4) DEFAULT NULL,
+  `black_win_rate` decimal(5,4) DEFAULT NULL,
+  `draw_rate` decimal(5,4) DEFAULT NULL,
+  `avg_game_length` decimal(6,2) DEFAULT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`opening_stat_id`),
+  CONSTRAINT `opening_statistics_ibfk_1` FOREIGN KEY (`opening_id`) REFERENCES `opening` (`opening_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

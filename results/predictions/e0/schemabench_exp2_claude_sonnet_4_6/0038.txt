@@ -1,0 +1,104 @@
+-- Schema for database: schemabench_0038
+
+CREATE TABLE `auth_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `password` varchar(128) NOT NULL,
+  `last_login` datetime DEFAULT NULL,
+  `is_superuser` tinyint(1) NOT NULL DEFAULT 0,
+  `username` varchar(150) NOT NULL,
+  `first_name` varchar(150) NOT NULL DEFAULT '',
+  `last_name` varchar(150) NOT NULL DEFAULT '',
+  `email` varchar(254) NOT NULL DEFAULT '',
+  `is_staff` tinyint(1) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `date_joined` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `category` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `slug` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `post` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `url` varchar(2048) DEFAULT NULL,
+  `text` longtext DEFAULT NULL,
+  `score` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `post_user_id` (`user_id`),
+  KEY `post_category_id` (`category_id`),
+  CONSTRAINT `post_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `post_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comment` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `body` longtext NOT NULL,
+  `score` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `post_id` int(11) NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `comment_user_id` (`user_id`),
+  KEY `comment_post_id` (`post_id`),
+  KEY `comment_parent_id` (`parent_id`),
+  CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comment_ibfk_3` FOREIGN KEY (`parent_id`) REFERENCES `comment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `post_vote` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `vote` tinyint(4) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `post_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `post_vote_user_post` (`user_id`, `post_id`),
+  KEY `post_vote_user_id` (`user_id`),
+  KEY `post_vote_post_id` (`post_id`),
+  CONSTRAINT `post_vote_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `post_vote_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comment_vote` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `vote` tinyint(4) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `comment_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `comment_vote_user_comment` (`user_id`, `comment_id`),
+  KEY `comment_vote_user_id` (`user_id`),
+  KEY `comment_vote_comment_id` (`comment_id`),
+  CONSTRAINT `comment_vote_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comment_vote_ibfk_2` FOREIGN KEY (`comment_id`) REFERENCES `comment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_profile` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `bio` longtext DEFAULT NULL,
+  `website` varchar(2048) DEFAULT NULL,
+  `github_username` varchar(100) DEFAULT NULL,
+  `karma` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_profile_user_id` (`user_id`),
+  CONSTRAINT `user_profile_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

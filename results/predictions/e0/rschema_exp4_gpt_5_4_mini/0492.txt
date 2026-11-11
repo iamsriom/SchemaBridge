@@ -1,0 +1,47 @@
+-- Schema for database: rschema_0492
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(255) NOT NULL,
+  `department_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`department_id`),
+  UNIQUE KEY `department_name` (`department_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `position` (
+  `position_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_id` int(11) NOT NULL,
+  `position_name` varchar(255) NOT NULL,
+  `salary` decimal(10,2) NOT NULL,
+  `position_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`position_id`),
+  KEY `department_id` (`department_id`),
+  CONSTRAINT `position_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_name` varchar(255) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `position_id` int(11) NOT NULL,
+  `hire_date` date DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  KEY `department_id` (`department_id`),
+  KEY `position_id` (`position_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_ibfk_2` FOREIGN KEY (`position_id`) REFERENCES `position` (`position_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_relationship` (
+  `relationship_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `superior_employee_id` int(11) NOT NULL,
+  `relationship_type` varchar(50) NOT NULL DEFAULT 'direct',
+  PRIMARY KEY (`relationship_id`),
+  UNIQUE KEY `uk_employee_superior` (`employee_id`,`superior_employee_id`),
+  KEY `superior_employee_id` (`superior_employee_id`),
+  CONSTRAINT `employee_relationship_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_relationship_ibfk_2` FOREIGN KEY (`superior_employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

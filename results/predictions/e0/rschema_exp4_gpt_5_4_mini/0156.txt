@@ -1,0 +1,47 @@
+-- Schema for database: rschema_0156
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `registration_time` datetime NOT NULL,
+  `last_login_time` datetime DEFAULT NULL,
+  `delivery_address` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(255) NOT NULL,
+  `product_description` text DEFAULT NULL,
+  `sales_price` decimal(10,2) NOT NULL,
+  `inventory_quantity` int(11) NOT NULL,
+  `sales_quantity` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `shopping_cart` (
+  `cart_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `added_time` datetime NOT NULL,
+  PRIMARY KEY (`cart_id`),
+  KEY `shopping_cart_ibfk_1` (`user_id`),
+  KEY `shopping_cart_ibfk_2` (`product_id`),
+  CONSTRAINT `shopping_cart_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `shopping_cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `total_price` decimal(10,2) NOT NULL,
+  `payment_method` varchar(50) NOT NULL,
+  `order_time` datetime NOT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `orders_ibfk_1` (`user_id`),
+  KEY `orders_ibfk_2` (`product_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

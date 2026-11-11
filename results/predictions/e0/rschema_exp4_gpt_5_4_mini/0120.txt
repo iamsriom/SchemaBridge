@@ -1,0 +1,59 @@
+-- Schema for database: rschema_0120
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `is_activated` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `corporations` (
+  `corporation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `corporation_name` varchar(255) NOT NULL,
+  `ticker` varchar(10) NOT NULL,
+  `eve_corporation_id` bigint(20) NOT NULL,
+  `ceo_id` bigint(20) NOT NULL,
+  `api_key_id` varchar(255) DEFAULT NULL,
+  `api_vcode` varchar(255) DEFAULT NULL,
+  `api_key_type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`corporation_id`),
+  UNIQUE KEY `eve_corporation_id` (`eve_corporation_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `characters` (
+  `character_id` int(11) NOT NULL AUTO_INCREMENT,
+  `character_name` varchar(255) NOT NULL,
+  `eve_character_id` bigint(20) NOT NULL,
+  `corporation_id` int(11) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `is_default` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`character_id`),
+  UNIQUE KEY `eve_character_id` (`eve_character_id`),
+  KEY `corporation_id` (`corporation_id`),
+  CONSTRAINT `characters_ibfk_1` FOREIGN KEY (`corporation_id`) REFERENCES `corporations` (`corporation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `login_attempts` (
+  `login_attempt_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `source_address` varchar(45) NOT NULL,
+  `browser_agent` varchar(255) DEFAULT NULL,
+  `login_result` varchar(50) NOT NULL,
+  `attempted_at` datetime NOT NULL,
+  PRIMARY KEY (`login_attempt_id`),
+  KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `applications` (
+  `application_id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_name` varchar(255) NOT NULL,
+  `maintainer` varchar(255) NOT NULL,
+  `app_key` varchar(255) NOT NULL,
+  `callback_url` varchar(255) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`application_id`),
+  UNIQUE KEY `app_key` (`app_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

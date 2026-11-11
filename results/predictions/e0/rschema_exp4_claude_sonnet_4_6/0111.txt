@@ -1,0 +1,74 @@
+-- Schema for database: rschema_0111
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'user',
+  `registration_time` datetime NOT NULL,
+  `update_time` datetime NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `companies` (
+  `company_id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_name` varchar(255) NOT NULL,
+  `company_address` varchar(500) DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  `update_time` datetime NOT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employees` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_name` varchar(255) NOT NULL,
+  `employee_position` varchar(255) DEFAULT NULL,
+  `company_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employees_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payments` (
+  `payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `payment_amount` decimal(15,2) NOT NULL,
+  `payment_date` datetime NOT NULL,
+  `payment_method` varchar(100) DEFAULT NULL,
+  `payment_status` varchar(50) DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  `update_time` datetime NOT NULL,
+  PRIMARY KEY (`payment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `credit_records` (
+  `credit_number` int(11) NOT NULL AUTO_INCREMENT,
+  `credit_type` varchar(100) NOT NULL,
+  `application_date` datetime NOT NULL,
+  `monthly_factor` decimal(10,4) NOT NULL,
+  `number_of_applications` int(11) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `update_time` datetime NOT NULL,
+  `deletion_time` datetime DEFAULT NULL,
+  `user_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `payment_id` int(11) NOT NULL,
+  PRIMARY KEY (`credit_number`),
+  CONSTRAINT `credit_records_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `credit_records_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `credit_records_ibfk_3` FOREIGN KEY (`company_id`) REFERENCES `companies` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `credit_records_ibfk_4` FOREIGN KEY (`payment_id`) REFERENCES `payments` (`payment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `credit_record_statuses` (
+  `status_id` int(11) NOT NULL AUTO_INCREMENT,
+  `credit_number` int(11) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `operation_type` varchar(50) NOT NULL,
+  `operation_timestamp` datetime NOT NULL,
+  `operator_id` int(11) NOT NULL,
+  PRIMARY KEY (`status_id`),
+  CONSTRAINT `credit_record_statuses_ibfk_1` FOREIGN KEY (`credit_number`) REFERENCES `credit_records` (`credit_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `credit_record_statuses_ibfk_2` FOREIGN KEY (`operator_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

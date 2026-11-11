@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0458
+CREATE TABLE `members` (
+  `member_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `telephone` varchar(30) DEFAULT NULL,
+  `expenditure` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `points` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`member_id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `books` (
+  `book_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_name` varchar(255) NOT NULL,
+  `book_title` varchar(255) NOT NULL,
+  `author` varchar(255) NOT NULL,
+  `publisher` varchar(255) DEFAULT NULL,
+  `publication_date` date DEFAULT NULL,
+  `isbn` varchar(20) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`book_id`),
+  UNIQUE KEY `isbn` (`isbn`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `sales` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `order_date` datetime NOT NULL,
+  `shipping_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `username` (`username`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`username`) REFERENCES `members` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_details` (
+  `order_detail_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`order_detail_id`),
+  KEY `order_id` (`order_id`),
+  KEY `book_id` (`book_id`),
+  CONSTRAINT `order_details_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_details_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `books` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

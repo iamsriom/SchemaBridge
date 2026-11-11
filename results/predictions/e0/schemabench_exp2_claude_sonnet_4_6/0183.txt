@@ -1,0 +1,98 @@
+-- Schema for database: schemabench_0183
+
+CREATE TABLE `location` (
+  `location_id` int(11) NOT NULL AUTO_INCREMENT,
+  `store_name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `zip_code` varchar(20) DEFAULT NULL,
+  `country` varchar(100) NOT NULL,
+  `phone` varchar(30) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`location_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `location_id` int(11) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(30) DEFAULT NULL,
+  `role` varchar(100) DEFAULT NULL,
+  `hire_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `genre` (
+  `genre_id` int(11) NOT NULL AUTO_INCREMENT,
+  `genre_name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`genre_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `artist` (
+  `artist_id` int(11) NOT NULL AUTO_INCREMENT,
+  `stage_name` varchar(255) NOT NULL,
+  `real_name` varchar(255) DEFAULT NULL,
+  `is_solo` tinyint(1) NOT NULL DEFAULT 1,
+  `bio` text DEFAULT NULL,
+  `formed_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`artist_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `artist_member` (
+  `member_id` int(11) NOT NULL AUTO_INCREMENT,
+  `artist_id` int(11) NOT NULL,
+  `member_name` varchar(255) NOT NULL,
+  `role` varchar(100) DEFAULT NULL,
+  `join_date` datetime DEFAULT NULL,
+  `leave_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`member_id`),
+  CONSTRAINT `artist_member_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artist` (`artist_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `album` (
+  `album_id` int(11) NOT NULL AUTO_INCREMENT,
+  `artist_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `release_date` datetime DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `label` varchar(255) DEFAULT NULL,
+  `format` varchar(50) DEFAULT NULL,
+  `cover_image_url` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`album_id`),
+  CONSTRAINT `album_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artist` (`artist_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `song` (
+  `song_id` int(11) NOT NULL AUTO_INCREMENT,
+  `album_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `duration` int(11) DEFAULT NULL,
+  `track_number` int(11) DEFAULT NULL,
+  `lyrics` text DEFAULT NULL,
+  PRIMARY KEY (`song_id`),
+  CONSTRAINT `song_ibfk_1` FOREIGN KEY (`album_id`) REFERENCES `album` (`album_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `song_genre` (
+  `song_id` int(11) NOT NULL,
+  `genre_id` int(11) NOT NULL,
+  PRIMARY KEY (`song_id`, `genre_id`),
+  CONSTRAINT `song_genre_ibfk_1` FOREIGN KEY (`song_id`) REFERENCES `song` (`song_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `song_genre_ibfk_2` FOREIGN KEY (`genre_id`) REFERENCES `genre` (`genre_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inventory` (
+  `inventory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `location_id` int(11) NOT NULL,
+  `album_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 0,
+  `last_updated` datetime DEFAULT NULL,
+  PRIMARY KEY (`inventory_id`),
+  CONSTRAINT `inventory_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `inventory_ibfk_2` FOREIGN KEY (`album_id`) REFERENCES `album` (`album_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

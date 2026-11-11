@@ -1,0 +1,41 @@
+-- Schema for database: rschema_0274
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `contact_number` varchar(50) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_service_representatives` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  `work_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `feedback` (
+  `feedback_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `feedback_content` text NOT NULL,
+  `feedback_time` datetime NOT NULL,
+  `processing_status` varchar(50) NOT NULL,
+  `processing_result` text DEFAULT NULL,
+  PRIMARY KEY (`feedback_id`),
+  KEY `feedback_ibfk_1` (`user_id`),
+  CONSTRAINT `feedback_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `feedback_processing` (
+  `processing_id` int(11) NOT NULL,
+  `feedback_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `processing_time` datetime NOT NULL,
+  `processing_result` text NOT NULL,
+  PRIMARY KEY (`processing_id`),
+  KEY `feedback_processing_ibfk_1` (`feedback_id`),
+  KEY `feedback_processing_ibfk_2` (`employee_id`),
+  CONSTRAINT `feedback_processing_ibfk_1` FOREIGN KEY (`feedback_id`) REFERENCES `feedback` (`feedback_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `feedback_processing_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `customer_service_representatives` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

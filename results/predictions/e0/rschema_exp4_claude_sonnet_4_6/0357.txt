@@ -1,0 +1,76 @@
+-- Schema for database: rschema_0357
+
+CREATE TABLE `location` (
+  `location_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `telephone` varchar(50) NOT NULL,
+  `business_hours` varchar(255) NOT NULL,
+  PRIMARY KEY (`location_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vehicle_category` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `location_id` int(11) NOT NULL,
+  `category_name` varchar(255) NOT NULL,
+  `weekday_price` decimal(10,2) NOT NULL,
+  `weekend_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`category_id`),
+  CONSTRAINT `vehicle_category_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vehicle` (
+  `license_plate` varchar(50) NOT NULL,
+  `location_id` int(11) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `brand` varchar(100) NOT NULL,
+  `model` varchar(100) NOT NULL,
+  `photo` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`license_plate`),
+  CONSTRAINT `vehicle_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `vehicle_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `vehicle_category` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `email` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `telephone` varchar(50) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  PRIMARY KEY (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `credit_card` (
+  `card_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_email` varchar(255) NOT NULL,
+  `card_number` varchar(50) NOT NULL,
+  `cardholder_name` varchar(255) NOT NULL,
+  `expiry_date` varchar(10) NOT NULL,
+  `card_type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`card_id`),
+  CONSTRAINT `credit_card_ibfk_1` FOREIGN KEY (`user_email`) REFERENCES `user` (`email`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reservation` (
+  `reservation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_email` varchar(255) NOT NULL,
+  `license_plate` varchar(50) NOT NULL,
+  `reservation_date` datetime NOT NULL,
+  `return_date` datetime NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`reservation_id`),
+  CONSTRAINT `reservation_ibfk_1` FOREIGN KEY (`user_email`) REFERENCES `user` (`email`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reservation_ibfk_2` FOREIGN KEY (`license_plate`) REFERENCES `vehicle` (`license_plate`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `news` (
+  `news_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `category` varchar(100) DEFAULT NULL,
+  `published_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `is_featured` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`news_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

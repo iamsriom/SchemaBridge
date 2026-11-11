@@ -1,0 +1,70 @@
+-- Schema for database: schemabench_0203
+CREATE TABLE `categories` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`category_id`),
+  UNIQUE KEY `category_name` (`category_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `suppliers` (
+  `supplier_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_name` varchar(255) NOT NULL,
+  `contact_name` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`supplier_id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(255) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `supplier_id` int(11) NOT NULL,
+  `stock_quantity` int(11) NOT NULL DEFAULT '0',
+  `unit_price` decimal(10,2) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`product_id`),
+  KEY `category_id` (`category_id`),
+  KEY `supplier_id` (`supplier_id`),
+  CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `products_ibfk_2` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales` (
+  `sale_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) DEFAULT NULL,
+  `sale_date` datetime NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  `payment_method` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`sale_id`),
+  KEY `customer_id` (`customer_id`),
+  CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sale_items` (
+  `sale_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sale_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `line_total` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`sale_item_id`),
+  KEY `sale_id` (`sale_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `sale_items_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `sales` (`sale_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sale_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,61 @@
+-- Schema for database: schemabench_0197
+CREATE TABLE `regions` (
+  `region_id` int(11) NOT NULL,
+  `region_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`region_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `nodes` (
+  `node_id` int(11) NOT NULL,
+  `region_id` int(11) NOT NULL,
+  `node_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`node_id`),
+  KEY `nodes_ibfk_1` (`region_id`),
+  CONSTRAINT `nodes_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `regions` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  `region_id` int(11) NOT NULL,
+  `account_balance` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `storage_limit_mb` int(11) NOT NULL DEFAULT '0',
+  `node_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`),
+  KEY `customers_ibfk_1` (`region_id`),
+  KEY `customers_ibfk_2` (`node_id`),
+  CONSTRAINT `customers_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `regions` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customers_ibfk_2` FOREIGN KEY (`node_id`) REFERENCES `nodes` (`node_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transactions` (
+  `transaction_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `transaction_type` varchar(50) NOT NULL,
+  `amount` decimal(15,2) NOT NULL,
+  `transaction_date` datetime NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  KEY `transactions_ibfk_1` (`customer_id`),
+  CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_nodes` (
+  `customer_node_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `node_id` int(11) NOT NULL,
+  `assigned_at` datetime NOT NULL,
+  `unassigned_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`customer_node_id`),
+  KEY `customer_nodes_ibfk_1` (`customer_id`),
+  KEY `customer_nodes_ibfk_2` (`node_id`),
+  CONSTRAINT `customer_nodes_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customer_nodes_ibfk_2` FOREIGN KEY (`node_id`) REFERENCES `nodes` (`node_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `metrics` (
+  `metric_id` int(11) NOT NULL,
+  `metric_name` varchar(100) NOT NULL,
+  `metric_value` decimal(18,4) NOT NULL,
+  `calculated_at` datetime NOT NULL,
+  PRIMARY KEY (`metric_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

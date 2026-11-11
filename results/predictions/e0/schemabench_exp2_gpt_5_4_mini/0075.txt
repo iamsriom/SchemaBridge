@@ -1,0 +1,55 @@
+-- Schema for database: schemabench_0075
+CREATE TABLE `organization` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `organization_slug_uniq` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organization_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `organization_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `role` varchar(50) NOT NULL,
+  `is_owner` tinyint(1) NOT NULL DEFAULT 0,
+  `joined_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `organization_user_uniq` (`organization_id`,`user_id`),
+  KEY `organization_user_ibfk_2` (`user_id`),
+  CONSTRAINT `organization_user_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organization_user_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organization_invitation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `organization_id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `invited_by_id` int(11) NOT NULL,
+  `token` char(32) NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `accepted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `organization_invitation_token_uniq` (`token`),
+  KEY `organization_invitation_ibfk_2` (`invited_by_id`),
+  KEY `organization_invitation_ibfk_1` (`organization_id`),
+  CONSTRAINT `organization_invitation_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organization_invitation_ibfk_2` FOREIGN KEY (`invited_by_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organization_message` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `organization_id` int(11) NOT NULL,
+  `sender_id` int(11) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `body` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `organization_message_ibfk_1` (`organization_id`),
+  KEY `organization_message_ibfk_2` (`sender_id`),
+  CONSTRAINT `organization_message_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organization_message_ibfk_2` FOREIGN KEY (`sender_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

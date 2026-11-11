@@ -1,0 +1,56 @@
+-- Schema for database: schemabench_0090
+CREATE TABLE `airline` (
+  `airline_id` int(11) NOT NULL AUTO_INCREMENT,
+  `carrier_code` char(2) NOT NULL,
+  `carrier_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`airline_id`),
+  UNIQUE KEY `carrier_code` (`carrier_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `airport` (
+  `airport_id` int(11) NOT NULL AUTO_INCREMENT,
+  `airport_code` char(3) NOT NULL,
+  `airport_name` varchar(255) NOT NULL,
+  `city_name` varchar(255) DEFAULT NULL,
+  `state_code` char(2) DEFAULT NULL,
+  PRIMARY KEY (`airport_id`),
+  UNIQUE KEY `airport_code` (`airport_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `delay_reason` (
+  `delay_reason_id` int(11) NOT NULL AUTO_INCREMENT,
+  `delay_code` char(2) NOT NULL,
+  `delay_description` varchar(255) NOT NULL,
+  PRIMARY KEY (`delay_reason_id`),
+  UNIQUE KEY `delay_code` (`delay_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flight_performance` (
+  `flight_performance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `report_year` int(11) NOT NULL,
+  `report_month` int(11) NOT NULL,
+  `carrier_id` int(11) NOT NULL,
+  `flight_date` date NOT NULL,
+  `flight_number` varchar(20) NOT NULL,
+  `origin_airport_id` int(11) NOT NULL,
+  `destination_airport_id` int(11) NOT NULL,
+  `scheduled_departure_time` datetime DEFAULT NULL,
+  `actual_departure_time` datetime DEFAULT NULL,
+  `scheduled_arrival_time` datetime DEFAULT NULL,
+  `actual_arrival_time` datetime DEFAULT NULL,
+  `departure_delay_minutes` int(11) DEFAULT NULL,
+  `arrival_delay_minutes` int(11) DEFAULT NULL,
+  `cancelled_flag` char(1) NOT NULL DEFAULT 'N',
+  `diverted_flag` char(1) NOT NULL DEFAULT 'N',
+  `delay_reason_id` int(11) DEFAULT NULL,
+  `reporting_source` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`flight_performance_id`),
+  KEY `carrier_id` (`carrier_id`),
+  KEY `origin_airport_id` (`origin_airport_id`),
+  KEY `destination_airport_id` (`destination_airport_id`),
+  KEY `delay_reason_id` (`delay_reason_id`),
+  CONSTRAINT `flight_performance_ibfk_1` FOREIGN KEY (`carrier_id`) REFERENCES `airline` (`airline_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_performance_ibfk_2` FOREIGN KEY (`origin_airport_id`) REFERENCES `airport` (`airport_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_performance_ibfk_3` FOREIGN KEY (`destination_airport_id`) REFERENCES `airport` (`airport_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_performance_ibfk_4` FOREIGN KEY (`delay_reason_id`) REFERENCES `delay_reason` (`delay_reason_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

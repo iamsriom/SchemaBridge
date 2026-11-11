@@ -1,0 +1,30 @@
+{
+  "text_number": 161,
+  "id": "67552f0b13602ec03b41aa40",
+  "llm": "gpt54mini",
+  "model_id": "gpt-5.4-mini",
+  "database": "rschema_0161",
+  "question": "\"The electronic commerce system shall support user registration and login, product display, shopping cart functionalities, and order management. During registration, users shall provide information such as username, password, and email, and may browse and query products via keyword search or categorization. Each product shall store details including name, description, price, inventory, and the category it belongs to. Users can add desired products to their shopping cart, and the system shall record the quantity of products and allow users to submit their final orders. Orders shall include basic information such as user ID, order amount, order status, and the times when they were created and updated. Administrators can manage products in the backend by adding, removing, modifying, or deleting listings, and can configure homepage carousels and set promotions for popular or recommended products to enhance product promotion and management.\"",
+  "ddl": "-- Schema for database: rschema_0161\nCREATE TABLE `users` (\n  `user_id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(100) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`user_id`),\n  UNIQUE KEY `uk_users_username` (`username`),\n  UNIQUE KEY `uk_users_email` (`email`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `categories` (\n  `category_id` int(11) NOT NULL AUTO_INCREMENT,\n  `category_name` varchar(100) NOT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`category_id`),\n  UNIQUE KEY `uk_categories_category_name` (`category_name`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `products` (\n  `product_id` int(11) NOT NULL AUTO_INCREMENT,\n  `category_id` int(11) NOT NULL,\n  `product_name` varchar(255) NOT NULL,\n  `description` text DEFAULT NULL,\n  `price` decimal(10,2) NOT NULL,\n  `inventory` int(11) NOT NULL DEFAULT 0,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`product_id`),\n  KEY `idx_products_category_id` (`category_id`),\n  CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `shopping_cart_items` (\n  `cart_item_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `product_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL DEFAULT 1,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`cart_item_id`),\n  KEY `idx_shopping_cart_items_user_id` (`user_id`),\n  KEY `idx_shopping_cart_items_product_id` (`product_id`),\n  CONSTRAINT `shopping_cart_items_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `shopping_cart_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `orders` (\n  `order_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `order_amount` decimal(10,2) NOT NULL,\n  `order_status` varchar(50) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`order_id`),\n  KEY `idx_orders_user_id` (`user_id`),\n  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `homepage_carousels` (\n  `carousel_id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(255) NOT NULL,\n  `image_url` varchar(500) NOT NULL,\n  `link_url` varchar(500) DEFAULT NULL,\n  `sort_order` int(11) NOT NULL DEFAULT 0,\n  `is_active` tinyint(1) NOT NULL DEFAULT 1,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`carousel_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `promotions` (\n  `promotion_id` int(11) NOT NULL AUTO_INCREMENT,\n  `product_id` int(11) NOT NULL,\n  `promotion_type` varchar(50) NOT NULL,\n  `promotion_title` varchar(255) NOT NULL,\n  `promotion_description` varchar(500) DEFAULT NULL,\n  `start_time` datetime DEFAULT NULL,\n  `end_time` datetime DEFAULT NULL,\n  `is_active` tinyint(1) NOT NULL DEFAULT 1,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`promotion_id`),\n  KEY `idx_promotions_product_id` (`product_id`),\n  CONSTRAINT `promotions_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "categories",
+      "products",
+      "shopping_cart_items",
+      "orders",
+      "homepage_carousels",
+      "promotions"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "categories": [],
+      "products": [],
+      "shopping_cart_items": [],
+      "orders": [],
+      "homepage_carousels": [],
+      "promotions": []
+    }
+  }
+}

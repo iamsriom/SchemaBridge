@@ -1,0 +1,137 @@
+-- Schema for database: schemabench_0217
+
+CREATE TABLE `school` (
+  `school_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(500) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `principal_name` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`school_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `school_id` int(11) DEFAULT NULL,
+  `username` varchar(100) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `full_name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `role` enum('admin','operator','student','teacher') NOT NULL,
+  `is_approved` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `school` (`school_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `publisher` (
+  `publisher_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(500) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`publisher_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `category` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `author` (
+  `author_id` int(11) NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(255) NOT NULL,
+  `bio` text DEFAULT NULL,
+  PRIMARY KEY (`author_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `book` (
+  `book_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(500) NOT NULL,
+  `isbn` varchar(20) DEFAULT NULL,
+  `publisher_id` int(11) DEFAULT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `publication_year` int(4) DEFAULT NULL,
+  `edition` varchar(50) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `total_copies` int(11) NOT NULL DEFAULT 1,
+  `available_copies` int(11) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`book_id`),
+  CONSTRAINT `book_ibfk_1` FOREIGN KEY (`publisher_id`) REFERENCES `publisher` (`publisher_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `book_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `book_author` (
+  `book_id` int(11) NOT NULL,
+  `author_id` int(11) NOT NULL,
+  PRIMARY KEY (`book_id`, `author_id`),
+  CONSTRAINT `book_author_ibfk_1` FOREIGN KEY (`book_id`) REFERENCES `book` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `book_author_ibfk_2` FOREIGN KEY (`author_id`) REFERENCES `author` (`author_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `library_collection` (
+  `collection_id` int(11) NOT NULL AUTO_INCREMENT,
+  `school_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `copies_available` int(11) NOT NULL DEFAULT 1,
+  `total_copies` int(11) NOT NULL DEFAULT 1,
+  `added_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`collection_id`),
+  CONSTRAINT `library_collection_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `school` (`school_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `library_collection_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `book` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `borrowing` (
+  `borrowing_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `school_id` int(11) NOT NULL,
+  `borrowed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `due_date` datetime NOT NULL,
+  `returned_at` datetime DEFAULT NULL,
+  `status` enum('borrowed','returned','overdue') NOT NULL DEFAULT 'borrowed',
+  `operator_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`borrowing_id`),
+  CONSTRAINT `borrowing_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `borrowing_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `book` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `borrowing_ibfk_3` FOREIGN KEY (`school_id`) REFERENCES `school` (`school_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `borrowing_ibfk_4` FOREIGN KEY (`operator_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reservation` (
+  `reservation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `school_id` int(11) NOT NULL,
+  `reserved_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `expiry_date` datetime NOT NULL,
+  `status` enum('pending','fulfilled','expired','cancelled') NOT NULL DEFAULT 'pending',
+  PRIMARY KEY (`reservation_id`),
+  CONSTRAINT `reservation_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reservation_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `book` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reservation_ibfk_3` FOREIGN KEY (`school_id`) REFERENCES `school` (`school_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `review` (
+  `review_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `rating` tinyint(1) NOT NULL,
+  `review_text` text DEFAULT NULL,
+  `is_approved` tinyint(1) NOT NULL DEFAULT 0,
+  `approved_by` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`review_id`),
+  CONSTRAINT `review_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `review_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `book` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `review_ibfk_3` FOREIGN KEY (`approved_by`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

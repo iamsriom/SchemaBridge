@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0294
+CREATE TABLE `branch_office` (
+  `branch_id` int(11) NOT NULL AUTO_INCREMENT,
+  `branch_name` varchar(255) NOT NULL,
+  `branch_address` varchar(255) NOT NULL,
+  PRIMARY KEY (`branch_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(255) NOT NULL,
+  `id_number` varchar(50) NOT NULL,
+  `contact_phone` varchar(20) NOT NULL,
+  `email_address` varchar(255) NOT NULL,
+  `branch_id` int(11) NOT NULL,
+  PRIMARY KEY (`customer_id`),
+  KEY `customer_ibfk_1` (`branch_id`),
+  CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`branch_id`) REFERENCES `branch_office` (`branch_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `account` (
+  `account_number` varchar(30) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `branch_id` int(11) NOT NULL,
+  `account_type` varchar(20) NOT NULL,
+  `balance` decimal(15,2) NOT NULL,
+  `open_date` date NOT NULL,
+  PRIMARY KEY (`account_number`),
+  KEY `account_ibfk_1` (`customer_id`),
+  KEY `account_ibfk_2` (`branch_id`),
+  CONSTRAINT `account_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `account_ibfk_2` FOREIGN KEY (`branch_id`) REFERENCES `branch_office` (`branch_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction_history` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `account_number` varchar(30) NOT NULL,
+  `transaction_type` varchar(20) NOT NULL,
+  `transaction_amount` decimal(15,2) NOT NULL,
+  `transaction_time` datetime NOT NULL,
+  `transaction_location` varchar(255) NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  KEY `transaction_history_ibfk_1` (`customer_id`),
+  KEY `transaction_history_ibfk_2` (`account_number`),
+  CONSTRAINT `transaction_history_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_history_ibfk_2` FOREIGN KEY (`account_number`) REFERENCES `account` (`account_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

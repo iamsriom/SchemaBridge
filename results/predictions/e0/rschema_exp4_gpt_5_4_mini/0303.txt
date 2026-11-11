@@ -1,0 +1,76 @@
+-- Schema for database: rschema_0303
+CREATE TABLE `project` (
+  `project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_name` varchar(255) NOT NULL,
+  `project_description` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sprint` (
+  `sprint_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `sprint_name` varchar(255) NOT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `status` varchar(50) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`sprint_id`),
+  KEY `sprint_ibfk_1` (`project_id`),
+  CONSTRAINT `sprint_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `story` (
+  `story_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `sprint_id` int(11) DEFAULT NULL,
+  `story_title` varchar(255) NOT NULL,
+  `story_description` text DEFAULT NULL,
+  `status` varchar(50) NOT NULL,
+  `story_points` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`story_id`),
+  KEY `story_ibfk_1` (`project_id`),
+  KEY `story_ibfk_2` (`sprint_id`),
+  CONSTRAINT `story_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `story_ibfk_2` FOREIGN KEY (`sprint_id`) REFERENCES `sprint` (`sprint_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `story_id` int(11) NOT NULL,
+  `task_title` varchar(255) NOT NULL,
+  `task_description` text DEFAULT NULL,
+  `status` varchar(50) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  KEY `task_ibfk_1` (`story_id`),
+  CONSTRAINT `task_ibfk_1` FOREIGN KEY (`story_id`) REFERENCES `story` (`story_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `acceptance_criteria` (
+  `criteria_id` int(11) NOT NULL AUTO_INCREMENT,
+  `story_id` int(11) NOT NULL,
+  `criteria_description` text NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`criteria_id`),
+  KEY `acceptance_criteria_ibfk_1` (`story_id`),
+  CONSTRAINT `acceptance_criteria_ibfk_1` FOREIGN KEY (`story_id`) REFERENCES `story` (`story_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `message_event` (
+  `event_id` int(11) NOT NULL AUTO_INCREMENT,
+  `subject` varchar(255) NOT NULL,
+  `message_reference` varchar(255) NOT NULL,
+  `version` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`event_id`),
+  UNIQUE KEY `message_event_uq_1` (`subject`, `message_reference`, `version`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

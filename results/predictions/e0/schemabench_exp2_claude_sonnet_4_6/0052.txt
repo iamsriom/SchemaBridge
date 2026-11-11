@@ -1,0 +1,145 @@
+-- Schema for database: schemabench_0052
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `github_id` varchar(255) DEFAULT NULL,
+  `github_username` varchar(255) DEFAULT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
+  `bio` text DEFAULT NULL,
+  `is_admin` tinyint(1) NOT NULL DEFAULT 0,
+  `is_banned` tinyint(1) NOT NULL DEFAULT 0,
+  `banned_at` datetime DEFAULT NULL,
+  `ban_reason` text DEFAULT NULL,
+  `remember_token` varchar(100) DEFAULT NULL,
+  `email_verified_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `password_resets` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `password_resets_email_index` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tags` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tags_slug_unique` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `threads` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `body` text NOT NULL,
+  `is_locked` tinyint(1) NOT NULL DEFAULT 0,
+  `is_pinned` tinyint(1) NOT NULL DEFAULT 0,
+  `reply_count` int(11) NOT NULL DEFAULT 0,
+  `views_count` int(11) NOT NULL DEFAULT 0,
+  `last_activity_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `threads_slug_unique` (`slug`),
+  KEY `threads_user_id_foreign` (`user_id`),
+  CONSTRAINT `threads_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `thread_tag` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `thread_id` int(11) NOT NULL,
+  `tag_id` int(11) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `thread_tag_thread_id_foreign` (`thread_id`),
+  KEY `thread_tag_tag_id_foreign` (`tag_id`),
+  CONSTRAINT `thread_tag_ibfk_1` FOREIGN KEY (`thread_id`) REFERENCES `threads` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `thread_tag_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `replies` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `thread_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `body` text NOT NULL,
+  `is_solution` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `replies_thread_id_foreign` (`thread_id`),
+  KEY `replies_user_id_foreign` (`user_id`),
+  KEY `replies_parent_id_foreign` (`parent_id`),
+  CONSTRAINT `replies_ibfk_1` FOREIGN KEY (`thread_id`) REFERENCES `threads` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `replies_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `replies_ibfk_3` FOREIGN KEY (`parent_id`) REFERENCES `replies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `likes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `likeable_id` int(11) NOT NULL,
+  `likeable_type` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `likes_user_id_foreign` (`user_id`),
+  KEY `likes_likeable_index` (`likeable_id`, `likeable_type`),
+  CONSTRAINT `likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `subscribable_id` int(11) NOT NULL,
+  `subscribable_type` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `subscriptions_user_id_foreign` (`user_id`),
+  KEY `subscriptions_subscribable_index` (`subscribable_id`, `subscribable_type`),
+  CONSTRAINT `subscriptions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notifications` (
+  `id` char(36) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `notifiable_id` int(11) NOT NULL,
+  `notifiable_type` varchar(255) NOT NULL,
+  `data` text NOT NULL,
+  `read_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `notifications_notifiable_index` (`notifiable_id`, `notifiable_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `failed_jobs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(255) NOT NULL,
+  `connection` text NOT NULL,
+  `queue` text NOT NULL,
+  `payload` longtext NOT NULL,
+  `exception` longtext NOT NULL,
+  `failed_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

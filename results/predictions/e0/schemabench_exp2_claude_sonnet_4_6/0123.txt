@@ -1,0 +1,98 @@
+-- Schema for database: schemabench_0123
+
+CREATE TABLE `pyrimidine_molecule` (
+  `molecule_id` int(11) NOT NULL AUTO_INCREMENT,
+  `molecule_name` varchar(255) NOT NULL,
+  `molecular_weight` float DEFAULT NULL,
+  `flexibility` float DEFAULT NULL,
+  `polarizability` float DEFAULT NULL,
+  `sigma_value` float DEFAULT NULL,
+  `inhibition_activity` float DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `molecular_position` (
+  `position_id` int(11) NOT NULL AUTO_INCREMENT,
+  `molecule_id` int(11) NOT NULL,
+  `position_index` int(11) NOT NULL,
+  `position_label` varchar(100) DEFAULT NULL,
+  `substituent` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`position_id`),
+  CONSTRAINT `molecular_position_ibfk_1` FOREIGN KEY (`molecule_id`) REFERENCES `pyrimidine_molecule` (`molecule_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `molecular_feature` (
+  `feature_id` int(11) NOT NULL AUTO_INCREMENT,
+  `molecule_id` int(11) NOT NULL,
+  `feature_name` varchar(255) NOT NULL,
+  `feature_value` float DEFAULT NULL,
+  `feature_type` varchar(100) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`feature_id`),
+  CONSTRAINT `molecular_feature_ibfk_1` FOREIGN KEY (`molecule_id`) REFERENCES `pyrimidine_molecule` (`molecule_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `qsar_model` (
+  `model_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_name` varchar(255) NOT NULL,
+  `algorithm` varchar(255) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `model_prediction` (
+  `prediction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_id` int(11) NOT NULL,
+  `molecule_id` int(11) NOT NULL,
+  `predicted_activity` float DEFAULT NULL,
+  `actual_activity` float DEFAULT NULL,
+  `residual_error` float DEFAULT NULL,
+  `prediction_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`prediction_id`),
+  CONSTRAINT `model_prediction_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `qsar_model` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `model_prediction_ibfk_2` FOREIGN KEY (`molecule_id`) REFERENCES `pyrimidine_molecule` (`molecule_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `researcher` (
+  `researcher_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `role` varchar(100) DEFAULT NULL,
+  `organization` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`researcher_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `experiment` (
+  `experiment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `researcher_id` int(11) NOT NULL,
+  `model_id` int(11) NOT NULL,
+  `experiment_name` varchar(255) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `start_date` datetime DEFAULT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`experiment_id`),
+  CONSTRAINT `experiment_ibfk_1` FOREIGN KEY (`researcher_id`) REFERENCES `researcher` (`researcher_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `experiment_ibfk_2` FOREIGN KEY (`model_id`) REFERENCES `qsar_model` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `visualization_report` (
+  `report_id` int(11) NOT NULL AUTO_INCREMENT,
+  `experiment_id` int(11) NOT NULL,
+  `report_title` varchar(255) NOT NULL,
+  `report_type` varchar(100) DEFAULT NULL,
+  `generated_at` datetime DEFAULT NULL,
+  `file_path` varchar(500) DEFAULT NULL,
+  `notes` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`report_id`),
+  CONSTRAINT `visualization_report_ibfk_1` FOREIGN KEY (`experiment_id`) REFERENCES `experiment` (`experiment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

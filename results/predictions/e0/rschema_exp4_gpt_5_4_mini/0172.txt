@@ -1,0 +1,56 @@
+-- Schema for database: rschema_0172
+CREATE TABLE `patients` (
+  `patient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctors` (
+  `doctor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `doctor_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`doctor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `normal_ranges` (
+  `range_id` int(11) NOT NULL AUTO_INCREMENT,
+  `doctor_id` int(11) NOT NULL,
+  `vital_sign_name` varchar(100) NOT NULL,
+  `min_value` decimal(10,2) DEFAULT NULL,
+  `max_value` decimal(10,2) DEFAULT NULL,
+  `unit` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`range_id`),
+  KEY `normal_ranges_ibfk_1` (`doctor_id`),
+  CONSTRAINT `normal_ranges_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vital_sign_logs` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `record_time` datetime NOT NULL,
+  `temperature` decimal(5,2) DEFAULT NULL,
+  `blood_pressure_systolic` int(11) DEFAULT NULL,
+  `blood_pressure_diastolic` int(11) DEFAULT NULL,
+  `heart_rate` int(11) DEFAULT NULL,
+  `respiratory_rate` int(11) DEFAULT NULL,
+  `oxygen_saturation` decimal(5,2) DEFAULT NULL,
+  `other_vital_signs` varchar(500) DEFAULT NULL,
+  `log_file_path` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`log_id`),
+  KEY `vital_sign_logs_ibfk_1` (`patient_id`),
+  CONSTRAINT `vital_sign_logs_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alerts` (
+  `alert_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `log_id` int(11) NOT NULL,
+  `abnormal_vital_signs` varchar(500) NOT NULL,
+  `alert_time` datetime NOT NULL,
+  `alert_content` varchar(1000) NOT NULL,
+  PRIMARY KEY (`alert_id`),
+  KEY `alerts_ibfk_1` (`patient_id`),
+  KEY `alerts_ibfk_2` (`log_id`),
+  CONSTRAINT `alerts_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `alerts_ibfk_2` FOREIGN KEY (`log_id`) REFERENCES `vital_sign_logs` (`log_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

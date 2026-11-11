@@ -1,0 +1,73 @@
+-- Schema for database: rschema_0147
+
+CREATE TABLE `class` (
+  `class_id` int(11) NOT NULL AUTO_INCREMENT,
+  `class_name` varchar(255) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
+  `grade` varchar(50) NOT NULL,
+  PRIMARY KEY (`class_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `member` (
+  `member_id` int(11) NOT NULL AUTO_INCREMENT,
+  `class_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `workplace` varchar(255) DEFAULT NULL,
+  `contact_number` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`member_id`),
+  CONSTRAINT `member_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `announcement` (
+  `announcement_id` int(11) NOT NULL AUTO_INCREMENT,
+  `class_id` int(11) NOT NULL,
+  `announcement_time` datetime NOT NULL,
+  `announcement_content` text NOT NULL,
+  PRIMARY KEY (`announcement_id`),
+  CONSTRAINT `announcement_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `message` (
+  `message_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sender_id` int(11) NOT NULL,
+  `receiver_id` int(11) NOT NULL,
+  `message_content` text NOT NULL,
+  `send_time` datetime NOT NULL,
+  `read_status` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`message_id`),
+  CONSTRAINT `message_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `message_ibfk_2` FOREIGN KEY (`receiver_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `log` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `member_id` int(11) NOT NULL,
+  `log_content` text NOT NULL,
+  `log_time` datetime NOT NULL,
+  `mood` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`log_id`),
+  CONSTRAINT `log_ibfk_1` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `leave_message` (
+  `leave_message_id` int(11) NOT NULL AUTO_INCREMENT,
+  `member_id` int(11) NOT NULL,
+  `message_time` datetime NOT NULL,
+  `message_content` text NOT NULL,
+  `message_count` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`leave_message_id`),
+  CONSTRAINT `leave_message_ibfk_1` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `application` (
+  `application_id` int(11) NOT NULL AUTO_INCREMENT,
+  `member_id` int(11) NOT NULL,
+  `application_time` datetime NOT NULL,
+  `approval_status` varchar(50) NOT NULL DEFAULT 'pending',
+  `application_content` text NOT NULL,
+  PRIMARY KEY (`application_id`),
+  CONSTRAINT `application_ibfk_1` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

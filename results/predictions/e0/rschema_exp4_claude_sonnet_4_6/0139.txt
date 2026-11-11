@@ -1,0 +1,86 @@
+-- Schema for database: rschema_0139
+
+CREATE TABLE `department` (
+  `dept_id` int(11) NOT NULL AUTO_INCREMENT,
+  `dept_name` varchar(100) NOT NULL,
+  `floor` int(11) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`dept_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctor` (
+  `doctor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `doctor_no` varchar(50) NOT NULL,
+  `doctor_name` varchar(100) NOT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `title` varchar(50) DEFAULT NULL,
+  `dept_id` int(11) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`doctor_id`),
+  CONSTRAINT `doctor_ibfk_1` FOREIGN KEY (`dept_id`) REFERENCES `department` (`dept_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patient` (
+  `patient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_name` varchar(100) NOT NULL,
+  `age` int(11) DEFAULT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `id_card` varchar(50) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `register_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `diagnosis` (
+  `diagnosis_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `doctor_id` int(11) NOT NULL,
+  `diagnosis_date` datetime NOT NULL,
+  `diagnosis_result` varchar(500) DEFAULT NULL,
+  `symptoms` varchar(500) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`diagnosis_id`),
+  CONSTRAINT `diagnosis_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `diagnosis_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prescription` (
+  `prescription_id` int(11) NOT NULL AUTO_INCREMENT,
+  `diagnosis_id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `doctor_id` int(11) NOT NULL,
+  `prescription_date` datetime NOT NULL,
+  `total_price` decimal(10,2) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`prescription_id`),
+  CONSTRAINT `prescription_ibfk_1` FOREIGN KEY (`diagnosis_id`) REFERENCES `diagnosis` (`diagnosis_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `prescription_ibfk_2` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `prescription_ibfk_3` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `drug` (
+  `drug_id` int(11) NOT NULL AUTO_INCREMENT,
+  `drug_name` varchar(100) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `manufacturer` varchar(100) DEFAULT NULL,
+  `specification` varchar(100) DEFAULT NULL,
+  `unit` varchar(20) DEFAULT NULL,
+  `stock` int(11) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`drug_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prescription_drug` (
+  `prescription_drug_id` int(11) NOT NULL AUTO_INCREMENT,
+  `prescription_id` int(11) NOT NULL,
+  `drug_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `subtotal` decimal(10,2) DEFAULT NULL,
+  `usage_instruction` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`prescription_drug_id`),
+  CONSTRAINT `prescription_drug_ibfk_1` FOREIGN KEY (`prescription_id`) REFERENCES `prescription` (`prescription_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `prescription_drug_ibfk_2` FOREIGN KEY (`drug_id`) REFERENCES `drug` (`drug_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

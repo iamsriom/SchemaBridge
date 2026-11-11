@@ -1,0 +1,61 @@
+-- Schema for database: rschema_0509
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(255) NOT NULL,
+  `department_head_id` int(11) DEFAULT NULL,
+  `contact_phone` varchar(20) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctor` (
+  `doctor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `contact_phone` varchar(20) DEFAULT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`doctor_id`),
+  KEY `doctor_ibfk_1` (`department_id`),
+  CONSTRAINT `doctor_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ward` (
+  `ward_id` int(11) NOT NULL AUTO_INCREMENT,
+  `location` varchar(255) NOT NULL,
+  `head_id` int(11) DEFAULT NULL,
+  `bed_count` int(11) NOT NULL,
+  `remaining_bed_count` int(11) NOT NULL,
+  PRIMARY KEY (`ward_id`),
+  KEY `ward_ibfk_1` (`head_id`),
+  CONSTRAINT `ward_ibfk_1` FOREIGN KEY (`head_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patient` (
+  `patient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `hospitalization_time` datetime DEFAULT NULL,
+  `ward_id` int(11) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `identity_card_number` varchar(30) DEFAULT NULL,
+  `medical_record_number` varchar(50) DEFAULT NULL,
+  `emergency_contact_phone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`patient_id`),
+  KEY `patient_ibfk_1` (`ward_id`),
+  CONSTRAINT `patient_ibfk_1` FOREIGN KEY (`ward_id`) REFERENCES `ward` (`ward_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `nurse` (
+  `nurse_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `duties` varchar(255) DEFAULT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`nurse_id`),
+  KEY `nurse_ibfk_1` (`department_id`),
+  CONSTRAINT `nurse_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,122 @@
+-- Schema for database: rschema_0344
+
+CREATE TABLE `application` (
+  `app_id` int(11) NOT NULL AUTO_INCREMENT,
+  `app_code` varchar(50) NOT NULL,
+  `app_name` varchar(255) NOT NULL,
+  `app_type` varchar(100) NOT NULL,
+  PRIMARY KEY (`app_id`),
+  UNIQUE KEY `app_code` (`app_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role` (
+  `role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permission` (
+  `permission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `permission_name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`permission_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role_permission` (
+  `role_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  PRIMARY KEY (`role_id`, `permission_id`),
+  CONSTRAINT `role_permission_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `role_permission_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permission` (`permission_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `role_id` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_app_permission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `app_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `user_app_permission_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_app_permission_ibfk_2` FOREIGN KEY (`app_id`) REFERENCES `application` (`app_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_app_permission_ibfk_3` FOREIGN KEY (`permission_id`) REFERENCES `permission` (`permission_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_app_access` (
+  `access_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `app_id` int(11) NOT NULL,
+  `granted_at` datetime NOT NULL,
+  PRIMARY KEY (`access_id`),
+  CONSTRAINT `user_app_access_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_app_access_ibfk_2` FOREIGN KEY (`app_id`) REFERENCES `application` (`app_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `web_service` (
+  `service_id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_name` varchar(255) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `app_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`service_id`),
+  CONSTRAINT `web_service_ibfk_1` FOREIGN KEY (`app_id`) REFERENCES `application` (`app_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_error` (
+  `error_id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `error_code` varchar(50) NOT NULL,
+  `error_description` varchar(500) DEFAULT NULL,
+  `error_timestamp` datetime NOT NULL,
+  `return_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`error_id`),
+  CONSTRAINT `service_error_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `web_service` (`service_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_invocation` (
+  `invocation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `invocation_time` datetime NOT NULL,
+  `return_status` varchar(50) NOT NULL,
+  `delay_time` decimal(10,3) DEFAULT NULL,
+  `response_time` decimal(10,3) DEFAULT NULL,
+  `caller_user_id` int(11) DEFAULT NULL,
+  `additional_metrics` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`invocation_id`),
+  CONSTRAINT `service_invocation_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `web_service` (`service_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `service_invocation_ibfk_2` FOREIGN KEY (`caller_user_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_statistics` (
+  `stat_id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `period_start` datetime NOT NULL,
+  `period_end` datetime NOT NULL,
+  `call_count` int(11) NOT NULL DEFAULT 0,
+  `success_count` int(11) NOT NULL DEFAULT 0,
+  `success_rate` decimal(5,2) DEFAULT NULL,
+  `avg_delay_time` decimal(10,3) DEFAULT NULL,
+  PRIMARY KEY (`stat_id`),
+  CONSTRAINT `service_statistics_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `web_service` (`service_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `error_invocation_link` (
+  `link_id` int(11) NOT NULL AUTO_INCREMENT,
+  `error_id` int(11) NOT NULL,
+  `invocation_id` int(11) NOT NULL,
+  PRIMARY KEY (`link_id`),
+  CONSTRAINT `error_invocation_link_ibfk_1` FOREIGN KEY (`error_id`) REFERENCES `service_error` (`error_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `error_invocation_link_ibfk_2` FOREIGN KEY (`invocation_id`) REFERENCES `service_invocation` (`invocation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,76 @@
+-- Schema for database: rschema_0433
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role` (
+  `role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_name` varchar(255) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `role_id` int(11) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `user_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `business_module` (
+  `module_id` int(11) NOT NULL AUTO_INCREMENT,
+  `module_code` varchar(100) NOT NULL,
+  `module_name` varchar(255) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`module_id`),
+  UNIQUE KEY `module_code` (`module_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `business_entity` (
+  `entity_id` int(11) NOT NULL AUTO_INCREMENT,
+  `entity_type` varchar(100) NOT NULL,
+  `module_code` varchar(100) NOT NULL,
+  `entity_name` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `creator_user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`entity_id`),
+  CONSTRAINT `business_entity_ibfk_1` FOREIGN KEY (`module_code`) REFERENCES `business_module` (`module_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `business_entity_ibfk_2` FOREIGN KEY (`creator_user_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attachment` (
+  `attachment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `file_name` varchar(255) NOT NULL,
+  `file_size` bigint(20) DEFAULT NULL,
+  `file_path` varchar(500) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `file_status` varchar(50) DEFAULT NULL,
+  `uploader_user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`attachment_id`),
+  CONSTRAINT `attachment_ibfk_1` FOREIGN KEY (`uploader_user_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `entity_attachment` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `entity_id` int(11) NOT NULL,
+  `attachment_id` int(11) NOT NULL,
+  `module_code` varchar(100) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `entity_attachment_ibfk_1` FOREIGN KEY (`entity_id`) REFERENCES `business_entity` (`entity_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `entity_attachment_ibfk_2` FOREIGN KEY (`attachment_id`) REFERENCES `attachment` (`attachment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `entity_attachment_ibfk_3` FOREIGN KEY (`module_code`) REFERENCES `business_module` (`module_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

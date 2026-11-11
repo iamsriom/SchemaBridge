@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0322
+CREATE TABLE `company` (
+  `company_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `website_address` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  `salary` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  KEY `employee_ibfk_1` (`company_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `company` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device` (
+  `device_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`device_id`),
+  KEY `device_ibfk_1` (`employee_id`),
+  CONSTRAINT `device_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `last_login_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `site` (
+  `site_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `hostname` varchar(255) NOT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`site_id`),
+  UNIQUE KEY `uniq_site_name` (`name`),
+  UNIQUE KEY `uniq_site_hostname` (`hostname`),
+  KEY `site_ibfk_1` (`user_id`),
+  CONSTRAINT `site_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

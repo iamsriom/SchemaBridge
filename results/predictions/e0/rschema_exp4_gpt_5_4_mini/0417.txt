@@ -1,0 +1,65 @@
+-- Schema for database: rschema_0417
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `avatar_link` varchar(255) DEFAULT NULL,
+  `registration_date` datetime NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_username` (`username`),
+  UNIQUE KEY `uk_users_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `categories` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`category_id`),
+  UNIQUE KEY `uk_categories_category_name` (`category_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `posts` (
+  `post_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `posting_time` datetime NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `reply_count` int(11) NOT NULL DEFAULT '0',
+  `like_count` int(11) NOT NULL DEFAULT '0',
+  `favorite_count` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`post_id`),
+  KEY `idx_posts_category_id` (`category_id`),
+  KEY `idx_posts_user_id` (`user_id`),
+  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `posts_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comments` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `comment_content` text NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `like_count` int(11) NOT NULL DEFAULT '0',
+  `reply_count` int(11) NOT NULL DEFAULT '0',
+  `posting_time` datetime NOT NULL,
+  `post_id` int(11) DEFAULT NULL,
+  `parent_comment_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`comment_id`),
+  KEY `idx_comments_user_id` (`user_id`),
+  KEY `idx_comments_post_id` (`post_id`),
+  KEY `idx_comments_parent_comment_id` (`parent_comment_id`),
+  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`parent_comment_id`) REFERENCES `comments` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notifications` (
+  `message_number` int(11) NOT NULL AUTO_INCREMENT,
+  `notification_content` text NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `read_status` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`message_number`),
+  KEY `idx_notifications_user_id` (`user_id`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

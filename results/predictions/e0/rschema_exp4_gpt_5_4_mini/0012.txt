@@ -1,0 +1,49 @@
+-- Schema for database: rschema_0012
+CREATE TABLE `warehouse` (
+  `warehouse_id` int(11) NOT NULL AUTO_INCREMENT,
+  `warehouse_name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `capacity` int(11) NOT NULL,
+  `current_inventory` int(11) NOT NULL,
+  PRIMARY KEY (`warehouse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `agricultural_product` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(255) NOT NULL,
+  `specification` varchar(255) NOT NULL,
+  `date_of_storage` datetime DEFAULT NULL,
+  `date_of_dispatch` datetime DEFAULT NULL,
+  `quantity_stored` int(11) NOT NULL,
+  `quantity_dispatched` int(11) NOT NULL,
+  `current_inventory` int(11) NOT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `storage_record` (
+  `storage_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `warehouse_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `storage_date` datetime NOT NULL,
+  `quantity_stored` int(11) NOT NULL,
+  `operator` varchar(255) NOT NULL,
+  PRIMARY KEY (`storage_record_id`),
+  KEY `storage_record_ibfk_1` (`warehouse_id`),
+  KEY `storage_record_ibfk_2` (`product_id`),
+  CONSTRAINT `storage_record_ibfk_1` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `storage_record_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `agricultural_product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dispatch_record` (
+  `dispatch_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `warehouse_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `dispatch_date` datetime NOT NULL,
+  `quantity_dispatched` int(11) NOT NULL,
+  `operator` varchar(255) NOT NULL,
+  PRIMARY KEY (`dispatch_record_id`),
+  KEY `dispatch_record_ibfk_1` (`warehouse_id`),
+  KEY `dispatch_record_ibfk_2` (`product_id`),
+  CONSTRAINT `dispatch_record_ibfk_1` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `dispatch_record_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `agricultural_product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

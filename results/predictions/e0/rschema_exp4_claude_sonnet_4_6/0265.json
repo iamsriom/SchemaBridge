@@ -1,0 +1,28 @@
+{
+  "text_number": 265,
+  "id": "67552f0b13602ec03b41ab4d",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0265",
+  "question": "The company produces chess pieces for various chess games. Each chessboard represents a production line or batch for a specific chess game, with a chessboard ID and chessboard name. Each chessboard contains multiple chess pieces, each with color and position information.\nThe company performs quality inspection on each chess piece, recording the inspection time and result. If the inspection fails, the defect type is recorded and a quality alert is generated.\nAdditionally, the company uses quality inspection models to predict and evaluate the quality status during the production process, recording the model running time and results.",
+  "ddl": "-- Schema for database: rschema_0265\n\nCREATE TABLE `chessboard` (\n  `chessboard_id` int(11) NOT NULL AUTO_INCREMENT,\n  `chessboard_name` varchar(255) NOT NULL,\n  PRIMARY KEY (`chessboard_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `chess_piece` (\n  `piece_id` int(11) NOT NULL AUTO_INCREMENT,\n  `chessboard_id` int(11) NOT NULL,\n  `color` varchar(50) NOT NULL,\n  `position` varchar(50) NOT NULL,\n  PRIMARY KEY (`piece_id`),\n  CONSTRAINT `chess_piece_ibfk_1` FOREIGN KEY (`chessboard_id`) REFERENCES `chessboard` (`chessboard_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `quality_inspection` (\n  `inspection_id` int(11) NOT NULL AUTO_INCREMENT,\n  `piece_id` int(11) NOT NULL,\n  `inspection_time` datetime NOT NULL,\n  `result` varchar(50) NOT NULL,\n  `defect_type` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`inspection_id`),\n  CONSTRAINT `quality_inspection_ibfk_1` FOREIGN KEY (`piece_id`) REFERENCES `chess_piece` (`piece_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `quality_alert` (\n  `alert_id` int(11) NOT NULL AUTO_INCREMENT,\n  `inspection_id` int(11) NOT NULL,\n  `alert_time` datetime NOT NULL,\n  `alert_message` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`alert_id`),\n  CONSTRAINT `quality_alert_ibfk_1` FOREIGN KEY (`inspection_id`) REFERENCES `quality_inspection` (`inspection_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `quality_inspection_model` (\n  `model_id` int(11) NOT NULL AUTO_INCREMENT,\n  `model_name` varchar(255) NOT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`model_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `model_run` (\n  `run_id` int(11) NOT NULL AUTO_INCREMENT,\n  `model_id` int(11) NOT NULL,\n  `chessboard_id` int(11) NOT NULL,\n  `run_time` datetime NOT NULL,\n  `run_result` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`run_id`),\n  CONSTRAINT `model_run_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `quality_inspection_model` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `model_run_ibfk_2` FOREIGN KEY (`chessboard_id`) REFERENCES `chessboard` (`chessboard_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "chessboard",
+      "chess_piece",
+      "quality_inspection",
+      "quality_alert",
+      "quality_inspection_model",
+      "model_run"
+    ],
+    "columns_by_table": {
+      "chessboard": [],
+      "chess_piece": [],
+      "quality_inspection": [],
+      "quality_alert": [],
+      "quality_inspection_model": [],
+      "model_run": []
+    }
+  }
+}

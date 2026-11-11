@@ -1,0 +1,66 @@
+-- Schema for database: rschema_0422
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `role` varchar(50) NOT NULL,
+  `registration_time` datetime NOT NULL,
+  `last_login_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project` (
+  `project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_name` varchar(255) NOT NULL,
+  `project_introduction` text DEFAULT NULL,
+  `responsible_person_id` int(11) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `project_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`project_id`),
+  KEY `responsible_person_id` (`responsible_person_id`),
+  CONSTRAINT `project_ibfk_1` FOREIGN KEY (`responsible_person_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_version` (
+  `version_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `version_name` varchar(100) NOT NULL,
+  `release_date` date DEFAULT NULL,
+  `version_description` text DEFAULT NULL,
+  `is_stable_version` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`version_id`),
+  KEY `project_id` (`project_id`),
+  CONSTRAINT `project_version_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `assigned_to_user_id` int(11) NOT NULL,
+  `task_name` varchar(255) NOT NULL,
+  `task_status` varchar(50) NOT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `task_description` text DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  KEY `project_id` (`project_id`),
+  KEY `assigned_to_user_id` (`assigned_to_user_id`),
+  CONSTRAINT `task_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_ibfk_2` FOREIGN KEY (`assigned_to_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `code_submission` (
+  `submission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `submission_time` datetime NOT NULL,
+  `submission_description` text DEFAULT NULL,
+  `code_path` varchar(500) NOT NULL,
+  PRIMARY KEY (`submission_id`),
+  KEY `user_id` (`user_id`),
+  KEY `project_id` (`project_id`),
+  CONSTRAINT `code_submission_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `code_submission_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

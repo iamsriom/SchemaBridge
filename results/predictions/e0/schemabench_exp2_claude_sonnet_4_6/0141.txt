@@ -1,0 +1,97 @@
+-- Schema for database: schemabench_0141
+
+CREATE TABLE `store` (
+  `store_id` int(11) NOT NULL,
+  `store_name` varchar(255) NOT NULL,
+  `city` varchar(255) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `zip_code` char(10) DEFAULT NULL,
+  `latitude` decimal(10,6) DEFAULT NULL,
+  `longitude` decimal(10,6) DEFAULT NULL,
+  PRIMARY KEY (`store_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `weather_station` (
+  `station_id` int(11) NOT NULL AUTO_INCREMENT,
+  `station_name` varchar(255) NOT NULL,
+  `latitude` decimal(10,6) DEFAULT NULL,
+  `longitude` decimal(10,6) DEFAULT NULL,
+  `elevation` decimal(8,2) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`station_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `store_weather_station` (
+  `store_id` int(11) NOT NULL,
+  `station_id` int(11) NOT NULL,
+  PRIMARY KEY (`store_id`, `station_id`),
+  CONSTRAINT `store_weather_station_ibfk_1` FOREIGN KEY (`store_id`) REFERENCES `store` (`store_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `store_weather_station_ibfk_2` FOREIGN KEY (`station_id`) REFERENCES `weather_station` (`station_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `category` varchar(255) DEFAULT NULL,
+  `weather_sensitive` tinyint(1) NOT NULL DEFAULT 1,
+  `unit_price` decimal(10,2) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `weather_observation` (
+  `observation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `station_id` int(11) NOT NULL,
+  `observation_date` date NOT NULL,
+  `max_temp` decimal(5,2) DEFAULT NULL,
+  `min_temp` decimal(5,2) DEFAULT NULL,
+  `mean_temp` decimal(5,2) DEFAULT NULL,
+  `precipitation` decimal(6,2) DEFAULT NULL,
+  `snowfall` decimal(6,2) DEFAULT NULL,
+  `snow_depth` decimal(6,2) DEFAULT NULL,
+  `wind_speed` decimal(5,2) DEFAULT NULL,
+  `weather_event` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`observation_id`),
+  CONSTRAINT `weather_observation_ibfk_1` FOREIGN KEY (`station_id`) REFERENCES `weather_station` (`station_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales` (
+  `sales_id` int(11) NOT NULL AUTO_INCREMENT,
+  `store_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `sale_date` date NOT NULL,
+  `units_sold` int(11) NOT NULL DEFAULT 0,
+  `revenue` decimal(12,2) DEFAULT NULL,
+  `units_returned` int(11) DEFAULT 0,
+  PRIMARY KEY (`sales_id`),
+  CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`store_id`) REFERENCES `store` (`store_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_forecast` (
+  `forecast_id` int(11) NOT NULL AUTO_INCREMENT,
+  `store_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `forecast_date` date NOT NULL,
+  `predicted_units` decimal(10,2) DEFAULT NULL,
+  `confidence_score` decimal(5,4) DEFAULT NULL,
+  `model_version` varchar(50) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`forecast_id`),
+  CONSTRAINT `sales_forecast_ibfk_1` FOREIGN KEY (`store_id`) REFERENCES `store` (`store_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_forecast_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inventory` (
+  `inventory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `store_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `record_date` date NOT NULL,
+  `stock_on_hand` int(11) NOT NULL DEFAULT 0,
+  `reorder_point` int(11) DEFAULT NULL,
+  `reorder_quantity` int(11) DEFAULT NULL,
+  `stockout_flag` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`inventory_id`),
+  CONSTRAINT `inventory_ibfk_1` FOREIGN KEY (`store_id`) REFERENCES `store` (`store_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `inventory_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

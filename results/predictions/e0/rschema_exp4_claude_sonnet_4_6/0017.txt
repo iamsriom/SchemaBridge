@@ -1,0 +1,52 @@
+-- Schema for database: rschema_0017
+
+CREATE TABLE `workshop` (
+  `workshop_id` int(11) NOT NULL AUTO_INCREMENT,
+  `workshop_name` varchar(255) NOT NULL,
+  `address` varchar(500) NOT NULL,
+  PRIMARY KEY (`workshop_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `worker` (
+  `worker_id` int(11) NOT NULL AUTO_INCREMENT,
+  `workshop_id` int(11) NOT NULL,
+  `worker_name` varchar(255) NOT NULL,
+  `contact_number` varchar(50) NOT NULL,
+  PRIMARY KEY (`worker_id`),
+  CONSTRAINT `worker_ibfk_1` FOREIGN KEY (`workshop_id`) REFERENCES `workshop` (`workshop_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `raw_material` (
+  `material_id` int(11) NOT NULL AUTO_INCREMENT,
+  `workshop_id` int(11) NOT NULL,
+  `material_name` varchar(255) NOT NULL,
+  `stock_quantity` decimal(15,2) NOT NULL DEFAULT '0.00',
+  PRIMARY KEY (`material_id`),
+  CONSTRAINT `raw_material_ibfk_1` FOREIGN KEY (`workshop_id`) REFERENCES `workshop` (`workshop_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `processing_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `worker_id` int(11) NOT NULL,
+  `workshop_id` int(11) NOT NULL,
+  `material_id` int(11) NOT NULL,
+  `processing_time` datetime NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `production_quantity` decimal(15,2) NOT NULL,
+  `quality_rating` varchar(50) NOT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `processing_record_ibfk_1` FOREIGN KEY (`worker_id`) REFERENCES `worker` (`worker_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `processing_record_ibfk_2` FOREIGN KEY (`workshop_id`) REFERENCES `workshop` (`workshop_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `processing_record_ibfk_3` FOREIGN KEY (`material_id`) REFERENCES `raw_material` (`material_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `production_performance` (
+  `performance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `workshop_id` int(11) NOT NULL,
+  `stat_year` int(11) NOT NULL,
+  `stat_month` int(11) NOT NULL,
+  `total_processing_volume` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `qualification_rate` decimal(5,2) NOT NULL DEFAULT '0.00',
+  PRIMARY KEY (`performance_id`),
+  CONSTRAINT `production_performance_ibfk_1` FOREIGN KEY (`workshop_id`) REFERENCES `workshop` (`workshop_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

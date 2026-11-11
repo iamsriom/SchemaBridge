@@ -1,0 +1,26 @@
+{
+  "text_number": 233,
+  "id": "67552f0a13602ec03b41a90d",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0233",
+  "question": "This database is designed for an e-commerce system, which manages customer information, address details, product information, and order processing. The main functions include:\n1.Customer Management: Stores and manages the basic information of customers, such as customer ID, first name, last name, email, birthday, etc. It also tracks the creation, update, and deletion (soft delete) timestamps.\n2.Address Management: Stores address details for customers, including address line, postal code, city, state, and country. It distinguishes between billing and shipping addresses and tracks the creation, update, and deletion (soft delete) timestamps.\n3.Product Management: Manages product details, such as product ID, name, code, price, and description. It also records the creation, update, and deletion (soft delete) timestamps.\n4.Order Management: Stores order information, including order ID and customer ID. It also tracks the creation, update, and deletion (soft delete) timestamps. Orders can have a many-to-many relationship with products, meaning an order can contain multiple products, and a product can appear in multiple orders.",
+  "ddl": "-- Schema for database: rschema_0233\n\nCREATE TABLE `customers` (\n  `customer_id` int(11) NOT NULL AUTO_INCREMENT,\n  `first_name` varchar(100) NOT NULL,\n  `last_name` varchar(100) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `birthday` date DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  `deleted_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`customer_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `addresses` (\n  `address_id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_id` int(11) NOT NULL,\n  `address_line` varchar(255) NOT NULL,\n  `postal_code` varchar(20) NOT NULL,\n  `city` varchar(100) NOT NULL,\n  `state` varchar(100) DEFAULT NULL,\n  `country` varchar(100) NOT NULL,\n  `is_billing` tinyint(1) NOT NULL DEFAULT 0,\n  `is_shipping` tinyint(1) NOT NULL DEFAULT 0,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  `deleted_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`address_id`),\n  CONSTRAINT `addresses_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `products` (\n  `product_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `code` varchar(100) NOT NULL,\n  `price` decimal(10,2) NOT NULL,\n  `description` text DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  `deleted_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`product_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `orders` (\n  `order_id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_id` int(11) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  `deleted_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`order_id`),\n  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `order_products` (\n  `order_product_id` int(11) NOT NULL AUTO_INCREMENT,\n  `order_id` int(11) NOT NULL,\n  `product_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL DEFAULT 1,\n  `unit_price` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`order_product_id`),\n  CONSTRAINT `order_products_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `order_products_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "customers",
+      "addresses",
+      "products",
+      "orders",
+      "order_products"
+    ],
+    "columns_by_table": {
+      "customers": [],
+      "addresses": [],
+      "products": [],
+      "orders": [],
+      "order_products": []
+    }
+  }
+}

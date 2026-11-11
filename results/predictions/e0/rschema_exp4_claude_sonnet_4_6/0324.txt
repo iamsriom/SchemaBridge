@@ -1,0 +1,37 @@
+-- Schema for database: rschema_0324
+
+CREATE TABLE `geoname` (
+  `geoname_id` int(11) NOT NULL,
+  `locale_code` varchar(10) NOT NULL,
+  `continent_code` char(2) NOT NULL,
+  `continent_name` varchar(100) NOT NULL,
+  `country_iso_code` char(2) DEFAULT NULL,
+  `country_name` varchar(255) DEFAULT NULL,
+  `is_in_european_union` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`geoname_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `geoname_country_index` (
+  `country_iso_code` char(2) NOT NULL,
+  `geoname_id` int(11) NOT NULL,
+  PRIMARY KEY (`country_iso_code`),
+  KEY `geoname_country_index_ibfk_1` (`geoname_id`),
+  CONSTRAINT `geoname_country_index_ibfk_1` FOREIGN KEY (`geoname_id`) REFERENCES `geoname` (`geoname_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ip_network` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `network` varchar(50) NOT NULL,
+  `geoname_id` int(11) DEFAULT NULL,
+  `registered_country_geoname_id` int(11) DEFAULT NULL,
+  `represented_country_geoname_id` int(11) DEFAULT NULL,
+  `is_anonymous_proxy` tinyint(1) NOT NULL DEFAULT 0,
+  `is_satellite_provider` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `ip_network_ibfk_1` (`geoname_id`),
+  KEY `ip_network_ibfk_2` (`registered_country_geoname_id`),
+  KEY `ip_network_ibfk_3` (`represented_country_geoname_id`),
+  CONSTRAINT `ip_network_ibfk_1` FOREIGN KEY (`geoname_id`) REFERENCES `geoname` (`geoname_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `ip_network_ibfk_2` FOREIGN KEY (`registered_country_geoname_id`) REFERENCES `geoname` (`geoname_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `ip_network_ibfk_3` FOREIGN KEY (`represented_country_geoname_id`) REFERENCES `geoname` (`geoname_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

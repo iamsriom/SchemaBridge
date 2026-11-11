@@ -1,0 +1,142 @@
+-- Schema for database: schemabench_0064
+CREATE TABLE `sessions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `session_id` varchar(255) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `cookie_id` varchar(255) DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` varchar(512) DEFAULT NULL,
+  `device_id` int(11) DEFAULT NULL,
+  `browser_id` int(11) DEFAULT NULL,
+  `os_id` int(11) DEFAULT NULL,
+  `geo_location_id` int(11) DEFAULT NULL,
+  `referer_id` int(11) DEFAULT NULL,
+  `route_id` int(11) DEFAULT NULL,
+  `started_at` datetime NOT NULL,
+  `ended_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `sessions_session_id_unique` (`session_id`),
+  KEY `sessions_user_id_index` (`user_id`),
+  KEY `sessions_cookie_id_index` (`cookie_id`),
+  KEY `sessions_device_id_index` (`device_id`),
+  KEY `sessions_browser_id_index` (`browser_id`),
+  KEY `sessions_os_id_index` (`os_id`),
+  KEY `sessions_geo_location_id_index` (`geo_location_id`),
+  KEY `sessions_referer_id_index` (`referer_id`),
+  KEY `sessions_route_id_index` (`route_id`),
+  CONSTRAINT `sessions_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `devices` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `sessions_ibfk_2` FOREIGN KEY (`browser_id`) REFERENCES `browsers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `sessions_ibfk_3` FOREIGN KEY (`os_id`) REFERENCES `operating_systems` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `sessions_ibfk_4` FOREIGN KEY (`geo_location_id`) REFERENCES `geo_locations` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `sessions_ibfk_5` FOREIGN KEY (`referer_id`) REFERENCES `referers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `sessions_ibfk_6` FOREIGN KEY (`route_id`) REFERENCES `routes` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `page_views` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `session_id` int(11) NOT NULL,
+  `url` varchar(2048) NOT NULL,
+  `title` varchar(512) DEFAULT NULL,
+  `route_id` int(11) DEFAULT NULL,
+  `referer_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `page_views_session_id_index` (`session_id`),
+  KEY `page_views_route_id_index` (`route_id`),
+  KEY `page_views_referer_id_index` (`referer_id`),
+  CONSTRAINT `page_views_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `page_views_ibfk_2` FOREIGN KEY (`route_id`) REFERENCES `routes` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `page_views_ibfk_3` FOREIGN KEY (`referer_id`) REFERENCES `referers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `devices` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_type` varchar(100) NOT NULL,
+  `brand` varchar(100) DEFAULT NULL,
+  `model` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `devices_device_type_index` (`device_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `browsers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `version` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `browsers_name_index` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `operating_systems` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `version` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `operating_systems_name_index` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `geo_locations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `latitude` decimal(10,7) DEFAULT NULL,
+  `longitude` decimal(10,7) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `geo_locations_country_index` (`country`),
+  KEY `geo_locations_city_index` (`city`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `referers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `url` varchar(2048) NOT NULL,
+  `host` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `referers_host_index` (`host`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `routes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `uri` varchar(2048) NOT NULL,
+  `method` varchar(10) DEFAULT NULL,
+  `parameters` text DEFAULT NULL,
+  `query_string` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `routes_name_index` (`name`),
+  KEY `routes_uri_index` (`uri`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `events` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `session_id` int(11) NOT NULL,
+  `event_type` varchar(100) NOT NULL,
+  `message` text DEFAULT NULL,
+  `exception_class` varchar(255) DEFAULT NULL,
+  `stack_trace` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `events_session_id_index` (`session_id`),
+  KEY `events_event_type_index` (`event_type`),
+  CONSTRAINT `events_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `sql_queries` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `session_id` int(11) NOT NULL,
+  `connection_name` varchar(100) DEFAULT NULL,
+  `sql` text NOT NULL,
+  `bindings` text DEFAULT NULL,
+  `time_ms` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `sql_queries_session_id_index` (`session_id`),
+  KEY `sql_queries_connection_name_index` (`connection_name`),
+  CONSTRAINT `sql_queries_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

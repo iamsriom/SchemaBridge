@@ -1,0 +1,67 @@
+-- Schema for database: schemabench_0229
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_username` (`username`),
+  UNIQUE KEY `uk_users_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `artifacts` (
+  `artifact_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `image_url` varchar(512) NOT NULL,
+  `latitude` decimal(10,7) NOT NULL,
+  `longitude` decimal(10,7) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`artifact_id`),
+  KEY `artifact_user_id_idx` (`user_id`),
+  CONSTRAINT `artifacts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tags` (
+  `tag_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  PRIMARY KEY (`tag_id`),
+  UNIQUE KEY `uk_tags_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `artifact_tags` (
+  `artifact_id` int(11) NOT NULL,
+  `tag_id` int(11) NOT NULL,
+  PRIMARY KEY (`artifact_id`,`tag_id`),
+  KEY `artifact_tags_tag_id_idx` (`tag_id`),
+  CONSTRAINT `artifact_tags_ibfk_1` FOREIGN KEY (`artifact_id`) REFERENCES `artifacts` (`artifact_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `artifact_tags_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`tag_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `votes` (
+  `vote_id` int(11) NOT NULL AUTO_INCREMENT,
+  `artifact_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `vote_value` tinyint(4) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`vote_id`),
+  UNIQUE KEY `uk_votes_artifact_user` (`artifact_id`,`user_id`),
+  KEY `votes_user_id_idx` (`user_id`),
+  CONSTRAINT `votes_ibfk_1` FOREIGN KEY (`artifact_id`) REFERENCES `artifacts` (`artifact_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `votes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `city_notifications` (
+  `notification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `artifact_id` int(11) NOT NULL,
+  `sent_at` datetime NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'pending',
+  `city_reference` varchar(255) DEFAULT NULL,
+  `response_message` text DEFAULT NULL,
+  PRIMARY KEY (`notification_id`),
+  KEY `city_notifications_artifact_id_idx` (`artifact_id`),
+  CONSTRAINT `city_notifications_ibfk_1` FOREIGN KEY (`artifact_id`) REFERENCES `artifacts` (`artifact_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

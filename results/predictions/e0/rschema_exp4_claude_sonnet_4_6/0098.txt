@@ -1,0 +1,194 @@
+-- Schema for database: rschema_0098
+
+CREATE TABLE `technology_category` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(255) NOT NULL,
+  `category_description` text DEFAULT NULL,
+  `parent_category_id` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`category_id`),
+  CONSTRAINT `technology_category_ibfk_1` FOREIGN KEY (`parent_category_id`) REFERENCES `technology_category` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vendor` (
+  `vendor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `vendor_name` varchar(255) NOT NULL,
+  `contact_person` varchar(255) DEFAULT NULL,
+  `contact_email` varchar(255) DEFAULT NULL,
+  `contact_phone` varchar(50) DEFAULT NULL,
+  `website` varchar(255) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`vendor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `technology_solution` (
+  `solution_id` int(11) NOT NULL AUTO_INCREMENT,
+  `solution_name` varchar(255) NOT NULL,
+  `solution_type` varchar(100) NOT NULL COMMENT 'e.g. software, hardware, cloud service, AI system',
+  `category_id` int(11) DEFAULT NULL,
+  `vendor_id` int(11) DEFAULT NULL,
+  `version` varchar(50) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `status` varchar(50) NOT NULL COMMENT 'e.g. under_evaluation, active, deprecated, retired',
+  `license_type` varchar(100) DEFAULT NULL,
+  `license_expiry_date` datetime DEFAULT NULL,
+  `acquisition_date` datetime DEFAULT NULL,
+  `total_cost` decimal(15,2) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`solution_id`),
+  CONSTRAINT `technology_solution_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `technology_category` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `technology_solution_ibfk_2` FOREIGN KEY (`vendor_id`) REFERENCES `vendor` (`vendor_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(255) NOT NULL,
+  `department_code` varchar(50) DEFAULT NULL,
+  `manager_name` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `job_title` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `implementation_project` (
+  `project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `solution_id` int(11) NOT NULL,
+  `project_name` varchar(255) NOT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `project_manager_id` int(11) DEFAULT NULL,
+  `planned_start_date` datetime DEFAULT NULL,
+  `actual_start_date` datetime DEFAULT NULL,
+  `planned_end_date` datetime DEFAULT NULL,
+  `actual_end_date` datetime DEFAULT NULL,
+  `status` varchar(50) NOT NULL COMMENT 'e.g. planned, in_progress, completed, on_hold, cancelled',
+  `budget` decimal(15,2) DEFAULT NULL,
+  `actual_cost` decimal(15,2) DEFAULT NULL,
+  `progress_percentage` decimal(5,2) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`project_id`),
+  CONSTRAINT `implementation_project_ibfk_1` FOREIGN KEY (`solution_id`) REFERENCES `technology_solution` (`solution_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `implementation_project_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `implementation_project_ibfk_3` FOREIGN KEY (`project_manager_id`) REFERENCES `employee` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_milestone` (
+  `milestone_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `milestone_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `planned_date` datetime DEFAULT NULL,
+  `actual_date` datetime DEFAULT NULL,
+  `status` varchar(50) NOT NULL COMMENT 'e.g. pending, completed, delayed',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`milestone_id`),
+  CONSTRAINT `project_milestone_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `implementation_project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_record` (
+  `maintenance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `solution_id` int(11) NOT NULL,
+  `maintenance_type` varchar(100) NOT NULL COMMENT 'e.g. upgrade, patch, repair, routine_check',
+  `performed_by_id` int(11) DEFAULT NULL,
+  `maintenance_date` datetime NOT NULL,
+  `description` text DEFAULT NULL,
+  `cost` decimal(15,2) DEFAULT NULL,
+  `outcome` varchar(255) DEFAULT NULL,
+  `next_maintenance_date` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`maintenance_id`),
+  CONSTRAINT `maintenance_record_ibfk_1` FOREIGN KEY (`solution_id`) REFERENCES `technology_solution` (`solution_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_record_ibfk_2` FOREIGN KEY (`performed_by_id`) REFERENCES `employee` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `evaluation` (
+  `evaluation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `solution_id` int(11) NOT NULL,
+  `evaluator_id` int(11) DEFAULT NULL,
+  `evaluation_date` datetime NOT NULL,
+  `evaluation_period_start` datetime DEFAULT NULL,
+  `evaluation_period_end` datetime DEFAULT NULL,
+  `overall_score` decimal(5,2) DEFAULT NULL COMMENT 'Overall effectiveness score out of 100',
+  `cost_effectiveness_score` decimal(5,2) DEFAULT NULL,
+  `implementation_progress_score` decimal(5,2) DEFAULT NULL,
+  `business_alignment_score` decimal(5,2) DEFAULT NULL,
+  `technical_performance_score` decimal(5,2) DEFAULT NULL,
+  `roi_percentage` decimal(10,2) DEFAULT NULL,
+  `summary` text DEFAULT NULL,
+  `recommendation` varchar(255) DEFAULT NULL COMMENT 'e.g. continue, upgrade, replace, discontinue',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`evaluation_id`),
+  CONSTRAINT `evaluation_ibfk_1` FOREIGN KEY (`solution_id`) REFERENCES `technology_solution` (`solution_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `evaluation_ibfk_2` FOREIGN KEY (`evaluator_id`) REFERENCES `employee` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_feedback` (
+  `feedback_id` int(11) NOT NULL AUTO_INCREMENT,
+  `solution_id` int(11) NOT NULL,
+  `employee_id` int(11) DEFAULT NULL,
+  `feedback_date` datetime NOT NULL,
+  `usability_rating` int(11) DEFAULT NULL COMMENT 'Rating 1-5',
+  `performance_rating` int(11) DEFAULT NULL COMMENT 'Rating 1-5',
+  `support_rating` int(11) DEFAULT NULL COMMENT 'Rating 1-5',
+  `overall_satisfaction` int(11) DEFAULT NULL COMMENT 'Rating 1-5',
+  `comments` text DEFAULT NULL,
+  `issues_reported` text DEFAULT NULL,
+  `suggestions` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`feedback_id`),
+  CONSTRAINT `user_feedback_ibfk_1` FOREIGN KEY (`solution_id`) REFERENCES `technology_solution` (`solution_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_feedback_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cost_record` (
+  `cost_id` int(11) NOT NULL AUTO_INCREMENT,
+  `solution_id` int(11) NOT NULL,
+  `cost_type` varchar(100) NOT NULL COMMENT 'e.g. acquisition, subscription, maintenance, training, support',
+  `amount` decimal(15,2) NOT NULL,
+  `currency` char(6) NOT NULL DEFAULT 'USD',
+  `cost_date` datetime NOT NULL,
+  `description` text DEFAULT NULL,
+  `recorded_by_id` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`cost_id`),
+  CONSTRAINT `cost_record_ibfk_1` FOREIGN KEY (`solution_id`) REFERENCES `technology_solution` (`solution_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cost_record_ibfk_2` FOREIGN KEY (`recorded_by_id`) REFERENCES `employee` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `solution_requirement` (
+  `requirement_id` int(11) NOT NULL AUTO_INCREMENT,
+  `solution_id` int(11) NOT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `requirement_title` varchar(255) NOT NULL,
+  `requirement_description` text DEFAULT NULL,
+  `priority` varchar(50) DEFAULT NULL COMMENT 'e.g. high, medium, low',
+  `status` varchar(50) DEFAULT NULL COMMENT 'e.g. met, partially_met, not_met',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`requirement_id`),
+  CONSTRAINT `solution_requirement_ibfk_1` FOREIGN KEY (`solution_id`) REFERENCES `technology_solution` (`solution_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `solution_requirement_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

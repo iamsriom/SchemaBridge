@@ -1,0 +1,30 @@
+{
+  "text_number": 125,
+  "id": "67552f0a13602ec03b41a94e",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0125",
+  "question": "The multilingual wiki system shall record and manage page content in different languages. Each page shall have configurable settings for editability and visibility. The system shall support page version management, allowing the creation of multiple versions for a page and specifying which version is the current active version. Users shall be able to submit comments on pages, and comments shall support nested replies to other comments for discussion and communication. When creating page versions, users shall have the option to upload image information to enrich the page content. The system shall provide functionality to view page history records, facilitating the tracing and reverting to previous versions.",
+  "ddl": "-- Schema for database: rschema_0125\n\nCREATE TABLE `language` (\n  `language_id` int(11) NOT NULL AUTO_INCREMENT,\n  `language_code` varchar(10) NOT NULL,\n  `language_name` varchar(100) NOT NULL,\n  PRIMARY KEY (`language_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `page` (\n  `page_id` int(11) NOT NULL AUTO_INCREMENT,\n  `language_id` int(11) NOT NULL,\n  `title` varchar(255) NOT NULL,\n  `is_editable` tinyint(1) NOT NULL DEFAULT 1,\n  `is_visible` tinyint(1) NOT NULL DEFAULT 1,\n  `current_version_id` int(11) DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`page_id`),\n  CONSTRAINT `page_ibfk_1` FOREIGN KEY (`language_id`) REFERENCES `language` (`language_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user` (\n  `user_id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(100) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `password_hash` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL,\n  PRIMARY KEY (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `page_version` (\n  `version_id` int(11) NOT NULL AUTO_INCREMENT,\n  `page_id` int(11) NOT NULL,\n  `version_number` int(11) NOT NULL,\n  `content` text NOT NULL,\n  `created_by` int(11) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `comment` varchar(500) DEFAULT NULL,\n  PRIMARY KEY (`version_id`),\n  CONSTRAINT `page_version_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `page` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `page_version_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nALTER TABLE `page` ADD CONSTRAINT `page_ibfk_2` FOREIGN KEY (`current_version_id`) REFERENCES `page_version` (`version_id`) ON DELETE SET NULL ON UPDATE CASCADE;\n\nCREATE TABLE `page_image` (\n  `image_id` int(11) NOT NULL AUTO_INCREMENT,\n  `version_id` int(11) NOT NULL,\n  `image_url` varchar(500) NOT NULL,\n  `image_name` varchar(255) DEFAULT NULL,\n  `uploaded_at` datetime NOT NULL,\n  `uploaded_by` int(11) NOT NULL,\n  PRIMARY KEY (`image_id`),\n  CONSTRAINT `page_image_ibfk_1` FOREIGN KEY (`version_id`) REFERENCES `page_version` (`version_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `page_image_ibfk_2` FOREIGN KEY (`uploaded_by`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `page_comment` (\n  `comment_id` int(11) NOT NULL AUTO_INCREMENT,\n  `page_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `parent_comment_id` int(11) DEFAULT NULL,\n  `content` text NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`comment_id`),\n  CONSTRAINT `page_comment_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `page` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `page_comment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `page_comment_ibfk_3` FOREIGN KEY (`parent_comment_id`) REFERENCES `page_comment` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `page_history` (\n  `history_id` int(11) NOT NULL AUTO_INCREMENT,\n  `page_id` int(11) NOT NULL,\n  `version_id` int(11) NOT NULL,\n  `action` varchar(100) NOT NULL,\n  `performed_by` int(11) NOT NULL,\n  `performed_at` datetime NOT NULL,\n  `notes` varchar(500) DEFAULT NULL,\n  PRIMARY KEY (`history_id`),\n  CONSTRAINT `page_history_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `page` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `page_history_ibfk_2` FOREIGN KEY (`version_id`) REFERENCES `page_version` (`version_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `page_history_ibfk_3` FOREIGN KEY (`performed_by`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "language",
+      "page",
+      "user",
+      "page_version",
+      "page_image",
+      "page_comment",
+      "page_history"
+    ],
+    "columns_by_table": {
+      "language": [],
+      "page": [],
+      "user": [],
+      "page_version": [],
+      "page_image": [],
+      "page_comment": [],
+      "page_history": []
+    }
+  }
+}

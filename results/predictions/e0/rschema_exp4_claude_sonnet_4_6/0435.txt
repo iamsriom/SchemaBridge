@@ -1,0 +1,125 @@
+-- Schema for database: rschema_0435
+
+CREATE TABLE `probe` (
+  `probe_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `weight` decimal(10,2) DEFAULT NULL,
+  `launch_date` datetime DEFAULT NULL,
+  `service_life` int(11) DEFAULT NULL COMMENT 'Service life in months',
+  PRIMARY KEY (`probe_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `probe_status` (
+  `status_id` int(11) NOT NULL AUTO_INCREMENT,
+  `probe_id` int(11) NOT NULL,
+  `operational_status` varchar(100) DEFAULT NULL,
+  `remaining_fuel` decimal(10,2) DEFAULT NULL,
+  `last_updated` datetime DEFAULT NULL,
+  PRIMARY KEY (`status_id`),
+  CONSTRAINT `probe_status_ibfk_1` FOREIGN KEY (`probe_id`) REFERENCES `probe` (`probe_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `scientific_instrument` (
+  `instrument_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `weight` decimal(10,2) DEFAULT NULL,
+  `power_consumption` decimal(10,2) DEFAULT NULL,
+  `accuracy` decimal(10,4) DEFAULT NULL,
+  PRIMARY KEY (`instrument_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `instrument_parameters` (
+  `parameter_id` int(11) NOT NULL AUTO_INCREMENT,
+  `instrument_id` int(11) NOT NULL,
+  `parameter_name` varchar(255) NOT NULL,
+  `parameter_value` varchar(255) DEFAULT NULL,
+  `calibration_data` text DEFAULT NULL,
+  `calibration_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`parameter_id`),
+  CONSTRAINT `instrument_parameters_ibfk_1` FOREIGN KEY (`instrument_id`) REFERENCES `scientific_instrument` (`instrument_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `probe_instrument_config` (
+  `config_id` int(11) NOT NULL AUTO_INCREMENT,
+  `probe_id` int(11) NOT NULL,
+  `instrument_id` int(11) NOT NULL,
+  `installation_date` datetime DEFAULT NULL,
+  `config_notes` text DEFAULT NULL,
+  PRIMARY KEY (`config_id`),
+  CONSTRAINT `probe_instrument_config_ibfk_1` FOREIGN KEY (`probe_id`) REFERENCES `probe` (`probe_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `probe_instrument_config_ibfk_2` FOREIGN KEY (`instrument_id`) REFERENCES `scientific_instrument` (`instrument_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `celestial_body` (
+  `celestial_body_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(100) DEFAULT NULL COMMENT 'planet/asteroid/comet etc.',
+  PRIMARY KEY (`celestial_body_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orbital_parameters` (
+  `orbital_id` int(11) NOT NULL AUTO_INCREMENT,
+  `celestial_body_id` int(11) NOT NULL,
+  `semi_major_axis` decimal(15,4) DEFAULT NULL,
+  `eccentricity` decimal(10,6) DEFAULT NULL,
+  `inclination` decimal(10,4) DEFAULT NULL,
+  `orbital_period` decimal(15,4) DEFAULT NULL,
+  `perihelion` decimal(15,4) DEFAULT NULL,
+  `aphelion` decimal(15,4) DEFAULT NULL,
+  PRIMARY KEY (`orbital_id`),
+  CONSTRAINT `orbital_parameters_ibfk_1` FOREIGN KEY (`celestial_body_id`) REFERENCES `celestial_body` (`celestial_body_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `physical_characteristics` (
+  `characteristic_id` int(11) NOT NULL AUTO_INCREMENT,
+  `celestial_body_id` int(11) NOT NULL,
+  `mass` decimal(20,4) DEFAULT NULL,
+  `radius` decimal(15,4) DEFAULT NULL,
+  `density` decimal(10,4) DEFAULT NULL,
+  `surface_temperature` decimal(10,2) DEFAULT NULL,
+  `gravity` decimal(10,4) DEFAULT NULL,
+  `atmosphere_composition` text DEFAULT NULL,
+  PRIMARY KEY (`characteristic_id`),
+  CONSTRAINT `physical_characteristics_ibfk_1` FOREIGN KEY (`celestial_body_id`) REFERENCES `celestial_body` (`celestial_body_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `observation` (
+  `observation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `celestial_body_id` int(11) NOT NULL,
+  `observation_time` datetime NOT NULL,
+  `observation_data` text DEFAULT NULL,
+  `observation_result` text DEFAULT NULL,
+  `observation_accuracy` decimal(10,4) DEFAULT NULL,
+  `research_value` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`observation_id`),
+  CONSTRAINT `observation_ibfk_1` FOREIGN KEY (`celestial_body_id`) REFERENCES `celestial_body` (`celestial_body_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `mission` (
+  `mission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `probe_id` int(11) NOT NULL,
+  `celestial_body_id` int(11) NOT NULL,
+  `mission_name` varchar(255) NOT NULL,
+  `priority` int(11) DEFAULT NULL,
+  `execution_status` varchar(100) DEFAULT NULL,
+  `scientific_data_status` varchar(100) DEFAULT NULL,
+  `start_date` datetime DEFAULT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `resource_allocation` text DEFAULT NULL,
+  PRIMARY KEY (`mission_id`),
+  CONSTRAINT `mission_ibfk_1` FOREIGN KEY (`probe_id`) REFERENCES `probe` (`probe_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `mission_ibfk_2` FOREIGN KEY (`celestial_body_id`) REFERENCES `celestial_body` (`celestial_body_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flight_trajectory` (
+  `trajectory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `mission_id` int(11) NOT NULL,
+  `waypoint_order` int(11) NOT NULL,
+  `position_x` decimal(20,6) DEFAULT NULL,
+  `position_y` decimal(20,6) DEFAULT NULL,
+  `position_z` decimal(20,6) DEFAULT NULL,
+  `velocity` decimal(15,4) DEFAULT NULL,
+  `recorded_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`trajectory_id`),
+  CONSTRAINT `flight_trajectory_ibfk_1` FOREIGN KEY (`mission_id`) REFERENCES `mission` (`mission_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

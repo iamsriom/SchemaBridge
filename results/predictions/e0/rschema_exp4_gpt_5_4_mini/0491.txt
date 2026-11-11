@@ -1,0 +1,62 @@
+-- Schema for database: rschema_0491
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `full_name` varchar(255) DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'active',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_username` (`username`),
+  UNIQUE KEY `uk_users_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `roles` (
+  `role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_name` varchar(100) NOT NULL,
+  `role_code` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`role_id`),
+  UNIQUE KEY `uk_roles_role_name` (`role_name`),
+  UNIQUE KEY `uk_roles_role_code` (`role_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `permissions` (
+  `permission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `permission_name` varchar(100) NOT NULL,
+  `permission_code` varchar(100) NOT NULL,
+  `resource_type` varchar(50) NOT NULL,
+  `resource_name` varchar(100) DEFAULT NULL,
+  `action` varchar(50) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`permission_id`),
+  UNIQUE KEY `uk_permissions_permission_code` (`permission_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `user_roles` (
+  `user_role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `assigned_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_role_id`),
+  UNIQUE KEY `uk_user_roles_user_role` (`user_id`,`role_id`),
+  KEY `idx_user_roles_user_id` (`user_id`),
+  KEY `idx_user_roles_role_id` (`role_id`),
+  CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `role_permissions` (
+  `role_permission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  `granted_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`role_permission_id`),
+  UNIQUE KEY `uk_role_permissions_role_permission` (`role_id`,`permission_id`),
+  KEY `idx_role_permissions_role_id` (`role_id`),
+  KEY `idx_role_permissions_permission_id` (`permission_id`),
+  CONSTRAINT `role_permissions_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `role_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`permission_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

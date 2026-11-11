@@ -1,0 +1,131 @@
+-- Schema for database: schemabench_0065
+
+CREATE TABLE `billing_plan` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `paypal_id` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(1024) DEFAULT NULL,
+  `plan_type` varchar(50) NOT NULL,
+  `state` varchar(50) NOT NULL,
+  `currency` char(3) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `setup_fee` decimal(10,2) DEFAULT NULL,
+  `frequency` varchar(50) NOT NULL,
+  `frequency_interval` int(11) NOT NULL DEFAULT 1,
+  `cycles` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `billing_agreement` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `paypal_id` varchar(255) NOT NULL,
+  `billing_plan_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(1024) DEFAULT NULL,
+  `state` varchar(50) NOT NULL,
+  `payer_email` varchar(255) DEFAULT NULL,
+  `payer_id` varchar(255) DEFAULT NULL,
+  `start_date` datetime NOT NULL,
+  `agreement_details` varchar(1024) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `billing_agreement_ibfk_1` FOREIGN KEY (`billing_plan_id`) REFERENCES `billing_plan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscription` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `billing_agreement_id` int(11) NOT NULL,
+  `subscriber_email` varchar(255) NOT NULL,
+  `subscriber_id` varchar(255) DEFAULT NULL,
+  `status` varchar(50) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `next_billing_date` datetime DEFAULT NULL,
+  `failed_payment_count` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `subscription_ibfk_1` FOREIGN KEY (`billing_agreement_id`) REFERENCES `billing_agreement` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `paypal_transaction_id` varchar(255) NOT NULL,
+  `subscription_id` int(11) NOT NULL,
+  `transaction_type` varchar(50) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `currency` char(3) NOT NULL,
+  `fee_amount` decimal(10,2) DEFAULT NULL,
+  `net_amount` decimal(10,2) DEFAULT NULL,
+  `payer_email` varchar(255) DEFAULT NULL,
+  `payer_id` varchar(255) DEFAULT NULL,
+  `transaction_date` datetime NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscription` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `refund` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `paypal_refund_id` varchar(255) NOT NULL,
+  `transaction_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `currency` char(3) NOT NULL,
+  `reason` varchar(1024) DEFAULT NULL,
+  `status` varchar(50) NOT NULL,
+  `refund_date` datetime NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `refund_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dispute` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `paypal_dispute_id` varchar(255) NOT NULL,
+  `transaction_id` int(11) NOT NULL,
+  `dispute_type` varchar(100) NOT NULL,
+  `reason` varchar(1024) DEFAULT NULL,
+  `status` varchar(50) NOT NULL,
+  `amount` decimal(10,2) DEFAULT NULL,
+  `currency` char(3) DEFAULT NULL,
+  `resolution` varchar(1024) DEFAULT NULL,
+  `opened_at` datetime NOT NULL,
+  `resolved_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `dispute_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `webhook_event` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `paypal_event_id` varchar(255) NOT NULL,
+  `event_type` varchar(255) NOT NULL,
+  `resource_type` varchar(255) DEFAULT NULL,
+  `resource_id` varchar(255) DEFAULT NULL,
+  `summary` varchar(1024) DEFAULT NULL,
+  `payload` longtext DEFAULT NULL,
+  `processed` tinyint(1) NOT NULL DEFAULT 0,
+  `received_at` datetime NOT NULL,
+  `processed_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `audit_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `action` varchar(255) NOT NULL,
+  `entity_type` varchar(100) NOT NULL,
+  `entity_id` int(11) DEFAULT NULL,
+  `performed_by` varchar(255) DEFAULT NULL,
+  `details` longtext DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

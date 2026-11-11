@@ -1,0 +1,122 @@
+-- Schema for database: schemabench_0165
+CREATE TABLE `country` (
+  `country_id` int(11) NOT NULL,
+  `country_name` varchar(255) NOT NULL,
+  `noc_code` char(3) NOT NULL,
+  PRIMARY KEY (`country_id`),
+  UNIQUE KEY `country_noc_code_uk` (`noc_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sport` (
+  `sport_id` int(11) NOT NULL,
+  `sport_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`sport_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `venue` (
+  `venue_id` int(11) NOT NULL,
+  `venue_name` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `capacity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`venue_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `team` (
+  `team_id` int(11) NOT NULL,
+  `country_id` int(11) NOT NULL,
+  `team_name` varchar(255) NOT NULL,
+  `sport_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`team_id`),
+  KEY `team_ibfk_1` (`country_id`),
+  KEY `team_ibfk_2` (`sport_id`),
+  CONSTRAINT `team_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `team_ibfk_2` FOREIGN KEY (`sport_id`) REFERENCES `sport` (`sport_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `athlete` (
+  `athlete_id` int(11) NOT NULL,
+  `country_id` int(11) NOT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `sport_id` int(11) NOT NULL,
+  PRIMARY KEY (`athlete_id`),
+  KEY `athlete_ibfk_1` (`country_id`),
+  KEY `athlete_ibfk_2` (`team_id`),
+  KEY `athlete_ibfk_3` (`sport_id`),
+  CONSTRAINT `athlete_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `athlete_ibfk_2` FOREIGN KEY (`team_id`) REFERENCES `team` (`team_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `athlete_ibfk_3` FOREIGN KEY (`sport_id`) REFERENCES `sport` (`sport_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `coach` (
+  `coach_id` int(11) NOT NULL,
+  `country_id` int(11) NOT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  `sport_id` int(11) DEFAULT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `role` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`coach_id`),
+  KEY `coach_ibfk_1` (`country_id`),
+  KEY `coach_ibfk_2` (`team_id`),
+  KEY `coach_ibfk_3` (`sport_id`),
+  CONSTRAINT `coach_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `coach_ibfk_2` FOREIGN KEY (`team_id`) REFERENCES `team` (`team_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `coach_ibfk_3` FOREIGN KEY (`sport_id`) REFERENCES `sport` (`sport_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `event` (
+  `event_id` int(11) NOT NULL,
+  `sport_id` int(11) NOT NULL,
+  `venue_id` int(11) NOT NULL,
+  `event_name` varchar(255) NOT NULL,
+  `phase` varchar(255) DEFAULT NULL,
+  `start_datetime` datetime NOT NULL,
+  `end_datetime` datetime DEFAULT NULL,
+  PRIMARY KEY (`event_id`),
+  KEY `event_ibfk_1` (`sport_id`),
+  KEY `event_ibfk_2` (`venue_id`),
+  CONSTRAINT `event_ibfk_1` FOREIGN KEY (`sport_id`) REFERENCES `sport` (`sport_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `event_ibfk_2` FOREIGN KEY (`venue_id`) REFERENCES `venue` (`venue_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `athlete_event` (
+  `athlete_event_id` int(11) NOT NULL,
+  `athlete_id` int(11) NOT NULL,
+  `event_id` int(11) NOT NULL,
+  `result_value` varchar(255) DEFAULT NULL,
+  `rank_position` int(11) DEFAULT NULL,
+  `medal` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`athlete_event_id`),
+  KEY `athlete_event_ibfk_1` (`athlete_id`),
+  KEY `athlete_event_ibfk_2` (`event_id`),
+  CONSTRAINT `athlete_event_ibfk_1` FOREIGN KEY (`athlete_id`) REFERENCES `athlete` (`athlete_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `athlete_event_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `event` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medal_standing` (
+  `medal_standing_id` int(11) NOT NULL,
+  `country_id` int(11) NOT NULL,
+  `event_id` int(11) DEFAULT NULL,
+  `gold_count` int(11) NOT NULL DEFAULT '0',
+  `silver_count` int(11) NOT NULL DEFAULT '0',
+  `bronze_count` int(11) NOT NULL DEFAULT '0',
+  `total_count` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`medal_standing_id`),
+  KEY `medal_standing_ibfk_1` (`country_id`),
+  KEY `medal_standing_ibfk_2` (`event_id`),
+  CONSTRAINT `medal_standing_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `medal_standing_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `event` (`event_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `torch_route` (
+  `torch_route_id` int(11) NOT NULL,
+  `route_name` varchar(255) NOT NULL,
+  `start_datetime` datetime NOT NULL,
+  `end_datetime` datetime DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`torch_route_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

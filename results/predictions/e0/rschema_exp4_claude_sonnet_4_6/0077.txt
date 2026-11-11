@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0077
+
+CREATE TABLE `users` (
+  `membership_number` varchar(20) NOT NULL,
+  `user_id` varchar(20) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `postal_code` char(6) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`membership_number`),
+  UNIQUE KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `categories` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `product_id` varchar(20) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `manufacturer` varchar(255) DEFAULT NULL,
+  `image_url` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`product_id`),
+  CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `purchase_id` varchar(20) NOT NULL,
+  `product_id` varchar(20) NOT NULL,
+  `membership_number` varchar(20) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `purchase_date` datetime NOT NULL,
+  `delivery_status` varchar(50) NOT NULL DEFAULT 'pending',
+  PRIMARY KEY (`purchase_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`membership_number`) REFERENCES `users` (`membership_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `announcements` (
+  `announcement_number` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `registration_date` datetime NOT NULL,
+  `publisher_id` varchar(20) NOT NULL,
+  PRIMARY KEY (`announcement_number`),
+  CONSTRAINT `announcements_ibfk_1` FOREIGN KEY (`publisher_id`) REFERENCES `users` (`membership_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

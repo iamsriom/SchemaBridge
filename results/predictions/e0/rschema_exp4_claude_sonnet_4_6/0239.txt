@@ -1,0 +1,107 @@
+-- Schema for database: rschema_0239
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'user',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `administrators` (
+  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `admin_level` int(11) NOT NULL DEFAULT 1,
+  `assigned_at` datetime NOT NULL,
+  PRIMARY KEY (`admin_id`),
+  UNIQUE KEY `user_id` (`user_id`),
+  CONSTRAINT `administrators_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `articles` (
+  `article_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'pending_review',
+  `read_count` int(11) NOT NULL DEFAULT 0,
+  `like_count` int(11) NOT NULL DEFAULT 0,
+  `published_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`article_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `articles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comments` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `article_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'pending_review',
+  `published_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`comment_id`),
+  KEY `article_id` (`article_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `replies` (
+  `reply_id` int(11) NOT NULL AUTO_INCREMENT,
+  `comment_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'pending_review',
+  `published_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`reply_id`),
+  KEY `comment_id` (`comment_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `replies_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `replies_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `article_reads` (
+  `read_id` int(11) NOT NULL AUTO_INCREMENT,
+  `article_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `read_at` datetime NOT NULL,
+  PRIMARY KEY (`read_id`),
+  KEY `article_id` (`article_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `article_reads_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `article_reads_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `article_likes` (
+  `like_id` int(11) NOT NULL AUTO_INCREMENT,
+  `article_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `liked_at` datetime NOT NULL,
+  PRIMARY KEY (`like_id`),
+  UNIQUE KEY `article_user_unique` (`article_id`, `user_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `article_likes_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `article_likes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_activity_log` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `activity_type` varchar(50) NOT NULL,
+  `target_type` varchar(50) NOT NULL,
+  `target_id` int(11) NOT NULL,
+  `activity_at` datetime NOT NULL,
+  PRIMARY KEY (`log_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `user_activity_log_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

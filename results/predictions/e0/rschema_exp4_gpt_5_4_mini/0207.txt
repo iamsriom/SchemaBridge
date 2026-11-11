@@ -1,0 +1,44 @@
+-- Schema for database: rschema_0207
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `facilities` (
+  `facility_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `responsible_person` varchar(255) NOT NULL,
+  `creation_date` datetime NOT NULL,
+  `usage_time` int(11) DEFAULT NULL,
+  `usage_frequency` int(11) DEFAULT NULL,
+  `user_feedback` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`facility_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_records` (
+  `maintenance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `facility_id` int(11) NOT NULL,
+  `maintenance_time` datetime NOT NULL,
+  `maintenance_content` varchar(1000) NOT NULL,
+  `maintenance_personnel` varchar(255) NOT NULL,
+  `maintenance_costs` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`maintenance_id`),
+  KEY `maintenance_records_ibfk_1` (`facility_id`),
+  CONSTRAINT `maintenance_records_ibfk_1` FOREIGN KEY (`facility_id`) REFERENCES `facilities` (`facility_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `facility_user_interactions` (
+  `interaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `facility_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `interaction_time` datetime NOT NULL,
+  `interaction_type` varchar(255) DEFAULT NULL,
+  `feedback` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`interaction_id`),
+  KEY `facility_user_interactions_ibfk_1` (`facility_id`),
+  KEY `facility_user_interactions_ibfk_2` (`user_id`),
+  CONSTRAINT `facility_user_interactions_ibfk_1` FOREIGN KEY (`facility_id`) REFERENCES `facilities` (`facility_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `facility_user_interactions_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

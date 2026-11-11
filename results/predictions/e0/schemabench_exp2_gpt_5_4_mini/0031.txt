@@ -1,0 +1,46 @@
+-- Schema for database: schemabench_0031
+CREATE TABLE `oauth2_application` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` varchar(255) NOT NULL,
+  `client_secret` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `client_type` varchar(32) NOT NULL,
+  `authorization_grant_type` varchar(32) NOT NULL,
+  `redirect_uris` text DEFAULT NULL,
+  `skip_authorization` tinyint(1) NOT NULL DEFAULT 0,
+  `created` datetime NOT NULL,
+  `updated` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `oauth2_application_client_id_uniq` (`client_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `oauth2_access_token` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `token` varchar(255) NOT NULL,
+  `expires` datetime NOT NULL,
+  `scope` text DEFAULT NULL,
+  `application_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `created` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `oauth2_access_token_token_uniq` (`token`),
+  KEY `oauth2_access_token_application_id_idx` (`application_id`),
+  KEY `oauth2_access_token_user_id_idx` (`user_id`),
+  CONSTRAINT `oauth2_access_token_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `oauth2_application` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `oauth2_access_token_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `oauth2_refresh_token` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `token` varchar(255) NOT NULL,
+  `access_token_id` int(11) NOT NULL,
+  `application_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `created` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `oauth2_refresh_token_token_uniq` (`token`),
+  UNIQUE KEY `oauth2_refresh_token_access_token_id_uniq` (`access_token_id`),
+  KEY `oauth2_refresh_token_application_id_idx` (`application_id`),
+  KEY `oauth2_refresh_token_user_id_idx` (`user_id`),
+  CONSTRAINT `oauth2_refresh_token_ibfk_1` FOREIGN KEY (`access_token_id`) REFERENCES `oauth2_access_token` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `oauth2_refresh_token_ibfk_2` FOREIGN KEY (`application_id`) REFERENCES `oauth2_application` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `oauth2_refresh_token_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

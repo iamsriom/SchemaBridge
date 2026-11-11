@@ -1,0 +1,58 @@
+-- Schema for database: rschema_0230
+
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone_number` varchar(50) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `mechanics` (
+  `mechanic_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone_number` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`mechanic_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vehicle_models` (
+  `model_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`model_id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_tasks` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `model_id` int(11) NOT NULL,
+  `mechanic_id` int(11) DEFAULT NULL,
+  `status` varchar(100) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  CONSTRAINT `maintenance_tasks_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_tasks_ibfk_2` FOREIGN KEY (`model_id`) REFERENCES `vehicle_models` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_tasks_ibfk_3` FOREIGN KEY (`mechanic_id`) REFERENCES `mechanics` (`mechanic_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `parts` (
+  `part_id` int(11) NOT NULL AUTO_INCREMENT,
+  `serial_number` varchar(100) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `stock_quantity` int(11) NOT NULL DEFAULT 0,
+  `supplier` varchar(255) NOT NULL,
+  PRIMARY KEY (`part_id`),
+  UNIQUE KEY `serial_number` (`serial_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `part_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `dispatch_date` datetime DEFAULT NULL,
+  `is_delivered` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `maintenance_tasks` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

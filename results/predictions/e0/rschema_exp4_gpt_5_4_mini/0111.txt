@@ -1,0 +1,66 @@
+-- Schema for database: rschema_0111
+CREATE TABLE `company` (
+  `company_id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_name` varchar(255) NOT NULL,
+  `company_address` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_name` varchar(255) NOT NULL,
+  `employee_position` varchar(255) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  KEY `employee_ibfk_1` (`company_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `company` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'user',
+  `registered_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `user_username_unique` (`username`),
+  UNIQUE KEY `user_email_unique` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `credit_record` (
+  `credit_number` varchar(50) NOT NULL,
+  `credit_type` varchar(100) NOT NULL,
+  `application_date` date NOT NULL,
+  `monthly_factor` decimal(10,2) NOT NULL,
+  `application_count` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  `user_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `payment_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`credit_number`),
+  KEY `credit_record_ibfk_1` (`user_id`),
+  KEY `credit_record_ibfk_2` (`employee_id`),
+  KEY `credit_record_ibfk_3` (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `credit_record_status_history` (
+  `status_history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `credit_number` varchar(50) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `operation_type` varchar(50) NOT NULL,
+  `operation_timestamp` datetime NOT NULL,
+  `operator_user_id` int(11) NOT NULL,
+  PRIMARY KEY (`status_history_id`),
+  KEY `credit_record_status_history_ibfk_1` (`credit_number`),
+  KEY `credit_record_status_history_ibfk_2` (`operator_user_id`),
+  CONSTRAINT `credit_record_status_history_ibfk_1` FOREIGN KEY (`credit_number`) REFERENCES `credit_record` (`credit_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `credit_record_status_history_ibfk_2` FOREIGN KEY (`operator_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,40 @@
+-- Schema for database: rschema_0468
+CREATE TABLE `credit_card_application` (
+  `application_no` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_no` int(11) DEFAULT NULL,
+  `card_type` varchar(100) NOT NULL,
+  `applicant_name` varchar(100) NOT NULL,
+  `applicant_id_no` varchar(50) NOT NULL,
+  `submission_time` datetime NOT NULL,
+  `application_result` varchar(20) NOT NULL DEFAULT 'pending review',
+  PRIMARY KEY (`application_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `credit_card_customer` (
+  `customer_no` int(11) NOT NULL AUTO_INCREMENT,
+  `application_no` int(11) NOT NULL,
+  `customer_name` varchar(100) NOT NULL,
+  `card_type` varchar(100) NOT NULL,
+  `credit_card_no` varchar(32) NOT NULL,
+  `valid_from` date NOT NULL,
+  `valid_to` date NOT NULL,
+  `credit_limit` decimal(12,2) NOT NULL,
+  `created_time` datetime NOT NULL,
+  `updated_time` datetime NOT NULL,
+  PRIMARY KEY (`customer_no`),
+  UNIQUE KEY `uk_credit_card_customer_credit_card_no` (`credit_card_no`),
+  KEY `credit_card_customer_ibfk_1` (`application_no`),
+  CONSTRAINT `credit_card_customer_ibfk_1` FOREIGN KEY (`application_no`) REFERENCES `credit_card_application` (`application_no`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `credit_card_transaction` (
+  `transaction_no` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_no` int(11) NOT NULL,
+  `transaction_time` datetime NOT NULL,
+  `transaction_amount` decimal(12,2) NOT NULL,
+  `transaction_type` varchar(50) NOT NULL,
+  `transaction_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`transaction_no`),
+  KEY `credit_card_transaction_ibfk_1` (`customer_no`),
+  CONSTRAINT `credit_card_transaction_ibfk_1` FOREIGN KEY (`customer_no`) REFERENCES `credit_card_customer` (`customer_no`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

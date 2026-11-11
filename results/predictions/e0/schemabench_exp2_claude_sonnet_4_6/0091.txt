@@ -1,0 +1,130 @@
+-- Schema for database: schemabench_0091
+
+CREATE TABLE `participant` (
+  `participant_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `age_at_entry` int(11) NOT NULL,
+  `gender` varchar(10) NOT NULL DEFAULT 'Male',
+  `education_level` varchar(100) DEFAULT NULL,
+  `occupation` varchar(100) DEFAULT NULL,
+  `enrollment_date` date NOT NULL,
+  `study_status` varchar(50) NOT NULL DEFAULT 'Active',
+  PRIMARY KEY (`participant_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medical_history` (
+  `medical_history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `participant_id` int(11) NOT NULL,
+  `diagnosis` varchar(255) DEFAULT NULL,
+  `diagnosis_date` date DEFAULT NULL,
+  `family_history_atherosclerosis` tinyint(1) NOT NULL DEFAULT 0,
+  `family_history_diabetes` tinyint(1) NOT NULL DEFAULT 0,
+  `family_history_hypertension` tinyint(1) NOT NULL DEFAULT 0,
+  `previous_cardiovascular_event` tinyint(1) NOT NULL DEFAULT 0,
+  `diabetes_status` varchar(50) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`medical_history_id`),
+  CONSTRAINT `medical_history_ibfk_1` FOREIGN KEY (`participant_id`) REFERENCES `participant` (`participant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `health_metrics` (
+  `metric_id` int(11) NOT NULL AUTO_INCREMENT,
+  `participant_id` int(11) NOT NULL,
+  `measurement_date` date NOT NULL,
+  `study_year` int(11) NOT NULL,
+  `systolic_blood_pressure` int(11) DEFAULT NULL,
+  `diastolic_blood_pressure` int(11) DEFAULT NULL,
+  `total_cholesterol` decimal(6,2) DEFAULT NULL,
+  `ldl_cholesterol` decimal(6,2) DEFAULT NULL,
+  `hdl_cholesterol` decimal(6,2) DEFAULT NULL,
+  `triglycerides` decimal(6,2) DEFAULT NULL,
+  `body_mass_index` decimal(5,2) DEFAULT NULL,
+  `weight_kg` decimal(5,2) DEFAULT NULL,
+  `height_cm` decimal(5,2) DEFAULT NULL,
+  `waist_circumference_cm` decimal(5,2) DEFAULT NULL,
+  `heart_rate` int(11) DEFAULT NULL,
+  `blood_glucose` decimal(6,2) DEFAULT NULL,
+  PRIMARY KEY (`metric_id`),
+  CONSTRAINT `health_metrics_ibfk_1` FOREIGN KEY (`participant_id`) REFERENCES `participant` (`participant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `lifestyle` (
+  `lifestyle_id` int(11) NOT NULL AUTO_INCREMENT,
+  `participant_id` int(11) NOT NULL,
+  `assessment_date` date NOT NULL,
+  `study_year` int(11) NOT NULL,
+  `smoking_status` varchar(50) DEFAULT NULL,
+  `cigarettes_per_day` int(11) DEFAULT NULL,
+  `smoking_years` int(11) DEFAULT NULL,
+  `alcohol_consumption` varchar(50) DEFAULT NULL,
+  `alcohol_units_per_week` decimal(5,2) DEFAULT NULL,
+  `physical_activity_level` varchar(50) DEFAULT NULL,
+  `physical_activity_hours_per_week` decimal(4,2) DEFAULT NULL,
+  `diet_type` varchar(100) DEFAULT NULL,
+  `stress_level` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`lifestyle_id`),
+  CONSTRAINT `lifestyle_ibfk_1` FOREIGN KEY (`participant_id`) REFERENCES `participant` (`participant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `risk_factor_assessment` (
+  `assessment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `participant_id` int(11) NOT NULL,
+  `assessment_date` date NOT NULL,
+  `study_year` int(11) NOT NULL,
+  `atherosclerosis_risk_score` decimal(5,2) DEFAULT NULL,
+  `hypertension_flag` tinyint(1) NOT NULL DEFAULT 0,
+  `hypercholesterolemia_flag` tinyint(1) NOT NULL DEFAULT 0,
+  `obesity_flag` tinyint(1) NOT NULL DEFAULT 0,
+  `smoking_risk_flag` tinyint(1) NOT NULL DEFAULT 0,
+  `alcohol_risk_flag` tinyint(1) NOT NULL DEFAULT 0,
+  `diabetes_risk_flag` tinyint(1) NOT NULL DEFAULT 0,
+  `overall_risk_category` varchar(50) DEFAULT NULL,
+  `assessed_by` varchar(100) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`assessment_id`),
+  CONSTRAINT `risk_factor_assessment_ibfk_1` FOREIGN KEY (`participant_id`) REFERENCES `participant` (`participant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `follow_up_visit` (
+  `visit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `participant_id` int(11) NOT NULL,
+  `visit_date` date NOT NULL,
+  `study_year` int(11) NOT NULL,
+  `visit_type` varchar(100) DEFAULT NULL,
+  `physician_id` int(11) DEFAULT NULL,
+  `visit_notes` text DEFAULT NULL,
+  `next_visit_date` date DEFAULT NULL,
+  `participant_withdrew` tinyint(1) NOT NULL DEFAULT 0,
+  `withdrawal_reason` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`visit_id`),
+  CONSTRAINT `follow_up_visit_ibfk_1` FOREIGN KEY (`participant_id`) REFERENCES `participant` (`participant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `researcher` (
+  `researcher_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `institution` varchar(255) DEFAULT NULL,
+  `role` varchar(100) DEFAULT NULL,
+  `access_level` varchar(50) NOT NULL DEFAULT 'Read',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`researcher_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `study_report` (
+  `report_id` int(11) NOT NULL AUTO_INCREMENT,
+  `researcher_id` int(11) NOT NULL,
+  `report_title` varchar(255) NOT NULL,
+  `report_date` date NOT NULL,
+  `study_year_start` int(11) DEFAULT NULL,
+  `study_year_end` int(11) DEFAULT NULL,
+  `summary` text DEFAULT NULL,
+  `findings` text DEFAULT NULL,
+  `recommendations` text DEFAULT NULL,
+  `report_status` varchar(50) NOT NULL DEFAULT 'Draft',
+  PRIMARY KEY (`report_id`),
+  CONSTRAINT `study_report_ibfk_1` FOREIGN KEY (`researcher_id`) REFERENCES `researcher` (`researcher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

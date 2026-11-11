@@ -1,0 +1,59 @@
+-- Schema for database: schemabench_0060
+CREATE TABLE `conversations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `conversation_participants` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `conversation_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `last_read_message_id` int(11) DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `conversation_participants_unique` (`conversation_id`,`user_id`),
+  KEY `conversation_participants_ibfk_2` (`user_id`),
+  KEY `conversation_participants_ibfk_3` (`last_read_message_id`),
+  CONSTRAINT `conversation_participants_ibfk_1` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `conversation_participants_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `conversation_participants_ibfk_3` FOREIGN KEY (`last_read_message_id`) REFERENCES `messages` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `messages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `conversation_id` int(11) NOT NULL,
+  `sender_id` int(11) NOT NULL,
+  `body` text NOT NULL,
+  `seen_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `messages_ibfk_1` (`conversation_id`),
+  KEY `messages_ibfk_2` (`sender_id`),
+  CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `messages_ibfk_2` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `message_oembeds` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `message_id` int(11) NOT NULL,
+  `url` varchar(2048) NOT NULL,
+  `provider_name` varchar(255) DEFAULT NULL,
+  `provider_url` varchar(2048) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `type` varchar(50) DEFAULT NULL,
+  `html` text DEFAULT NULL,
+  `thumbnail_url` varchar(2048) DEFAULT NULL,
+  `width` int(11) DEFAULT NULL,
+  `height` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `message_oembeds_ibfk_1` (`message_id`),
+  CONSTRAINT `message_oembeds_ibfk_1` FOREIGN KEY (`message_id`) REFERENCES `messages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

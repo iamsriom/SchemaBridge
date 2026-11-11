@@ -1753,6 +1753,32 @@ def main() -> int:
     for r in tvi_rows:
         if r["method"] == "Direct":
             continue
+        # Skip BLOCKED / incomplete baseline rows (missing predictions → null metrics).
+        if r.get("nged") is None or r.get("status") == "BLOCKED":
+            cmp_rows.append(
+                {
+                    "table": "VI",
+                    "dataset": r["dataset"],
+                    "method": r["method"],
+                    "model": r["model"],
+                    "old_nged": "",
+                    "new_nged": "",
+                    "old_hall": "",
+                    "new_hall": "",
+                    "old_tables": "",
+                    "new_tables": "",
+                    "old_attributes": "",
+                    "new_attributes": "",
+                    "old_domain": "",
+                    "new_domain": "--",
+                    "old_entity": "",
+                    "new_entity": "",
+                    "old_referential": "",
+                    "new_referential": "",
+                    "status": r.get("status") or "BLOCKED",
+                }
+            )
+            continue
         old = next(
             (
                 o

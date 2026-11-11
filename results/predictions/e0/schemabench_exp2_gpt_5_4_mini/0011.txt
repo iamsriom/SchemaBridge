@@ -1,0 +1,141 @@
+-- Schema for database: schemabench_0011
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `remember_token` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `slug` varchar(50) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `roles_slug_unique` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_roles_user_id_index` (`user_id`),
+  KEY `user_roles_role_id_index` (`role_id`),
+  CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `departments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tickets` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `agent_id` int(11) DEFAULT NULL,
+  `subject` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `status` varchar(30) NOT NULL DEFAULT 'open',
+  `priority` varchar(20) NOT NULL DEFAULT 'normal',
+  `language` varchar(10) DEFAULT NULL,
+  `closed_at` datetime DEFAULT NULL,
+  `last_replied_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tickets_user_id_index` (`user_id`),
+  KEY `tickets_department_id_index` (`department_id`),
+  KEY `tickets_agent_id_index` (`agent_id`),
+  CONSTRAINT `tickets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tickets_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `tickets_ibfk_3` FOREIGN KEY (`agent_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticket_comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `comment` text NOT NULL,
+  `is_internal` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ticket_comments_ticket_id_index` (`ticket_id`),
+  KEY `ticket_comments_user_id_index` (`user_id`),
+  CONSTRAINT `ticket_comments_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticket_comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticket_attachments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(11) NOT NULL,
+  `comment_id` int(11) DEFAULT NULL,
+  `user_id` int(11) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `mime_type` varchar(100) DEFAULT NULL,
+  `file_size` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ticket_attachments_ticket_id_index` (`ticket_id`),
+  KEY `ticket_attachments_comment_id_index` (`comment_id`),
+  KEY `ticket_attachments_user_id_index` (`user_id`),
+  CONSTRAINT `ticket_attachments_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticket_attachments_ibfk_2` FOREIGN KEY (`comment_id`) REFERENCES `ticket_comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticket_attachments_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ticket_status_history` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `old_status` varchar(30) DEFAULT NULL,
+  `new_status` varchar(30) NOT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ticket_status_history_ticket_id_index` (`ticket_id`),
+  KEY `ticket_status_history_user_id_index` (`user_id`),
+  CONSTRAINT `ticket_status_history_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ticket_status_history_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `languages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(10) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `languages_code_unique` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `setting_key` varchar(100) NOT NULL,
+  `setting_value` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `settings_setting_key_unique` (`setting_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

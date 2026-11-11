@@ -1,0 +1,38 @@
+-- Schema for database: rschema_0062
+CREATE TABLE `author` (
+  `author_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`author_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `technical_document` (
+  `document_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `creation_date` date DEFAULT NULL,
+  `version_number` int(11) NOT NULL,
+  PRIMARY KEY (`document_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `document_author` (
+  `document_id` int(11) NOT NULL,
+  `author_id` int(11) NOT NULL,
+  PRIMARY KEY (`document_id`,`author_id`),
+  CONSTRAINT `document_author_ibfk_1` FOREIGN KEY (`document_id`) REFERENCES `technical_document` (`document_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `document_author_ibfk_2` FOREIGN KEY (`author_id`) REFERENCES `author` (`author_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `document_version_record` (
+  `modification_id` int(11) NOT NULL,
+  `document_id` int(11) NOT NULL,
+  `version_number` int(11) NOT NULL,
+  `modification_date` datetime NOT NULL,
+  `modifying_author_id` int(11) NOT NULL,
+  `modification_content` text NOT NULL,
+  PRIMARY KEY (`modification_id`),
+  CONSTRAINT `document_version_record_ibfk_1` FOREIGN KEY (`document_id`) REFERENCES `technical_document` (`document_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `document_version_record_ibfk_2` FOREIGN KEY (`modifying_author_id`) REFERENCES `author` (`author_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

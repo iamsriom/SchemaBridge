@@ -1,0 +1,108 @@
+-- Schema for database: schemabench_0210
+CREATE TABLE `authors` (
+  `author_id` int(11) NOT NULL AUTO_INCREMENT,
+  `author_name` varchar(255) NOT NULL,
+  `biography` text DEFAULT NULL,
+  PRIMARY KEY (`author_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `genres` (
+  `genre_id` int(11) NOT NULL AUTO_INCREMENT,
+  `genre_name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`genre_id`),
+  UNIQUE KEY `genre_name` (`genre_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `books` (
+  `book_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `author_id` int(11) NOT NULL,
+  `genre_id` int(11) NOT NULL,
+  `publication_date` date DEFAULT NULL,
+  `isbn` varchar(20) DEFAULT NULL,
+  `availability_status` varchar(20) NOT NULL DEFAULT 'available',
+  `total_copies` int(11) NOT NULL DEFAULT 1,
+  `available_copies` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`book_id`),
+  UNIQUE KEY `isbn` (`isbn`),
+  KEY `author_id` (`author_id`),
+  KEY `genre_id` (`genre_id`),
+  CONSTRAINT `books_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `authors` (`author_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `books_ibfk_2` FOREIGN KEY (`genre_id`) REFERENCES `genres` (`genre_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patrons` (
+  `patron_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `membership_date` date NOT NULL,
+  `membership_status` varchar(20) NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`patron_id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `librarians` (
+  `librarian_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `hire_date` date NOT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'staff',
+  PRIMARY KEY (`librarian_id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `loans` (
+  `loan_id` int(11) NOT NULL AUTO_INCREMENT,
+  `book_id` int(11) NOT NULL,
+  `patron_id` int(11) NOT NULL,
+  `librarian_id` int(11) DEFAULT NULL,
+  `borrow_date` datetime NOT NULL,
+  `due_date` datetime NOT NULL,
+  `return_date` datetime DEFAULT NULL,
+  `loan_status` varchar(20) NOT NULL DEFAULT 'borrowed',
+  PRIMARY KEY (`loan_id`),
+  KEY `book_id` (`book_id`),
+  KEY `patron_id` (`patron_id`),
+  KEY `librarian_id` (`librarian_id`),
+  CONSTRAINT `loans_ibfk_1` FOREIGN KEY (`book_id`) REFERENCES `books` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `loans_ibfk_2` FOREIGN KEY (`patron_id`) REFERENCES `patrons` (`patron_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `loans_ibfk_3` FOREIGN KEY (`librarian_id`) REFERENCES `librarians` (`librarian_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reviews` (
+  `review_id` int(11) NOT NULL AUTO_INCREMENT,
+  `book_id` int(11) NOT NULL,
+  `patron_id` int(11) NOT NULL,
+  `rating` int(11) NOT NULL,
+  `review_text` text DEFAULT NULL,
+  `review_date` datetime NOT NULL,
+  PRIMARY KEY (`review_id`),
+  KEY `book_id` (`book_id`),
+  KEY `patron_id` (`patron_id`),
+  CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`book_id`) REFERENCES (`books`) (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`patron_id`) REFERENCES (`patrons`) (`patron_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transactions` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patron_id` int(11) NOT NULL,
+  `librarian_id` int(11) DEFAULT NULL,
+  `loan_id` int(11) DEFAULT NULL,
+  `transaction_type` varchar(50) NOT NULL,
+  `transaction_date` datetime NOT NULL,
+  `amount` decimal(10,2) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`transaction_id`),
+  KEY `patron_id` (`patron_id`),
+  KEY `librarian_id` (`librarian_id`),
+  KEY `loan_id` (`loan_id`),
+  CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`patron_id`) REFERENCES `patrons` (`patron_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`librarian_id`) REFERENCES `librarians` (`librarian_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `transactions_ibfk_3` FOREIGN KEY (`loan_id`) REFERENCES `loans` (`loan_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

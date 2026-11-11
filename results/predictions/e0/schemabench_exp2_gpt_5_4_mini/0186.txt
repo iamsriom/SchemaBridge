@@ -1,0 +1,67 @@
+-- Schema for database: schemabench_0186
+CREATE TABLE `employees` (
+  `employee_id` int(11) NOT NULL,
+  `employee_name` varchar(255) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `suppliers` (
+  `supplier_name` varchar(255) NOT NULL,
+  `contact_phone` varchar(20) NOT NULL,
+  PRIMARY KEY (`supplier_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `phones` (
+  `product_code` varchar(50) NOT NULL,
+  `make` varchar(255) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  `retail_price` decimal(10,2) NOT NULL,
+  `stock_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`product_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supplier_supply` (
+  `supply_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_name` varchar(255) NOT NULL,
+  `product_code` varchar(50) NOT NULL,
+  `supply_price` decimal(10,2) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `supply_date` datetime NOT NULL,
+  PRIMARY KEY (`supply_id`),
+  KEY `supplier_supply_ibfk_1` (`supplier_name`),
+  KEY `supplier_supply_ibfk_2` (`product_code`),
+  CONSTRAINT `supplier_supply_ibfk_1` FOREIGN KEY (`supplier_name`) REFERENCES `suppliers` (`supplier_name`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `supplier_supply_ibfk_2` FOREIGN KEY (`product_code`) REFERENCES `phones` (`product_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `contracts` (
+  `contract_number` varchar(50) NOT NULL,
+  `terms` text NOT NULL,
+  `pricing` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`contract_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `purchases` (
+  `purchase_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `product_code` varchar(50) NOT NULL,
+  `contract_number` varchar(50) DEFAULT NULL,
+  `purchase_date` datetime NOT NULL,
+  PRIMARY KEY (`purchase_id`),
+  KEY `purchases_ibfk_1` (`customer_id`),
+  KEY `purchases_ibfk_2` (`employee_id`),
+  KEY `purchases_ibfk_3` (`product_code`),
+  KEY `purchases_ibfk_4` (`contract_number`),
+  CONSTRAINT `purchases_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchases_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchases_ibfk_3` FOREIGN KEY (`product_code`) REFERENCES `phones` (`product_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchases_ibfk_4` FOREIGN KEY (`contract_number`) REFERENCES `contracts` (`contract_number`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

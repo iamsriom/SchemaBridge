@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0222
+CREATE TABLE `recipe_types` (
+  `recipe_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_name` varchar(100) NOT NULL,
+  `type_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`recipe_type_id`),
+  UNIQUE KEY `type_name` (`type_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ingredients` (
+  `ingredient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ingredient_name` varchar(100) NOT NULL,
+  `ingredient_description` varchar(1000) DEFAULT NULL,
+  `ingredient_image` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ingredient_id`),
+  UNIQUE KEY `ingredient_name` (`ingredient_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `recipes` (
+  `recipe_id` int(11) NOT NULL AUTO_INCREMENT,
+  `recipe_type_id` int(11) NOT NULL,
+  `recipe_name` varchar(200) NOT NULL,
+  `recipe_description` varchar(2000) DEFAULT NULL,
+  `recipe_image` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`recipe_id`),
+  KEY `recipe_type_id` (`recipe_type_id`),
+  CONSTRAINT `recipes_ibfk_1` FOREIGN KEY (`recipe_type_id`) REFERENCES `recipe_types` (`recipe_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `recipe_steps` (
+  `step_id` int(11) NOT NULL AUTO_INCREMENT,
+  `recipe_id` int(11) NOT NULL,
+  `step_order` int(11) NOT NULL,
+  `step_description` varchar(2000) NOT NULL,
+  PRIMARY KEY (`step_id`),
+  KEY `recipe_id` (`recipe_id`),
+  CONSTRAINT `recipe_steps_ibfk_1` FOREIGN KEY (`recipe_id`) REFERENCES `recipes` (`recipe_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `recipe_ingredients` (
+  `recipe_ingredient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `recipe_id` int(11) NOT NULL,
+  `ingredient_id` int(11) NOT NULL,
+  `quantity` decimal(10,2) NOT NULL,
+  `unit` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`recipe_ingredient_id`),
+  KEY `recipe_id` (`recipe_id`),
+  KEY `ingredient_id` (`ingredient_id`),
+  CONSTRAINT `recipe_ingredients_ibfk_1` FOREIGN KEY (`recipe_id`) REFERENCES `recipes` (`recipe_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `recipe_ingredients_ibfk_2` FOREIGN KEY (`ingredient_id`) REFERENCES `ingredients` (`ingredient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

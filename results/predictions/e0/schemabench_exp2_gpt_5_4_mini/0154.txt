@@ -1,0 +1,136 @@
+-- Schema for database: schemabench_0154
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(30) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `preferences` text DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`customer_id`),
+  UNIQUE KEY `uk_customers_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `shelves` (
+  `shelf_id` int(11) NOT NULL AUTO_INCREMENT,
+  `shelf_code` varchar(50) NOT NULL,
+  `location_description` varchar(255) DEFAULT NULL,
+  `zone` varchar(100) DEFAULT NULL,
+  `capacity` int(11) DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`shelf_id`),
+  UNIQUE KEY `uk_shelves_shelf_code` (`shelf_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(255) NOT NULL,
+  `sku` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `stock_quantity` int(11) NOT NULL DEFAULT 0,
+  `shelf_id` int(11) DEFAULT NULL,
+  `reorder_level` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`product_id`),
+  UNIQUE KEY `uk_products_sku` (`sku`),
+  KEY `products_ibfk_1` (`shelf_id`),
+  CONSTRAINT `products_ibfk_1` FOREIGN KEY (`shelf_id`) REFERENCES `shelves` (`shelf_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `order_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` varchar(50) NOT NULL DEFAULT 'pending',
+  `payment_status` varchar(50) NOT NULL DEFAULT 'unpaid',
+  `total_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `delivery_address` varchar(255) DEFAULT NULL,
+  `completed_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `orders_ibfk_1` (`customer_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `order_items` (
+  `order_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `line_total` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`order_item_id`),
+  KEY `order_items_ibfk_1` (`order_id`),
+  KEY `order_items_ibfk_2` (`product_id`),
+  CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `robots` (
+  `robot_id` int(11) NOT NULL AUTO_INCREMENT,
+  `robot_name` varchar(100) NOT NULL,
+  `robot_code` varchar(50) NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'idle',
+  `current_location` varchar(255) DEFAULT NULL,
+  `battery_level` int(11) DEFAULT NULL,
+  `last_maintenance_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`robot_id`),
+  UNIQUE KEY `uk_robots_robot_code` (`robot_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `robot_tasks` (
+  `robot_task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `robot_id` int(11) NOT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `product_id` int(11) DEFAULT NULL,
+  `shelf_id` int(11) DEFAULT NULL,
+  `task_type` varchar(50) NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'queued',
+  `assigned_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `started_at` datetime DEFAULT NULL,
+  `completed_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`robot_task_id`),
+  KEY `robot_tasks_ibfk_1` (`robot_id`),
+  KEY `robot_tasks_ibfk_2` (`order_id`),
+  KEY `robot_tasks_ibfk_3` (`product_id`),
+  KEY `robot_tasks_ibfk_4` (`shelf_id`),
+  CONSTRAINT `robot_tasks_ibfk_1` FOREIGN KEY (`robot_id`) REFERENCES `robots` (`robot_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `robot_tasks_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `robot_tasks_ibfk_3` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `robot_tasks_ibfk_4` FOREIGN KEY (`shelf_id`) REFERENCES `shelves` (`shelf_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `wishlist_items` (
+  `wishlist_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `added_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`wishlist_item_id`),
+  UNIQUE KEY `uk_wishlist_items_customer_product` (`customer_id`,`product_id`),
+  KEY `wishlist_items_ibfk_2` (`product_id`),
+  CONSTRAINT `wishlist_items_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `wishlist_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `customer_service_tickets` (
+  `ticket_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `subject` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'open',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `resolved_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`ticket_id`),
+  KEY `customer_service_tickets_ibfk_1` (`customer_id`),
+  KEY `customer_service_tickets_ibfk_2` (`order_id`),
+  CONSTRAINT `customer_service_tickets_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customer_service_tickets_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `notifications` (
+  `notification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `notification_type` varchar(50) NOT NULL,
+  `message` text NOT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT 0,
+  `sent_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`notification_id`),
+  KEY `notifications_ibfk_1` (`customer_id`),
+  KEY `notifications_ibfk_2` (`order_id`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

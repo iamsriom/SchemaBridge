@@ -1,0 +1,55 @@
+-- Schema for database: schemabench_0124
+CREATE TABLE `region` (
+  `region_id` int(11) NOT NULL AUTO_INCREMENT,
+  `region_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`region_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `county` (
+  `county_id` int(11) NOT NULL AUTO_INCREMENT,
+  `county_name` varchar(255) NOT NULL,
+  `region_id` int(11) NOT NULL,
+  PRIMARY KEY (`county_id`),
+  KEY `county_ibfk_1` (`region_id`),
+  CONSTRAINT `county_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `city` (
+  `city_id` int(11) NOT NULL AUTO_INCREMENT,
+  `city_name` varchar(255) NOT NULL,
+  `county_id` int(11) NOT NULL,
+  PRIMARY KEY (`city_id`),
+  KEY `city_ibfk_1` (`county_id`),
+  CONSTRAINT `city_ibfk_1` FOREIGN KEY (`county_id`) REFERENCES `county` (`county_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `food_type` (
+  `food_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `food_type_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`food_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `restaurant` (
+  `restaurant_id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_name` varchar(255) NOT NULL,
+  `food_type_id` int(11) NOT NULL,
+  `city_id` int(11) NOT NULL,
+  `street_number` varchar(20) NOT NULL,
+  `street_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`restaurant_id`),
+  KEY `restaurant_ibfk_1` (`food_type_id`),
+  KEY `restaurant_ibfk_2` (`city_id`),
+  CONSTRAINT `restaurant_ibfk_1` FOREIGN KEY (`food_type_id`) REFERENCES `food_type` (`food_type_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `restaurant_ibfk_2` FOREIGN KEY (`city_id`) REFERENCES `city` (`city_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `review` (
+  `review_id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(11) NOT NULL,
+  `review_text` text NOT NULL,
+  `rating` int(11) NOT NULL,
+  `review_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`review_id`),
+  KEY `review_ibfk_1` (`restaurant_id`),
+  CONSTRAINT `review_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurant` (`restaurant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

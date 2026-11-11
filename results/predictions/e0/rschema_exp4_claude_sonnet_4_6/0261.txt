@@ -1,0 +1,49 @@
+-- Schema for database: rschema_0261
+
+CREATE TABLE `address` (
+  `address_id` int(11) NOT NULL,
+  `detailed_address` varchar(255) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  PRIMARY KEY (`address_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `district` (
+  `district_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  PRIMARY KEY (`district_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `town` (
+  `town_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `district_id` int(11) NOT NULL,
+  PRIMARY KEY (`town_id`),
+  CONSTRAINT `town_ibfk_1` FOREIGN KEY (`district_id`) REFERENCES `district` (`district_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `city` (
+  `city_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`city_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `city_district` (
+  `city_id` int(11) NOT NULL,
+  `district_id` int(11) NOT NULL,
+  PRIMARY KEY (`city_id`, `district_id`),
+  CONSTRAINT `city_district_ibfk_1` FOREIGN KEY (`city_id`) REFERENCES `city` (`city_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `city_district_ibfk_2` FOREIGN KEY (`district_id`) REFERENCES `district` (`district_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `voter` (
+  `voter_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `address_id` int(11) NOT NULL,
+  `registration_status` varchar(50) NOT NULL,
+  `district_id` int(11) NOT NULL,
+  PRIMARY KEY (`voter_id`),
+  UNIQUE KEY `address_id` (`address_id`),
+  CONSTRAINT `voter_ibfk_1` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `voter_ibfk_2` FOREIGN KEY (`district_id`) REFERENCES `district` (`district_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

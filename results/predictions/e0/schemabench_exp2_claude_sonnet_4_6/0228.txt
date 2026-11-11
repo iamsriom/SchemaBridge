@@ -1,0 +1,123 @@
+-- Schema for database: schemabench_0228
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `user_type` varchar(20) NOT NULL COMMENT 'customer, home_cook, restaurant, admin',
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `zip_code` varchar(20) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vendors` (
+  `vendor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `vendor_name` varchar(255) NOT NULL,
+  `vendor_type` varchar(20) NOT NULL COMMENT 'restaurant, home_cook',
+  `description` text DEFAULT NULL,
+  `cuisine_type` varchar(100) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `zip_code` varchar(20) DEFAULT NULL,
+  `operating_hours` varchar(255) DEFAULT NULL,
+  `average_rating` decimal(3,2) DEFAULT NULL,
+  `is_approved` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`vendor_id`),
+  CONSTRAINT `vendors_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `menu_items` (
+  `item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `vendor_id` int(11) NOT NULL,
+  `item_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `cuisine_type` varchar(100) DEFAULT NULL,
+  `category` varchar(100) DEFAULT NULL,
+  `is_available` tinyint(1) NOT NULL DEFAULT 1,
+  `image_url` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`item_id`),
+  CONSTRAINT `menu_items_ibfk_1` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`vendor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `coupons` (
+  `coupon_id` int(11) NOT NULL AUTO_INCREMENT,
+  `vendor_id` int(11) DEFAULT NULL,
+  `coupon_code` varchar(50) NOT NULL,
+  `discount_type` varchar(20) NOT NULL COMMENT 'percentage, fixed',
+  `discount_value` decimal(10,2) NOT NULL,
+  `minimum_order_amount` decimal(10,2) DEFAULT NULL,
+  `max_uses` int(11) DEFAULT NULL,
+  `times_used` int(11) NOT NULL DEFAULT 0,
+  `valid_from` datetime NOT NULL,
+  `valid_until` datetime NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`coupon_id`),
+  UNIQUE KEY `coupon_code` (`coupon_code`),
+  CONSTRAINT `coupons_ibfk_1` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`vendor_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `vendor_id` int(11) NOT NULL,
+  `coupon_id` int(11) DEFAULT NULL,
+  `order_status` varchar(30) NOT NULL COMMENT 'pending, confirmed, preparing, delivered, cancelled',
+  `subtotal` decimal(10,2) NOT NULL,
+  `discount_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `total_amount` decimal(10,2) NOT NULL,
+  `delivery_address` varchar(255) DEFAULT NULL,
+  `delivery_city` varchar(100) DEFAULT NULL,
+  `delivery_state` varchar(100) DEFAULT NULL,
+  `delivery_zip_code` varchar(20) DEFAULT NULL,
+  `special_instructions` text DEFAULT NULL,
+  `placed_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`vendor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_3` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`coupon_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_items` (
+  `order_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  `special_instructions` text DEFAULT NULL,
+  PRIMARY KEY (`order_item_id`),
+  CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `menu_items` (`item_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ratings` (
+  `rating_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `vendor_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `rating_value` tinyint(4) NOT NULL COMMENT '1 to 5',
+  `review_text` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`rating_id`),
+  CONSTRAINT `ratings_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ratings_ibfk_2` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`vendor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ratings_ibfk_3` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

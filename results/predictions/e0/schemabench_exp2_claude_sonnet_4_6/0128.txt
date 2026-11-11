@@ -1,0 +1,71 @@
+-- Schema for database: schemabench_0128
+
+CREATE TABLE `businesses` (
+  `business_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` char(2) DEFAULT NULL,
+  `postal_code` varchar(10) DEFAULT NULL,
+  `latitude` decimal(10,7) DEFAULT NULL,
+  `longitude` decimal(10,7) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `owner_name` varchar(255) DEFAULT NULL,
+  `owner_zip` varchar(10) DEFAULT NULL,
+  `tax_code` varchar(50) DEFAULT NULL,
+  `business_certificate` int(11) DEFAULT NULL,
+  `application_date` datetime DEFAULT NULL,
+  `neighborhood_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`business_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `neighborhoods` (
+  `neighborhood_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` char(2) DEFAULT NULL,
+  PRIMARY KEY (`neighborhood_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inspections` (
+  `inspection_id` int(11) NOT NULL AUTO_INCREMENT,
+  `business_id` int(11) NOT NULL,
+  `score` int(11) DEFAULT NULL,
+  `date` datetime DEFAULT NULL,
+  `type` varchar(100) DEFAULT NULL,
+  `is_unscheduled` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`inspection_id`),
+  CONSTRAINT `inspections_ibfk_1` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`business_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `violations` (
+  `violation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `inspection_id` int(11) NOT NULL,
+  `business_id` int(11) NOT NULL,
+  `date` datetime DEFAULT NULL,
+  `violation_type_id` int(11) DEFAULT NULL,
+  `risk_category` varchar(50) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`violation_id`),
+  CONSTRAINT `violations_ibfk_1` FOREIGN KEY (`inspection_id`) REFERENCES `inspections` (`inspection_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `violations_ibfk_2` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`business_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `violation_types` (
+  `violation_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL,
+  `risk_category` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`violation_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inspection_score_predictions` (
+  `prediction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `business_id` int(11) NOT NULL,
+  `predicted_score` decimal(5,2) DEFAULT NULL,
+  `prediction_date` datetime DEFAULT NULL,
+  `model_version` varchar(50) DEFAULT NULL,
+  `inspection_year` int(11) DEFAULT NULL,
+  PRIMARY KEY (`prediction_id`),
+  CONSTRAINT `inspection_score_predictions_ibfk_1` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`business_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

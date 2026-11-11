@@ -1,0 +1,65 @@
+-- Schema for database: rschema_0507
+CREATE TABLE `user_account` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` varchar(50) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_user_account_username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `auth_token` (
+  `token_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `issued_at` datetime NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `is_valid` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`token_id`),
+  UNIQUE KEY `uk_auth_token_token` (`token`),
+  KEY `auth_token_ibfk_1` (`user_id`),
+  CONSTRAINT `auth_token_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_account` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `content_basic` (
+  `content_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `content_type` varchar(50) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`content_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `content_text_image` (
+  `content_id` int(11) NOT NULL,
+  `text_content` text DEFAULT NULL,
+  `image_url` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`content_id`),
+  CONSTRAINT `content_text_image_ibfk_1` FOREIGN KEY (`content_id`) REFERENCES `content_basic` (`content_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `content_video` (
+  `content_id` int(11) NOT NULL,
+  `video_url` varchar(500) DEFAULT NULL,
+  `thumbnail_url` varchar(500) DEFAULT NULL,
+  `video_duration` int(11) DEFAULT NULL,
+  `play_count` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`content_id`),
+  CONSTRAINT `content_video_ibfk_1` FOREIGN KEY (`content_id`) REFERENCES `content_basic` (`content_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_video_play_stats` (
+  `stat_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `content_id` int(11) NOT NULL,
+  `period_start` datetime NOT NULL,
+  `period_end` datetime NOT NULL,
+  `play_count` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`stat_id`),
+  KEY `user_video_play_stats_ibfk_1` (`user_id`),
+  KEY `user_video_play_stats_ibfk_2` (`content_id`),
+  CONSTRAINT `user_video_play_stats_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_account` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_video_play_stats_ibfk_2` FOREIGN KEY (`content_id`) REFERENCES `content_basic` (`content_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

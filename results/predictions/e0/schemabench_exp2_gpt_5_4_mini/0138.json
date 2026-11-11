@@ -1,0 +1,216 @@
+{
+  "text_number": 138,
+  "id": "SB-138",
+  "llm": "gpt54mini",
+  "model_id": "gpt-5.4-mini",
+  "database": "schemabench_0138",
+  "question": "1) Background / Context  \nThe project involves the creation of a data management system for the Department of Computer Science and Engineering at the University of Washington (UW-CSE). The system stores and manages information regarding departmental entities, such as students and professors, as well as their interrelations, such as advisory roles and courses taught.\n\n2) Objectives  \nThe primary objective is to facilitate efficient data management and retrieval concerning key departmental entities and their relationships. The system aims to support the tracking of advisory relationships, course assignments, and individual roles and phases within the program.\n\n3) Stakeholders & Users  \n- Stakeholders: Department of Computer Science and Engineering, University Administration  \n- Primary Users: Faculty members, Administrative staff, Students  \n\n4) Functional Descriptions  \n- Entity Management: The system shall maintain a database of individuals associated with the department, including students and professors.  \n- Relationship Tracking: The system shall support the tracking of advisory relationships (e.g., which professors advise which students) and teaching assignments (e.g., which professors teach which courses).  \n- Course Management: The system shall manage course information, including course levels and the faculty responsible for teaching them.  \n\n5) Non-Functional Descriptions  \n- Data Consistency: The system must ensure data integrity through the use of foreign key constraints to maintain consistent relationships between entities.  \n- Scalability: The system should handle adjustments in the number of entities and relationships as the department grows.  \n- Security: Access to the system should be restricted to authorized personnel to prevent unauthorized data manipulation.  \n- Maintainability: The system should support easy updates and adjustments to accommodate changes in departmental needs or structure.",
+  "ddl": "-- Schema for database: schemabench_0138\nCREATE TABLE `person` (\n  `person_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `role` varchar(50) NOT NULL,\n  PRIMARY KEY (`person_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `student` (\n  `student_id` int(11) NOT NULL,\n  `phase` varchar(50) DEFAULT NULL,\n  PRIMARY KEY (`student_id`),\n  CONSTRAINT `student_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `person` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `professor` (\n  `professor_id` int(11) NOT NULL,\n  PRIMARY KEY (`professor_id`),\n  CONSTRAINT `professor_ibfk_1` FOREIGN KEY (`professor_id`) REFERENCES `person` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `course` (\n  `course_id` int(11) NOT NULL,\n  `course_name` varchar(255) NOT NULL,\n  `course_level` int(11) NOT NULL,\n  PRIMARY KEY (`course_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `advising` (\n  `professor_id` int(11) NOT NULL,\n  `student_id` int(11) NOT NULL,\n  PRIMARY KEY (`professor_id`,`student_id`),\n  CONSTRAINT `advising_ibfk_1` FOREIGN KEY (`professor_id`) REFERENCES `professor` (`professor_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `advising_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `teaching_assignment` (\n  `professor_id` int(11) NOT NULL,\n  `course_id` int(11) NOT NULL,\n  PRIMARY KEY (`professor_id`,`course_id`),\n  CONSTRAINT `teaching_assignment_ibfk_1` FOREIGN KEY (`professor_id`) REFERENCES `professor` (`professor_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `teaching_assignment_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "schemabench_0138",
+    "tables": [
+      "person",
+      "student",
+      "professor",
+      "course",
+      "advising",
+      "teaching_assignment"
+    ],
+    "columns_by_table": {
+      "person": [
+        {
+          "COLUMN_NAME": "person_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "name",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "role",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 50,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(50)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "student": [
+        {
+          "COLUMN_NAME": "student_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "phase",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 50,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(50)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "professor": [
+        {
+          "COLUMN_NAME": "professor_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "course": [
+        {
+          "COLUMN_NAME": "course_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "course_name",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "course_level",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "advising": [
+        {
+          "COLUMN_NAME": "professor_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "student_id",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "teaching_assignment": [
+        {
+          "COLUMN_NAME": "professor_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "course_id",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ]
+    }
+  }
+}

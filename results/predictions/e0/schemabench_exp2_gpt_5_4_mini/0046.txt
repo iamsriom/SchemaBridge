@@ -1,0 +1,187 @@
+-- Schema for database: schemabench_0046
+CREATE TABLE `accounts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `domain` varchar(255) DEFAULT NULL,
+  `locale` varchar(10) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_digest` varchar(255) NOT NULL,
+  `role` varchar(50) NOT NULL,
+  `availability_status` varchar(50) DEFAULT NULL,
+  `locale` varchar(10) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`),
+  KEY `users_account_id_index` (`account_id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `contacts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(50) DEFAULT NULL,
+  `identifier` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `contacts_account_id_index` (`account_id`),
+  CONSTRAINT `contacts_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `contact_notes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `contact_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `contact_notes_contact_id_index` (`contact_id`),
+  KEY `contact_notes_user_id_index` (`user_id`),
+  CONSTRAINT `contact_notes_ibfk_1` FOREIGN KEY (`contact_id`) REFERENCES `contacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `contact_notes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inboxes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `channel_type` varchar(50) NOT NULL,
+  `enable_auto_assignment` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `inboxes_account_id_index` (`account_id`),
+  CONSTRAINT `inboxes_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `conversations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
+  `inbox_id` int(11) NOT NULL,
+  `contact_id` int(11) NOT NULL,
+  `assignee_id` int(11) DEFAULT NULL,
+  `status` varchar(50) NOT NULL,
+  `priority` varchar(20) DEFAULT NULL,
+  `subject` varchar(255) DEFAULT NULL,
+  `last_activity_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `conversations_account_id_index` (`account_id`),
+  KEY `conversations_inbox_id_index` (`inbox_id`),
+  KEY `conversations_contact_id_index` (`contact_id`),
+  KEY `conversations_assignee_id_index` (`assignee_id`),
+  CONSTRAINT `conversations_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES (`accounts`) (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `conversations_ibfk_2` FOREIGN KEY (`inbox_id`) REFERENCES `inboxes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `conversations_ibfk_3` FOREIGN KEY (`contact_id`) REFERENCES `contacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `conversations_ibfk_4` FOREIGN KEY (`assignee_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `messages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `conversation_id` int(11) NOT NULL,
+  `sender_type` varchar(50) NOT NULL,
+  `sender_id` int(11) DEFAULT NULL,
+  `content` text NOT NULL,
+  `message_type` varchar(50) NOT NULL,
+  `private` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `messages_conversation_id_index` (`conversation_id`),
+  CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `labels` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `color` varchar(20) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `labels_account_id_index` (`account_id`),
+  CONSTRAINT `labels_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `conversation_labels` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `conversation_id` int(11) NOT NULL,
+  `label_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `conversation_labels_unique` (`conversation_id`,`label_id`),
+  KEY `conversation_labels_label_id_index` (`label_id`),
+  CONSTRAINT `conversation_labels_ibfk_1` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `conversation_labels_ibfk_2` FOREIGN KEY (`label_id`) REFERENCES `labels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `canned_responses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
+  `short_code` varchar(100) NOT NULL,
+  `content` text NOT NULL,
+  `created_by_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `canned_responses_account_id_index` (`account_id`),
+  KEY `canned_responses_created_by_id_index` (`created_by_id`),
+  CONSTRAINT `canned_responses_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `canned_responses_ibfk_2` FOREIGN KEY (`created_by_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `custom_attributes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
+  `attribute_model` varchar(50) NOT NULL,
+  `attribute_key` varchar(255) NOT NULL,
+  `attribute_display_name` varchar(255) NOT NULL,
+  `attribute_type` varchar(50) NOT NULL,
+  `attribute_values` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `custom_attributes_account_id_index` (`account_id`),
+  CONSTRAINT `custom_attributes_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `webhooks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
+  `url` varchar(255) NOT NULL,
+  `subscriptions` text NOT NULL,
+  `secret` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `webhooks_account_id_index` (`account_id`),
+  CONSTRAINT `webhooks_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `integrations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
+  `provider` varchar(50) NOT NULL,
+  `settings` text DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `integrations_account_id_index` (`account_id`),
+  CONSTRAINT `integrations_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

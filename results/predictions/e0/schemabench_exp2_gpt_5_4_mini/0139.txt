@@ -1,0 +1,69 @@
+-- Schema for database: schemabench_0139
+CREATE TABLE `att_classes` (
+  `att_id` int(11) NOT NULL,
+  `att_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`att_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `obj_classes` (
+  `obj_id` int(11) NOT NULL,
+  `obj_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`obj_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pred_classes` (
+  `pred_id` int(11) NOT NULL,
+  `pred_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`pred_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `images` (
+  `image_id` int(11) NOT NULL,
+  `image_url` varchar(1024) DEFAULT NULL,
+  `width` int(11) DEFAULT NULL,
+  `height` int(11) DEFAULT NULL,
+  PRIMARY KEY (`image_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `img_obj` (
+  `img_obj_id` int(11) NOT NULL,
+  `image_id` int(11) NOT NULL,
+  `obj_id` int(11) NOT NULL,
+  `x` int(11) NOT NULL,
+  `y` int(11) NOT NULL,
+  `w` int(11) NOT NULL,
+  `h` int(11) NOT NULL,
+  PRIMARY KEY (`img_obj_id`),
+  KEY `img_obj_ibfk_1` (`image_id`),
+  KEY `img_obj_ibfk_2` (`obj_id`),
+  CONSTRAINT `img_obj_ibfk_1` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `img_obj_ibfk_2` FOREIGN KEY (`obj_id`) REFERENCES `obj_classes` (`obj_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `img_obj_att` (
+  `img_obj_att_id` int(11) NOT NULL,
+  `img_obj_id` int(11) NOT NULL,
+  `att_id` int(11) NOT NULL,
+  PRIMARY KEY (`img_obj_att_id`),
+  KEY `img_obj_att_ibfk_1` (`img_obj_id`),
+  KEY `img_obj_att_ibfk_2` (`att_id`),
+  CONSTRAINT `img_obj_att_ibfk_1` FOREIGN KEY (`img_obj_id`) REFERENCES `img_obj` (`img_obj_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `img_obj_att_ibfk_2` FOREIGN KEY (`att_id`) REFERENCES `att_classes` (`att_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `img_rel` (
+  `img_rel_id` int(11) NOT NULL,
+  `image_id` int(11) NOT NULL,
+  `subject_img_obj_id` int(11) NOT NULL,
+  `object_img_obj_id` int(11) NOT NULL,
+  `pred_id` int(11) NOT NULL,
+  PRIMARY KEY (`img_rel_id`),
+  KEY `img_rel_ibfk_1` (`image_id`),
+  KEY `img_rel_ibfk_2` (`subject_img_obj_id`),
+  KEY `img_rel_ibfk_3` (`object_img_obj_id`),
+  KEY `img_rel_ibfk_4` (`pred_id`),
+  CONSTRAINT `img_rel_ibfk_1` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `img_rel_ibfk_2` FOREIGN KEY (`subject_img_obj_id`) REFERENCES `img_obj` (`img_obj_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `img_rel_ibfk_3` FOREIGN KEY (`object_img_obj_id`) REFERENCES `img_obj` (`img_obj_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `img_rel_ibfk_4` FOREIGN KEY (`pred_id`) REFERENCES `pred_classes` (`pred_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

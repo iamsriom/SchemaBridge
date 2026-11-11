@@ -1,0 +1,185 @@
+-- Schema for database: schemabench_0116
+
+CREATE TABLE `country` (
+  `code` char(4) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `capital` varchar(255) DEFAULT NULL,
+  `area` float DEFAULT NULL,
+  `population` int(11) DEFAULT NULL,
+  `gdp` float DEFAULT NULL,
+  PRIMARY KEY (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `continent` (
+  `name` varchar(255) NOT NULL,
+  `area` float DEFAULT NULL,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `country_continent` (
+  `country_code` char(4) NOT NULL,
+  `continent_name` varchar(255) NOT NULL,
+  `percentage` float DEFAULT NULL,
+  PRIMARY KEY (`country_code`, `continent_name`),
+  CONSTRAINT `country_continent_ibfk_1` FOREIGN KEY (`country_code`) REFERENCES `country` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `country_continent_ibfk_2` FOREIGN KEY (`continent_name`) REFERENCES `continent` (`name`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `borders` (
+  `country_code1` char(4) NOT NULL,
+  `country_code2` char(4) NOT NULL,
+  `length` float DEFAULT NULL,
+  PRIMARY KEY (`country_code1`, `country_code2`),
+  CONSTRAINT `borders_ibfk_1` FOREIGN KEY (`country_code1`) REFERENCES `country` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `borders_ibfk_2` FOREIGN KEY (`country_code2`) REFERENCES `country` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `city` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `country_code` char(4) NOT NULL,
+  `population` int(11) DEFAULT NULL,
+  `latitude` float DEFAULT NULL,
+  `longitude` float DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `city_ibfk_1` FOREIGN KEY (`country_code`) REFERENCES `country` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `mountain` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `height` float DEFAULT NULL,
+  `latitude` float DEFAULT NULL,
+  `longitude` float DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `mountain_country` (
+  `mountain_id` int(11) NOT NULL,
+  `country_code` char(4) NOT NULL,
+  PRIMARY KEY (`mountain_id`, `country_code`),
+  CONSTRAINT `mountain_country_ibfk_1` FOREIGN KEY (`mountain_id`) REFERENCES `mountain` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `mountain_country_ibfk_2` FOREIGN KEY (`country_code`) REFERENCES `country` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `river` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `length` float DEFAULT NULL,
+  `source_latitude` float DEFAULT NULL,
+  `source_longitude` float DEFAULT NULL,
+  `mouth_latitude` float DEFAULT NULL,
+  `mouth_longitude` float DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `river_country` (
+  `river_id` int(11) NOT NULL,
+  `country_code` char(4) NOT NULL,
+  PRIMARY KEY (`river_id`, `country_code`),
+  CONSTRAINT `river_country_ibfk_1` FOREIGN KEY (`river_id`) REFERENCES `river` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `river_country_ibfk_2` FOREIGN KEY (`country_code`) REFERENCES `country` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `lake` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `area` float DEFAULT NULL,
+  `depth` float DEFAULT NULL,
+  `latitude` float DEFAULT NULL,
+  `longitude` float DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `lake_country` (
+  `lake_id` int(11) NOT NULL,
+  `country_code` char(4) NOT NULL,
+  PRIMARY KEY (`lake_id`, `country_code`),
+  CONSTRAINT `lake_country_ibfk_1` FOREIGN KEY (`lake_id`) REFERENCES `lake` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `lake_country_ibfk_2` FOREIGN KEY (`country_code`) REFERENCES `country` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `island` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `area` float DEFAULT NULL,
+  `latitude` float DEFAULT NULL,
+  `longitude` float DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `island_country` (
+  `island_id` int(11) NOT NULL,
+  `country_code` char(4) NOT NULL,
+  PRIMARY KEY (`island_id`, `country_code`),
+  CONSTRAINT `island_country_ibfk_1` FOREIGN KEY (`island_id`) REFERENCES `island` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `island_country_ibfk_2` FOREIGN KEY (`country_code`) REFERENCES `country` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sea` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `area` float DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sea_country` (
+  `sea_id` int(11) NOT NULL,
+  `country_code` char(4) NOT NULL,
+  PRIMARY KEY (`sea_id`, `country_code`),
+  CONSTRAINT `sea_country_ibfk_1` FOREIGN KEY (`sea_id`) REFERENCES `sea` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sea_country_ibfk_2` FOREIGN KEY (`country_code`) REFERENCES `country` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `economy` (
+  `country_code` char(4) NOT NULL,
+  `gdp` float DEFAULT NULL,
+  `agriculture` float DEFAULT NULL,
+  `industry` float DEFAULT NULL,
+  `services` float DEFAULT NULL,
+  PRIMARY KEY (`country_code`),
+  CONSTRAINT `economy_ibfk_1` FOREIGN KEY (`country_code`) REFERENCES `country` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ethnic_group` (
+  `country_code` char(4) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `percentage` float DEFAULT NULL,
+  PRIMARY KEY (`country_code`, `name`),
+  CONSTRAINT `ethnic_group_ibfk_1` FOREIGN KEY (`country_code`) REFERENCES `country` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `language` (
+  `country_code` char(4) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `percentage` float DEFAULT NULL,
+  PRIMARY KEY (`country_code`, `name`),
+  CONSTRAINT `language_ibfk_1` FOREIGN KEY (`country_code`) REFERENCES `country` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `religion` (
+  `country_code` char(4) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `percentage` float DEFAULT NULL,
+  PRIMARY KEY (`country_code`, `name`),
+  CONSTRAINT `religion_ibfk_1` FOREIGN KEY (`country_code`) REFERENCES `country` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organization` (
+  `abbreviation` varchar(12) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `founded` int(11) DEFAULT NULL,
+  `city` varchar(255) DEFAULT NULL,
+  `country_code` char(4) DEFAULT NULL,
+  PRIMARY KEY (`abbreviation`),
+  CONSTRAINT `organization_ibfk_1` FOREIGN KEY (`country_code`) REFERENCES `country` (`code`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `membership` (
+  `country_code` char(4) NOT NULL,
+  `organization_abbreviation` varchar(12) NOT NULL,
+  `type` varchar(60) DEFAULT NULL,
+  PRIMARY KEY (`country_code`, `organization_abbreviation`),
+  CONSTRAINT `membership_ibfk_1` FOREIGN KEY (`country_code`) REFERENCES `country` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `membership_ibfk_2` FOREIGN KEY (`organization_abbreviation`) REFERENCES `organization` (`abbreviation`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

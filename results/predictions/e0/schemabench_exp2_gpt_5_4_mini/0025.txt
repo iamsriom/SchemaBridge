@@ -1,0 +1,54 @@
+-- Schema for database: schemabench_0025
+CREATE TABLE `silk_request` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `path` varchar(255) NOT NULL,
+  `method` varchar(16) NOT NULL,
+  `query_params` longtext DEFAULT NULL,
+  `body` longtext DEFAULT NULL,
+  `response_status_code` int(11) DEFAULT NULL,
+  `response_body` longtext DEFAULT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `time_taken_ms` int(11) DEFAULT NULL,
+  `meta` longtext DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `silk_sqlquery` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `request_id` int(11) NOT NULL,
+  `query` longtext NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `time_taken_ms` int(11) DEFAULT NULL,
+  `raw_sql` longtext DEFAULT NULL,
+  `params` longtext DEFAULT NULL,
+  `alias` varchar(255) DEFAULT NULL,
+  `is_slow` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `silk_sqlquery_request_id_idx` (`request_id`),
+  CONSTRAINT `silk_sqlquery_ibfk_1` FOREIGN KEY (`request_id`) REFERENCES `silk_request` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `silk_profile` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `kind` varchar(32) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `time_taken_ms` int(11) DEFAULT NULL,
+  `description` longtext DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `silk_profile_stat` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `profile_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `count` int(11) NOT NULL DEFAULT '0',
+  `time_taken_ms` int(11) NOT NULL DEFAULT '0',
+  `average_time_ms` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `silk_profile_stat_profile_id_idx` (`profile_id`),
+  CONSTRAINT `silk_profile_stat_ibfk_1` FOREIGN KEY (`profile_id`) REFERENCES `silk_profile` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

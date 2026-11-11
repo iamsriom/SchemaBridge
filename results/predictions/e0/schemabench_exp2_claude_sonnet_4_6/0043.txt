@@ -1,0 +1,100 @@
+-- Schema for database: schemabench_0043
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL DEFAULT '',
+  `encrypted_password` varchar(255) NOT NULL DEFAULT '',
+  `reset_password_token` varchar(255) DEFAULT NULL,
+  `reset_password_sent_at` datetime DEFAULT NULL,
+  `remember_created_at` datetime DEFAULT NULL,
+  `sign_in_count` int(11) NOT NULL DEFAULT 0,
+  `current_sign_in_at` datetime DEFAULT NULL,
+  `last_sign_in_at` datetime DEFAULT NULL,
+  `current_sign_in_ip` varchar(255) DEFAULT NULL,
+  `last_sign_in_ip` varchar(255) DEFAULT NULL,
+  `confirmation_token` varchar(255) DEFAULT NULL,
+  `confirmed_at` datetime DEFAULT NULL,
+  `confirmation_sent_at` datetime DEFAULT NULL,
+  `unconfirmed_email` varchar(255) DEFAULT NULL,
+  `failed_attempts` int(11) NOT NULL DEFAULT 0,
+  `unlock_token` varchar(255) DEFAULT NULL,
+  `locked_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `omniauth_identities` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `provider` varchar(255) NOT NULL,
+  `uid` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `omniauth_identities_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sessions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `session_token` varchar(255) NOT NULL,
+  `ip_address` varchar(255) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `last_active_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `sessions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `password_reset_requests` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `reset_token` varchar(255) NOT NULL,
+  `requested_at` datetime NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `password_reset_requests_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `account_confirmation_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `confirmation_token` varchar(255) NOT NULL,
+  `sent_at` datetime NOT NULL,
+  `confirmed_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `account_confirmation_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sign_in_attempts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `attempted_at` datetime NOT NULL,
+  `ip_address` varchar(255) DEFAULT NULL,
+  `success` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `sign_in_attempts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `account_locks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `locked_at` datetime NOT NULL,
+  `unlock_token` varchar(255) DEFAULT NULL,
+  `unlock_sent_at` datetime DEFAULT NULL,
+  `unlocked_at` datetime DEFAULT NULL,
+  `unlock_strategy` varchar(50) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `account_locks_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

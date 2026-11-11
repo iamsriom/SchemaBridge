@@ -1,0 +1,148 @@
+-- Schema for database: schemabench_0083
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'agent',
+  `locale` varchar(10) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `mailboxes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `mailboxes_email_unique` (`email`),
+  UNIQUE KEY `mailboxes_slug_unique` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `mailbox_user` (
+  `mailbox_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`mailbox_id`,`user_id`),
+  KEY `mailbox_user_user_id_index` (`user_id`),
+  CONSTRAINT `mailbox_user_ibfk_1` FOREIGN KEY (`mailbox_id`) REFERENCES `mailboxes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `mailbox_user_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `customers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `locale` varchar(10) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `customers_email_index` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `conversations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `mailbox_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'open',
+  `is_starred` tinyint(1) NOT NULL DEFAULT '0',
+  `is_spam` tinyint(1) NOT NULL DEFAULT '0',
+  `last_message_at` datetime DEFAULT NULL,
+  `closed_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `conversations_mailbox_id_index` (`mailbox_id`),
+  KEY `conversations_customer_id_index` (`customer_id`),
+  CONSTRAINT `conversations_ibfk_1` FOREIGN KEY (`mailbox_id`) REFERENCES `mailboxes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `conversations_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `conversation_messages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `conversation_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `customer_id` int(11) DEFAULT NULL,
+  `type` varchar(20) NOT NULL,
+  `body` text NOT NULL,
+  `is_internal` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `conversation_messages_conversation_id_index` (`conversation_id`),
+  KEY `conversation_messages_user_id_index` (`user_id`),
+  KEY `conversation_messages_customer_id_index` (`customer_id`),
+  CONSTRAINT `conversation_messages_ibfk_1` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `conversation_messages_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `conversation_messages_ibfk_3` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `conversation_tags` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `color` char(7) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `conversation_tags_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `conversation_tag_map` (
+  `conversation_id` int(11) NOT NULL,
+  `tag_id` int(11) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`conversation_id`,`tag_id`),
+  KEY `conversation_tag_map_tag_id_index` (`tag_id`),
+  CONSTRAINT `conversation_tag_map_ibfk_1` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `conversation_tag_map_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `conversation_tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `conversation_followers` (
+  `conversation_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`conversation_id`,`user_id`),
+  KEY `conversation_followers_user_id_index` (`user_id`),
+  CONSTRAINT `conversation_followers_ibfk_1` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `conversation_followers_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `conversation_ratings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `conversation_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `rating` tinyint(1) NOT NULL,
+  `comment` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `conversation_ratings_conversation_id_index` (`conversation_id`),
+  KEY `conversation_ratings_customer_id_index` (`customer_id`),
+  CONSTRAINT `conversation_ratings_ibfk_1` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `conversation_ratings_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `conversation_id` int(11) DEFAULT NULL,
+  `type` varchar(100) NOT NULL,
+  `data` text DEFAULT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `notifications_user_id_index` (`user_id`),
+  KEY `notifications_conversation_id_index` (`conversation_id`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `integrations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `mailbox_id` int(11) NOT NULL,
+  `provider` varchar(50) NOT NULL,
+  `settings` text NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `integrations_mailbox_id_index` (`mailbox_id`),
+  CONSTRAINT `integrations_ibfk_1` FOREIGN KEY (`mailbox_id`) REFERENCES `mailboxes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

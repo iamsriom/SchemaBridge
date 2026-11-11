@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0293
+
+CREATE TABLE `mine` (
+  `mine_id` int(11) NOT NULL AUTO_INCREMENT,
+  `mine_name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `person_in_charge` varchar(255) NOT NULL,
+  PRIMARY KEY (`mine_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_personnel` (
+  `personnel_id` int(11) NOT NULL AUTO_INCREMENT,
+  `personnel_name` varchar(255) NOT NULL,
+  `contact_number` varchar(50) NOT NULL,
+  PRIMARY KEY (`personnel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment` (
+  `equipment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_name` varchar(255) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  `purchase_date` datetime NOT NULL,
+  `mine_id` int(11) NOT NULL,
+  `status` varchar(100) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`equipment_id`),
+  CONSTRAINT `equipment_ibfk_1` FOREIGN KEY (`mine_id`) REFERENCES `mine` (`mine_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_record` (
+  `maintenance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `maintenance_date` datetime NOT NULL,
+  `maintenance_content` varchar(1000) NOT NULL,
+  `personnel_id` int(11) NOT NULL,
+  `maintenance_cost` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`maintenance_id`),
+  CONSTRAINT `maintenance_record_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_record_ibfk_2` FOREIGN KEY (`personnel_id`) REFERENCES `maintenance_personnel` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment_usage` (
+  `usage_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `usage_date` datetime NOT NULL,
+  `usage_hours` decimal(8,2) NOT NULL,
+  `operator` varchar(255) DEFAULT NULL,
+  `usage_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`usage_id`),
+  CONSTRAINT `equipment_usage_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,72 @@
+-- Schema for database: rschema_0168
+CREATE TABLE `equipment` (
+  `equipment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_name` varchar(255) NOT NULL,
+  `equipment_type` varchar(255) NOT NULL,
+  `manufacturer` varchar(255) NOT NULL,
+  `installation_date` date NOT NULL,
+  PRIMARY KEY (`equipment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment_state_record` (
+  `state_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `record_time` datetime NOT NULL,
+  `temperature` decimal(10,2) DEFAULT NULL,
+  `vibration` decimal(10,2) DEFAULT NULL,
+  `operational_state` varchar(100) DEFAULT NULL,
+  `health_indicator` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`state_record_id`),
+  KEY `equipment_state_record_ibfk_1` (`equipment_id`),
+  CONSTRAINT `equipment_state_record_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_record` (
+  `maintenance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `maintenance_time` datetime NOT NULL,
+  `maintenance_type` varchar(255) NOT NULL,
+  `maintenance_personnel` varchar(255) NOT NULL,
+  `maintenance_cost` decimal(10,2) NOT NULL,
+  `maintenance_notes` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`maintenance_id`),
+  KEY `maintenance_record_ibfk_1` (`equipment_id`),
+  CONSTRAINT `maintenance_record_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `historical_data` (
+  `historical_data_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `data_time` datetime NOT NULL,
+  `data_type` varchar(100) NOT NULL,
+  `data_value` decimal(18,6) DEFAULT NULL,
+  `data_text` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`historical_data_id`),
+  KEY `historical_data_ibfk_1` (`equipment_id`),
+  CONSTRAINT `historical_data_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_buffer` (
+  `buffer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `buffer_time` datetime NOT NULL,
+  `payload` text NOT NULL,
+  `transmission_status` varchar(50) NOT NULL,
+  `retry_count` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`buffer_id`),
+  KEY `data_buffer_ibfk_1` (`equipment_id`),
+  CONSTRAINT `data_buffer_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `remote_monitoring_interface` (
+  `interface_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `interface_name` varchar(255) NOT NULL,
+  `endpoint_url` varchar(500) NOT NULL,
+  `protocol` varchar(50) NOT NULL,
+  `last_sync_time` datetime DEFAULT NULL,
+  `interface_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`interface_id`),
+  KEY `remote_monitoring_interface_ibfk_1` (`equipment_id`),
+  CONSTRAINT `remote_monitoring_interface_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

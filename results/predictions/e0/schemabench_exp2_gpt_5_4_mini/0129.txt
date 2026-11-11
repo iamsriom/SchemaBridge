@@ -1,0 +1,75 @@
+-- Schema for database: schemabench_0129
+CREATE TABLE `play` (
+  `play_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `genre` varchar(100) DEFAULT NULL,
+  `year_written` int(11) DEFAULT NULL,
+  `source_text` text DEFAULT NULL,
+  PRIMARY KEY (`play_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `character` (
+  `character_id` int(11) NOT NULL AUTO_INCREMENT,
+  `character_name` varchar(255) NOT NULL,
+  `alias` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`character_id`),
+  UNIQUE KEY `uk_character_name` (`character_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `scene` (
+  `scene_id` int(11) NOT NULL AUTO_INCREMENT,
+  `play_id` int(11) NOT NULL,
+  `act_number` int(11) NOT NULL,
+  `scene_number` int(11) NOT NULL,
+  `scene_title` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`scene_id`),
+  KEY `play_id` (`play_id`),
+  CONSTRAINT `scene_ibfk_1` FOREIGN KEY (`play_id`) REFERENCES `play` (`play_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `line` (
+  `line_id` int(11) NOT NULL AUTO_INCREMENT,
+  `scene_id` int(11) NOT NULL,
+  `line_number` int(11) NOT NULL,
+  `speaker_character_id` int(11) DEFAULT NULL,
+  `line_text` text NOT NULL,
+  `predicted_character_id` int(11) DEFAULT NULL,
+  `prediction_confidence` decimal(5,4) DEFAULT NULL,
+  PRIMARY KEY (`line_id`),
+  KEY `scene_id` (`scene_id`),
+  KEY `speaker_character_id` (`speaker_character_id`),
+  KEY `predicted_character_id` (`predicted_character_id`),
+  CONSTRAINT `line_ibfk_1` FOREIGN KEY (`scene_id`) REFERENCES `scene` (`scene_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `line_ibfk_2` FOREIGN KEY (`speaker_character_id`) REFERENCES `character` (`character_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `line_ibfk_3` FOREIGN KEY (`predicted_character_id`) REFERENCES `character` (`character_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `character_scene` (
+  `character_scene_id` int(11) NOT NULL AUTO_INCREMENT,
+  `character_id` int(11) NOT NULL,
+  `scene_id` int(11) NOT NULL,
+  `line_count` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`character_scene_id`),
+  UNIQUE KEY `uk_character_scene` (`character_id`,`scene_id`),
+  KEY `scene_id` (`scene_id`),
+  CONSTRAINT `character_scene_ibfk_1` FOREIGN KEY (`character_id`) REFERENCES `character` (`character_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `character_scene_ibfk_2` FOREIGN KEY (`scene_id`) REFERENCES `scene` (`scene_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `search_log` (
+  `search_log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `searched_at` datetime NOT NULL,
+  `search_type` varchar(50) NOT NULL,
+  `query_text` varchar(255) NOT NULL,
+  `play_id` int(11) DEFAULT NULL,
+  `character_id` int(11) DEFAULT NULL,
+  `scene_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`search_log_id`),
+  KEY `play_id` (`play_id`),
+  KEY `character_id` (`character_id`),
+  KEY `scene_id` (`scene_id`),
+  CONSTRAINT `search_log_ibfk_1` FOREIGN KEY (`play_id`) REFERENCES `play` (`play_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `search_log_ibfk_2` FOREIGN KEY (`character_id`) REFERENCES `character` (`character_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `search_log_ibfk_3` FOREIGN KEY (`scene_id`) REFERENCES `scene` (`scene_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

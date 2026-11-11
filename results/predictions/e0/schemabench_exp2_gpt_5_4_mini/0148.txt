@@ -1,0 +1,131 @@
+-- Schema for database: schemabench_0148
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'user',
+  `status` varchar(50) NOT NULL DEFAULT 'active',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `products` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `sku` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `stock_quantity` int(11) NOT NULL DEFAULT 0,
+  `status` varchar(50) NOT NULL DEFAULT 'active',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `products_sku_unique` (`sku`),
+  KEY `products_category_id_index` (`category_id`),
+  CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `orders` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `order_number` varchar(100) NOT NULL,
+  `order_date` datetime NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'pending',
+  `total_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `orders_order_number_unique` (`order_number`),
+  KEY `orders_user_id_index` (`user_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `order_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `line_total` decimal(10,2) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `order_items_order_id_index` (`order_id`),
+  KEY `order_items_product_id_index` (`product_id`),
+  CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `invoices` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `invoice_number` varchar(100) NOT NULL,
+  `issue_date` datetime NOT NULL,
+  `due_date` datetime DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'unpaid',
+  `total_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `paid_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `invoices_invoice_number_unique` (`invoice_number`),
+  KEY `invoices_order_id_index` (`order_id`),
+  CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `payments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `invoice_id` int(11) NOT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `payment_date` datetime NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `method` varchar(50) NOT NULL,
+  `reference` varchar(255) DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'completed',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `payments_invoice_id_index` (`invoice_id`),
+  KEY `payments_order_id_index` (`order_id`),
+  CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `payments_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `refunds` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `payment_id` int(11) NOT NULL,
+  `invoice_id` int(11) NOT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `refund_date` datetime NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `reason` varchar(255) DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'processed',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `refunds_payment_id_index` (`payment_id`),
+  KEY `refunds_invoice_id_index` (`invoice_id`),
+  KEY `refunds_order_id_index` (`order_id`),
+  CONSTRAINT `refunds_ibfk_1` FOREIGN KEY (`payment_id`) REFERENCES `payments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `refunds_ibfk_2` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `refunds_ibfk_3` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `reports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `report_type` varchar(100) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `parameters` text DEFAULT NULL,
+  `generated_at` datetime NOT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `reports_created_by_index` (`created_by`),
+  CONSTRAINT `reports_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

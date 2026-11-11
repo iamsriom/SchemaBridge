@@ -1,0 +1,129 @@
+{
+  "text_number": 344,
+  "id": "67552f0a13602ec03b41a900",
+  "llm": "gpt54mini",
+  "model_id": "gpt-5.4-mini",
+  "database": "rschema_0344",
+  "question": "Business Requirements Description:\nThis system is designed for managing and monitoring web services in various applications. Key requirements include:\nEach user has a unique username, email, and role. User roles are associated with specific permissions. Users can be assigned different roles and permissions that are linked to particular applications.\nEach application has a unique ID, code, name, and type.\nEach web service has a unique ID, name, description, and creation date. It records error information, including error codes, descriptions, timestamps, and return status.\nMonitors the invocation of web services, recording details like invocation time, return status, delay time, and other performance metrics.\nTracks statistics such as success rate and call count over a specific time period.\nTracks which users are authorized to access which applications.\nLinks error data with monitoring data to enable detailed analysis and reporting.",
+  "ddl": "-- Schema for database: rschema_0344\nCREATE TABLE `applications` (\n  `application_id` int(11) NOT NULL AUTO_INCREMENT,\n  `code` varchar(100) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `type` varchar(100) NOT NULL,\n  PRIMARY KEY (`application_id`),\n  UNIQUE KEY `uk_applications_code` (`code`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `roles` (\n  `role_id` int(11) NOT NULL AUTO_INCREMENT,\n  `role_name` varchar(100) NOT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`role_id`),\n  UNIQUE KEY `uk_roles_role_name` (`role_name`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `permissions` (\n  `permission_id` int(11) NOT NULL AUTO_INCREMENT,\n  `permission_name` varchar(100) NOT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`permission_id`),\n  UNIQUE KEY `uk_permissions_permission_name` (`permission_name`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `users` (\n  `user_id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(100) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `role_id` int(11) NOT NULL,\n  PRIMARY KEY (`user_id`),\n  UNIQUE KEY `uk_users_username` (`username`),\n  UNIQUE KEY `uk_users_email` (`email`),\n  KEY `users_ibfk_1` (`role_id`),\n  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `role_permissions` (\n  `role_id` int(11) NOT NULL,\n  `permission_id` int(11) NOT NULL,\n  PRIMARY KEY (`role_id`,`permission_id`),\n  KEY `role_permissions_ibfk_2` (`permission_id`),\n  CONSTRAINT `role_permissions_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `role_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`permission_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_application_access` (\n  `user_id` int(11) NOT NULL,\n  `application_id` int(11) NOT NULL,\n  `authorized_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`user_id`,`application_id`),\n  KEY `user_application_access_ibfk_2` (`application_id`),\n  CONSTRAINT `user_application_access_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `user_application_access_ibfk_2` FOREIGN KEY (`application_id`) REFERENCES `applications` (`application_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `application_user_permissions` (\n  `application_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `permission_id` int(11) NOT NULL,\n  PRIMARY KEY (`application_id`,`user_id`,`permission_id`),\n  KEY `application_user_permissions_ibfk_2` (`user_id`),\n  KEY `application_user_permissions_ibfk_3` (`permission_id`),\n  CONSTRAINT `application_user_permissions_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `applications` (`application_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `application_user_permissions_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `application_user_permissions_ibfk_3` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`permission_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `web_services` (\n  `web_service_id` int(11) NOT NULL AUTO_INCREMENT,\n  `application_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `description` varchar(500) DEFAULT NULL,\n  `creation_date` datetime NOT NULL,\n  PRIMARY KEY (`web_service_id`),\n  KEY `web_services_ibfk_1` (`application_id`),\n  CONSTRAINT `web_services_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `applications` (`application_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `web_service_errors` (\n  `error_id` int(11) NOT NULL AUTO_INCREMENT,\n  `web_service_id` int(11) NOT NULL,\n  `error_code` varchar(50) NOT NULL,\n  `error_description` varchar(500) DEFAULT NULL,\n  `error_timestamp` datetime NOT NULL,\n  `return_status` varchar(50) NOT NULL,\n  PRIMARY KEY (`error_id`),\n  KEY `web_service_errors_ibfk_1` (`web_service_id`),\n  CONSTRAINT `web_service_errors_ibfk_1` FOREIGN KEY (`web_service_id`) REFERENCES `web_services` (`web_service_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `web_service_monitoring` (\n  `monitor_id` int(11) NOT NULL AUTO_INCREMENT,\n  `web_service_id` int(11) NOT NULL,\n  `invocation_time` datetime NOT NULL,\n  `return_status` varchar(50) NOT NULL,\n  `delay_time_ms` int(11) DEFAULT NULL,\n  `success_rate` decimal(5,2) DEFAULT NULL,\n  `call_count` int(11) DEFAULT NULL,\n  `time_period_start` datetime DEFAULT NULL,\n  `time_period_end` datetime DEFAULT NULL,\n  PRIMARY KEY (`monitor_id`),\n  KEY `web_service_monitoring_ibfk_1` (`web_service_id`),\n  CONSTRAINT `web_service_monitoring_ibfk_1` FOREIGN KEY (`web_service_id`) REFERENCES `web_services` (`web_service_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `monitoring_error_links` (\n  `monitor_id` int(11) NOT NULL,\n  `error_id` int(11) NOT NULL,\n  PRIMARY KEY (`monitor_id`,`error_id`),\n  KEY `monitoring_error_links_ibfk_2` (`error_id`),\n  CONSTRAINT `monitoring_error_links_ibfk_1` FOREIGN KEY (`monitor_id`) REFERENCES `web_service_monitoring` (`monitor_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `monitoring_error_links_ibfk_2` FOREIGN KEY (`error_id`) REFERENCES `web_service_errors` (`error_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "rschema_0344",
+    "tables": [
+      "applications",
+      "roles",
+      "permissions",
+      "users",
+      "role_permissions",
+      "user_application_access",
+      "application_user_permissions",
+      "web_services",
+      "web_service_errors",
+      "web_service_monitoring",
+      "monitoring_error_links"
+    ],
+    "columns_by_table": {
+      "applications": [
+        {
+          "COLUMN_NAME": "application_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "auto_increment",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "code",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 100,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(100)",
+          "COLUMN_KEY": "UNI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "name",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "type",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 100,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(100)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ]
+    },
+    "roles": [
+      {
+        "COLUMN_NAME": "role_id",
+        "ORDINAL_POSITION": 1,
+        "COLUMN_DEFAULT": null,
+        "IS_NULLABLE": "NO",
+        "DATA_TYPE": "int",
+        "CHARACTER_MAXIMUM_LENGTH": null,
+        "NUMERIC_PRECISION": 10,
+        "NUMERIC_SCALE": 0,
+        "COLUMN_TYPE": "int(11)",
+        "COLUMN_KEY": "PRI",
+        "EXTRA": "auto_increment",
+        "COLUMN_COMMENT": ""
+      },
+      {
+        "COLUMN_NAME": "role_name",
+        "ORDINAL_POSITION": 2,
+        "COLUMN_DEFAULT": null,
+        "IS_NULLABLE": "NO",
+        "DATA_TYPE": "varchar",
+        "CHARACTER_MAXIMUM_LENGTH": 100,
+        "NUMERIC_PRECISION": null,
+        "NUMERIC_SCALE": null,
+        "COLUMN_TYPE": "varchar(100)",
+        "COLUMN_KEY": "UNI",
+        "EXTRA": "",
+        "COLUMN_COMMENT": ""
+      },
+      {
+        "COLUMN_NAME": "description",
+        "ORDINAL_POSITION": 3,
+        "COLUMN_DEFAULT": null,
+        "IS_NULLABLE": "YES",
+        "DATA_TYPE": "varchar",
+        "CHARACTER_MAXIMUM_LENGTH": 255,
+        "NUMERIC_PRECISION": null,
+        "NUMERIC_SCALE": null,
+        "COLUMN_TYPE": "varchar(255)",
+        "COLUMN_KEY": "",
+        "EXTRA": "",
+        "COLUMN_COMMENT": ""
+      }
+    ]
+  }
+}

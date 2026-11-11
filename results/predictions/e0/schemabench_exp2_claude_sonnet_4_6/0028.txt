@@ -1,0 +1,103 @@
+-- Schema for database: schemabench_0028
+
+CREATE TABLE `auth_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `password` varchar(128) NOT NULL,
+  `last_login` datetime DEFAULT NULL,
+  `is_superuser` tinyint(1) NOT NULL DEFAULT '0',
+  `username` varchar(150) NOT NULL,
+  `first_name` varchar(150) NOT NULL DEFAULT '',
+  `last_name` varchar(150) NOT NULL DEFAULT '',
+  `email` varchar(254) NOT NULL DEFAULT '',
+  `is_staff` tinyint(1) NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `date_joined` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `two_factor_phone_device` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(64) NOT NULL,
+  `confirmed` tinyint(1) NOT NULL DEFAULT '0',
+  `number` varchar(40) NOT NULL,
+  `key` varchar(40) NOT NULL,
+  `method` varchar(4) NOT NULL,
+  `token` varchar(6) DEFAULT NULL,
+  `valid_until` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `two_factor_phone_device_user_id` (`user_id`),
+  CONSTRAINT `two_factor_phone_device_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `otp_totp_totpdevice` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(64) NOT NULL,
+  `confirmed` tinyint(1) NOT NULL DEFAULT '0',
+  `key` varchar(80) NOT NULL,
+  `step` smallint(5) NOT NULL DEFAULT '30',
+  `t0` bigint(20) NOT NULL DEFAULT '0',
+  `digits` smallint(5) NOT NULL DEFAULT '6',
+  `tolerance` smallint(5) NOT NULL DEFAULT '1',
+  `drift` smallint(6) NOT NULL DEFAULT '0',
+  `last_t` bigint(20) NOT NULL DEFAULT '-1',
+  PRIMARY KEY (`id`),
+  KEY `otp_totp_totpdevice_user_id` (`user_id`),
+  CONSTRAINT `otp_totp_totpdevice_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `otp_yubikey_yubikeydevice` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(64) NOT NULL,
+  `confirmed` tinyint(1) NOT NULL DEFAULT '0',
+  `public_id` varchar(128) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `otp_yubikey_yubikeydevice_user_id` (`user_id`),
+  CONSTRAINT `otp_yubikey_yubikeydevice_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `otp_static_staticdevice` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(64) NOT NULL,
+  `confirmed` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `otp_static_staticdevice_user_id` (`user_id`),
+  CONSTRAINT `otp_static_staticdevice_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `otp_static_statictoken` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_id` int(11) NOT NULL,
+  `token` varchar(16) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `otp_static_statictoken_device_id` (`device_id`),
+  CONSTRAINT `otp_static_statictoken_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `otp_static_staticdevice` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `two_factor_user_profile` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `default_device_type` varchar(64) DEFAULT NULL,
+  `default_device_id` int(11) DEFAULT NULL,
+  `is_verified` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`),
+  CONSTRAINT `two_factor_user_profile_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `two_factor_auth_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `timestamp` datetime NOT NULL,
+  `device_type` varchar(64) NOT NULL,
+  `device_id` int(11) NOT NULL,
+  `result` varchar(16) NOT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `two_factor_auth_log_user_id` (`user_id`),
+  CONSTRAINT `two_factor_auth_log_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

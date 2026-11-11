@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0080
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone` varchar(50) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `repair_worker` (
+  `worker_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`worker_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `part` (
+  `part_id` int(11) NOT NULL AUTO_INCREMENT,
+  `serial_number` varchar(100) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `supplier` varchar(255) DEFAULT NULL,
+  `stock_quantity` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`part_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `repair_task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `vehicle_model` varchar(255) NOT NULL,
+  `status` enum('pending','in progress','completed') NOT NULL DEFAULT 'pending',
+  `customer_id` int(11) NOT NULL,
+  `worker_id` int(11) NOT NULL,
+  `start_date` date DEFAULT NULL,
+  `completion_date` date DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  CONSTRAINT `repair_task_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `repair_task_ibfk_2` FOREIGN KEY (`worker_id`) REFERENCES `repair_worker` (`worker_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_part` (
+  `task_part_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `part_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`task_part_id`),
+  CONSTRAINT `task_part_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `repair_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_part_ibfk_2` FOREIGN KEY (`part_id`) REFERENCES `part` (`part_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

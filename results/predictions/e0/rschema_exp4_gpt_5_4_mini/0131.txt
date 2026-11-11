@@ -1,0 +1,77 @@
+-- Schema for database: rschema_0131
+CREATE TABLE `positions` (
+  `position_id` int(11) NOT NULL AUTO_INCREMENT,
+  `position_name` varchar(100) NOT NULL,
+  `position_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`position_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employees` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_name` varchar(100) NOT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `hire_date` date DEFAULT NULL,
+  `position_id` int(11) NOT NULL,
+  `performance_status` varchar(50) DEFAULT NULL,
+  `status` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  KEY `position_id` (`position_id`),
+  CONSTRAINT `employees_ibfk_1` FOREIGN KEY (`position_id`) REFERENCES `positions` (`position_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `suppliers` (
+  `supplier_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_name` varchar(150) NOT NULL,
+  `contact_person` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `supplier_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`supplier_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `projects` (
+  `project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_name` varchar(150) NOT NULL,
+  `project_description` varchar(255) DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `progress_percent` decimal(5,2) DEFAULT NULL,
+  `progress_status` varchar(50) DEFAULT NULL,
+  `responsible_employee_id` int(11) NOT NULL,
+  `supplier_id` int(11) NOT NULL,
+  PRIMARY KEY (`project_id`),
+  KEY `responsible_employee_id` (`responsible_employee_id`),
+  KEY `supplier_id` (`supplier_id`),
+  CONSTRAINT `projects_ibfk_1` FOREIGN KEY (`responsible_employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `projects_ibfk_2` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attendance_records` (
+  `attendance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `attendance_date` date NOT NULL,
+  `check_in_time` datetime DEFAULT NULL,
+  `check_out_time` datetime DEFAULT NULL,
+  `attendance_status` varchar(20) DEFAULT NULL,
+  `remark` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`attendance_id`),
+  KEY `employee_id` (`employee_id`),
+  CONSTRAINT `attendance_records_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `salary_records` (
+  `salary_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `salary_month` char(7) NOT NULL,
+  `base_salary` decimal(10,2) NOT NULL,
+  `bonus` decimal(10,2) DEFAULT NULL,
+  `deduction` decimal(10,2) DEFAULT NULL,
+  `net_salary` decimal(10,2) NOT NULL,
+  `pay_date` date DEFAULT NULL,
+  PRIMARY KEY (`salary_id`),
+  KEY `employee_id` (`employee_id`),
+  CONSTRAINT `salary_records_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

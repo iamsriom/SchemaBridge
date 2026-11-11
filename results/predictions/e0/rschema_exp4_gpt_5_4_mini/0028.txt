@@ -1,0 +1,103 @@
+-- Schema for database: rschema_0028
+CREATE TABLE `timber` (
+  `timber_id` int(11) NOT NULL AUTO_INCREMENT,
+  `timber_name` varchar(255) NOT NULL,
+  `timber_type` varchar(255) NOT NULL,
+  `purchase_price` decimal(10,2) NOT NULL,
+  `processing_cost` decimal(10,2) NOT NULL,
+  `selling_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`timber_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(255) NOT NULL,
+  `person_in_charge` varchar(255) NOT NULL,
+  `contact_info` varchar(255) NOT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_code` varchar(50) NOT NULL,
+  `employee_name` varchar(255) NOT NULL,
+  `gender` varchar(10) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  UNIQUE KEY `uk_employee_code` (`employee_code`),
+  KEY `employee_ibfk_1` (`department_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supplier` (
+  `supplier_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`supplier_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `procurement` (
+  `procurement_id` int(11) NOT NULL AUTO_INCREMENT,
+  `timber_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `purchaser_id` int(11) NOT NULL,
+  `supplier_id` int(11) NOT NULL,
+  `purchase_time` datetime NOT NULL,
+  PRIMARY KEY (`procurement_id`),
+  KEY `procurement_ibfk_1` (`timber_id`),
+  KEY `procurement_ibfk_2` (`purchaser_id`),
+  KEY `procurement_ibfk_3` (`supplier_id`),
+  CONSTRAINT `procurement_ibfk_1` FOREIGN KEY (`timber_id`) REFERENCES `timber` (`timber_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `procurement_ibfk_2` FOREIGN KEY (`purchaser_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `procurement_ibfk_3` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `processing` (
+  `processing_id` int(11) NOT NULL AUTO_INCREMENT,
+  `timber_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `processor_id` int(11) NOT NULL,
+  `processing_time` datetime NOT NULL,
+  PRIMARY KEY (`processing_id`),
+  KEY `processing_ibfk_1` (`timber_id`),
+  KEY `processing_ibfk_2` (`processor_id`),
+  CONSTRAINT `processing_ibfk_1` FOREIGN KEY (`timber_id`) REFERENCES `timber` (`timber_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `processing_ibfk_2` FOREIGN KEY (`processor_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales` (
+  `sales_id` int(11) NOT NULL AUTO_INCREMENT,
+  `timber_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `salesperson_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `sales_time` datetime NOT NULL,
+  PRIMARY KEY (`sales_id`),
+  KEY `sales_ibfk_1` (`timber_id`),
+  KEY `sales_ibfk_2` (`salesperson_id`),
+  KEY `sales_ibfk_3` (`customer_id`),
+  CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`timber_id`) REFERENCES `timber` (`timber_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_ibfk_2` FOREIGN KEY (`salesperson_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_ibfk_3` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department_performance` (
+  `performance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_id` int(11) NOT NULL,
+  `evaluation_period` varchar(50) NOT NULL,
+  `performance_score` decimal(10,2) NOT NULL,
+  `evaluation_content` text DEFAULT NULL,
+  `evaluation_time` datetime NOT NULL,
+  PRIMARY KEY (`performance_id`),
+  KEY `department_performance_ibfk_1` (`department_id`),
+  CONSTRAINT `department_performance_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

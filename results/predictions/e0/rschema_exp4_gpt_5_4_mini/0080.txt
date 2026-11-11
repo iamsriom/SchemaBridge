@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0080
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(255) NOT NULL,
+  `phone_number` varchar(50) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `repair_workers` (
+  `worker_id` int(11) NOT NULL AUTO_INCREMENT,
+  `worker_name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  PRIMARY KEY (`worker_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `parts` (
+  `part_id` int(11) NOT NULL AUTO_INCREMENT,
+  `serial_number` varchar(100) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `supplier` varchar(255) NOT NULL,
+  `inventory_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`part_id`),
+  UNIQUE KEY `serial_number` (`serial_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `repair_tasks` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `vehicle_model` varchar(255) NOT NULL,
+  `task_status` enum('pending','in progress','completed') NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `worker_id` int(11) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `completion_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `worker_id` (`worker_id`),
+  CONSTRAINT `repair_tasks_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `repair_tasks_ibfk_2` FOREIGN KEY (`worker_id`) REFERENCES `repair_workers` (`worker_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `repair_task_parts` (
+  `task_id` int(11) NOT NULL,
+  `part_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`task_id`,`part_id`),
+  KEY `part_id` (`part_id`),
+  CONSTRAINT `repair_task_parts_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `repair_tasks` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `repair_task_parts_ibfk_2` FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,91 @@
+-- Schema for database: schemabench_0176
+CREATE TABLE `water_type` (
+  `water_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `water_type_name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`water_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supplier` (
+  `supplier_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_name` varchar(255) NOT NULL,
+  `contact_person` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`supplier_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `job_role` (
+  `job_role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `job_role_name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`job_role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shift` (
+  `shift_id` int(11) NOT NULL AUTO_INCREMENT,
+  `shift_name` varchar(255) NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  PRIMARY KEY (`shift_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `worker` (
+  `worker_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `job_role_id` int(11) NOT NULL,
+  `shift_id` int(11) DEFAULT NULL,
+  `hire_date` date DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`worker_id`),
+  KEY `worker_ibfk_1` (`department_id`),
+  KEY `worker_ibfk_2` (`job_role_id`),
+  KEY `worker_ibfk_3` (`shift_id`),
+  CONSTRAINT `worker_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `worker_ibfk_2` FOREIGN KEY (`job_role_id`) REFERENCES `job_role` (`job_role_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `worker_ibfk_3` FOREIGN KEY (`shift_id`) REFERENCES `shift` (`shift_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `water_procurement` (
+  `procurement_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_id` int(11) NOT NULL,
+  `water_type_id` int(11) NOT NULL,
+  `delivery_date` date NOT NULL,
+  `quantity` decimal(10,2) NOT NULL,
+  `unit_price` decimal(10,2) DEFAULT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`procurement_id`),
+  KEY `water_procurement_ibfk_1` (`supplier_id`),
+  KEY `water_procurement_ibfk_2` (`water_type_id`),
+  CONSTRAINT `water_procurement_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `water_procurement_ibfk_2` FOREIGN KEY (`water_type_id`) REFERENCES `water_type` (`water_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `water_consumption` (
+  `consumption_id` int(11) NOT NULL AUTO_INCREMENT,
+  `water_type_id` int(11) NOT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `worker_id` int(11) DEFAULT NULL,
+  `consumption_date` date NOT NULL,
+  `quantity_used` decimal(10,2) NOT NULL,
+  `balance_after` decimal(10,2) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`consumption_id`),
+  KEY `water_consumption_ibfk_1` (`water_type_id`),
+  KEY `water_consumption_ibfk_2` (`department_id`),
+  KEY `water_consumption_ibfk_3` (`worker_id`),
+  CONSTRAINT `water_consumption_ibfk_1` FOREIGN KEY (`water_type_id`) REFERENCES `water_type` (`water_type_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `water_consumption_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `water_consumption_ibfk_3` FOREIGN KEY (`worker_id`) REFERENCES `worker` (`worker_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

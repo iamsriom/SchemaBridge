@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0387
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_information` varchar(255) NOT NULL,
+  `credit_card_number` varchar(32) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `airlines` (
+  `airline_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_information` varchar(255) NOT NULL,
+  PRIMARY KEY (`airline_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flights` (
+  `flight_id` int(11) NOT NULL AUTO_INCREMENT,
+  `flight_number` varchar(50) NOT NULL,
+  `destination` varchar(255) NOT NULL,
+  `departure_time` datetime NOT NULL,
+  `arrival_time` datetime NOT NULL,
+  `airline_id` int(11) NOT NULL,
+  PRIMARY KEY (`flight_id`),
+  KEY `airline_id` (`airline_id`),
+  CONSTRAINT `flights_ibfk_1` FOREIGN KEY (`airline_id`) REFERENCES `airlines` (`airline_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reservations` (
+  `reservation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `reservation_number` varchar(50) NOT NULL,
+  `reservation_date` date NOT NULL,
+  `reservation_time` time NOT NULL,
+  `number_of_tickets` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `flight_id` int(11) NOT NULL,
+  PRIMARY KEY (`reservation_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `flight_id` (`flight_id`),
+  CONSTRAINT `reservations_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reservations_ibfk_2` FOREIGN KEY (`flight_id`) REFERENCES `flights` (`flight_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payments` (
+  `payment_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `payment_amount` decimal(10,2) NOT NULL,
+  `payment_date` date NOT NULL,
+  `payment_method` varchar(100) NOT NULL,
+  `reservation_id` int(11) NOT NULL,
+  PRIMARY KEY (`payment_record_id`),
+  UNIQUE KEY `reservation_id` (`reservation_id`),
+  CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`reservation_id`) REFERENCES `reservations` (`reservation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

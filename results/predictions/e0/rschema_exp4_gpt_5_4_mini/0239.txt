@@ -1,0 +1,55 @@
+-- Schema for database: rschema_0239
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `user_type` varchar(20) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `articles` (
+  `article_id` int(11) NOT NULL AUTO_INCREMENT,
+  `author_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `published_at` datetime DEFAULT NULL,
+  `read_count` int(11) NOT NULL DEFAULT 0,
+  `like_count` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`article_id`),
+  KEY `articles_ibfk_1` (`author_id`),
+  CONSTRAINT `articles_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comments` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `article_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `published_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`comment_id`),
+  KEY `comments_ibfk_1` (`article_id`),
+  KEY `comments_ibfk_2` (`user_id`),
+  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `replies` (
+  `reply_id` int(11) NOT NULL AUTO_INCREMENT,
+  `comment_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `published_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`reply_id`),
+  KEY `replies_ibfk_1` (`comment_id`),
+  KEY `replies_ibfk_2` (`user_id`),
+  CONSTRAINT `replies_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `replies_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

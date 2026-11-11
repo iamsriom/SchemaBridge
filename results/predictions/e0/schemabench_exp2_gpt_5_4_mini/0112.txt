@@ -1,0 +1,117 @@
+-- Schema for database: schemabench_0112
+CREATE TABLE `master` (
+  `player_id` varchar(10) NOT NULL,
+  `first_name` varchar(255) DEFAULT NULL,
+  `last_name` varchar(255) DEFAULT NULL,
+  `birth_date` date DEFAULT NULL,
+  `birth_city` varchar(255) DEFAULT NULL,
+  `birth_state` varchar(255) DEFAULT NULL,
+  `birth_country` varchar(255) DEFAULT NULL,
+  `death_date` date DEFAULT NULL,
+  `shoots_catches` char(1) DEFAULT NULL,
+  PRIMARY KEY (`player_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `teams` (
+  `team_id` varchar(10) NOT NULL,
+  `year_id` int(11) NOT NULL,
+  `lg_id` varchar(10) NOT NULL,
+  `franch_id` varchar(10) DEFAULT NULL,
+  `division_id` varchar(10) DEFAULT NULL,
+  `rank` int(11) DEFAULT NULL,
+  `games` int(11) DEFAULT NULL,
+  `wins` int(11) DEFAULT NULL,
+  `losses` int(11) DEFAULT NULL,
+  `ties` int(11) DEFAULT NULL,
+  `ot_losses` int(11) DEFAULT NULL,
+  `goals_for` int(11) DEFAULT NULL,
+  `goals_against` int(11) DEFAULT NULL,
+  `points` int(11) DEFAULT NULL,
+  PRIMARY KEY (`team_id`,`year_id`,`lg_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `teams_half` (
+  `team_id` varchar(10) NOT NULL,
+  `year_id` int(11) NOT NULL,
+  `lg_id` varchar(10) NOT NULL,
+  `half` char(1) NOT NULL,
+  `rank` int(11) DEFAULT NULL,
+  `games` int(11) DEFAULT NULL,
+  `wins` int(11) DEFAULT NULL,
+  `losses` int(11) DEFAULT NULL,
+  `ties` int(11) DEFAULT NULL,
+  `goals_for` int(11) DEFAULT NULL,
+  `goals_against` int(11) DEFAULT NULL,
+  `points` int(11) DEFAULT NULL,
+  PRIMARY KEY (`team_id`,`year_id`,`lg_id`,`half`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `teams_post` (
+  `team_id` varchar(10) NOT NULL,
+  `year_id` int(11) NOT NULL,
+  `lg_id` varchar(10) NOT NULL,
+  `round` varchar(10) NOT NULL,
+  `wins` int(11) DEFAULT NULL,
+  `losses` int(11) DEFAULT NULL,
+  `ties` int(11) DEFAULT NULL,
+  `goals_for` int(11) DEFAULT NULL,
+  `goals_against` int(11) DEFAULT NULL,
+  PRIMARY KEY (`team_id`,`year_id`,`lg_id`,`round`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `scoring` (
+  `player_id` varchar(10) NOT NULL,
+  `year_id` int(11) NOT NULL,
+  `lg_id` varchar(10) NOT NULL,
+  `team_id` varchar(10) DEFAULT NULL,
+  `games` int(11) DEFAULT NULL,
+  `goals` int(11) DEFAULT NULL,
+  `assists` int(11) DEFAULT NULL,
+  `points` int(11) DEFAULT NULL,
+  `penalty_minutes` int(11) DEFAULT NULL,
+  PRIMARY KEY (`player_id`,`year_id`,`lg_id`),
+  CONSTRAINT `scoring_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `master` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `goalies` (
+  `player_id` varchar(10) NOT NULL,
+  `year_id` int(11) NOT NULL,
+  `lg_id` varchar(10) NOT NULL,
+  `team_id` varchar(10) DEFAULT NULL,
+  `games` int(11) DEFAULT NULL,
+  `wins` int(11) DEFAULT NULL,
+  `losses` int(11) DEFAULT NULL,
+  `ties` int(11) DEFAULT NULL,
+  `shutouts` int(11) DEFAULT NULL,
+  `goals_against_avg` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`player_id`,`year_id`,`lg_id`),
+  CONSTRAINT `goalies_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `master` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `coaches` (
+  `coach_id` varchar(10) NOT NULL,
+  `year_id` int(11) NOT NULL,
+  `lg_id` varchar(10) NOT NULL,
+  `team_id` varchar(10) NOT NULL,
+  `games` int(11) DEFAULT NULL,
+  `wins` int(11) DEFAULT NULL,
+  `losses` int(11) DEFAULT NULL,
+  `ties` int(11) DEFAULT NULL,
+  PRIMARY KEY (`coach_id`,`year_id`,`lg_id`,`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `awards_players` (
+  `award_id` int(11) NOT NULL AUTO_INCREMENT,
+  `player_id` varchar(10) NOT NULL,
+  `year_id` int(11) NOT NULL,
+  `lg_id` varchar(10) DEFAULT NULL,
+  `award_name` varchar(255) NOT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`award_id`),
+  KEY `awards_players_player_idx` (`player_id`),
+  CONSTRAINT `awards_players_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `master` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `awards_coaches` (
+  `award_id` int(11) NOT NULL AUTO_INCREMENT,
+  `coach_id` varchar(10) NOT NULL,
+  `year_id` int(11) NOT NULL,
+  `lg_id` varchar(10) DEFAULT NULL,
+  `award_name` varchar(255) NOT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`award_id`),
+  KEY `awards_coaches_coach_idx` (`coach_id`),
+  CONSTRAINT `awards_coaches_ibfk_1` FOREIGN KEY (`coach_id`) REFERENCES `coaches` (`coach_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,24 @@
+{
+  "text_number": 126,
+  "id": "67552f0a13602ec03b41a95a",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0126",
+  "question": "This database is used in the death record management module of a medical system, especially community health centers or small hospitals, to record and manage the information of the deceased confirmed by these institutions.\n\nMain functions:\n\n1. Record death information: You can record the personal information of the deceased, including name and unique identification number.\n\n2. Manage inspectors: By recording the identification number of the inspector, you can track which staff member confirmed the death.\n\n3. Update records: Automatically update the last modification time of each record, which helps to track the latest status of the information.\n\n4. Query and statistics: You can query according to the identification number of the deceased or the inspector, and count the death records over a period of time.",
+  "ddl": "-- Schema for database: rschema_0126\n\nCREATE TABLE `death_record` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `deceased_name` varchar(255) NOT NULL,\n  `deceased_id_number` char(18) NOT NULL,\n  `inspector_id_number` char(18) NOT NULL,\n  `confirmed_at` datetime NOT NULL,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `institution_name` varchar(255) DEFAULT NULL,\n  `remarks` varchar(500) DEFAULT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `inspector` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `inspector_id_number` char(18) NOT NULL,\n  `inspector_name` varchar(255) NOT NULL,\n  `department` varchar(255) DEFAULT NULL,\n  `phone` varchar(20) DEFAULT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `inspector_id_number` (`inspector_id_number`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `deceased` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `deceased_name` varchar(255) NOT NULL,\n  `deceased_id_number` char(18) NOT NULL,\n  `gender` tinyint(1) DEFAULT NULL,\n  `birth_date` datetime DEFAULT NULL,\n  `address` varchar(500) DEFAULT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `deceased_id_number` (`deceased_id_number`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `death_confirmation` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `deceased_id` int(11) NOT NULL,\n  `inspector_id` int(11) NOT NULL,\n  `confirmation_time` datetime NOT NULL,\n  `cause_of_death` varchar(500) DEFAULT NULL,\n  `institution_name` varchar(255) DEFAULT NULL,\n  `remarks` varchar(500) DEFAULT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `death_confirmation_ibfk_1` FOREIGN KEY (`deceased_id`) REFERENCES `deceased` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `death_confirmation_ibfk_2` FOREIGN KEY (`inspector_id`) REFERENCES `inspector` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "death_record",
+      "inspector",
+      "deceased",
+      "death_confirmation"
+    ],
+    "columns_by_table": {
+      "death_record": [],
+      "inspector": [],
+      "deceased": [],
+      "death_confirmation": []
+    }
+  }
+}

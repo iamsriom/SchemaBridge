@@ -1,0 +1,28 @@
+{
+  "text_number": 128,
+  "id": "SB-128",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "schemabench_0128",
+  "question": "Background / Context:\n\nThe project involves the development of a predictive analytics system for the San Francisco Department of Public Health. The system will manage data about food-related businesses, inspections, and violations. This involves predicting unscheduled inspection scores to ensure public health standards are maintained across eateries.\n\nObjectives:\n\n1. Predict inspection scores for unscheduled inspections from 2013 to 2016, with scores ranging from 1 to 100.\n2. Use historical data to enhance the Department's ability to forecast potential public health risks.\n\nStakeholders & Users:\n\n- San Francisco Department of Public Health officials\n- Data analysts and public health inspectors\n- Business owners affected by inspections\n\nFunctional Descriptions:\n\n1. Business Management:\n   - Store and manage data on businesses, including identification, location, and ownership details.\n   \n2. Inspection Record Keeping:\n   - Maintain a log of inspections, including scores, dates, and types.\n   - Facilitate the prediction of future inspection scores based on historical inspection data.\n\n3. Violation Tracking:\n   - Document violations, including type and risk category.\n   - Link violations to businesses and specific inspection events.\n\nNon-Functional Descriptions:\n\n- The system should ensure the confidentiality and integrity of business data.\n- Data processing should be efficient to allow timely predictions and analysis.\n- The solution must scale to handle a large volume of data spanning several years of records.",
+  "ddl": "-- Schema for database: schemabench_0128\n\nCREATE TABLE `businesses` (\n  `business_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `address` varchar(255) DEFAULT NULL,\n  `city` varchar(100) DEFAULT NULL,\n  `state` char(2) DEFAULT NULL,\n  `postal_code` varchar(10) DEFAULT NULL,\n  `latitude` decimal(10,7) DEFAULT NULL,\n  `longitude` decimal(10,7) DEFAULT NULL,\n  `phone_number` varchar(20) DEFAULT NULL,\n  `owner_name` varchar(255) DEFAULT NULL,\n  `owner_zip` varchar(10) DEFAULT NULL,\n  `tax_code` varchar(50) DEFAULT NULL,\n  `business_certificate` int(11) DEFAULT NULL,\n  `application_date` datetime DEFAULT NULL,\n  `neighborhood_id` int(11) DEFAULT NULL,\n  PRIMARY KEY (`business_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `neighborhoods` (\n  `neighborhood_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `city` varchar(100) DEFAULT NULL,\n  `state` char(2) DEFAULT NULL,\n  PRIMARY KEY (`neighborhood_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `inspections` (\n  `inspection_id` int(11) NOT NULL AUTO_INCREMENT,\n  `business_id` int(11) NOT NULL,\n  `score` int(11) DEFAULT NULL,\n  `date` datetime DEFAULT NULL,\n  `type` varchar(100) DEFAULT NULL,\n  `is_unscheduled` tinyint(1) NOT NULL DEFAULT 0,\n  PRIMARY KEY (`inspection_id`),\n  CONSTRAINT `inspections_ibfk_1` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`business_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `violations` (\n  `violation_id` int(11) NOT NULL AUTO_INCREMENT,\n  `inspection_id` int(11) NOT NULL,\n  `business_id` int(11) NOT NULL,\n  `date` datetime DEFAULT NULL,\n  `violation_type_id` int(11) DEFAULT NULL,\n  `risk_category` varchar(50) DEFAULT NULL,\n  `description` text DEFAULT NULL,\n  PRIMARY KEY (`violation_id`),\n  CONSTRAINT `violations_ibfk_1` FOREIGN KEY (`inspection_id`) REFERENCES `inspections` (`inspection_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `violations_ibfk_2` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`business_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `violation_types` (\n  `violation_type_id` int(11) NOT NULL AUTO_INCREMENT,\n  `code` varchar(50) NOT NULL,\n  `description` text DEFAULT NULL,\n  `risk_category` varchar(50) DEFAULT NULL,\n  PRIMARY KEY (`violation_type_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `inspection_score_predictions` (\n  `prediction_id` int(11) NOT NULL AUTO_INCREMENT,\n  `business_id` int(11) NOT NULL,\n  `predicted_score` decimal(5,2) DEFAULT NULL,\n  `prediction_date` datetime DEFAULT NULL,\n  `model_version` varchar(50) DEFAULT NULL,\n  `inspection_year` int(11) DEFAULT NULL,\n  PRIMARY KEY (`prediction_id`),\n  CONSTRAINT `inspection_score_predictions_ibfk_1` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`business_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "businesses",
+      "neighborhoods",
+      "inspections",
+      "violations",
+      "violation_types",
+      "inspection_score_predictions"
+    ],
+    "columns_by_table": {
+      "businesses": [],
+      "neighborhoods": [],
+      "inspections": [],
+      "violations": [],
+      "violation_types": [],
+      "inspection_score_predictions": []
+    }
+  }
+}

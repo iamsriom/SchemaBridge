@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0152
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_personal_info` (
+  `user_id` int(11) NOT NULL,
+  `full_name` varchar(255) DEFAULT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `user_personal_info_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_profile` (
+  `user_id` int(11) NOT NULL,
+  `occupation` varchar(255) DEFAULT NULL,
+  `interests` varchar(500) DEFAULT NULL,
+  `personal_profile` text DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `user_profile_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `posts` (
+  `post_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `images` text DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`post_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comments` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `post_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `comment_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `content` text NOT NULL,
+  PRIMARY KEY (`comment_id`),
+  KEY `post_id` (`post_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

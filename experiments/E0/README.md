@@ -41,6 +41,10 @@ Never substitute `configs/paper_reference_values.json` for missing prediction fi
 
 ```bash
 pip install -r requirements.txt
+# one-shot helper:
+bash scripts/reproduce_e0_offline.sh
+
+# or step-by-step:
 python3 -m pytest -q
 python3 experiments/E0/evaluate.py
 # equivalent:
@@ -49,11 +53,14 @@ python3 experiments/E0/reproduce_genuine_tables.py --validate-only
 python3 experiments/E0/reproduce_genuine_tables.py --dataset rschema
 python3 experiments/E0/reproduce_genuine_tables.py --model 'CodeLlama-13B' --skip-pytest
 python3 experiments/E0/reproduce_genuine_tables.py --write-gpm --no-render
-python3 experiments/E0/reproduce_genuine_tables.py --strict   # exit 2 if Direct dirs incomplete
+python3 experiments/E0/reproduce_genuine_tables.py --strict   # exit 2 if Direct dirs incomplete / baselines blocked
 python3 experiments/E0/reproduce_genuine_tables.py --include-gpt4o-mini   # optional
 ```
 
-Outputs (local, gitignored): `results/metrics/reproduced/E0_TABLE_{V,VI}_FINAL.*`
+Outputs: `results/metrics/reproduced/E0_TABLE_{V,VI}_FINAL.*`
+Verification: `audit/E0_VERIFICATION_REPORT.md`, `audit/E0_PAPER_COMPARISON.csv`
+
+**Honesty note:** PaperMethods baseline `results.jsonl` trees are not recoverable on the research server, so Table VI One-shot / CoT / Few-shot rows remain `BLOCKED` until those predictions are restored. SchemaAgent multi-agent code is intentionally **not** shipped. Original prompting helpers live under `original_benchmarks/`.
 
 ## Closed Direct inference (paid; opt-in)
 

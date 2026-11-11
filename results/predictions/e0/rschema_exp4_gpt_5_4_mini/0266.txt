@@ -1,0 +1,43 @@
+-- Schema for database: rschema_0266
+CREATE TABLE `pipeline` (
+  `pipeline_id` int(11) NOT NULL,
+  `starting_point` varchar(255) NOT NULL,
+  `ending_point` varchar(255) NOT NULL,
+  `length` decimal(10,2) NOT NULL,
+  `diameter` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`pipeline_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_personnel` (
+  `personnel_id` int(11) NOT NULL,
+  `personnel_name` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `position_title` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`personnel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_task` (
+  `task_id` int(11) NOT NULL,
+  `pipeline_id` int(11) NOT NULL,
+  `personnel_id` int(11) NOT NULL,
+  `maintenance_details` text NOT NULL,
+  `maintenance_time` datetime NOT NULL,
+  `task_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  KEY `pipeline_id` (`pipeline_id`),
+  KEY `personnel_id` (`personnel_id`),
+  CONSTRAINT `maintenance_task_ibfk_1` FOREIGN KEY (`pipeline_id`) REFERENCES `pipeline` (`pipeline_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_task_ibfk_2` FOREIGN KEY (`personnel_id`) REFERENCES `maintenance_personnel` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_monitoring` (
+  `monitoring_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `monitoring_time` datetime NOT NULL,
+  `monitoring_status` varchar(50) NOT NULL,
+  `performance_score` decimal(5,2) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`monitoring_id`),
+  KEY `task_id` (`task_id`),
+  CONSTRAINT `maintenance_monitoring_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `maintenance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

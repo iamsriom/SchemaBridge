@@ -1,0 +1,70 @@
+-- Schema for database: schemabench_0153
+
+CREATE TABLE `Books` (
+  `book_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `author` varchar(255) NOT NULL,
+  `publisher` varchar(255) DEFAULT NULL,
+  `publication_date` date DEFAULT NULL,
+  `isbn` varchar(20) NOT NULL,
+  `total_copies` int(11) NOT NULL DEFAULT '0',
+  `available_copies` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`book_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Staffs` (
+  `staff_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `date_of_joining` date NOT NULL,
+  PRIMARY KEY (`staff_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Members` (
+  `member_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `membership_status` varchar(20) NOT NULL DEFAULT 'active',
+  `date_of_membership` date NOT NULL,
+  PRIMARY KEY (`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `IssuedBooks` (
+  `issue_id` int(11) NOT NULL AUTO_INCREMENT,
+  `member_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `issue_date` date NOT NULL,
+  `due_date` date NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  PRIMARY KEY (`issue_id`),
+  CONSTRAINT `issuedbooks_ibfk_1` FOREIGN KEY (`member_id`) REFERENCES `Members` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `issuedbooks_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `Books` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `issuedbooks_ibfk_3` FOREIGN KEY (`staff_id`) REFERENCES `Staffs` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ReturnBooks` (
+  `return_id` int(11) NOT NULL AUTO_INCREMENT,
+  `issue_id` int(11) NOT NULL,
+  `return_date` date NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  PRIMARY KEY (`return_id`),
+  CONSTRAINT `returnbooks_ibfk_1` FOREIGN KEY (`issue_id`) REFERENCES `IssuedBooks` (`issue_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `returnbooks_ibfk_2` FOREIGN KEY (`staff_id`) REFERENCES `Staffs` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Fine` (
+  `fine_id` int(11) NOT NULL AUTO_INCREMENT,
+  `return_id` int(11) NOT NULL,
+  `days_overdue` int(11) NOT NULL DEFAULT '0',
+  `fine_per_day` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `total_fine` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `fine_status` varchar(20) NOT NULL DEFAULT 'unpaid',
+  PRIMARY KEY (`fine_id`),
+  CONSTRAINT `fine_ibfk_1` FOREIGN KEY (`return_id`) REFERENCES `ReturnBooks` (`return_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

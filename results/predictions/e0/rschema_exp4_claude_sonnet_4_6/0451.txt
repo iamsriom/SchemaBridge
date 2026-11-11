@@ -1,0 +1,72 @@
+-- Schema for database: rschema_0451
+
+CREATE TABLE `intrusion_detection` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `detection_time` datetime NOT NULL,
+  `source_ip` varchar(45) NOT NULL,
+  `destination_ip` varchar(45) NOT NULL,
+  `source_port` int(11) NOT NULL,
+  `destination_port` int(11) NOT NULL,
+  `attack_type` varchar(100) NOT NULL,
+  `threat_level` varchar(50) NOT NULL,
+  PRIMARY KEY (`record_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `knowledge_base` (
+  `knowledge_id` int(11) NOT NULL AUTO_INCREMENT,
+  `knowledge_category` varchar(100) NOT NULL,
+  `knowledge_description` text NOT NULL,
+  `knowledge_source` varchar(255) NOT NULL,
+  `knowledge_reliability` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`knowledge_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `response_plan` (
+  `plan_id` int(11) NOT NULL AUTO_INCREMENT,
+  `plan_generation_time` datetime NOT NULL,
+  `plan_type` varchar(50) NOT NULL,
+  `plan_content` text NOT NULL,
+  `execution_status` varchar(50) NOT NULL,
+  `record_id` int(11) DEFAULT NULL,
+  `knowledge_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`plan_id`),
+  CONSTRAINT `response_plan_ibfk_1` FOREIGN KEY (`record_id`) REFERENCES `intrusion_detection` (`record_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `response_plan_ibfk_2` FOREIGN KEY (`knowledge_id`) REFERENCES `knowledge_base` (`knowledge_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alarm` (
+  `alarm_id` int(11) NOT NULL AUTO_INCREMENT,
+  `alarm_time` datetime NOT NULL,
+  `alarm_level` varchar(50) NOT NULL,
+  `alarm_content` text NOT NULL,
+  `processing_status` varchar(50) NOT NULL,
+  `record_id` int(11) NOT NULL,
+  PRIMARY KEY (`alarm_id`),
+  CONSTRAINT `alarm_ibfk_1` FOREIGN KEY (`record_id`) REFERENCES `intrusion_detection` (`record_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pso_svm_model` (
+  `model_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_name` varchar(255) NOT NULL,
+  `training_time` datetime NOT NULL,
+  `accuracy` decimal(5,4) DEFAULT NULL,
+  `kernel_type` varchar(50) DEFAULT NULL,
+  `swarm_size` int(11) DEFAULT NULL,
+  `max_iterations` int(11) DEFAULT NULL,
+  `model_status` varchar(50) NOT NULL,
+  `model_description` text DEFAULT NULL,
+  PRIMARY KEY (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `random_forest_prediction` (
+  `prediction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `prediction_time` datetime NOT NULL,
+  `security_status` varchar(100) NOT NULL,
+  `confidence_score` decimal(5,4) DEFAULT NULL,
+  `num_trees` int(11) DEFAULT NULL,
+  `feature_importance` text DEFAULT NULL,
+  `prediction_result` text NOT NULL,
+  `record_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`prediction_id`),
+  CONSTRAINT `random_forest_prediction_ibfk_1` FOREIGN KEY (`record_id`) REFERENCES `intrusion_detection` (`record_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

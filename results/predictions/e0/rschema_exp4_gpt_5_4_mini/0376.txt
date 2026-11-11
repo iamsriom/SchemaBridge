@@ -1,0 +1,86 @@
+-- Schema for database: rschema_0376
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(255) NOT NULL,
+  `phone_number` varchar(50) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `technicians` (
+  `technician_id` int(11) NOT NULL AUTO_INCREMENT,
+  `technician_name` varchar(255) NOT NULL,
+  `contact_address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`technician_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `car_models` (
+  `model_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `suppliers` (
+  `supplier_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`supplier_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `parts` (
+  `part_id` int(11) NOT NULL AUTO_INCREMENT,
+  `serial_number` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `supplier_id` int(11) NOT NULL,
+  `inventory_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`part_id`),
+  UNIQUE KEY `uk_parts_serial_number` (`serial_number`),
+  KEY `parts_ibfk_1` (`supplier_id`),
+  CONSTRAINT `parts_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `repair_tasks` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_id` int(11) NOT NULL,
+  `task_status` varchar(50) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `technician_id` int(11) NOT NULL,
+  `task_creation_date` datetime NOT NULL,
+  `completion_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  KEY `repair_tasks_ibfk_1` (`model_id`),
+  KEY `repair_tasks_ibfk_2` (`customer_id`),
+  KEY `repair_tasks_ibfk_3` (`technician_id`),
+  CONSTRAINT `repair_tasks_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `car_models` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `repair_tasks_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `repair_tasks_ibfk_3` FOREIGN KEY (`technician_id`) REFERENCES `technicians` (`technician_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `order_creation_date` datetime NOT NULL,
+  `delivery_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  UNIQUE KEY `uk_orders_task_id` (`task_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `repair_tasks` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_parts` (
+  `order_id` int(11) NOT NULL,
+  `part_id` int(11) NOT NULL,
+  `required_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`order_id`,`part_id`),
+  KEY `order_parts_ibfk_2` (`part_id`),
+  CONSTRAINT `order_parts_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_parts_ibfk_2` FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_parts` (
+  `task_id` int(11) NOT NULL,
+  `part_id` int(11) NOT NULL,
+  `used_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`task_id`,`part_id`),
+  KEY `task_parts_ibfk_2` (`part_id`),
+  CONSTRAINT `task_parts_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `repair_tasks` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_parts_ibfk_2` FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

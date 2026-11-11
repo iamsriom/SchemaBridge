@@ -1,0 +1,88 @@
+-- Schema for database: rschema_0385
+
+CREATE TABLE `currency` (
+  `currency_id` int(11) NOT NULL AUTO_INCREMENT,
+  `currency_code` varchar(10) NOT NULL,
+  `currency_name` varchar(100) NOT NULL,
+  `symbol` varchar(10) DEFAULT NULL,
+  `decimal_places` int(11) NOT NULL DEFAULT 2,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`currency_id`),
+  UNIQUE KEY `currency_code` (`currency_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bank_account` (
+  `account_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_number` varchar(50) NOT NULL,
+  `account_holder_name` varchar(255) NOT NULL,
+  `currency_id` int(11) NOT NULL,
+  `balance` decimal(18,2) NOT NULL DEFAULT 0.00,
+  `frozen_amount` decimal(18,2) NOT NULL DEFAULT 0.00,
+  `account_type` varchar(50) DEFAULT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'active',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`account_id`),
+  UNIQUE KEY `account_number` (`account_number`),
+  CONSTRAINT `bank_account_ibfk_1` FOREIGN KEY (`currency_id`) REFERENCES `currency` (`currency_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction_status` (
+  `status_id` int(11) NOT NULL AUTO_INCREMENT,
+  `status_code` varchar(50) NOT NULL,
+  `status_name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`status_id`),
+  UNIQUE KEY `status_code` (`status_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_reference` varchar(100) NOT NULL,
+  `from_account_id` int(11) DEFAULT NULL,
+  `to_account_id` int(11) DEFAULT NULL,
+  `transaction_type` varchar(50) NOT NULL,
+  `amount` decimal(18,2) NOT NULL,
+  `currency_id` int(11) NOT NULL,
+  `status_id` int(11) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `initiated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `completed_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`transaction_id`),
+  UNIQUE KEY `transaction_reference` (`transaction_reference`),
+  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`from_account_id`) REFERENCES `bank_account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_ibfk_2` FOREIGN KEY (`to_account_id`) REFERENCES `bank_account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_ibfk_3` FOREIGN KEY (`currency_id`) REFERENCES `currency` (`currency_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_ibfk_4` FOREIGN KEY (`status_id`) REFERENCES `transaction_status` (`status_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction_failure_log` (
+  `failure_log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_id` int(11) NOT NULL,
+  `error_code` varchar(50) DEFAULT NULL,
+  `error_message` varchar(1000) DEFAULT NULL,
+  `failure_reason` varchar(500) DEFAULT NULL,
+  `failed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `additional_info` text DEFAULT NULL,
+  PRIMARY KEY (`failure_log_id`),
+  CONSTRAINT `transaction_failure_log_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction_status_history` (
+  `history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_id` int(11) NOT NULL,
+  `previous_status_id` int(11) DEFAULT NULL,
+  `new_status_id` int(11) NOT NULL,
+  `changed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `changed_by` varchar(100) DEFAULT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`history_id`),
+  CONSTRAINT `transaction_status_history_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_status_history_ibfk_2` FOREIGN KEY (`previous_status_id`) REFERENCES `transaction_status` (`status_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_status_history_ibfk_3` FOREIGN KEY (`new_status_id`) REFERENCES `transaction_status` (`status_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

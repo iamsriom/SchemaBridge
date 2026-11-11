@@ -1,0 +1,57 @@
+-- Schema for database: rschema_0500
+
+CREATE TABLE `role` (
+  `role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_name` varchar(255) NOT NULL,
+  `role_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `email` (`email`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_type` (
+  `task_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_type_name` varchar(255) NOT NULL,
+  `task_type_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`task_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_status` (
+  `task_status_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_status_name` varchar(255) NOT NULL,
+  `task_status_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`task_status_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_priority` (
+  `task_priority_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_priority_name` varchar(255) NOT NULL,
+  `task_priority_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`task_priority_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_name` varchar(255) NOT NULL,
+  `task_description` varchar(255) DEFAULT NULL,
+  `task_deadline` datetime DEFAULT NULL,
+  `task_progress` int(11) DEFAULT NULL,
+  `task_type_id` int(11) NOT NULL,
+  `task_status_id` int(11) NOT NULL,
+  `task_priority_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`task_id`),
+  CONSTRAINT `task_ibfk_1` FOREIGN KEY (`task_type_id`) REFERENCES `task_type` (`task_type_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_ibfk_2` FOREIGN KEY (`task_status_id`) REFERENCES `task_status` (`task_status_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_ibfk_3` FOREIGN KEY (`task_priority_id`) REFERENCES `task_priority` (`task_priority_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

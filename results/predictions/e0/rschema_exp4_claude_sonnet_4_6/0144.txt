@@ -1,0 +1,88 @@
+-- Schema for database: rschema_0144
+
+CREATE TABLE `school` (
+  `school_id` int(11) NOT NULL AUTO_INCREMENT,
+  `school_name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `contact_number` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`school_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teacher` (
+  `teacher_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `gender` char(6) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  `specialized_field` varchar(100) DEFAULT NULL,
+  `employment_status` varchar(50) DEFAULT NULL,
+  `school_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`teacher_id`),
+  CONSTRAINT `teacher_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `school` (`school_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `class` (
+  `class_id` int(11) NOT NULL AUTO_INCREMENT,
+  `class_name` varchar(100) NOT NULL,
+  `specialized_direction` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`class_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `gender` char(6) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `major` varchar(100) DEFAULT NULL,
+  `class_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`student_id`),
+  CONSTRAINT `student_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course` (
+  `course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_name` varchar(255) NOT NULL,
+  `credits` int(11) DEFAULT NULL,
+  `teacher_id` int(11) DEFAULT NULL,
+  `classroom` varchar(100) DEFAULT NULL,
+  `class_time` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`course_id`),
+  CONSTRAINT `course_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student_course` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `student_course_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `student_course_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `exam_score` (
+  `score_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `score` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`score_id`),
+  CONSTRAINT `exam_score_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `exam_score_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `class_student` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `class_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `class_student_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `class_student_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `school_teacher` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `school_id` int(11) NOT NULL,
+  `teacher_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `school_teacher_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `school` (`school_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `school_teacher_ibfk_2` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,99 @@
+-- Schema for database: rschema_0157
+CREATE TABLE `school_info` (
+  `school_id` int(11) NOT NULL AUTO_INCREMENT,
+  `school_number` varchar(50) NOT NULL,
+  `school_name` varchar(255) NOT NULL,
+  `school_introduction` text DEFAULT NULL,
+  `school_facilities` text DEFAULT NULL,
+  PRIMARY KEY (`school_id`),
+  UNIQUE KEY `school_number` (`school_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `branch_info` (
+  `branch_id` int(11) NOT NULL AUTO_INCREMENT,
+  `branch_number` varchar(50) NOT NULL,
+  `branch_name` varchar(255) NOT NULL,
+  `branch_introduction` text DEFAULT NULL,
+  PRIMARY KEY (`branch_id`),
+  UNIQUE KEY `branch_number` (`branch_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `class_info` (
+  `class_id` int(11) NOT NULL AUTO_INCREMENT,
+  `class_number` varchar(50) NOT NULL,
+  `class_name` varchar(255) NOT NULL,
+  `class_introduction` text DEFAULT NULL,
+  `branch_id` int(11) NOT NULL,
+  `teacher_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`class_id`),
+  UNIQUE KEY `class_number` (`class_number`),
+  KEY `branch_id` (`branch_id`),
+  KEY `teacher_id` (`teacher_id`),
+  CONSTRAINT `class_info_ibfk_1` FOREIGN KEY (`branch_id`) REFERENCES `branch_info` (`branch_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `class_info_ibfk_2` FOREIGN KEY (`teacher_id`) REFERENCES `teacher_info` (`teacher_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teacher_info` (
+  `teacher_id` int(11) NOT NULL AUTO_INCREMENT,
+  `teacher_number` varchar(50) NOT NULL,
+  `teacher_name` varchar(255) NOT NULL,
+  `teacher_title` varchar(255) DEFAULT NULL,
+  `teacher_profile` text DEFAULT NULL,
+  PRIMARY KEY (`teacher_id`),
+  UNIQUE KEY `teacher_number` (`teacher_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_info` (
+  `course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_number` varchar(50) NOT NULL,
+  `course_name` varchar(255) NOT NULL,
+  `course_description` text DEFAULT NULL,
+  `course_credits` decimal(4,1) NOT NULL DEFAULT '0.0',
+  PRIMARY KEY (`course_id`),
+  UNIQUE KEY `course_number` (`course_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dormitory_info` (
+  `dormitory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `dormitory_number` varchar(50) NOT NULL,
+  `dormitory_building` varchar(255) NOT NULL,
+  `dormitory_room_number` varchar(50) NOT NULL,
+  `dormitory_bed_count` int(11) NOT NULL,
+  PRIMARY KEY (`dormitory_id`),
+  UNIQUE KEY `dormitory_number` (`dormitory_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student_info` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_number` varchar(50) NOT NULL,
+  `student_name` varchar(255) NOT NULL,
+  `student_gender` varchar(20) NOT NULL,
+  `class_id` int(11) NOT NULL,
+  `branch_id` int(11) NOT NULL,
+  `dormitory_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`student_id`),
+  UNIQUE KEY `student_number` (`student_number`),
+  KEY `class_id` (`class_id`),
+  KEY `branch_id` (`branch_id`),
+  KEY `dormitory_id` (`dormitory_id`),
+  CONSTRAINT `student_info_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `class_info` (`class_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `student_info_ibfk_2` FOREIGN KEY (`branch_id`) REFERENCES `branch_info` (`branch_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `student_info_ibfk_3` FOREIGN KEY (`dormitory_id`) REFERENCES `dormitory_info` (`dormitory_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_schedule_info` (
+  `schedule_id` int(11) NOT NULL AUTO_INCREMENT,
+  `class_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `teacher_id` int(11) DEFAULT NULL,
+  `schedule_day` varchar(20) NOT NULL,
+  `schedule_period` varchar(50) NOT NULL,
+  `schedule_location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`schedule_id`),
+  KEY `class_id` (`class_id`),
+  KEY `course_id` (`course_id`),
+  KEY `teacher_id` (`teacher_id`),
+  CONSTRAINT `course_schedule_info_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `class_info` (`class_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_schedule_info_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course_info` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_schedule_info_ibfk_3` FOREIGN KEY (`teacher_id`) REFERENCES `teacher_info` (`teacher_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

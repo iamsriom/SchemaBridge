@@ -1,0 +1,77 @@
+-- Schema for database: rschema_0002
+
+CREATE TABLE `transportation_task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_number` varchar(50) NOT NULL,
+  `origin` varchar(255) NOT NULL,
+  `destination` varchar(255) NOT NULL,
+  `cargo_name` varchar(255) NOT NULL,
+  `weight` decimal(10,2) NOT NULL,
+  `transportation_time` decimal(10,2) DEFAULT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `performance_score` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  UNIQUE KEY `task_number` (`task_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transportation_method` (
+  `method_id` int(11) NOT NULL AUTO_INCREMENT,
+  `method_name` varchar(50) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`method_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `carrier` (
+  `carrier_id` int(11) NOT NULL AUTO_INCREMENT,
+  `carrier_name` varchar(255) NOT NULL,
+  `contact_phone` varchar(20) NOT NULL,
+  `method_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`carrier_id`),
+  CONSTRAINT `carrier_ibfk_1` FOREIGN KEY (`method_id`) REFERENCES `transportation_method` (`method_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_segment` (
+  `segment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `method_id` int(11) NOT NULL,
+  `carrier_id` int(11) NOT NULL,
+  `segment_order` int(11) NOT NULL,
+  `segment_origin` varchar(255) NOT NULL,
+  `segment_destination` varchar(255) NOT NULL,
+  `segment_start_time` datetime DEFAULT NULL,
+  `segment_end_time` datetime DEFAULT NULL,
+  `segment_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`segment_id`),
+  CONSTRAINT `task_segment_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `transportation_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_segment_ibfk_2` FOREIGN KEY (`method_id`) REFERENCES `transportation_method` (`method_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_segment_ibfk_3` FOREIGN KEY (`carrier_id`) REFERENCES `carrier` (`carrier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `monitoring_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `segment_id` int(11) DEFAULT NULL,
+  `record_time` datetime NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `status` varchar(100) DEFAULT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `monitoring_record_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `transportation_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `monitoring_record_ibfk_2` FOREIGN KEY (`segment_id`) REFERENCES `task_segment` (`segment_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `performance_evaluation` (
+  `evaluation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `evaluation_time` datetime NOT NULL,
+  `on_time_delivery` tinyint(1) DEFAULT NULL,
+  `cargo_integrity` tinyint(1) DEFAULT NULL,
+  `service_score` decimal(5,2) DEFAULT NULL,
+  `cost_efficiency` decimal(10,2) DEFAULT NULL,
+  `evaluator` varchar(100) DEFAULT NULL,
+  `comments` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`evaluation_id`),
+  CONSTRAINT `performance_evaluation_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `transportation_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

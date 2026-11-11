@@ -1,0 +1,78 @@
+-- Schema for database: schemabench_0005
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `stripe_id` varchar(255) DEFAULT NULL,
+  `pm_type` varchar(255) DEFAULT NULL,
+  `pm_last_four` char(4) DEFAULT NULL,
+  `trial_ends_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`),
+  KEY `users_stripe_id_index` (`stripe_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `stripe_id` varchar(255) NOT NULL,
+  `stripe_status` varchar(255) NOT NULL,
+  `stripe_price` varchar(255) DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `trial_ends_at` datetime DEFAULT NULL,
+  `ends_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `subscriptions_user_id_index` (`user_id`),
+  UNIQUE KEY `subscriptions_stripe_id_unique` (`stripe_id`),
+  CONSTRAINT `subscriptions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscription_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `subscription_id` int(11) NOT NULL,
+  `stripe_id` varchar(255) NOT NULL,
+  `stripe_product` varchar(255) NOT NULL,
+  `stripe_price` varchar(255) NOT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `subscription_items_subscription_id_index` (`subscription_id`),
+  UNIQUE KEY `subscription_items_stripe_id_unique` (`stripe_id`),
+  CONSTRAINT `subscription_items_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `receipts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `stripe_id` varchar(255) NOT NULL,
+  `amount` int(11) NOT NULL,
+  `currency` varchar(10) NOT NULL,
+  `invoice_pdf` varchar(255) DEFAULT NULL,
+  `paid_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `receipts_user_id_index` (`user_id`),
+  UNIQUE KEY `receipts_stripe_id_unique` (`stripe_id`),
+  CONSTRAINT `receipts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tax_rates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `stripe_id` varchar(255) NOT NULL,
+  `display_name` varchar(255) NOT NULL,
+  `percentage` decimal(5,2) NOT NULL,
+  `inclusive` tinyint(1) NOT NULL DEFAULT '0',
+  `country` char(2) DEFAULT NULL,
+  `state` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tax_rates_stripe_id_unique` (`stripe_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

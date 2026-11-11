@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0400
+
+CREATE TABLE `role` (
+  `role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_name` varchar(50) NOT NULL,
+  `permissions` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `college` varchar(100) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `registration_time` datetime NOT NULL,
+  `role_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `book` (
+  `book_id` int(11) NOT NULL AUTO_INCREMENT,
+  `book_name` varchar(255) NOT NULL,
+  `author` varchar(100) DEFAULT NULL,
+  `publisher` varchar(100) DEFAULT NULL,
+  `publication_date` datetime DEFAULT NULL,
+  `book_category` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`book_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `borrow` (
+  `borrow_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `borrow_date` datetime NOT NULL,
+  `return_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`borrow_id`),
+  CONSTRAINT `borrow_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `borrow_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `book` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notification` (
+  `notification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `notification_title` varchar(255) NOT NULL,
+  `notification_content` text DEFAULT NULL,
+  `publisher_id` int(11) NOT NULL,
+  `release_date` datetime NOT NULL,
+  PRIMARY KEY (`notification_id`),
+  CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`publisher_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

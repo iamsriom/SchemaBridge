@@ -1,0 +1,97 @@
+-- Schema for database: rschema_0235
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(50) DEFAULT NULL,
+  `registration_time` datetime NOT NULL,
+  `device_platform` varchar(50) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_sku` varchar(255) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `platform` varchar(50) NOT NULL,
+  `inventory_unit` varchar(100) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `currency` char(3) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`product_id`),
+  UNIQUE KEY `product_sku` (`product_sku`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `purchase_records` (
+  `purchase_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `order_number` varchar(255) NOT NULL,
+  `purchase_date` datetime NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `currency` char(3) NOT NULL,
+  `platform` varchar(50) NOT NULL,
+  `is_sandbox` tinyint(1) NOT NULL DEFAULT '0',
+  `is_cross_platform` tinyint(1) NOT NULL DEFAULT '0',
+  `renewal_of_purchase_id` int(11) DEFAULT NULL,
+  `changed_from_purchase_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`purchase_id`),
+  UNIQUE KEY `order_number` (`order_number`),
+  KEY `user_id` (`user_id`),
+  KEY `product_id` (`product_id`),
+  KEY `renewal_of_purchase_id` (`renewal_of_purchase_id`),
+  KEY `changed_from_purchase_id` (`changed_from_purchase_id`),
+  CONSTRAINT `purchase_records_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchase_records_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchase_records_ibfk_3` FOREIGN KEY (`renewal_of_purchase_id`) REFERENCES `purchase_records` (`purchase_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `purchase_records_ibfk_4` FOREIGN KEY (`changed_from_purchase_id`) REFERENCES `purchase_records` (`purchase_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `receipts` (
+  `receipt_id` int(11) NOT NULL AUTO_INCREMENT,
+  `purchase_id` int(11) NOT NULL,
+  `receipt_voucher` varchar(255) NOT NULL,
+  `receipt_data` longtext NOT NULL,
+  `receipt_hash` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`receipt_id`),
+  UNIQUE KEY `receipt_voucher` (`receipt_voucher`),
+  UNIQUE KEY `receipt_hash` (`receipt_hash`),
+  KEY `purchase_id` (`purchase_id`),
+  CONSTRAINT `receipts_ibfk_1` FOREIGN KEY (`purchase_id`) REFERENCES `purchase_records` (`purchase_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscriptions` (
+  `subscription_id` int(11) NOT NULL AUTO_INCREMENT,
+  `purchase_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `trial_start_date` datetime DEFAULT NULL,
+  `trial_end_date` datetime DEFAULT NULL,
+  `promo_start_date` datetime DEFAULT NULL,
+  `promo_end_date` datetime DEFAULT NULL,
+  `valid_from` datetime NOT NULL,
+  `valid_until` datetime NOT NULL,
+  `cycle_type` varchar(50) NOT NULL,
+  `subscription_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`subscription_id`),
+  KEY `purchase_id` (`purchase_id`),
+  KEY `user_id` (`user_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `subscriptions_ibfk_1` FOREIGN KEY (`purchase_id`) REFERENCES `purchase_records` (`purchase_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `subscriptions_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `subscriptions_ibfk_3` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `refunds` (
+  `refund_id` int(11) NOT NULL AUTO_INCREMENT,
+  `purchase_id` int(11) NOT NULL,
+  `refund_date` datetime NOT NULL,
+  `refund_amount` decimal(10,2) NOT NULL,
+  `currency` char(3) NOT NULL,
+  `refund_reason` varchar(255) DEFAULT NULL,
+  `refund_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`refund_id`),
+  KEY `purchase_id` (`purchase_id`),
+  CONSTRAINT `refunds_ibfk_1` FOREIGN KEY (`purchase_id`) REFERENCES `purchase_records` (`purchase_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

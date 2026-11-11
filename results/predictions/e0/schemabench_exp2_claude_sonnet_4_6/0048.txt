@@ -1,0 +1,156 @@
+-- Schema for database: schemabench_0048
+
+CREATE TABLE `developers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `applications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `developer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `framework_version` varchar(50) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `developer_id` (`developer_id`),
+  CONSTRAINT `applications_ibfk_1` FOREIGN KEY (`developer_id`) REFERENCES `developers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `end_users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `application_id` (`application_id`),
+  CONSTRAINT `end_users_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `authentication_sessions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `end_user_id` int(11) NOT NULL,
+  `token` varchar(512) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `end_user_id` (`end_user_id`),
+  CONSTRAINT `authentication_sessions_ibfk_1` FOREIGN KEY (`end_user_id`) REFERENCES `end_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment_plans` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `billing_interval` varchar(50) NOT NULL,
+  `features` text DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `application_id` (`application_id`),
+  CONSTRAINT `payment_plans_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `end_user_id` int(11) NOT NULL,
+  `payment_plan_id` int(11) NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'active',
+  `started_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `expires_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `end_user_id` (`end_user_id`),
+  KEY `payment_plan_id` (`payment_plan_id`),
+  CONSTRAINT `subscriptions_ibfk_1` FOREIGN KEY (`end_user_id`) REFERENCES `end_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `subscriptions_ibfk_2` FOREIGN KEY (`payment_plan_id`) REFERENCES `payment_plans` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `subscription_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `currency` char(3) NOT NULL DEFAULT 'USD',
+  `status` varchar(50) NOT NULL DEFAULT 'pending',
+  `payment_method` varchar(100) DEFAULT NULL,
+  `transaction_id` varchar(255) DEFAULT NULL,
+  `paid_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `subscription_id` (`subscription_id`),
+  CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `database_migrations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_id` int(11) NOT NULL,
+  `migration_name` varchar(255) NOT NULL,
+  `batch` int(11) NOT NULL,
+  `executed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `application_id` (`application_id`),
+  CONSTRAINT `database_migrations_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `api_routes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_id` int(11) NOT NULL,
+  `method` varchar(10) NOT NULL,
+  `path` varchar(255) NOT NULL,
+  `handler` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `application_id` (`application_id`),
+  CONSTRAINT `api_routes_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ui_components` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_id` int(11) NOT NULL,
+  `component_type` varchar(100) NOT NULL,
+  `component_name` varchar(255) NOT NULL,
+  `props` text DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `application_id` (`application_id`),
+  CONSTRAINT `ui_components_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `environment_configurations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_id` int(11) NOT NULL,
+  `config_key` varchar(255) NOT NULL,
+  `config_value` text DEFAULT NULL,
+  `environment` varchar(50) NOT NULL DEFAULT 'production',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `application_id` (`application_id`),
+  CONSTRAINT `environment_configurations_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `error_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_id` int(11) NOT NULL,
+  `error_code` varchar(50) DEFAULT NULL,
+  `message` text NOT NULL,
+  `stack_trace` text DEFAULT NULL,
+  `severity` varchar(20) NOT NULL DEFAULT 'error',
+  `occurred_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `application_id` (`application_id`),
+  CONSTRAINT `error_logs_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,119 @@
+-- Schema for database: schemabench_0014
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `display_name` varchar(255) DEFAULT NULL,
+  `avatar_url` varchar(255) DEFAULT NULL,
+  `bio` text DEFAULT NULL,
+  `is_admin` tinyint(1) NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_username_unique` (`username`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `permission_groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `permission_groups_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `user_permission_groups` (
+  `user_id` int(11) NOT NULL,
+  `permission_group_id` int(11) NOT NULL,
+  `assigned_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`,`permission_group_id`),
+  KEY `user_permission_groups_ibfk_2` (`permission_group_id`),
+  CONSTRAINT `user_permission_groups_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_permission_groups_ibfk_2` FOREIGN KEY (`permission_group_id`) REFERENCES `permission_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `discussions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `editor_type` varchar(50) NOT NULL DEFAULT 'markdown',
+  `is_locked` tinyint(1) NOT NULL DEFAULT '0',
+  `is_pinned` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `discussions_slug_unique` (`slug`),
+  KEY `discussions_ibfk_1` (`user_id`),
+  CONSTRAINT `discussions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `posts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `discussion_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `parent_post_id` int(11) DEFAULT NULL,
+  `content` text NOT NULL,
+  `editor_type` varchar(50) NOT NULL DEFAULT 'markdown',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `posts_ibfk_1` (`discussion_id`),
+  KEY `posts_ibfk_2` (`user_id`),
+  KEY `posts_ibfk_3` (`parent_post_id`),
+  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`discussion_id`) REFERENCES `discussions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `posts_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `posts_ibfk_3` FOREIGN KEY (`parent_post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `themes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `custom_css` text DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `themes_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `subject_type` varchar(100) NOT NULL,
+  `subject_id` int(11) NOT NULL,
+  `message` varchar(255) NOT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT '0',
+  `delivered_via_email` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL,
+  `read_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `notifications_ibfk_1` (`user_id`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `api_keys` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `key_name` varchar(255) NOT NULL,
+  `api_key_hash` varchar(255) NOT NULL,
+  `last_used_at` datetime DEFAULT NULL,
+  `expires_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `api_keys_api_key_hash_unique` (`api_key_hash`),
+  KEY `api_keys_ibfk_1` (`user_id`),
+  CONSTRAINT `api_keys_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `extensions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `version` varchar(50) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `is_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `config_json` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `extensions_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

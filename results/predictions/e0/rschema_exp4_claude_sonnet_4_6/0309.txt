@@ -1,0 +1,81 @@
+-- Schema for database: rschema_0309
+
+CREATE TABLE `region` (
+  `region_id` int(11) NOT NULL AUTO_INCREMENT,
+  `region_name` varchar(255) NOT NULL,
+  `region_code` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`region_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `income_group` (
+  `income_group_id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_name` varchar(255) NOT NULL,
+  `min_income` decimal(15,2) DEFAULT NULL,
+  `max_income` decimal(15,2) DEFAULT NULL,
+  PRIMARY KEY (`income_group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(50) DEFAULT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `marital_status` varchar(50) DEFAULT NULL,
+  `region_id` int(11) NOT NULL,
+  `income_group_id` int(11) NOT NULL,
+  PRIMARY KEY (`customer_id`),
+  CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customer_ibfk_2` FOREIGN KEY (`income_group_id`) REFERENCES `income_group` (`income_group_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vehicle_segment` (
+  `segment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `segment_name` varchar(255) NOT NULL,
+  `segment_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`segment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `policy_attribute` (
+  `attribute_id` int(11) NOT NULL AUTO_INCREMENT,
+  `attribute_name` varchar(255) NOT NULL,
+  `attribute_description` varchar(500) DEFAULT NULL,
+  `premium` decimal(15,2) NOT NULL,
+  `segment_id` int(11) NOT NULL,
+  PRIMARY KEY (`attribute_id`),
+  CONSTRAINT `policy_attribute_ibfk_1` FOREIGN KEY (`segment_id`) REFERENCES `vehicle_segment` (`segment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `policy` (
+  `policy_id` int(11) NOT NULL AUTO_INCREMENT,
+  `policy_name` varchar(255) NOT NULL,
+  `policy_type` varchar(255) NOT NULL,
+  `segment_id` int(11) NOT NULL,
+  `total_premium` decimal(15,2) DEFAULT NULL,
+  `policy_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`policy_id`),
+  CONSTRAINT `policy_ibfk_1` FOREIGN KEY (`segment_id`) REFERENCES `vehicle_segment` (`segment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `policy_attribute_mapping` (
+  `mapping_id` int(11) NOT NULL AUTO_INCREMENT,
+  `policy_id` int(11) NOT NULL,
+  `attribute_id` int(11) NOT NULL,
+  PRIMARY KEY (`mapping_id`),
+  CONSTRAINT `policy_attribute_mapping_ibfk_1` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`policy_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `policy_attribute_mapping_ibfk_2` FOREIGN KEY (`attribute_id`) REFERENCES `policy_attribute` (`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `insurance_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `policy_id` int(11) NOT NULL,
+  `purchase_date` date NOT NULL,
+  `expiration_date` date NOT NULL,
+  `total_amount_paid` decimal(15,2) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `insurance_record_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `insurance_record_ibfk_2` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`policy_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

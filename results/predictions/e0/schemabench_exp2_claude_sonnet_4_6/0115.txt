@@ -1,0 +1,47 @@
+-- Schema for database: schemabench_0115
+
+CREATE TABLE `legalact` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `court_name` varchar(255) NOT NULL,
+  `case_number` varchar(100) DEFAULT NULL,
+  `judge` varchar(255) DEFAULT NULL,
+  `decision_date` datetime DEFAULT NULL,
+  `act_type` varchar(100) DEFAULT NULL,
+  `act_number` varchar(100) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `legalact_link` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `legalact_id` int(11) NOT NULL,
+  `linked_legalact_id` int(11) NOT NULL,
+  `link_type` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `legalact_link_ibfk_1` FOREIGN KEY (`legalact_id`) REFERENCES `legalact` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `legalact_link_ibfk_2` FOREIGN KEY (`linked_legalact_id`) REFERENCES `legalact` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `legalact_people` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `legalact_id` int(11) NOT NULL,
+  `person_name` varchar(255) NOT NULL,
+  `role` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `legalact_people_ibfk_1` FOREIGN KEY (`legalact_id`) REFERENCES `legalact` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `scrapefix` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `legalact_id` int(11) NOT NULL,
+  `contributor` varchar(255) NOT NULL,
+  `fix_description` text DEFAULT NULL,
+  `fix_date` datetime NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `scrapefix_ibfk_1` FOREIGN KEY (`legalact_id`) REFERENCES `legalact` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

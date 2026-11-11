@@ -1,0 +1,98 @@
+-- Schema for database: rschema_0431
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(255) NOT NULL,
+  `introduction` text DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`department_id`),
+  UNIQUE KEY `uk_department_name` (`department_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctor` (
+  `doctor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_id` int(11) NOT NULL,
+  `doctor_name` varchar(255) NOT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  `specialty` varchar(255) DEFAULT NULL,
+  `introduction` text DEFAULT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'active',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`doctor_id`),
+  KEY `idx_doctor_department_id` (`department_id`),
+  CONSTRAINT `doctor_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctor_schedule` (
+  `schedule_id` int(11) NOT NULL AUTO_INCREMENT,
+  `doctor_id` int(11) NOT NULL,
+  `consultation_date` date NOT NULL,
+  `consultation_time` varchar(20) NOT NULL,
+  `total_slots` int(11) NOT NULL,
+  `remaining_slots` int(11) NOT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'open',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`schedule_id`),
+  KEY `idx_doctor_schedule_doctor_id` (`doctor_id`),
+  KEY `idx_doctor_schedule_date_time` (`consultation_date`,`consultation_time`),
+  CONSTRAINT `doctor_schedule_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `real_name` varchar(100) DEFAULT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `id_card` varchar(30) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `role` varchar(20) NOT NULL DEFAULT 'patient',
+  `status` varchar(20) NOT NULL DEFAULT 'active',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_user_username` (`username`),
+  UNIQUE KEY `uk_user_phone` (`phone`),
+  UNIQUE KEY `uk_user_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `appointment` (
+  `appointment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `schedule_id` int(11) NOT NULL,
+  `appointment_no` varchar(50) NOT NULL,
+  `appointment_status` varchar(20) NOT NULL DEFAULT 'registered',
+  `cancel_reason` varchar(255) DEFAULT NULL,
+  `registered_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `canceled_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`appointment_id`),
+  UNIQUE KEY `uk_appointment_no` (`appointment_no`),
+  KEY `idx_appointment_user_id` (`user_id`),
+  KEY `idx_appointment_schedule_id` (`schedule_id`),
+  KEY `idx_appointment_status` (`appointment_status`),
+  CONSTRAINT `appointment_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `appointment_ibfk_2` FOREIGN KEY (`schedule_id`) REFERENCES `doctor_schedule` (`schedule_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `appointment_statistics` (
+  `statistics_id` int(11) NOT NULL AUTO_INCREMENT,
+  `stat_date` date NOT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `doctor_id` int(11) DEFAULT NULL,
+  `registered_count` int(11) NOT NULL DEFAULT 0,
+  `canceled_count` int(11) NOT NULL DEFAULT 0,
+  `completed_count` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`statistics_id`),
+  KEY `idx_statistics_department_id` (`department_id`),
+  KEY `idx_statistics_doctor_id` (`doctor_id`),
+  KEY `idx_statistics_stat_date` (`stat_date`),
+  CONSTRAINT `appointment_statistics_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `appointment_statistics_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

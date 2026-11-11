@@ -1,0 +1,58 @@
+-- Schema for database: rschema_0493
+CREATE TABLE `enterprise` (
+  `enterprise_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`enterprise_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role` (
+  `role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_name` varchar(255) NOT NULL,
+  `hourly_wage` decimal(10,2) NOT NULL,
+  `daily_working_hours` decimal(5,2) NOT NULL,
+  `lunch_time` time NOT NULL,
+  PRIMARY KEY (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `enterprise_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `identification_number` varchar(50) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  UNIQUE KEY `uk_employee_email` (`email`),
+  UNIQUE KEY `uk_employee_identification_number` (`identification_number`),
+  KEY `employee_ibfk_1` (`enterprise_id`),
+  KEY `employee_ibfk_2` (`role_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprise` (`enterprise_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attendance_record` (
+  `attendance_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `check_in_time` datetime NOT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `check_in_location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`attendance_record_id`),
+  KEY `attendance_record_ibfk_1` (`employee_id`),
+  CONSTRAINT `attendance_record_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `todo_item` (
+  `todo_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `task_description` varchar(255) NOT NULL,
+  `completion_status` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`todo_item_id`),
+  KEY `todo_item_ibfk_1` (`employee_id`),
+  CONSTRAINT `todo_item_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

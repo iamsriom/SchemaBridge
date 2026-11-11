@@ -1,0 +1,55 @@
+-- Schema for database: rschema_0135
+CREATE TABLE `product_category` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(255) NOT NULL,
+  `parent_category_id` int(11) DEFAULT NULL,
+  `category_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`category_id`),
+  KEY `product_category_ibfk_1` (`parent_category_id`),
+  CONSTRAINT `product_category_ibfk_1` FOREIGN KEY (`parent_category_id`) REFERENCES `product_category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `brand` (
+  `brand_id` int(11) NOT NULL AUTO_INCREMENT,
+  `brand_name` varchar(255) NOT NULL,
+  `brand_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`brand_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `shelf` (
+  `shelf_id` int(11) NOT NULL AUTO_INCREMENT,
+  `shelf_code` varchar(50) NOT NULL,
+  `shelf_name` varchar(255) NOT NULL,
+  `location_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`shelf_id`),
+  UNIQUE KEY `shelf_code` (`shelf_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(255) NOT NULL,
+  `brand_id` int(11) DEFAULT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `product_sku` varchar(100) DEFAULT NULL,
+  `product_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`product_id`),
+  UNIQUE KEY `product_sku` (`product_sku`),
+  KEY `product_ibfk_1` (`brand_id`),
+  KEY `product_ibfk_2` (`category_id`),
+  CONSTRAINT `product_ibfk_1` FOREIGN KEY (`brand_id`) REFERENCES `brand` (`brand_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `product_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `product_category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `shelf_product_control` (
+  `control_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `shelf_id` int(11) NOT NULL,
+  `responsible_person` varchar(255) NOT NULL,
+  `stock_status` varchar(20) NOT NULL,
+  `stock_quantity` int(11) NOT NULL DEFAULT '0',
+  `unit_price` decimal(10,2) NOT NULL,
+  `stocked_at` datetime DEFAULT NULL,
+  `unstocked_at` datetime DEFAULT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`control_id`),
+  KEY `shelf_product_control_ibfk_1` (`product_id`),
+  KEY `shelf_product_control_ibfk_2` (`shelf_id`),
+  CONSTRAINT `shelf_product_control_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `shelf_product_control_ibfk_2` FOREIGN KEY (`shelf_id`) REFERENCES `shelf` (`shelf_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,132 @@
+-- Schema for database: rschema_0178
+
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `address` varchar(500) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `zip_code` varchar(20) DEFAULT NULL,
+  `date_of_birth` datetime DEFAULT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `is_registered` tinyint(1) NOT NULL DEFAULT 0,
+  `authorization_signed` tinyint(1) NOT NULL DEFAULT 0,
+  `authorization_date` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`customer_id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment_methods` (
+  `payment_method_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `payment_type` varchar(50) NOT NULL,
+  `card_holder_name` varchar(255) DEFAULT NULL,
+  `card_number_last4` char(4) DEFAULT NULL,
+  `expiry_date` varchar(10) DEFAULT NULL,
+  `billing_address` varchar(500) DEFAULT NULL,
+  `is_default` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`payment_method_id`),
+  CONSTRAINT `payment_methods_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctors` (
+  `doctor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `license_number` varchar(100) NOT NULL,
+  `specialty` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `clinic_name` varchar(255) DEFAULT NULL,
+  `clinic_address` varchar(500) DEFAULT NULL,
+  `is_verified` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`doctor_id`),
+  UNIQUE KEY `license_number` (`license_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medications` (
+  `medication_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `generic_name` varchar(255) DEFAULT NULL,
+  `description` varchar(1000) DEFAULT NULL,
+  `dosage_form` varchar(100) DEFAULT NULL,
+  `strength` varchar(100) DEFAULT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `requires_prescription` tinyint(1) NOT NULL DEFAULT 1,
+  `stock_quantity` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`medication_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prescriptions` (
+  `prescription_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `doctor_id` int(11) NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'Pending',
+  `submission_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `validation_date` datetime DEFAULT NULL,
+  `confirmation_sent_at` datetime DEFAULT NULL,
+  `doctor_response` varchar(255) DEFAULT NULL,
+  `doctor_response_at` datetime DEFAULT NULL,
+  `notes` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`prescription_id`),
+  CONSTRAINT `prescriptions_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `prescriptions_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prescription_items` (
+  `prescription_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `prescription_id` int(11) NOT NULL,
+  `medication_id` int(11) NOT NULL,
+  `dosage_instructions` varchar(500) DEFAULT NULL,
+  `quantity` int(11) NOT NULL,
+  `refills_allowed` int(11) NOT NULL DEFAULT 0,
+  `unit_price` decimal(10,2) NOT NULL,
+  `total_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`prescription_item_id`),
+  CONSTRAINT `prescription_items_ibfk_1` FOREIGN KEY (`prescription_id`) REFERENCES `prescriptions` (`prescription_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `prescription_items_ibfk_2` FOREIGN KEY (`medication_id`) REFERENCES `medications` (`medication_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `prescription_id` int(11) DEFAULT NULL,
+  `payment_method_id` int(11) NOT NULL,
+  `order_status` varchar(50) NOT NULL DEFAULT 'Pending',
+  `subtotal` decimal(10,2) NOT NULL,
+  `tax` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `shipping_cost` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `total_amount` decimal(10,2) NOT NULL,
+  `shipping_address` varchar(500) NOT NULL,
+  `shipping_city` varchar(100) NOT NULL,
+  `shipping_state` varchar(100) NOT NULL,
+  `shipping_zip` varchar(20) NOT NULL,
+  `payment_status` varchar(50) NOT NULL DEFAULT 'Unpaid',
+  `paid_at` datetime DEFAULT NULL,
+  `mailed_at` datetime DEFAULT NULL,
+  `tracking_number` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`prescription_id`) REFERENCES `prescriptions` (`prescription_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_3` FOREIGN KEY (`payment_method_id`) REFERENCES `payment_methods` (`payment_method_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_items` (
+  `order_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `medication_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `total_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`order_item_id`),
+  CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`medication_id`) REFERENCES `medications` (`medication_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

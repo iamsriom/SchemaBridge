@@ -1,0 +1,132 @@
+-- Schema for database: schemabench_0017
+CREATE TABLE `accounts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `number` varchar(255) DEFAULT NULL,
+  `currency_code` char(3) NOT NULL,
+  `balance` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `reconciled` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `customers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `sale_price` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `purchase_price` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `tax_rate` decimal(5,2) NOT NULL DEFAULT '0.00',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `items_ibfk_1` (`category_id`),
+  CONSTRAINT `items_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `invoices` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `invoice_number` varchar(255) NOT NULL,
+  `invoice_date` date NOT NULL,
+  `due_date` date DEFAULT NULL,
+  `status` varchar(50) NOT NULL,
+  `currency_code` char(3) NOT NULL,
+  `subtotal` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `tax_total` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `total` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `paid_amount` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `invoices_ibfk_1` (`customer_id`),
+  CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `invoice_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `invoice_id` int(11) NOT NULL,
+  `item_id` int(11) DEFAULT NULL,
+  `description` varchar(255) NOT NULL,
+  `quantity` decimal(15,2) NOT NULL DEFAULT '1.00',
+  `price` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `tax_rate` decimal(5,2) NOT NULL DEFAULT '0.00',
+  `total` decimal(15,2) NOT NULL DEFAULT '0.00',
+  PRIMARY KEY (`id`),
+  KEY `invoice_items_ibfk_1` (`invoice_id`),
+  KEY `invoice_items_ibfk_2` (`item_id`),
+  CONSTRAINT `invoice_items_ibfk_1` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `invoice_items_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `expenses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) DEFAULT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `expense_date` date NOT NULL,
+  `amount` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `currency_code` char(3) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `reference` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `expenses_ibfk_1` (`account_id`),
+  KEY `expenses_ibfk_2` (`category_id`),
+  CONSTRAINT `expenses_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `expenses_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `transactions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `transaction_date` date NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `amount` decimal(15,2) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `reference` varchar(255) DEFAULT NULL,
+  `reconciled` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `transactions_ibfk_1` (`account_id`),
+  KEY `transactions_ibfk_2` (`category_id`),
+  CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `bill_histories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `bill_id` int(11) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `bill_histories_ibfk_1` (`bill_id`),
+  CONSTRAINT `bill_histories_ibfk_1` FOREIGN KEY (`bill_id`) REFERENCES `expenses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `invoice_histories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `invoice_id` int(11) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `invoice_histories_ibfk_1` (`invoice_id`),
+  CONSTRAINT `invoice_histories_ibfk_1` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

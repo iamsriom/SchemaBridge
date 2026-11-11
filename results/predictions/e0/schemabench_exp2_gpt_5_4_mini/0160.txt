@@ -1,0 +1,84 @@
+-- Schema for database: schemabench_0160
+CREATE TABLE `company` (
+  `company_id` int(11) NOT NULL,
+  `company_name` varchar(255) NOT NULL,
+  `headquarters_address` varchar(255) DEFAULT NULL,
+  `established_date` date DEFAULT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stock` (
+  `stock_code` varchar(20) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  PRIMARY KEY (`stock_code`),
+  UNIQUE KEY `uk_stock_company` (`company_id`),
+  CONSTRAINT `stock_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `company` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stock_exchange` (
+  `exchange_id` int(11) NOT NULL,
+  `exchange_name` varchar(255) NOT NULL,
+  `exchange_code` varchar(20) NOT NULL,
+  `contact_details` varchar(255) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`exchange_id`),
+  UNIQUE KEY `uk_stock_exchange_code` (`exchange_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stock_listing` (
+  `listing_id` int(11) NOT NULL,
+  `stock_code` varchar(20) NOT NULL,
+  `exchange_id` int(11) NOT NULL,
+  `symbol` varchar(20) NOT NULL,
+  `last_trading_price` decimal(18,4) DEFAULT NULL,
+  `daily_volume` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`listing_id`),
+  UNIQUE KEY `uk_stock_listing_exchange_symbol` (`exchange_id`,`symbol`),
+  UNIQUE KEY `uk_stock_listing_stock_exchange` (`stock_code`,`exchange_id`),
+  CONSTRAINT `stock_listing_ibfk_1` FOREIGN KEY (`stock_code`) REFERENCES `stock` (`stock_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `stock_listing_ibfk_2` FOREIGN KEY (`exchange_id`) REFERENCES `stock_exchange` (`exchange_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `broker` (
+  `broker_id` int(11) NOT NULL,
+  `broker_name` varchar(255) NOT NULL,
+  `contact_details` varchar(255) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`broker_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trader` (
+  `trader_id` int(11) NOT NULL,
+  `trader_name` varchar(255) NOT NULL,
+  `contact_details` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`trader_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trading_account` (
+  `account_id` int(11) NOT NULL,
+  `trader_id` int(11) NOT NULL,
+  `broker_id` int(11) NOT NULL,
+  `cash_balance` decimal(18,2) NOT NULL DEFAULT '0.00',
+  `security_value` decimal(18,2) NOT NULL DEFAULT '0.00',
+  PRIMARY KEY (`account_id`),
+  KEY `trading_account_ibfk_1` (`trader_id`),
+  KEY `trading_account_ibfk_2` (`broker_id`),
+  CONSTRAINT `trading_account_ibfk_1` FOREIGN KEY (`trader_id`) REFERENCES `trader` (`trader_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trading_account_ibfk_2` FOREIGN KEY (`broker_id`) REFERENCES `broker` (`broker_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trade_transaction` (
+  `transaction_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `listing_id` int(11) NOT NULL,
+  `shares` int(11) NOT NULL,
+  `price` decimal(18,4) NOT NULL,
+  `commission` decimal(18,2) NOT NULL DEFAULT '0.00',
+  `transaction_timestamp` datetime NOT NULL,
+  `transaction_type` varchar(10) NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  KEY `trade_transaction_ibfk_1` (`account_id`),
+  KEY `trade_transaction_ibfk_2` (`listing_id`),
+  CONSTRAINT `trade_transaction_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `trading_account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `trade_transaction_ibfk_2` FOREIGN KEY (`listing_id`) REFERENCES `stock_listing` (`listing_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

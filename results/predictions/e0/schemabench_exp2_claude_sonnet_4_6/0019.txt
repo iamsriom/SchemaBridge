@@ -1,0 +1,166 @@
+-- Schema for database: schemabench_0019
+
+CREATE TABLE `auth_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(150) NOT NULL,
+  `email` varchar(254) NOT NULL,
+  `password` varchar(128) NOT NULL,
+  `first_name` varchar(150) NOT NULL DEFAULT '',
+  `last_name` varchar(150) NOT NULL DEFAULT '',
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `is_staff` tinyint(1) NOT NULL DEFAULT 0,
+  `is_superuser` tinyint(1) NOT NULL DEFAULT 0,
+  `date_joined` datetime NOT NULL,
+  `last_login` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `profile` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `api_key` varchar(128) NOT NULL DEFAULT '',
+  `current_team_id` int(11) DEFAULT NULL,
+  `reports_allowed` tinyint(1) NOT NULL DEFAULT 1,
+  `next_report_date` datetime DEFAULT NULL,
+  `reports_interval_weeks` int(11) NOT NULL DEFAULT 4,
+  `ping_log_limit` int(11) NOT NULL DEFAULT 100,
+  `check_limit` int(11) NOT NULL DEFAULT 20,
+  `token` varchar(128) NOT NULL DEFAULT '',
+  `last_sms_date` datetime DEFAULT NULL,
+  `sms_limit` int(11) NOT NULL DEFAULT 5,
+  `sms_sent` int(11) NOT NULL DEFAULT 0,
+  `team_limit` int(11) NOT NULL DEFAULT 2,
+  `sort` varchar(20) NOT NULL DEFAULT 'created',
+  `deletion_notice_date` datetime DEFAULT NULL,
+  `tz` varchar(36) NOT NULL DEFAULT 'UTC',
+  `theme` varchar(20) NOT NULL DEFAULT 'light',
+  PRIMARY KEY (`id`),
+  CONSTRAINT `profile_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `owner_id` int(11) NOT NULL,
+  `api_key` varchar(128) NOT NULL DEFAULT '',
+  `api_key_readonly` varchar(128) NOT NULL DEFAULT '',
+  `badge_key` varchar(150) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uuid` (`uuid`),
+  CONSTRAINT `project_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `member` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `role` varchar(10) NOT NULL DEFAULT 'w',
+  PRIMARY KEY (`id`),
+  CONSTRAINT `member_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `member_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `project` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `check` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL DEFAULT '',
+  `tags` varchar(500) NOT NULL DEFAULT '',
+  `slug` varchar(100) NOT NULL DEFAULT '',
+  `desc` varchar(1000) NOT NULL DEFAULT '',
+  `kind` varchar(10) NOT NULL DEFAULT 'simple',
+  `status` varchar(10) NOT NULL DEFAULT 'new',
+  `last_ping` datetime DEFAULT NULL,
+  `last_ping_was_fail` tinyint(1) DEFAULT NULL,
+  `has_confirmation_link` tinyint(1) NOT NULL DEFAULT 0,
+  `alert_after` datetime DEFAULT NULL,
+  `grace` int(11) NOT NULL DEFAULT 3600,
+  `timeout` int(11) NOT NULL DEFAULT 86400,
+  `schedule` varchar(100) NOT NULL DEFAULT '* * * * *',
+  `tz` varchar(36) NOT NULL DEFAULT 'UTC',
+  `subject` varchar(200) NOT NULL DEFAULT '',
+  `subject_fail` varchar(200) NOT NULL DEFAULT '',
+  `methods` varchar(30) NOT NULL DEFAULT '',
+  `manual_resume` tinyint(1) NOT NULL DEFAULT 0,
+  `n_pings` int(11) NOT NULL DEFAULT 0,
+  `failure_kw` varchar(200) NOT NULL DEFAULT '',
+  `success_kw` varchar(200) NOT NULL DEFAULT '',
+  `filter_subject` tinyint(1) NOT NULL DEFAULT 0,
+  `filter_body` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uuid` (`uuid`),
+  CONSTRAINT `check_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ping` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_id` int(11) NOT NULL,
+  `created` datetime NOT NULL,
+  `kind` varchar(10) DEFAULT NULL,
+  `scheme` varchar(10) NOT NULL DEFAULT 'http',
+  `remote_addr` varchar(45) NOT NULL DEFAULT '',
+  `method` varchar(10) NOT NULL DEFAULT '',
+  `ua` varchar(200) NOT NULL DEFAULT '',
+  `body_raw` longblob DEFAULT NULL,
+  `exitstatus` smallint(6) DEFAULT NULL,
+  `n` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `ping_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `check` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `channel` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL DEFAULT '',
+  `kind` varchar(20) NOT NULL,
+  `value` longtext NOT NULL DEFAULT '',
+  `email_verified` tinyint(1) NOT NULL DEFAULT 0,
+  `last_error` varchar(200) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uuid` (`uuid`),
+  CONSTRAINT `channel_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `channel_checks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `channel_id` int(11) NOT NULL,
+  `check_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `channel_checks_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `channel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `channel_checks_ibfk_2` FOREIGN KEY (`check_id`) REFERENCES `check` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notification` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_id` int(11) NOT NULL,
+  `check_status` varchar(10) NOT NULL,
+  `channel_id` int(11) NOT NULL,
+  `created` datetime NOT NULL,
+  `error` varchar(200) NOT NULL DEFAULT '',
+  `status` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `check` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `notification_ibfk_2` FOREIGN KEY (`channel_id`) REFERENCES `channel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `token_bucket` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `value` varchar(80) NOT NULL,
+  `tokens` float NOT NULL DEFAULT 1.0,
+  `updated` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `value` (`value`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flip` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_id` int(11) NOT NULL,
+  `created` datetime NOT NULL,
+  `processed` datetime DEFAULT NULL,
+  `old_status` varchar(10) NOT NULL,
+  `new_status` varchar(10) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `flip_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `check` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

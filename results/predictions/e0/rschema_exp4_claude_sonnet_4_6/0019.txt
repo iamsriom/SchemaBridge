@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0019
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `address` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dish` (
+  `dish_id` int(11) NOT NULL AUTO_INCREMENT,
+  `dish_name` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `description` varchar(1000) DEFAULT NULL,
+  `category` varchar(100) DEFAULT NULL,
+  `is_available` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`dish_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_status` (
+  `status_id` int(11) NOT NULL AUTO_INCREMENT,
+  `status_name` varchar(100) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`status_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_number` varchar(100) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `order_time` datetime NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  `status_id` int(11) NOT NULL,
+  `notes` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  UNIQUE KEY `order_number` (`order_number`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`status_id`) REFERENCES `order_status` (`status_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_item` (
+  `order_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `dish_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `unit_price` decimal(10,2) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  `special_instructions` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`order_item_id`),
+  CONSTRAINT `order_item_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_item_ibfk_2` FOREIGN KEY (`dish_id`) REFERENCES `dish` (`dish_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

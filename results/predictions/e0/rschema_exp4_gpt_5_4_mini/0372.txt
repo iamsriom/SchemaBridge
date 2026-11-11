@@ -1,0 +1,36 @@
+-- Schema for database: rschema_0372
+CREATE TABLE `regions` (
+  `region_id` int(11) NOT NULL AUTO_INCREMENT,
+  `region_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`region_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `leagues` (
+  `league_id` int(11) NOT NULL AUTO_INCREMENT,
+  `league_name` varchar(255) NOT NULL,
+  `region_id` int(11) NOT NULL,
+  `parent_league_id` int(11) DEFAULT NULL,
+  `person_in_charge_id` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  `version` int(11) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`league_id`),
+  KEY `region_id` (`region_id`),
+  KEY `parent_league_id` (`parent_league_id`),
+  KEY `person_in_charge_id` (`person_in_charge_id`),
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`),
+  CONSTRAINT `leagues_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `regions` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `leagues_ibfk_2` FOREIGN KEY (`parent_league_id`) REFERENCES `leagues` (`league_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `leagues_ibfk_3` FOREIGN KEY (`person_in_charge_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `leagues_ibfk_4` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `leagues_ibfk_5` FOREIGN KEY (`updated_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

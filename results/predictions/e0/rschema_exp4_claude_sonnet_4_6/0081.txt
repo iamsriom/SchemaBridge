@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0081
+
+CREATE TABLE `user_group` (
+  `group_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `one_time_password` varchar(255) DEFAULT NULL,
+  `password_reset_key` varchar(255) DEFAULT NULL,
+  `group_id` int(11) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `user_group` (`group_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `api_key` (
+  `key_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `key_content` varchar(512) NOT NULL,
+  `permission_level` int(11) NOT NULL DEFAULT 1,
+  `ignore_call_limit` tinyint(1) NOT NULL DEFAULT 0,
+  `is_private` tinyint(1) NOT NULL DEFAULT 0,
+  `allowed_ips` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`key_id`),
+  CONSTRAINT `api_key_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `api_call_log` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `resource_path` varchar(512) NOT NULL,
+  `http_method` varchar(16) NOT NULL,
+  `request_params` text DEFAULT NULL,
+  `api_key_id` int(11) DEFAULT NULL,
+  `client_ip` varchar(64) DEFAULT NULL,
+  `call_time` datetime NOT NULL,
+  `response_time` int(11) DEFAULT NULL,
+  `authorization_status` tinyint(1) NOT NULL DEFAULT 0,
+  `response_status_code` int(11) DEFAULT NULL,
+  PRIMARY KEY (`log_id`),
+  CONSTRAINT `api_call_log_ibfk_1` FOREIGN KEY (`api_key_id`) REFERENCES `api_key` (`key_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

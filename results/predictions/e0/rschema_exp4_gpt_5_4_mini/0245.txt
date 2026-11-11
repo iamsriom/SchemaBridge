@@ -1,0 +1,80 @@
+-- Schema for database: rschema_0245
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `nickname` varchar(100) DEFAULT NULL,
+  `avatar_url` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `novels` (
+  `novel_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `author` varchar(255) DEFAULT NULL,
+  `category` varchar(100) DEFAULT NULL,
+  `cover_url` varchar(255) DEFAULT NULL,
+  `description` text,
+  `status` varchar(50) DEFAULT NULL,
+  `word_count` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`novel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `chapters` (
+  `chapter_id` int(11) NOT NULL AUTO_INCREMENT,
+  `novel_id` int(11) NOT NULL,
+  `chapter_no` int(11) NOT NULL,
+  `chapter_title` varchar(255) NOT NULL,
+  `content` longtext NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`chapter_id`),
+  KEY `idx_chapters_novel_id` (`novel_id`),
+  CONSTRAINT `chapters_ibfk_1` FOREIGN KEY (`novel_id`) REFERENCES `novels` (`novel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bookshelves` (
+  `bookshelf_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `novel_id` int(11) NOT NULL,
+  `added_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`bookshelf_id`),
+  UNIQUE KEY `uk_bookshelves_user_novel` (`user_id`,`novel_id`),
+  KEY `idx_bookshelves_novel_id` (`novel_id`),
+  CONSTRAINT `bookshelves_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bookshelves_ibfk_2` FOREIGN KEY (`novel_id`) REFERENCES `novels` (`novel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `book_reviews` (
+  `review_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `novel_id` int(11) NOT NULL,
+  `rating` int(11) DEFAULT NULL,
+  `comment` text NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`review_id`),
+  KEY `idx_book_reviews_user_id` (`user_id`),
+  KEY `idx_book_reviews_novel_id` (`novel_id`),
+  CONSTRAINT `book_reviews_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `book_reviews_ibfk_2` FOREIGN KEY (`novel_id`) REFERENCES `novels` (`novel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `book_ranks` (
+  `rank_id` int(11) NOT NULL AUTO_INCREMENT,
+  `novel_id` int(11) NOT NULL,
+  `rank_date` date NOT NULL,
+  `rank_type` varchar(50) NOT NULL,
+  `rank_position` int(11) NOT NULL,
+  `score` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`rank_id`),
+  UNIQUE KEY `uk_book_ranks_date_type_novel` (`rank_date`,`rank_type`,`novel_id`),
+  KEY `idx_book_ranks_novel_id` (`novel_id`),
+  CONSTRAINT `book_ranks_ibfk_1` FOREIGN KEY (`novel_id`) REFERENCES `novels` (`novel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

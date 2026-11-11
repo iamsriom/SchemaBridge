@@ -1,0 +1,137 @@
+-- Schema for database: rschema_0436
+
+CREATE TABLE `admin` (
+  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`admin_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `member` (
+  `member_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `registered_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `website_setting` (
+  `setting_id` int(11) NOT NULL AUTO_INCREMENT,
+  `site_name` varchar(100) NOT NULL,
+  `logo` varchar(255) DEFAULT NULL,
+  `copyright` varchar(255) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `keywords` varchar(255) DEFAULT NULL,
+  `icp` varchar(100) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `admin_id` int(11) NOT NULL,
+  PRIMARY KEY (`setting_id`),
+  CONSTRAINT `website_setting_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `category` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`category_id`),
+  CONSTRAINT `category_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `category` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tag` (
+  `tag_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`tag_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `news_article` (
+  `article_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `author` varchar(100) NOT NULL,
+  `cover_image` varchar(255) DEFAULT NULL,
+  `summary` varchar(500) DEFAULT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `admin_id` int(11) NOT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `view_count` int(11) NOT NULL DEFAULT 0,
+  `released_at` datetime NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`article_id`),
+  CONSTRAINT `news_article_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `news_article_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `article_tag` (
+  `article_id` int(11) NOT NULL,
+  `tag_id` int(11) NOT NULL,
+  PRIMARY KEY (`article_id`, `tag_id`),
+  CONSTRAINT `article_tag_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `news_article` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `article_tag_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `tag` (`tag_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `advertisement` (
+  `ad_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `link_url` varchar(255) DEFAULT NULL,
+  `position` varchar(50) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `admin_id` int(11) NOT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`ad_id`),
+  CONSTRAINT `advertisement_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comment` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `article_id` int(11) NOT NULL,
+  `member_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`comment_id`),
+  CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `news_article` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `message` (
+  `message_id` int(11) NOT NULL AUTO_INCREMENT,
+  `article_id` int(11) NOT NULL,
+  `member_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `reply_content` text DEFAULT NULL,
+  `admin_id` int(11) DEFAULT NULL,
+  `replied_at` datetime DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`message_id`),
+  CONSTRAINT `message_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `news_article` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `message_ibfk_2` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `message_ibfk_3` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `search_log` (
+  `search_id` int(11) NOT NULL AUTO_INCREMENT,
+  `keyword` varchar(255) NOT NULL,
+  `member_id` int(11) DEFAULT NULL,
+  `searched_at` datetime NOT NULL,
+  PRIMARY KEY (`search_id`),
+  CONSTRAINT `search_log_ibfk_1` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

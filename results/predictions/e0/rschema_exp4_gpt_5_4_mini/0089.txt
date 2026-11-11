@@ -1,0 +1,38 @@
+-- Schema for database: rschema_0089
+CREATE TABLE `accounts` (
+  `account_id` int(11) NOT NULL AUTO_INCREMENT,
+  `address` varchar(255) NOT NULL,
+  `balance` decimal(20,8) NOT NULL DEFAULT 0.00000000,
+  PRIMARY KEY (`account_id`),
+  UNIQUE KEY `address` (`address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `blocks` (
+  `block_id` int(11) NOT NULL AUTO_INCREMENT,
+  `block_hash` varchar(255) NOT NULL,
+  `height` int(11) NOT NULL,
+  `block_timestamp` datetime NOT NULL,
+  `previous_block_hash` varchar(255) DEFAULT NULL,
+  `merkle_root` varchar(255) NOT NULL,
+  PRIMARY KEY (`block_id`),
+  UNIQUE KEY `block_hash` (`block_hash`),
+  UNIQUE KEY `height` (`height`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transactions` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_hash` varchar(255) NOT NULL,
+  `block_id` int(11) NOT NULL,
+  `transaction_timestamp` datetime NOT NULL,
+  `fee` decimal(20,8) NOT NULL DEFAULT 0.00000000,
+  `input_account_id` int(11) NOT NULL,
+  `output_account_id` int(11) NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  UNIQUE KEY `transaction_hash` (`transaction_hash`),
+  KEY `block_id` (`block_id`),
+  KEY `input_account_id` (`input_account_id`),
+  KEY `output_account_id` (`output_account_id`),
+  CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`block_id`) REFERENCES `blocks` (`block_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`input_account_id`) REFERENCES `accounts` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactions_ibfk_3` FOREIGN KEY (`output_account_id`) REFERENCES `accounts` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

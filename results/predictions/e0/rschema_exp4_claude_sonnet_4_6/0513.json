@@ -1,0 +1,269 @@
+{
+  "text_number": 513,
+  "id": "67552f0b13602ec03b41ab0a",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0513",
+  "question": "Design a voting management system:\nVoter Management: Each individual can be a legitimate voter or an invalid voter. Each legitimate voter must register their voting area (i.e., district) through the system. Each legitimate voter can only register in one district.\nDistrict Management: The district to which a voter belongs is determined by their residential address. An address can be a town or a city. Some districts may include multiple towns; whereas some larger cities may also contain multiple districts.",
+  "ddl": "-- Schema for database: rschema_0513\n\nCREATE TABLE `address` (\n  `address_id` int(11) NOT NULL AUTO_INCREMENT,\n  `address_type` varchar(10) NOT NULL COMMENT 'town or city',\n  `address_name` varchar(255) NOT NULL,\n  PRIMARY KEY (`address_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `district` (\n  `district_id` int(11) NOT NULL AUTO_INCREMENT,\n  `district_name` varchar(255) NOT NULL,\n  PRIMARY KEY (`district_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `district_address` (\n  `district_id` int(11) NOT NULL,\n  `address_id` int(11) NOT NULL,\n  PRIMARY KEY (`district_id`, `address_id`),\n  CONSTRAINT `district_address_ibfk_1` FOREIGN KEY (`district_id`) REFERENCES `district` (`district_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `district_address_ibfk_2` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `voter` (\n  `voter_id` int(11) NOT NULL AUTO_INCREMENT,\n  `first_name` varchar(100) NOT NULL,\n  `last_name` varchar(100) NOT NULL,\n  `date_of_birth` datetime DEFAULT NULL,\n  `is_legitimate` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1 = legitimate voter, 0 = invalid voter',\n  `address_id` int(11) DEFAULT NULL,\n  PRIMARY KEY (`voter_id`),\n  CONSTRAINT `voter_ibfk_1` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `voter_registration` (\n  `registration_id` int(11) NOT NULL AUTO_INCREMENT,\n  `voter_id` int(11) NOT NULL,\n  `district_id` int(11) NOT NULL,\n  `registration_date` datetime NOT NULL,\n  PRIMARY KEY (`registration_id`),\n  UNIQUE KEY `voter_id` (`voter_id`),\n  CONSTRAINT `voter_registration_ibfk_1` FOREIGN KEY (`voter_id`) REFERENCES `voter` (`voter_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `voter_registration_ibfk_2` FOREIGN KEY (`district_id`) REFERENCES `district` (`district_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "rschema_0513",
+    "tables": [
+      "address",
+      "district",
+      "district_address",
+      "voter",
+      "voter_registration"
+    ],
+    "columns_by_table": {
+      "address": [
+        {
+          "COLUMN_NAME": "address_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "auto_increment",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "address_type",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 10,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(10)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": "town or city"
+        },
+        {
+          "COLUMN_NAME": "address_name",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "district": [
+        {
+          "COLUMN_NAME": "district_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "auto_increment",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "district_name",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "district_address": [
+        {
+          "COLUMN_NAME": "district_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "address_id",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "voter": [
+        {
+          "COLUMN_NAME": "voter_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "auto_increment",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "first_name",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 100,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(100)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "last_name",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 100,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(100)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "date_of_birth",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "datetime",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "datetime",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "is_legitimate",
+          "ORDINAL_POSITION": 5,
+          "COLUMN_DEFAULT": "0",
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "tinyint",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 3,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "tinyint(1)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": "1 = legitimate voter, 0 = invalid voter"
+        },
+        {
+          "COLUMN_NAME": "address_id",
+          "ORDINAL_POSITION": 6,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "MUL",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ],
+      "voter_registration": [
+        {
+          "COLUMN_NAME": "registration_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "auto_increment",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "voter_id",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "UNI",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "district_id",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "MUL",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "registration_date",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "datetime",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "datetime",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ]
+    }
+  }
+}

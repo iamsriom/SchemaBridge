@@ -1,0 +1,162 @@
+-- Schema for database: schemabench_0049
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `oauth_provider` varchar(100) DEFAULT NULL,
+  `oauth_provider_id` varchar(255) DEFAULT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'customer',
+  `timezone_id` int(11) DEFAULT NULL,
+  `language_code` varchar(10) DEFAULT NULL,
+  `remember_token` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`),
+  KEY `users_timezone_id_index` (`timezone_id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`timezone_id`) REFERENCES `timezones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `businesses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `address_line1` varchar(255) DEFAULT NULL,
+  `address_line2` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `country_code` char(2) DEFAULT NULL,
+  `timezone_id` int(11) DEFAULT NULL,
+  `language_code` varchar(10) DEFAULT NULL,
+  `ical_token` char(64) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `businesses_slug_unique` (`slug`),
+  UNIQUE KEY `businesses_ical_token_unique` (`ical_token`),
+  KEY `businesses_owner_user_id_index` (`owner_user_id`),
+  KEY `businesses_timezone_id_index` (`timezone_id`),
+  CONSTRAINT `businesses_ibfk_1` FOREIGN KEY (`owner_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `businesses_ibfk_2` FOREIGN KEY (`timezone_id`) REFERENCES `timezones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staff` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `business_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `job_title` varchar(255) DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `staff_business_id_index` (`business_id`),
+  KEY `staff_user_id_index` (`user_id`),
+  CONSTRAINT `staff_ibfk_1` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `staff_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `services` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `business_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `duration_minutes` int(11) NOT NULL,
+  `buffer_minutes` int(11) NOT NULL DEFAULT '0',
+  `price` decimal(10,2) DEFAULT NULL,
+  `currency_code` char(3) DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `services_business_id_index` (`business_id`),
+  CONSTRAINT `services_ibfk_1` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_staff` (
+  `service_id` int(11) NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  PRIMARY KEY (`service_id`,`staff_id`),
+  KEY `service_staff_staff_id_index` (`staff_id`),
+  CONSTRAINT `service_staff_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `service_staff_ibfk_2` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `appointments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `business_id` int(11) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  `staff_id` int(11) DEFAULT NULL,
+  `customer_user_id` int(11) DEFAULT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  `customer_email` varchar(255) DEFAULT NULL,
+  `customer_phone` varchar(50) DEFAULT NULL,
+  `start_at` datetime NOT NULL,
+  `end_at` datetime NOT NULL,
+  `status` varchar(30) NOT NULL DEFAULT 'pending',
+  `notes` text DEFAULT NULL,
+  `calendar_uid` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `appointments_business_id_index` (`business_id`),
+  KEY `appointments_service_id_index` (`service_id`),
+  KEY `appointments_staff_id_index` (`staff_id`),
+  KEY `appointments_customer_user_id_index` (`customer_user_id`),
+  CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `appointments_ibfk_3` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `appointments_ibfk_4` FOREIGN KEY (`customer_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `availability_rules` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_id` int(11) NOT NULL,
+  `day_of_week` tinyint(1) NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  `effective_from` date DEFAULT NULL,
+  `effective_to` date DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `availability_rules_staff_id_index` (`staff_id`),
+  CONSTRAINT `availability_rules_ibfk_1` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `appointment_id` int(11) DEFAULT NULL,
+  `type` varchar(100) NOT NULL,
+  `channel` varchar(50) NOT NULL DEFAULT 'email',
+  `subject` varchar(255) DEFAULT NULL,
+  `message` text NOT NULL,
+  `sent_at` datetime DEFAULT NULL,
+  `read_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `notifications_user_id_index` (`user_id`),
+  KEY `notifications_appointment_id_index` (`appointment_id`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `timezones` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `iana_name` varchar(100) NOT NULL,
+  `utc_offset_minutes` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `timezones_iana_name_unique` (`iana_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

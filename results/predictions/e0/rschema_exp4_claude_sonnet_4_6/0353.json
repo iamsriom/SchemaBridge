@@ -1,0 +1,30 @@
+{
+  "text_number": 353,
+  "id": "67552f0a13602ec03b41a925",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0353",
+  "question": "The database design requirements for a certain web page management system are as follows: The system needs to store additional navigation information for each page in the application, such as page name, alias, title, etc., to support page management, navigation control, permission management, and dynamic display control. Through this system, administrators can set the display order, style, redirection target, and click events of pages. The system records information about web page users, including user ID, username, email address, and other details. At the same time, the system needs to record administrator information, including ID and name. Administrators can modify page visibility, allowing pages to be dynamically shown or hidden, and can perform page grouping management and set permission management schemes. All update records will be saved to ensure the traceability of changes.",
+  "ddl": "-- Schema for database: rschema_0353\n\nCREATE TABLE `users` (\n  `user_id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `password_hash` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`user_id`),\n  UNIQUE KEY `email` (`email`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `admins` (\n  `admin_id` int(11) NOT NULL AUTO_INCREMENT,\n  `admin_name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `password_hash` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`admin_id`),\n  UNIQUE KEY `email` (`email`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `page_groups` (\n  `group_id` int(11) NOT NULL AUTO_INCREMENT,\n  `group_name` varchar(255) NOT NULL,\n  `description` varchar(500) DEFAULT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`group_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `permission_schemes` (\n  `scheme_id` int(11) NOT NULL AUTO_INCREMENT,\n  `scheme_name` varchar(255) NOT NULL,\n  `description` varchar(500) DEFAULT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`scheme_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `pages` (\n  `page_id` int(11) NOT NULL AUTO_INCREMENT,\n  `page_name` varchar(255) NOT NULL,\n  `alias` varchar(255) DEFAULT NULL,\n  `title` varchar(255) DEFAULT NULL,\n  `description` varchar(500) DEFAULT NULL,\n  `url` varchar(500) DEFAULT NULL,\n  `redirect_target` varchar(500) DEFAULT NULL,\n  `click_event` varchar(255) DEFAULT NULL,\n  `display_order` int(11) NOT NULL DEFAULT 0,\n  `style` varchar(255) DEFAULT NULL,\n  `is_visible` tinyint(1) NOT NULL DEFAULT 1,\n  `group_id` int(11) DEFAULT NULL,\n  `scheme_id` int(11) DEFAULT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`page_id`),\n  UNIQUE KEY `alias` (`alias`),\n  KEY `group_id` (`group_id`),\n  KEY `scheme_id` (`scheme_id`),\n  CONSTRAINT `pages_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `page_groups` (`group_id`) ON DELETE SET NULL ON UPDATE CASCADE,\n  CONSTRAINT `pages_ibfk_2` FOREIGN KEY (`scheme_id`) REFERENCES `permission_schemes` (`scheme_id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `page_update_logs` (\n  `log_id` int(11) NOT NULL AUTO_INCREMENT,\n  `page_id` int(11) NOT NULL,\n  `admin_id` int(11) NOT NULL,\n  `field_changed` varchar(255) NOT NULL,\n  `old_value` varchar(500) DEFAULT NULL,\n  `new_value` varchar(500) DEFAULT NULL,\n  `changed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`log_id`),\n  KEY `page_id` (`page_id`),\n  KEY `admin_id` (`admin_id`),\n  CONSTRAINT `page_update_logs_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `pages` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `page_update_logs_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `admins` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `page_permissions` (\n  `permission_id` int(11) NOT NULL AUTO_INCREMENT,\n  `page_id` int(11) NOT NULL,\n  `user_id` int(11) DEFAULT NULL,\n  `scheme_id` int(11) DEFAULT NULL,\n  `can_view` tinyint(1) NOT NULL DEFAULT 1,\n  `can_edit` tinyint(1) NOT NULL DEFAULT 0,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`permission_id`),\n  KEY `page_id` (`page_id`),\n  KEY `user_id` (`user_id`),\n  KEY `scheme_id` (`scheme_id`),\n  CONSTRAINT `page_permissions_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `pages` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `page_permissions_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `page_permissions_ibfk_3` FOREIGN KEY (`scheme_id`) REFERENCES `permission_schemes` (`scheme_id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "admins",
+      "page_groups",
+      "permission_schemes",
+      "pages",
+      "page_update_logs",
+      "page_permissions"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "admins": [],
+      "page_groups": [],
+      "permission_schemes": [],
+      "pages": [],
+      "page_update_logs": [],
+      "page_permissions": []
+    }
+  }
+}

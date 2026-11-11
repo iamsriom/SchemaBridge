@@ -1,0 +1,79 @@
+-- Schema for database: schemabench_0233
+CREATE TABLE `incidents` (
+  `incident_id` int(11) NOT NULL AUTO_INCREMENT,
+  `incident_type` varchar(100) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `incident_date` datetime NOT NULL,
+  `response_time_minutes` int(11) DEFAULT NULL,
+  PRIMARY KEY (`incident_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `personnel` (
+  `personnel_id` int(11) NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(255) NOT NULL,
+  `contact_number` varchar(20) DEFAULT NULL,
+  `designation` varchar(100) NOT NULL,
+  `shift_details` varchar(100) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`personnel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vehicles` (
+  `vehicle_id` int(11) NOT NULL AUTO_INCREMENT,
+  `vehicle_type` varchar(100) NOT NULL,
+  `model` varchar(100) NOT NULL,
+  `availability_status` varchar(50) NOT NULL,
+  `registration_number` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`vehicle_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment` (
+  `equipment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_type` varchar(100) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `condition_status` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`equipment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `victims` (
+  `victim_id` int(11) NOT NULL AUTO_INCREMENT,
+  `identification_number` varchar(100) DEFAULT NULL,
+  `full_name` varchar(255) NOT NULL,
+  `age` int(11) DEFAULT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`victim_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tasks` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `incident_id` int(11) NOT NULL,
+  `task_type` varchar(100) NOT NULL,
+  `task_description` text DEFAULT NULL,
+  `completion_status` varchar(50) NOT NULL,
+  `assigned_personnel_id` int(11) DEFAULT NULL,
+  `assigned_vehicle_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  KEY `incident_id` (`incident_id`),
+  KEY `assigned_personnel_id` (`assigned_personnel_id`),
+  KEY `assigned_vehicle_id` (`assigned_vehicle_id`),
+  CONSTRAINT `tasks_ibfk_1` FOREIGN KEY (`incident_id`) REFERENCES `incidents` (`incident_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tasks_ibfk_2` FOREIGN KEY (`assigned_personnel_id`) REFERENCES `personnel` (`personnel_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `tasks_ibfk_3` FOREIGN KEY (`assigned_vehicle_id`) REFERENCES `vehicles` (`vehicle_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medical_records` (
+  `medical_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `victim_id` int(11) NOT NULL,
+  `incident_id` int(11) NOT NULL,
+  `diagnosis` varchar(255) NOT NULL,
+  `treatment` text DEFAULT NULL,
+  `record_date` datetime NOT NULL,
+  PRIMARY KEY (`medical_record_id`),
+  KEY `victim_id` (`victim_id`),
+  KEY `incident_id` (`incident_id`),
+  CONSTRAINT `medical_records_ibfk_1` FOREIGN KEY (`victim_id`) REFERENCES `victims` (`victim_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `medical_records_ibfk_2` FOREIGN KEY (`incident_id`) REFERENCES `incidents` (`incident_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

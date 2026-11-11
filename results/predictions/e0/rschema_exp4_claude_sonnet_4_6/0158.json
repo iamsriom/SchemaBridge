@@ -1,0 +1,30 @@
+{
+  "text_number": 158,
+  "id": "67552f0b13602ec03b41aa24",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0158",
+  "question": "The online examination system shall include functions such as user management, question bank management, and exam management.\nThe system shall have different user roles, such as student, teacher, and administrator. Each user shall have a unique ID, real name, contact information, and other details.\nThe question bank shall contain various questions. Each question shall have a difficulty level, content, options, correct answer, explanation, and belong to a category.\nAdministrators shall be able to create exams, set the exam name, description, time range, status, and select questions from the question bank to include in the exam, specifying the order of the questions.\nStudents shall be able to take exams. After submitting answers, the system shall record the exam score and the answer status for each question, including the user's answer and whether it is correct.\nThe exam score shall include the student's score and submission time.",
+  "ddl": "-- Schema for database: rschema_0158\n\nCREATE TABLE `user` (\n  `user_id` int(11) NOT NULL AUTO_INCREMENT,\n  `real_name` varchar(100) NOT NULL,\n  `username` varchar(100) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `email` varchar(255) DEFAULT NULL,\n  `phone` varchar(20) DEFAULT NULL,\n  `role` varchar(20) NOT NULL COMMENT 'student, teacher, administrator',\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`user_id`),\n  UNIQUE KEY `username` (`username`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `category` (\n  `category_id` int(11) NOT NULL AUTO_INCREMENT,\n  `category_name` varchar(100) NOT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  PRIMARY KEY (`category_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `question` (\n  `question_id` int(11) NOT NULL AUTO_INCREMENT,\n  `category_id` int(11) NOT NULL,\n  `difficulty` varchar(20) NOT NULL COMMENT 'easy, medium, hard',\n  `content` text NOT NULL,\n  `options` text DEFAULT NULL,\n  `correct_answer` varchar(255) NOT NULL,\n  `explanation` text DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`question_id`),\n  CONSTRAINT `question_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `exam` (\n  `exam_id` int(11) NOT NULL AUTO_INCREMENT,\n  `creator_id` int(11) NOT NULL,\n  `exam_name` varchar(255) NOT NULL,\n  `description` text DEFAULT NULL,\n  `start_time` datetime NOT NULL,\n  `end_time` datetime NOT NULL,\n  `status` varchar(20) NOT NULL COMMENT 'draft, published, ended',\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`exam_id`),\n  CONSTRAINT `exam_ibfk_1` FOREIGN KEY (`creator_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `exam_question` (\n  `exam_question_id` int(11) NOT NULL AUTO_INCREMENT,\n  `exam_id` int(11) NOT NULL,\n  `question_id` int(11) NOT NULL,\n  `question_order` int(11) NOT NULL,\n  `score` int(11) NOT NULL DEFAULT 1,\n  PRIMARY KEY (`exam_question_id`),\n  CONSTRAINT `exam_question_ibfk_1` FOREIGN KEY (`exam_id`) REFERENCES `exam` (`exam_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `exam_question_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `question` (`question_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `exam_record` (\n  `record_id` int(11) NOT NULL AUTO_INCREMENT,\n  `exam_id` int(11) NOT NULL,\n  `student_id` int(11) NOT NULL,\n  `score` decimal(10,2) DEFAULT NULL,\n  `submit_time` datetime DEFAULT NULL,\n  `status` varchar(20) NOT NULL COMMENT 'in_progress, submitted',\n  `created_at` datetime NOT NULL,\n  PRIMARY KEY (`record_id`),\n  CONSTRAINT `exam_record_ibfk_1` FOREIGN KEY (`exam_id`) REFERENCES `exam` (`exam_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `exam_record_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `answer_record` (\n  `answer_record_id` int(11) NOT NULL AUTO_INCREMENT,\n  `record_id` int(11) NOT NULL,\n  `question_id` int(11) NOT NULL,\n  `user_answer` varchar(255) DEFAULT NULL,\n  `is_correct` tinyint(1) NOT NULL DEFAULT 0,\n  `answered_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`answer_record_id`),\n  CONSTRAINT `answer_record_ibfk_1` FOREIGN KEY (`record_id`) REFERENCES `exam_record` (`record_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `answer_record_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `question` (`question_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "user",
+      "category",
+      "question",
+      "exam",
+      "exam_question",
+      "exam_record",
+      "answer_record"
+    ],
+    "columns_by_table": {
+      "user": [],
+      "category": [],
+      "question": [],
+      "exam": [],
+      "exam_question": [],
+      "exam_record": [],
+      "answer_record": []
+    }
+  }
+}

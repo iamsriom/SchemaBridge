@@ -1,0 +1,81 @@
+-- Schema for database: rschema_0191
+
+CREATE TABLE `product_category` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(200) NOT NULL,
+  `model` varchar(100) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`product_id`),
+  CONSTRAINT `product_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `product_category` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_team` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_personnel` (
+  `personnel_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `telephone` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  `hire_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`personnel_id`),
+  CONSTRAINT `sales_personnel_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `sales_team` (`team_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(100) NOT NULL,
+  `customer_telephone` varchar(20) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `personnel_id` int(11) NOT NULL,
+  `sales_date` datetime NOT NULL,
+  `sales_quantity` int(11) NOT NULL,
+  `sales_cost` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`task_id`),
+  CONSTRAINT `sales_task_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_task_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_task_ibfk_3` FOREIGN KEY (`personnel_id`) REFERENCES `sales_personnel` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_evaluation` (
+  `evaluation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `satisfaction_score` int(11) NOT NULL,
+  `comment` varchar(500) DEFAULT NULL,
+  `evaluation_date` datetime NOT NULL,
+  PRIMARY KEY (`evaluation_id`),
+  CONSTRAINT `customer_evaluation_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `sales_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `performance_evaluation` (
+  `evaluation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `personnel_id` int(11) NOT NULL,
+  `evaluation_period` varchar(50) NOT NULL,
+  `tasks_completed` int(11) NOT NULL DEFAULT 0,
+  `avg_satisfaction_score` decimal(5,2) DEFAULT NULL,
+  `evaluation_date` datetime NOT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`evaluation_id`),
+  CONSTRAINT `performance_evaluation_ibfk_1` FOREIGN KEY (`personnel_id`) REFERENCES `sales_personnel` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

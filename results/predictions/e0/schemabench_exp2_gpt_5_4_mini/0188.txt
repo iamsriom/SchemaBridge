@@ -1,0 +1,92 @@
+-- Schema for database: schemabench_0188
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `available_rooms` int(11) DEFAULT NULL,
+  `employee_count` int(11) DEFAULT NULL,
+  `budget` decimal(12,2) DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_id` int(11) DEFAULT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `position` varchar(100) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `salary` decimal(12,2) DEFAULT NULL,
+  `phone` varchar(30) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  KEY `employee_ibfk_1` (`department_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_shift` (
+  `shift_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `shift_start` datetime NOT NULL,
+  `shift_end` datetime NOT NULL,
+  `shift_role` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`shift_id`),
+  KEY `employee_shift_ibfk_1` (`employee_id`),
+  CONSTRAINT `employee_shift_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patient` (
+  `patient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `insurance_provider` varchar(255) DEFAULT NULL,
+  `insurance_number` varchar(100) DEFAULT NULL,
+  `phone` varchar(30) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patient_case` (
+  `case_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `admitted_at` datetime NOT NULL,
+  `discharged_at` datetime DEFAULT NULL,
+  `case_status` varchar(50) NOT NULL,
+  `admission_reason` varchar(255) DEFAULT NULL,
+  `prescriptions` text DEFAULT NULL,
+  `actions_taken` text DEFAULT NULL,
+  PRIMARY KEY (`case_id`),
+  KEY `patient_case_ibfk_1` (`patient_id`),
+  KEY `patient_case_ibfk_2` (`department_id`),
+  CONSTRAINT `patient_case_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `patient_case_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `case_assignment` (
+  `assignment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `case_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `assigned_role` varchar(100) NOT NULL,
+  `specialization` varchar(255) DEFAULT NULL,
+  `assigned_at` datetime NOT NULL,
+  PRIMARY KEY (`assignment_id`),
+  KEY `case_assignment_ibfk_1` (`case_id`),
+  KEY `case_assignment_ibfk_2` (`employee_id`),
+  CONSTRAINT `case_assignment_ibfk_1` FOREIGN KEY (`case_id`) REFERENCES `patient_case` (`case_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `case_assignment_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resource` (
+  `resource_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_id` int(11) NOT NULL,
+  `resource_name` varchar(255) NOT NULL,
+  `resource_type` varchar(100) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `is_available` tinyint(1) NOT NULL DEFAULT '1',
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`resource_id`),
+  KEY `resource_ibfk_1` (`department_id`),
+  CONSTRAINT `resource_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

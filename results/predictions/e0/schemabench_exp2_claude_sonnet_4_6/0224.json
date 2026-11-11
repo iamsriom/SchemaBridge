@@ -1,0 +1,32 @@
+{
+  "text_number": 224,
+  "id": "SB-224",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "schemabench_0224",
+  "question": "1) Background / Context\n\nThe project aims to assist company management in effectively preparing for the \"silver tsunami,\" which refers to the significant wave of impending employee retirements. The challenge is to identify employees nearing retirement and manage their transition, as well as to leverage this situation by engaging eligible employees in a mentorship program to pass on valuable knowledge.\n\n2) Objectives\n\n- Identify employees who are approaching retirement.\n- Provide management with detailed information on these employees.\n- Identify employees eligible for participation in a mentorship program.\n  \n3) Stakeholders & Users\n\n- Stakeholders: Company Management, HR Department\n- Users: Managers, HR Personnel\n\n4) Functional Descriptions\n\n- Query the database to identify employees who are close to retirement based on age and other criteria.\n- Retrieve detailed information (e.g., personal details, employment history, salary, titles) of retiring employees.\n- Identify employees eligible for the mentorship program based on specific eligibility criteria.\n- Generate reports for managers containing the required employee information.\n\n5) Non-Functional Descriptions\n\n- Ensure data accuracy and consistency across retrieved reports.\n- Maintain data security and privacy, especially concerning personal employee information.\n- The system should be scalable to accommodate growing data as more employees are added.",
+  "ddl": "-- Schema for database: schemabench_0224\n\nCREATE TABLE `employees` (\n  `emp_no` int(11) NOT NULL,\n  `birth_date` date NOT NULL,\n  `first_name` varchar(14) NOT NULL,\n  `last_name` varchar(16) NOT NULL,\n  `gender` char(1) NOT NULL,\n  `hire_date` date NOT NULL,\n  PRIMARY KEY (`emp_no`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `departments` (\n  `dept_no` char(4) NOT NULL,\n  `dept_name` varchar(40) NOT NULL,\n  PRIMARY KEY (`dept_no`),\n  UNIQUE KEY `dept_name` (`dept_name`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `dept_emp` (\n  `emp_no` int(11) NOT NULL,\n  `dept_no` char(4) NOT NULL,\n  `from_date` date NOT NULL,\n  `to_date` date NOT NULL,\n  PRIMARY KEY (`emp_no`, `dept_no`),\n  CONSTRAINT `dept_emp_ibfk_1` FOREIGN KEY (`emp_no`) REFERENCES `employees` (`emp_no`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `dept_emp_ibfk_2` FOREIGN KEY (`dept_no`) REFERENCES `departments` (`dept_no`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `dept_manager` (\n  `dept_no` char(4) NOT NULL,\n  `emp_no` int(11) NOT NULL,\n  `from_date` date NOT NULL,\n  `to_date` date NOT NULL,\n  PRIMARY KEY (`dept_no`, `emp_no`),\n  CONSTRAINT `dept_manager_ibfk_1` FOREIGN KEY (`emp_no`) REFERENCES `employees` (`emp_no`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `dept_manager_ibfk_2` FOREIGN KEY (`dept_no`) REFERENCES `departments` (`dept_no`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `titles` (\n  `emp_no` int(11) NOT NULL,\n  `title` varchar(50) NOT NULL,\n  `from_date` date NOT NULL,\n  `to_date` date DEFAULT NULL,\n  PRIMARY KEY (`emp_no`, `title`, `from_date`),\n  CONSTRAINT `titles_ibfk_1` FOREIGN KEY (`emp_no`) REFERENCES `employees` (`emp_no`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `salaries` (\n  `emp_no` int(11) NOT NULL,\n  `salary` int(11) NOT NULL,\n  `from_date` date NOT NULL,\n  `to_date` date NOT NULL,\n  PRIMARY KEY (`emp_no`, `from_date`),\n  CONSTRAINT `salaries_ibfk_1` FOREIGN KEY (`emp_no`) REFERENCES `employees` (`emp_no`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `retirement_info` (\n  `retirement_id` int(11) NOT NULL AUTO_INCREMENT,\n  `emp_no` int(11) NOT NULL,\n  `first_name` varchar(14) NOT NULL,\n  `last_name` varchar(16) NOT NULL,\n  `retirement_date` date DEFAULT NULL,\n  `is_eligible` tinyint(1) NOT NULL DEFAULT 0,\n  PRIMARY KEY (`retirement_id`),\n  CONSTRAINT `retirement_info_ibfk_1` FOREIGN KEY (`emp_no`) REFERENCES `employees` (`emp_no`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `mentorship_eligibility` (\n  `mentorship_id` int(11) NOT NULL AUTO_INCREMENT,\n  `emp_no` int(11) NOT NULL,\n  `first_name` varchar(14) NOT NULL,\n  `last_name` varchar(16) NOT NULL,\n  `birth_date` date NOT NULL,\n  `hire_date` date NOT NULL,\n  `title` varchar(50) NOT NULL,\n  `from_date` date NOT NULL,\n  `to_date` date DEFAULT NULL,\n  `is_eligible` tinyint(1) NOT NULL DEFAULT 0,\n  PRIMARY KEY (`mentorship_id`),\n  CONSTRAINT `mentorship_eligibility_ibfk_1` FOREIGN KEY (`emp_no`) REFERENCES `employees` (`emp_no`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "employees",
+      "departments",
+      "dept_emp",
+      "dept_manager",
+      "titles",
+      "salaries",
+      "retirement_info",
+      "mentorship_eligibility"
+    ],
+    "columns_by_table": {
+      "employees": [],
+      "departments": [],
+      "dept_emp": [],
+      "dept_manager": [],
+      "titles": [],
+      "salaries": [],
+      "retirement_info": [],
+      "mentorship_eligibility": []
+    }
+  }
+}

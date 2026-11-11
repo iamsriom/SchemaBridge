@@ -1,0 +1,54 @@
+-- Schema for database: schemabench_0030
+CREATE TABLE `device` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  `user_id` int(11) DEFAULT NULL,
+  `device_id` varchar(255) NOT NULL,
+  `registration_id` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `device_registration_id_uniq` (`registration_id`),
+  KEY `device_user_id_idx` (`user_id`),
+  CONSTRAINT `device_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `gcm_device` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_ptr_id` int(11) NOT NULL,
+  `cloud_message_type` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `gcm_device_device_ptr_id_uniq` (`device_ptr_id`),
+  CONSTRAINT `gcm_device_ibfk_1` FOREIGN KEY (`device_ptr_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `apns_device` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_ptr_id` int(11) NOT NULL,
+  `certificate` varchar(255) DEFAULT NULL,
+  `application_id` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `apns_device_device_ptr_id_uniq` (`device_ptr_id`),
+  CONSTRAINT `apns_device_ibfk_1` FOREIGN KEY (`device_ptr_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `wns_device` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_ptr_id` int(11) NOT NULL,
+  `application_id` varchar(255) DEFAULT NULL,
+  `application_secret` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `wns_device_device_ptr_id_uniq` (`device_ptr_id`),
+  CONSTRAINT `wns_device_ibfk_1` FOREIGN KEY (`device_ptr_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `webpush_device` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_ptr_id` int(11) NOT NULL,
+  `auth` varchar(255) DEFAULT NULL,
+  `p256dh` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `webpush_device_device_ptr_id_uniq` (`device_ptr_id`),
+  CONSTRAINT `webpush_device_ibfk_1` FOREIGN KEY (`device_ptr_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,174 @@
+-- Schema for database: schemabench_0006
+CREATE TABLE `roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_roles_on_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `encrypted_password` varchar(255) NOT NULL,
+  `reset_password_token` varchar(255) DEFAULT NULL,
+  `reset_password_sent_at` datetime DEFAULT NULL,
+  `remember_created_at` datetime DEFAULT NULL,
+  `sign_in_count` int(11) NOT NULL DEFAULT 0,
+  `current_sign_in_at` datetime DEFAULT NULL,
+  `last_sign_in_at` datetime DEFAULT NULL,
+  `current_sign_in_ip` varchar(255) DEFAULT NULL,
+  `last_sign_in_ip` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_users_on_email` (`email`),
+  UNIQUE KEY `index_users_on_reset_password_token` (`reset_password_token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_user_roles_on_user_id` (`user_id`),
+  KEY `index_user_roles_on_role_id` (`role_id`),
+  CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `menu_title` varchar(255) DEFAULT NULL,
+  `body` text DEFAULT NULL,
+  `position` int(11) NOT NULL DEFAULT 0,
+  `show_in_menu` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_pages_on_slug` (`slug`),
+  KEY `index_pages_on_parent_id` (`parent_id`),
+  CONSTRAINT `pages_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `pages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resources` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `content_type` varchar(255) NOT NULL,
+  `file_size` int(11) NOT NULL,
+  `s3_key` varchar(255) DEFAULT NULL,
+  `s3_bucket` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `images` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `resource_id` int(11) NOT NULL,
+  `alt_text` varchar(255) DEFAULT NULL,
+  `caption` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_images_on_resource_id` (`resource_id`),
+  CONSTRAINT `images_ibfk_1` FOREIGN KEY (`resource_id`) REFERENCES `resources` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `blog_categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_blog_categories_on_slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `blog_posts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `body` text DEFAULT NULL,
+  `published_at` datetime DEFAULT NULL,
+  `author_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_blog_posts_on_slug` (`slug`),
+  KEY `index_blog_posts_on_category_id` (`category_id`),
+  KEY `index_blog_posts_on_author_id` (`author_id`),
+  CONSTRAINT `blog_posts_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `blog_categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `blog_posts_ibfk_2` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `blog_comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `post_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `body` text NOT NULL,
+  `approved` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_blog_comments_on_post_id` (`post_id`),
+  CONSTRAINT `blog_comments_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `blog_posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `portfolio_galleries` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_portfolio_galleries_on_slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `portfolio_images` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `gallery_id` int(11) NOT NULL,
+  `resource_id` int(11) NOT NULL,
+  `position` int(11) NOT NULL DEFAULT 0,
+  `caption` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_portfolio_images_on_gallery_id` (`gallery_id`),
+  KEY `index_portfolio_images_on_resource_id` (`resource_id`),
+  CONSTRAINT `portfolio_images_ibfk_1` FOREIGN KEY (`gallery_id`) REFERENCES `portfolio_galleries` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `portfolio_images_ibfk_2` FOREIGN KEY (`resource_id`) REFERENCES `resources` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `news_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `body` text DEFAULT NULL,
+  `published_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_news_items_on_slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inquiries` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  `message` text NOT NULL,
+  `status` varchar(255) NOT NULL DEFAULT 'new',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

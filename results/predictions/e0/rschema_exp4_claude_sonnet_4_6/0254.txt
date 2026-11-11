@@ -1,0 +1,197 @@
+-- Schema for database: rschema_0254
+
+CREATE TABLE `seismic_station` (
+  `station_id` int(11) NOT NULL AUTO_INCREMENT,
+  `station_code` varchar(20) NOT NULL,
+  `station_name` varchar(100) NOT NULL,
+  `station_type` varchar(50) DEFAULT NULL COMMENT 'provincial or central station',
+  `location` varchar(255) DEFAULT NULL,
+  `contact_info` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`station_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `real_name` varchar(50) NOT NULL,
+  `role` varchar(20) NOT NULL COMMENT 'admin or ordinary',
+  `station_id` int(11) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`station_id`) REFERENCES `seismic_station` (`station_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `seismometer` (
+  `seismometer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `serial_number` varchar(50) NOT NULL,
+  `model` varchar(100) DEFAULT NULL,
+  `manufacturer` varchar(100) DEFAULT NULL,
+  `station_id` int(11) NOT NULL,
+  `installation_date` datetime DEFAULT NULL,
+  `status` varchar(20) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`seismometer_id`),
+  CONSTRAINT `seismometer_ibfk_1` FOREIGN KEY (`station_id`) REFERENCES `seismic_station` (`station_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `voltage_sensitivity` (
+  `vs_id` int(11) NOT NULL AUTO_INCREMENT,
+  `seismometer_id` int(11) NOT NULL,
+  `sensitivity_value` decimal(15,6) NOT NULL COMMENT 'voltage sensitivity in V/(m/s)',
+  `measurement_date` datetime NOT NULL,
+  `operator_id` int(11) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`vs_id`),
+  CONSTRAINT `voltage_sensitivity_ibfk_1` FOREIGN KEY (`seismometer_id`) REFERENCES `seismometer` (`seismometer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `voltage_sensitivity_ibfk_2` FOREIGN KEY (`operator_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `calibration_coil_sensitivity` (
+  `ccs_id` int(11) NOT NULL AUTO_INCREMENT,
+  `seismometer_id` int(11) NOT NULL,
+  `sensitivity_value` decimal(15,6) NOT NULL COMMENT 'calibration coil sensitivity in A/(m/s^2)',
+  `measurement_date` datetime NOT NULL,
+  `operator_id` int(11) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`ccs_id`),
+  CONSTRAINT `calibration_coil_sensitivity_ibfk_1` FOREIGN KEY (`seismometer_id`) REFERENCES `seismometer` (`seismometer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `calibration_coil_sensitivity_ibfk_2` FOREIGN KEY (`operator_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `moment_of_inertia` (
+  `moi_id` int(11) NOT NULL AUTO_INCREMENT,
+  `seismometer_id` int(11) NOT NULL,
+  `inertia_value` decimal(15,6) NOT NULL COMMENT 'moment of inertia in kg*m^2',
+  `measurement_date` datetime NOT NULL,
+  `operator_id` int(11) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`moi_id`),
+  CONSTRAINT `moment_of_inertia_ibfk_1` FOREIGN KEY (`seismometer_id`) REFERENCES `seismometer` (`seismometer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `moment_of_inertia_ibfk_2` FOREIGN KEY (`operator_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equivalent_pendulum_length` (
+  `epl_id` int(11) NOT NULL AUTO_INCREMENT,
+  `seismometer_id` int(11) NOT NULL,
+  `pendulum_length` decimal(15,6) NOT NULL COMMENT 'equivalent pendulum length in meters',
+  `measurement_date` datetime NOT NULL,
+  `operator_id` int(11) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`epl_id`),
+  CONSTRAINT `equivalent_pendulum_length_ibfk_1` FOREIGN KEY (`seismometer_id`) REFERENCES `seismometer` (`seismometer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `equivalent_pendulum_length_ibfk_2` FOREIGN KEY (`operator_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `calibration_record` (
+  `calibration_id` int(11) NOT NULL AUTO_INCREMENT,
+  `seismometer_id` int(11) NOT NULL,
+  `calibration_time` datetime NOT NULL,
+  `mechanical_period` decimal(15,6) DEFAULT NULL COMMENT 'mechanical period in seconds',
+  `equivalent_pendulum_length` decimal(15,6) DEFAULT NULL COMMENT 'equivalent pendulum length in meters',
+  `moment_of_inertia` decimal(15,6) DEFAULT NULL COMMENT 'moment of inertia in kg*m^2',
+  `calibration_coil_sensitivity` decimal(15,6) DEFAULT NULL COMMENT 'calibration coil sensitivity',
+  `voltage_sensitivity` decimal(15,6) DEFAULT NULL COMMENT 'voltage sensitivity',
+  `amplitude` decimal(15,6) DEFAULT NULL COMMENT 'calibration amplitude',
+  `width` decimal(15,6) DEFAULT NULL COMMENT 'calibration width',
+  `operator_id` int(11) DEFAULT NULL,
+  `station_id` int(11) NOT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`calibration_id`),
+  CONSTRAINT `calibration_record_ibfk_1` FOREIGN KEY (`seismometer_id`) REFERENCES `seismometer` (`seismometer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `calibration_record_ibfk_2` FOREIGN KEY (`operator_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `calibration_record_ibfk_3` FOREIGN KEY (`station_id`) REFERENCES `seismic_station` (`station_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comparison_result` (
+  `comparison_id` int(11) NOT NULL AUTO_INCREMENT,
+  `calibration_id` int(11) NOT NULL,
+  `reference_seismometer_id` int(11) DEFAULT NULL,
+  `comparison_value` decimal(15,6) DEFAULT NULL,
+  `deviation` decimal(15,6) DEFAULT NULL,
+  `pass_flag` tinyint(1) DEFAULT NULL COMMENT '1=pass, 0=fail',
+  `comparison_time` datetime NOT NULL,
+  `operator_id` int(11) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`comparison_id`),
+  CONSTRAINT `comparison_result_ibfk_1` FOREIGN KEY (`calibration_id`) REFERENCES `calibration_record` (`calibration_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comparison_result_ibfk_2` FOREIGN KEY (`reference_seismometer_id`) REFERENCES `seismometer` (`seismometer_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `comparison_result_ibfk_3` FOREIGN KEY (`operator_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vibration_table_test` (
+  `test_id` int(11) NOT NULL AUTO_INCREMENT,
+  `calibration_id` int(11) NOT NULL,
+  `test_frequency` decimal(15,6) DEFAULT NULL COMMENT 'test frequency in Hz',
+  `test_amplitude` decimal(15,6) DEFAULT NULL COMMENT 'test amplitude',
+  `measured_sensitivity` decimal(15,6) DEFAULT NULL,
+  `phase_difference` decimal(15,6) DEFAULT NULL,
+  `pass_flag` tinyint(1) DEFAULT NULL COMMENT '1=pass, 0=fail',
+  `test_time` datetime NOT NULL,
+  `operator_id` int(11) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`test_id`),
+  CONSTRAINT `vibration_table_test_ibfk_1` FOREIGN KEY (`calibration_id`) REFERENCES `calibration_record` (`calibration_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `vibration_table_test_ibfk_2` FOREIGN KEY (`operator_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permission` (
+  `permission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `permission_name` varchar(50) NOT NULL,
+  `permission_code` varchar(50) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`permission_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role` (
+  `role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_name` varchar(50) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role_permission` (
+  `rp_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  PRIMARY KEY (`rp_id`),
+  CONSTRAINT `role_permission_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `role_permission_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permission` (`permission_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_role` (
+  `ur_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  PRIMARY KEY (`ur_id`),
+  CONSTRAINT `user_role_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_role_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `operation_log` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `operation_type` varchar(50) NOT NULL COMMENT 'e.g. login, query, edit, delete',
+  `operation_target` varchar(100) DEFAULT NULL,
+  `operation_detail` varchar(500) DEFAULT NULL,
+  `operation_time` datetime NOT NULL,
+  `ip_address` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`log_id`),
+  CONSTRAINT `operation_log_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

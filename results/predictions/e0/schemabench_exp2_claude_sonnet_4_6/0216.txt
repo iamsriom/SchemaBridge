@@ -1,0 +1,53 @@
+-- Schema for database: schemabench_0216
+
+CREATE TABLE `games` (
+  `game_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `platform` varchar(100) DEFAULT NULL,
+  `publisher` varchar(255) DEFAULT NULL,
+  `developer` varchar(255) DEFAULT NULL,
+  `release_year` int(11) DEFAULT NULL,
+  `genre` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`game_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `game_sales` (
+  `sale_id` int(11) NOT NULL AUTO_INCREMENT,
+  `game_id` int(11) NOT NULL,
+  `total_sales` decimal(10,2) DEFAULT NULL COMMENT 'Total sales in millions of units',
+  `na_sales` decimal(10,2) DEFAULT NULL COMMENT 'North America sales in millions',
+  `eu_sales` decimal(10,2) DEFAULT NULL COMMENT 'Europe sales in millions',
+  `jp_sales` decimal(10,2) DEFAULT NULL COMMENT 'Japan sales in millions',
+  `other_sales` decimal(10,2) DEFAULT NULL COMMENT 'Other regions sales in millions',
+  PRIMARY KEY (`sale_id`),
+  CONSTRAINT `game_sales_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `games` (`game_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `critic_reviews` (
+  `review_id` int(11) NOT NULL AUTO_INCREMENT,
+  `game_id` int(11) NOT NULL,
+  `critic_score` decimal(5,2) DEFAULT NULL COMMENT 'Average critic score out of 100',
+  `num_critic_reviews` int(11) DEFAULT NULL COMMENT 'Number of critic reviews',
+  PRIMARY KEY (`review_id`),
+  CONSTRAINT `critic_reviews_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `games` (`game_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_reviews` (
+  `review_id` int(11) NOT NULL AUTO_INCREMENT,
+  `game_id` int(11) NOT NULL,
+  `user_score` decimal(4,2) DEFAULT NULL COMMENT 'Average user score out of 10',
+  `num_user_reviews` int(11) DEFAULT NULL COMMENT 'Number of user reviews',
+  PRIMARY KEY (`review_id`),
+  CONSTRAINT `user_reviews_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `games` (`game_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `yearly_summary` (
+  `summary_id` int(11) NOT NULL AUTO_INCREMENT,
+  `release_year` int(11) NOT NULL,
+  `num_games` int(11) DEFAULT NULL COMMENT 'Number of top-selling games released that year',
+  `avg_critic_score` decimal(5,2) DEFAULT NULL COMMENT 'Average critic score for the year',
+  `avg_user_score` decimal(4,2) DEFAULT NULL COMMENT 'Average user score for the year',
+  `total_sales` decimal(12,2) DEFAULT NULL COMMENT 'Total sales for the year in millions',
+  `num_high_scoring_games` int(11) DEFAULT NULL COMMENT 'Number of games with high scores',
+  PRIMARY KEY (`summary_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

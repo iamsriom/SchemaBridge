@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0193
+
+CREATE TABLE `material` (
+  `material_id` int(11) NOT NULL AUTO_INCREMENT,
+  `material_number` varchar(50) NOT NULL,
+  `material_name` varchar(255) NOT NULL,
+  `specification` varchar(255) DEFAULT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `inventory` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`material_id`),
+  UNIQUE KEY `material_number` (`material_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_name` varchar(255) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project` (
+  `project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_name` varchar(255) NOT NULL,
+  `project_description` varchar(500) DEFAULT NULL,
+  `start_date` datetime DEFAULT NULL,
+  `end_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `material_usage` (
+  `usage_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `material_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `use_date` datetime NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  PRIMARY KEY (`usage_id`),
+  CONSTRAINT `material_usage_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `material_usage_ibfk_2` FOREIGN KEY (`material_id`) REFERENCES `material` (`material_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `material_usage_ibfk_3` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `material_usage_ibfk_4` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

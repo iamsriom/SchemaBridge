@@ -1,0 +1,150 @@
+-- Schema for database: schemabench_0092
+
+CREATE TABLE `teams` (
+  `team_id` varchar(10) NOT NULL,
+  `year` int(11) NOT NULL,
+  `league_id` varchar(10) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `division` varchar(50) DEFAULT NULL,
+  `conference` varchar(50) DEFAULT NULL,
+  `wins` int(11) DEFAULT NULL,
+  `losses` int(11) DEFAULT NULL,
+  `home_wins` int(11) DEFAULT NULL,
+  `home_losses` int(11) DEFAULT NULL,
+  `away_wins` int(11) DEFAULT NULL,
+  `away_losses` int(11) DEFAULT NULL,
+  `points_for` int(11) DEFAULT NULL,
+  `points_against` int(11) DEFAULT NULL,
+  `playoff` varchar(10) DEFAULT NULL,
+  `rank` int(11) DEFAULT NULL,
+  PRIMARY KEY (`team_id`, `year`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `players` (
+  `player_id` varchar(20) NOT NULL,
+  `first_name` varchar(100) DEFAULT NULL,
+  `last_name` varchar(100) DEFAULT NULL,
+  `birth_date` datetime DEFAULT NULL,
+  `height` float DEFAULT NULL,
+  `weight` float DEFAULT NULL,
+  `college` varchar(100) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`player_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `coaches` (
+  `coach_id` varchar(20) NOT NULL,
+  `first_name` varchar(100) DEFAULT NULL,
+  `last_name` varchar(100) DEFAULT NULL,
+  `team_id` varchar(10) DEFAULT NULL,
+  `year` int(11) DEFAULT NULL,
+  `wins` int(11) DEFAULT NULL,
+  `losses` int(11) DEFAULT NULL,
+  `post_wins` int(11) DEFAULT NULL,
+  `post_losses` int(11) DEFAULT NULL,
+  PRIMARY KEY (`coach_id`),
+  CONSTRAINT `coaches_ibfk_1` FOREIGN KEY (`team_id`, `year`) REFERENCES `teams` (`team_id`, `year`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `players_teams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `player_id` varchar(20) NOT NULL,
+  `team_id` varchar(10) NOT NULL,
+  `year` int(11) NOT NULL,
+  `stint` int(11) DEFAULT NULL,
+  `games` int(11) DEFAULT NULL,
+  `games_started` int(11) DEFAULT NULL,
+  `minutes` int(11) DEFAULT NULL,
+  `points` int(11) DEFAULT NULL,
+  `rebounds` int(11) DEFAULT NULL,
+  `assists` int(11) DEFAULT NULL,
+  `steals` int(11) DEFAULT NULL,
+  `blocks` int(11) DEFAULT NULL,
+  `turnovers` int(11) DEFAULT NULL,
+  `personal_fouls` int(11) DEFAULT NULL,
+  `field_goals_made` int(11) DEFAULT NULL,
+  `field_goals_attempted` int(11) DEFAULT NULL,
+  `three_pointers_made` int(11) DEFAULT NULL,
+  `three_pointers_attempted` int(11) DEFAULT NULL,
+  `free_throws_made` int(11) DEFAULT NULL,
+  `free_throws_attempted` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `players_teams_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `players` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `players_teams_ibfk_2` FOREIGN KEY (`team_id`, `year`) REFERENCES `teams` (`team_id`, `year`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `awards_players` (
+  `award_id` int(11) NOT NULL AUTO_INCREMENT,
+  `player_id` varchar(20) NOT NULL,
+  `award` varchar(100) NOT NULL,
+  `year` int(11) NOT NULL,
+  `league_id` varchar(10) DEFAULT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  `position` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`award_id`),
+  CONSTRAINT `awards_players_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `players` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `awards_coaches` (
+  `award_id` int(11) NOT NULL AUTO_INCREMENT,
+  `coach_id` varchar(20) NOT NULL,
+  `award` varchar(100) NOT NULL,
+  `year` int(11) NOT NULL,
+  `league_id` varchar(10) DEFAULT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`award_id`),
+  CONSTRAINT `awards_coaches_ibfk_1` FOREIGN KEY (`coach_id`) REFERENCES `coaches` (`coach_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `series_post` (
+  `series_id` int(11) NOT NULL AUTO_INCREMENT,
+  `year` int(11) NOT NULL,
+  `round` varchar(50) DEFAULT NULL,
+  `series` varchar(10) DEFAULT NULL,
+  `wins` int(11) DEFAULT NULL,
+  `losses` int(11) DEFAULT NULL,
+  `team_id_winner` varchar(10) DEFAULT NULL,
+  `team_id_loser` varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`series_id`),
+  CONSTRAINT `series_post_ibfk_1` FOREIGN KEY (`team_id_winner`, `year`) REFERENCES `teams` (`team_id`, `year`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `series_post_ibfk_2` FOREIGN KEY (`team_id_loser`, `year`) REFERENCES `teams` (`team_id`, `year`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `draft` (
+  `draft_id` int(11) NOT NULL AUTO_INCREMENT,
+  `year` int(11) NOT NULL,
+  `round` int(11) DEFAULT NULL,
+  `pick` int(11) DEFAULT NULL,
+  `team_id` varchar(10) DEFAULT NULL,
+  `player_id` varchar(20) DEFAULT NULL,
+  `college` varchar(100) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `overall_pick` int(11) DEFAULT NULL,
+  PRIMARY KEY (`draft_id`),
+  CONSTRAINT `draft_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `players` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `draft_ibfk_2` FOREIGN KEY (`team_id`, `year`) REFERENCES `teams` (`team_id`, `year`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `player_allstar` (
+  `allstar_id` int(11) NOT NULL AUTO_INCREMENT,
+  `player_id` varchar(20) NOT NULL,
+  `year` int(11) NOT NULL,
+  `games_played` int(11) DEFAULT NULL,
+  `minutes` int(11) DEFAULT NULL,
+  `points` int(11) DEFAULT NULL,
+  `rebounds` int(11) DEFAULT NULL,
+  `assists` int(11) DEFAULT NULL,
+  `steals` int(11) DEFAULT NULL,
+  `blocks` int(11) DEFAULT NULL,
+  `turnovers` int(11) DEFAULT NULL,
+  `personal_fouls` int(11) DEFAULT NULL,
+  `field_goals_made` int(11) DEFAULT NULL,
+  `field_goals_attempted` int(11) DEFAULT NULL,
+  `three_pointers_made` int(11) DEFAULT NULL,
+  `three_pointers_attempted` int(11) DEFAULT NULL,
+  `free_throws_made` int(11) DEFAULT NULL,
+  `free_throws_attempted` int(11) DEFAULT NULL,
+  PRIMARY KEY (`allstar_id`),
+  CONSTRAINT `player_allstar_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `players` (`player_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

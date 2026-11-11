@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0206
+CREATE TABLE `protection_zone` (
+  `zone_id` int(11) NOT NULL AUTO_INCREMENT,
+  `zone_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`zone_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `area` (
+  `area_id` int(11) NOT NULL AUTO_INCREMENT,
+  `zone_id` int(11) NOT NULL,
+  `area_number` varchar(50) NOT NULL,
+  `area_name` varchar(255) NOT NULL,
+  `geographic_location` varchar(255) NOT NULL,
+  `administrator` varchar(255) NOT NULL,
+  PRIMARY KEY (`area_id`),
+  UNIQUE KEY `uk_area_number` (`area_number`),
+  KEY `area_ibfk_1` (`zone_id`),
+  CONSTRAINT `area_ibfk_1` FOREIGN KEY (`zone_id`) REFERENCES `protection_zone` (`zone_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `species_record` (
+  `species_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `area_id` int(11) NOT NULL,
+  `record_number` varchar(50) NOT NULL,
+  `record_time` datetime NOT NULL,
+  `recorder` varchar(255) NOT NULL,
+  `species_name` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`species_record_id`),
+  UNIQUE KEY `uk_species_record_number` (`record_number`),
+  KEY `species_record_ibfk_1` (`area_id`),
+  CONSTRAINT `species_record_ibfk_1` FOREIGN KEY (`area_id`) REFERENCES `area` (`area_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `environment_change_record` (
+  `environment_change_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `area_id` int(11) NOT NULL,
+  `record_number` varchar(50) NOT NULL,
+  `change_time` datetime NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `temperature` decimal(10,2) DEFAULT NULL,
+  `humidity` decimal(10,2) DEFAULT NULL,
+  `rainfall` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`environment_change_record_id`),
+  UNIQUE KEY `uk_environment_change_record_number` (`record_number`),
+  KEY `environment_change_record_ibfk_1` (`area_id`),
+  CONSTRAINT `environment_change_record_ibfk_1` FOREIGN KEY (`area_id`) REFERENCES `area` (`area_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

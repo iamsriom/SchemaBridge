@@ -1,0 +1,52 @@
+-- Schema for database: rschema_0276
+
+CREATE TABLE `maintenance_team` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_name` varchar(255) NOT NULL,
+  `team_leader_id` int(11) DEFAULT NULL,
+  `team_responsibilities` text DEFAULT NULL,
+  `total_members` int(11) DEFAULT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_technician` (
+  `technician_id` int(11) NOT NULL AUTO_INCREMENT,
+  `technician_name` varchar(255) NOT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `position` varchar(100) DEFAULT NULL,
+  `employment_date` datetime DEFAULT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`technician_id`),
+  CONSTRAINT `maintenance_technician_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `maintenance_team` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+ALTER TABLE `maintenance_team` ADD CONSTRAINT `maintenance_team_ibfk_1` FOREIGN KEY (`team_leader_id`) REFERENCES `maintenance_technician` (`technician_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `address` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `technician_id` int(11) DEFAULT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  `maintenance_time` datetime DEFAULT NULL,
+  `maintenance_duration` int(11) DEFAULT NULL,
+  `maintenance_cost` decimal(10,2) DEFAULT NULL,
+  `maintenance_result` varchar(500) DEFAULT NULL,
+  `product_name` varchar(255) DEFAULT NULL,
+  `product_model` varchar(255) DEFAULT NULL,
+  `customer_feedback` text DEFAULT NULL,
+  `satisfaction_level` int(11) DEFAULT NULL,
+  `feedback_resolution` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  CONSTRAINT `maintenance_task_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_task_ibfk_2` FOREIGN KEY (`technician_id`) REFERENCES `maintenance_technician` (`technician_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_task_ibfk_3` FOREIGN KEY (`team_id`) REFERENCES `maintenance_team` (`team_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

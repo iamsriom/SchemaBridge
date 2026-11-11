@@ -1,0 +1,129 @@
+-- Schema for database: schemabench_0219
+
+CREATE TABLE `fuel_type` (
+  `fuel_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `fuel_type_name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `price_per_unit` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`fuel_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supplier` (
+  `supplier_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_name` varchar(150) NOT NULL,
+  `contact_name` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`supplier_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supplier_fuel_type` (
+  `supplier_fuel_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_id` int(11) NOT NULL,
+  `fuel_type_id` int(11) NOT NULL,
+  PRIMARY KEY (`supplier_fuel_type_id`),
+  CONSTRAINT `supplier_fuel_type_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `supplier_fuel_type_ibfk_2` FOREIGN KEY (`fuel_type_id`) REFERENCES `fuel_type` (`fuel_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fuel_tank` (
+  `tank_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tank_name` varchar(100) NOT NULL,
+  `fuel_type_id` int(11) NOT NULL,
+  `capacity` decimal(10,2) NOT NULL,
+  `current_level` decimal(10,2) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`tank_id`),
+  CONSTRAINT `fuel_tank_ibfk_1` FOREIGN KEY (`fuel_type_id`) REFERENCES `fuel_type` (`fuel_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tank_refill` (
+  `refill_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tank_id` int(11) NOT NULL,
+  `supplier_id` int(11) NOT NULL,
+  `fuel_type_id` int(11) NOT NULL,
+  `refill_date` datetime NOT NULL,
+  `quantity` decimal(10,2) NOT NULL,
+  `cost` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`refill_id`),
+  CONSTRAINT `tank_refill_ibfk_1` FOREIGN KEY (`tank_id`) REFERENCES `fuel_tank` (`tank_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tank_refill_ibfk_2` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tank_refill_ibfk_3` FOREIGN KEY (`fuel_type_id`) REFERENCES `fuel_type` (`fuel_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fuel_pump` (
+  `pump_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pump_name` varchar(100) NOT NULL,
+  `tank_id` int(11) NOT NULL,
+  `fuel_type_id` int(11) NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'active',
+  `installation_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`pump_id`),
+  CONSTRAINT `fuel_pump_ibfk_1` FOREIGN KEY (`tank_id`) REFERENCES `fuel_tank` (`tank_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fuel_pump_ibfk_2` FOREIGN KEY (`fuel_type_id`) REFERENCES `fuel_type` (`fuel_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `registration_date` datetime NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `role` varchar(100) NOT NULL,
+  `hire_date` datetime NOT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `pump_id` int(11) NOT NULL,
+  `fuel_type_id` int(11) NOT NULL,
+  `transaction_date` datetime NOT NULL,
+  `quantity` decimal(10,2) NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_ibfk_3` FOREIGN KEY (`pump_id`) REFERENCES `fuel_pump` (`pump_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_ibfk_4` FOREIGN KEY (`fuel_type_id`) REFERENCES `fuel_type` (`fuel_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment` (
+  `payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_id` int(11) NOT NULL,
+  `payment_date` datetime NOT NULL,
+  `payment_method` varchar(50) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'completed',
+  PRIMARY KEY (`payment_id`),
+  CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance` (
+  `maintenance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pump_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `supplier_id` int(11) DEFAULT NULL,
+  `maintenance_date` datetime NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `cost` decimal(10,2) DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'completed',
+  PRIMARY KEY (`maintenance_id`),
+  CONSTRAINT `maintenance_ibfk_1` FOREIGN KEY (`pump_id`) REFERENCES `fuel_pump` (`pump_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_ibfk_3` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,195 @@
+-- Schema for database: rschema_0321
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `full_name` varchar(150) DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `profile_picture_url` varchar(500) DEFAULT NULL,
+  `bio` text DEFAULT NULL,
+  `phone_number` varchar(30) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `favorite_position` varchar(50) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_friendships` (
+  `friendship_id` int(11) NOT NULL AUTO_INCREMENT,
+  `requester_id` int(11) NOT NULL,
+  `addressee_id` int(11) NOT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'pending',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`friendship_id`),
+  UNIQUE KEY `unique_friendship` (`requester_id`, `addressee_id`),
+  CONSTRAINT `user_friendships_ibfk_1` FOREIGN KEY (`requester_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_friendships_ibfk_2` FOREIGN KEY (`addressee_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_interests` (
+  `interest_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `interest_tag` varchar(100) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`interest_id`),
+  CONSTRAINT `user_interests_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `membership_plans` (
+  `plan_id` int(11) NOT NULL AUTO_INCREMENT,
+  `plan_name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `duration_days` int(11) NOT NULL,
+  `benefits` text DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`plan_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_memberships` (
+  `membership_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `plan_id` int(11) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'active',
+  `payment_reference` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`membership_id`),
+  CONSTRAINT `user_memberships_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_memberships_ibfk_2` FOREIGN KEY (`plan_id`) REFERENCES `membership_plans` (`plan_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `teams` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_name` varchar(150) NOT NULL,
+  `logo_url` varchar(500) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `home_city` varchar(100) DEFAULT NULL,
+  `home_stadium` varchar(150) DEFAULT NULL,
+  `founded_year` int(11) DEFAULT NULL,
+  `creator_id` int(11) NOT NULL,
+  `is_official_club` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`team_id`),
+  CONSTRAINT `teams_ibfk_1` FOREIGN KEY (`creator_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `team_members` (
+  `team_member_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'member',
+  `jersey_number` int(11) DEFAULT NULL,
+  `position` varchar(50) DEFAULT NULL,
+  `joined_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` varchar(20) NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`team_member_id`),
+  UNIQUE KEY `unique_team_member` (`team_id`, `user_id`),
+  CONSTRAINT `team_members_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `team_members_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `matches` (
+  `match_id` int(11) NOT NULL AUTO_INCREMENT,
+  `home_team_id` int(11) NOT NULL,
+  `away_team_id` int(11) NOT NULL,
+  `match_date` datetime NOT NULL,
+  `venue` varchar(200) DEFAULT NULL,
+  `competition_name` varchar(150) DEFAULT NULL,
+  `status` varchar(30) NOT NULL DEFAULT 'scheduled',
+  `home_score` int(11) DEFAULT NULL,
+  `away_score` int(11) DEFAULT NULL,
+  `match_notes` text DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`match_id`),
+  CONSTRAINT `matches_ibfk_1` FOREIGN KEY (`home_team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `matches_ibfk_2` FOREIGN KEY (`away_team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `matches_ibfk_3` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `match_timeline_events` (
+  `event_id` int(11) NOT NULL AUTO_INCREMENT,
+  `match_id` int(11) NOT NULL,
+  `event_minute` int(11) NOT NULL,
+  `event_type` varchar(50) NOT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  `player_id` int(11) DEFAULT NULL,
+  `secondary_player_id` int(11) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`event_id`),
+  CONSTRAINT `match_timeline_events_ibfk_1` FOREIGN KEY (`match_id`) REFERENCES `matches` (`match_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `match_timeline_events_ibfk_2` FOREIGN KEY (`team_id`) REFERENCES `teams` (`team_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `match_timeline_events_ibfk_3` FOREIGN KEY (`player_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `match_timeline_events_ibfk_4` FOREIGN KEY (`secondary_player_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `events` (
+  `event_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(200) NOT NULL,
+  `description` text DEFAULT NULL,
+  `organizer_id` int(11) NOT NULL,
+  `event_type` varchar(50) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `start_datetime` datetime NOT NULL,
+  `end_datetime` datetime DEFAULT NULL,
+  `max_participants` int(11) DEFAULT NULL,
+  `is_public` tinyint(1) NOT NULL DEFAULT 1,
+  `status` varchar(30) NOT NULL DEFAULT 'upcoming',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`event_id`),
+  CONSTRAINT `events_ibfk_1` FOREIGN KEY (`organizer_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `event_participants` (
+  `participation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `rsvp_status` varchar(20) NOT NULL DEFAULT 'going',
+  `registered_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`participation_id`),
+  UNIQUE KEY `unique_event_participant` (`event_id`, `user_id`),
+  CONSTRAINT `event_participants_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `event_participants_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sponsors` (
+  `sponsor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sponsor_name` varchar(150) NOT NULL,
+  `contact_email` varchar(255) DEFAULT NULL,
+  `website_url` varchar(500) DEFAULT NULL,
+  `logo_url` varchar(500) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`sponsor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `event_sponsors` (
+  `event_sponsor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_id` int(11) NOT NULL,
+  `sponsor_id` int(11) NOT NULL,
+  `sponsorship_level` varchar(50) DEFAULT NULL,
+  `contribution_amount` decimal(12,2) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`event_sponsor_id`),
+  UNIQUE KEY `unique_event_sponsor` (`event_id`, `sponsor_id`),
+  CONSTRAINT `event_sponsors_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `event_sponsors_ibfk_2` FOREIGN KEY (`sponsor_id`) REFERENCES `sponsors` (`sponsor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

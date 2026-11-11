@@ -1,0 +1,96 @@
+-- Schema for database: rschema_0445
+
+CREATE TABLE `unit` (
+  `unit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `unit_name` varchar(255) NOT NULL,
+  `unit_type` varchar(50) NOT NULL COMMENT 'secondary_unit, third_party_unit',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`unit_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `personnel` (
+  `person_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `person_type` varchar(50) NOT NULL COMMENT 'teacher, student, third_party, visitor',
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `unit_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`person_id`),
+  CONSTRAINT `personnel_ibfk_1` FOREIGN KEY (`unit_id`) REFERENCES `unit` (`unit_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `administrator` (
+  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `management_role` varchar(100) NOT NULL,
+  `person_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`admin_id`),
+  CONSTRAINT `administrator_ibfk_1` FOREIGN KEY (`person_id`) REFERENCES `personnel` (`person_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `health_info` (
+  `health_id` int(11) NOT NULL AUTO_INCREMENT,
+  `person_id` int(11) NOT NULL,
+  `temperature` decimal(4,1) DEFAULT NULL,
+  `symptoms` varchar(500) DEFAULT NULL,
+  `health_code_color` varchar(20) DEFAULT NULL COMMENT 'green, yellow, red',
+  `record_time` datetime NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`health_id`),
+  CONSTRAINT `health_info_ibfk_1` FOREIGN KEY (`person_id`) REFERENCES `personnel` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `travel_trajectory` (
+  `trajectory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `person_id` int(11) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `visit_time` datetime NOT NULL,
+  `leave_time` datetime DEFAULT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`trajectory_id`),
+  CONSTRAINT `travel_trajectory_ibfk_1` FOREIGN KEY (`person_id`) REFERENCES `personnel` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `visitor_appointment` (
+  `appointment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `visitor_id` int(11) NOT NULL,
+  `visited_person_id` int(11) NOT NULL,
+  `scheduled_entry_time` datetime NOT NULL,
+  `scheduled_exit_time` datetime NOT NULL,
+  `appointment_status` varchar(50) NOT NULL COMMENT 'pending_review, approved, rejected',
+  `wechat_qr_code` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`appointment_id`),
+  CONSTRAINT `visitor_appointment_ibfk_1` FOREIGN KEY (`visitor_id`) REFERENCES `personnel` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `visitor_appointment_ibfk_2` FOREIGN KEY (`visited_person_id`) REFERENCES `personnel` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `access_control_device` (
+  `device_id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_name` varchar(100) NOT NULL,
+  `device_location` varchar(255) NOT NULL,
+  `device_status` varchar(20) NOT NULL COMMENT 'normal, fault',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`device_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `access_record` (
+  `access_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `person_id` int(11) NOT NULL,
+  `entry_time` datetime NOT NULL,
+  `exit_time` datetime DEFAULT NULL,
+  `device_id` int(11) NOT NULL,
+  `verification_method` varchar(50) DEFAULT NULL COMMENT 'dynamic_qr_code, facial_recognition',
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`access_record_id`),
+  CONSTRAINT `access_record_ibfk_1` FOREIGN KEY (`person_id`) REFERENCES `personnel` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `access_record_ibfk_2` FOREIGN KEY (`device_id`) REFERENCES `access_control_device` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

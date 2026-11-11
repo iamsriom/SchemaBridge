@@ -1,0 +1,104 @@
+-- Schema for database: schemabench_0166
+
+CREATE TABLE `brand` (
+  `brand_id` int(11) NOT NULL AUTO_INCREMENT,
+  `brand_name` varchar(255) NOT NULL,
+  `country_of_origin` varchar(255) DEFAULT NULL,
+  `founded_year` int(11) DEFAULT NULL,
+  `website` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`brand_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `category` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(255) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `brand_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `color` varchar(100) DEFAULT NULL,
+  `size` varchar(50) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `stock_quantity` int(11) NOT NULL DEFAULT 0,
+  `sku` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`product_id`),
+  CONSTRAINT `product_ibfk_1` FOREIGN KEY (`brand_id`) REFERENCES `brand` (`brand_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `product_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `address` varchar(500) DEFAULT NULL,
+  `city` varchar(255) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `zip_code` varchar(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `role` varchar(100) DEFAULT NULL,
+  `hire_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_ticket` (
+  `ticket_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `customer_id` int(11) DEFAULT NULL,
+  `sale_date` datetime NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  `discount` decimal(10,2) DEFAULT NULL,
+  `notes` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`ticket_id`),
+  CONSTRAINT `sales_ticket_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_ticket_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_ticket_item` (
+  `item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`item_id`),
+  CONSTRAINT `sales_ticket_item_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `sales_ticket` (`ticket_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_ticket_item_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment` (
+  `payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(11) NOT NULL,
+  `payment_method` varchar(100) NOT NULL,
+  `amount_paid` decimal(10,2) NOT NULL,
+  `payment_date` datetime NOT NULL,
+  PRIMARY KEY (`payment_id`),
+  CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `sales_ticket` (`ticket_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `credit_card_payment` (
+  `credit_card_payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `payment_id` int(11) NOT NULL,
+  `card_type` varchar(100) NOT NULL,
+  `card_state` varchar(100) DEFAULT NULL,
+  `last_four_digits` char(4) DEFAULT NULL,
+  `cardholder_name` varchar(255) DEFAULT NULL,
+  `expiry_date` varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`credit_card_payment_id`),
+  CONSTRAINT `credit_card_payment_ibfk_1` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`payment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

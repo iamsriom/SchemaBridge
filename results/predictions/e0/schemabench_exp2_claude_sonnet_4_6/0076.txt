@@ -1,0 +1,101 @@
+-- Schema for database: schemabench_0076
+
+CREATE TABLE `servers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `ssh_user` varchar(100) NOT NULL,
+  `ssh_port` int(11) NOT NULL DEFAULT '22',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `check_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `is_custom` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `monitoring_checks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `server_id` int(11) NOT NULL,
+  `check_type_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `is_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `schedule_interval` int(11) NOT NULL DEFAULT '60',
+  `threshold_value` varchar(255) DEFAULT NULL,
+  `last_run_at` datetime DEFAULT NULL,
+  `last_run_status` varchar(50) DEFAULT NULL,
+  `last_run_output` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `monitoring_checks_ibfk_1` FOREIGN KEY (`server_id`) REFERENCES `servers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `monitoring_checks_ibfk_2` FOREIGN KEY (`check_type_id`) REFERENCES `check_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `check_results` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `monitoring_check_id` int(11) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `output` text DEFAULT NULL,
+  `executed_at` datetime NOT NULL,
+  `duration_ms` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `check_results_ibfk_1` FOREIGN KEY (`monitoring_check_id`) REFERENCES `monitoring_checks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alerts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `monitoring_check_id` int(11) NOT NULL,
+  `check_result_id` int(11) NOT NULL,
+  `message` text NOT NULL,
+  `severity` varchar(50) NOT NULL DEFAULT 'critical',
+  `is_resolved` tinyint(1) NOT NULL DEFAULT '0',
+  `triggered_at` datetime NOT NULL,
+  `resolved_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `alerts_ibfk_1` FOREIGN KEY (`monitoring_check_id`) REFERENCES `monitoring_checks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `alerts_ibfk_2` FOREIGN KEY (`check_result_id`) REFERENCES `check_results` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'admin',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alert_notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `alert_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `notification_method` varchar(50) NOT NULL DEFAULT 'email',
+  `sent_at` datetime NOT NULL,
+  `is_acknowledged` tinyint(1) NOT NULL DEFAULT '0',
+  `acknowledged_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `alert_notifications_ibfk_1` FOREIGN KEY (`alert_id`) REFERENCES `alerts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `alert_notifications_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `server_user_assignments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `server_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `assigned_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `server_user_assignments_ibfk_1` FOREIGN KEY (`server_id`) REFERENCES `servers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `server_user_assignments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

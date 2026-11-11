@@ -1,0 +1,70 @@
+-- Schema for database: rschema_0247
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `student_number` varchar(50) DEFAULT NULL,
+  `teacher_id` varchar(50) DEFAULT NULL,
+  `role` varchar(20) NOT NULL,
+  `registration_time` datetime NOT NULL,
+  `last_login_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_student_number` (`student_number`),
+  UNIQUE KEY `uk_users_teacher_id` (`teacher_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `classes` (
+  `class_id` int(11) NOT NULL AUTO_INCREMENT,
+  `class_name` varchar(255) NOT NULL,
+  `major` varchar(255) NOT NULL,
+  `grade` varchar(20) NOT NULL,
+  PRIMARY KEY (`class_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `teachers` (
+  `teacher_id` int(11) NOT NULL AUTO_INCREMENT,
+  `teacher_number` varchar(50) NOT NULL,
+  `teacher_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`teacher_id`),
+  UNIQUE KEY `uk_teachers_teacher_number` (`teacher_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `students` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_number` varchar(50) NOT NULL,
+  `student_name` varchar(255) NOT NULL,
+  `class_id` int(11) NOT NULL,
+  PRIMARY KEY (`student_id`),
+  UNIQUE KEY `uk_students_student_number` (`student_number`),
+  KEY `students_ibfk_1` (`class_id`),
+  CONSTRAINT `students_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `classes` (`class_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `courses` (
+  `course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_name` varchar(255) NOT NULL,
+  `course_description` text DEFAULT NULL,
+  `teacher_id` int(11) NOT NULL,
+  PRIMARY KEY (`course_id`),
+  KEY `courses_ibfk_1` (`teacher_id`),
+  CONSTRAINT `courses_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`teacher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `sign_in_controls` (
+  `flag_id` int(11) NOT NULL AUTO_INCREMENT,
+  `teacher_id` int(11) NOT NULL,
+  `sign_in_start_time` datetime NOT NULL,
+  `sign_in_end_time` datetime DEFAULT NULL,
+  `control_flag` varchar(20) NOT NULL,
+  PRIMARY KEY (`flag_id`),
+  KEY `sign_in_controls_ibfk_1` (`teacher_id`),
+  CONSTRAINT `sign_in_controls_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`teacher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `sign_in_records` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `flag_id` int(11) NOT NULL,
+  `sign_in_time` datetime NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `sign_in_status` varchar(20) NOT NULL,
+  PRIMARY KEY (`record_id`),
+  KEY `sign_in_records_ibfk_1` (`student_id`),
+  KEY `sign_in_records_ibfk_2` (`flag_id`),
+  CONSTRAINT `sign_in_records_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sign_in_records_ibfk_2` FOREIGN KEY (`flag_id`) REFERENCES `sign_in_controls` (`flag_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

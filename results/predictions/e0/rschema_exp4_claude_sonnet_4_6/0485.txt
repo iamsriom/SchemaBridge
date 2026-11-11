@@ -1,0 +1,42 @@
+-- Schema for database: rschema_0485
+
+CREATE TABLE `protection_area` (
+  `area_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `person_in_charge` varchar(100) NOT NULL,
+  PRIMARY KEY (`area_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `species` (
+  `species_id` int(11) NOT NULL AUTO_INCREMENT,
+  `species_name` varchar(255) NOT NULL,
+  `species_type` varchar(50) NOT NULL COMMENT 'flora or fauna',
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`species_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flora_fauna_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `area_id` int(11) NOT NULL,
+  `species_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `growth_status` varchar(255) NOT NULL,
+  `record_time` datetime NOT NULL,
+  `recorder` varchar(100) NOT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `flora_fauna_record_ibfk_1` FOREIGN KEY (`area_id`) REFERENCES `protection_area` (`area_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flora_fauna_record_ibfk_2` FOREIGN KEY (`species_id`) REFERENCES `species` (`species_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `environmental_change` (
+  `change_id` int(11) NOT NULL AUTO_INCREMENT,
+  `area_id` int(11) NOT NULL,
+  `temperature` decimal(5,2) DEFAULT NULL COMMENT 'in Celsius',
+  `humidity` decimal(5,2) DEFAULT NULL COMMENT 'in percentage',
+  `rainfall` decimal(7,2) DEFAULT NULL COMMENT 'in mm',
+  `record_time` datetime NOT NULL,
+  `location` varchar(255) NOT NULL,
+  PRIMARY KEY (`change_id`),
+  CONSTRAINT `environmental_change_ibfk_1` FOREIGN KEY (`area_id`) REFERENCES `protection_area` (`area_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

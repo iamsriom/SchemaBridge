@@ -1,0 +1,144 @@
+-- Schema for database: schemabench_0150
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `is_admin` tinyint(1) NOT NULL DEFAULT '0',
+  `is_moderator` tinyint(1) NOT NULL DEFAULT '0',
+  `about` text DEFAULT NULL,
+  `invited_by_user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`),
+  KEY `invited_by_user_id` (`invited_by_user_id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`invited_by_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `invites` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` char(32) NOT NULL,
+  `invited_by_user_id` int(11) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `used_by_user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`),
+  KEY `invited_by_user_id` (`invited_by_user_id`),
+  KEY `used_by_user_id` (`used_by_user_id`),
+  CONSTRAINT `invites_ibfk_1` FOREIGN KEY (`invited_by_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `invites_ibfk_2` FOREIGN KEY (`used_by_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `stories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `url` varchar(2048) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
+  `is_moderated` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `stories_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `story_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `parent_comment_id` int(11) DEFAULT NULL,
+  `body` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
+  `is_moderated` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `story_id` (`story_id`),
+  KEY `user_id` (`user_id`),
+  KEY `parent_comment_id` (`parent_comment_id`),
+  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`story_id`) REFERENCES `stories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`parent_comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `votes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `story_id` int(11) DEFAULT NULL,
+  `comment_id` int(11) DEFAULT NULL,
+  `vote_value` tinyint(1) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_story_vote` (`user_id`,`story_id`),
+  UNIQUE KEY `user_comment_vote` (`user_id`,`comment_id`),
+  KEY `story_id` (`story_id`),
+  KEY `comment_id` (`comment_id`),
+  CONSTRAINT `votes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `votes_ibfk_2` FOREIGN KEY (`story_id`) REFERENCES `stories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `votes_ibfk_3` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `tags` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `story_tags` (
+  `story_id` int(11) NOT NULL,
+  `tag_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`story_id`,`tag_id`),
+  KEY `tag_id` (`tag_id`),
+  CONSTRAINT `story_tags_ibfk_1` FOREIGN KEY (`story_id`) REFERENCES `stories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `story_tags_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `moderation_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `moderator_user_id` int(11) NOT NULL,
+  `story_id` int(11) DEFAULT NULL,
+  `comment_id` int(11) DEFAULT NULL,
+  `action` varchar(100) NOT NULL,
+  `reason` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `moderator_user_id` (`moderator_user_id`),
+  KEY `story_id` (`story_id`),
+  KEY `comment_id` (`comment_id`),
+  CONSTRAINT `moderation_logs_ibfk_1` FOREIGN KEY (`moderator_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `moderation_logs_ibfk_2` FOREIGN KEY (`story_id`) REFERENCES `stories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `moderation_logs_ibfk_3` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `messages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `sender_user_id` int(11) NOT NULL,
+  `recipient_user_id` int(11) NOT NULL,
+  `subject` varchar(255) DEFAULT NULL,
+  `body` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  `read_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `sender_user_id` (`sender_user_id`),
+  KEY `recipient_user_id` (`recipient_user_id`),
+  CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`sender_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `messages_ibfk_2` FOREIGN KEY (`recipient_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `saved_stories` (
+  `user_id` int(11) NOT NULL,
+  `story_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`,`story_id`),
+  KEY `story_id` (`story_id`),
+  CONSTRAINT `saved_stories_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `saved_stories_ibfk_2` FOREIGN KEY (`story_id`) REFERENCES `stories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `hidden_stories` (
+  `user_id` int(11) NOT NULL,
+  `story_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`,`story_id`),
+  KEY `story_id` (`story_id`),
+  CONSTRAINT `hidden_stories_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `hidden_stories_ibfk_2` FOREIGN KEY (`story_id`) REFERENCES `stories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

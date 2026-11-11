@@ -1,0 +1,144 @@
+{
+  "text_number": 476,
+  "id": "67552f0b13602ec03b41ab17",
+  "llm": "gpt54mini",
+  "model_id": "gpt-5.4-mini",
+  "database": "rschema_0476",
+  "question": "The design of the information management system for a pizza shop is as follows:\nThe system includes Customer Management, Sales Order Processing, Production Planning, Raw Material Procurement, Product Inventory Management, Order Delivery, and Financial Records.\nCustomer information comprises Customer ID, Name, Contact Number, and Address.\nSales Order records the customer's order details, including Order ID, Customer ID, Expected Delivery Date, and Order Status.\nProduction Planning determines the production sequence and quantity based on Sales Orders and inventory status, and records the production status.  \nInventory Management tracks the quantity and status of pizzas and raw materials.\nPurchase Orders are used to order raw materials from suppliers, documenting Supplier ID, Raw Material ID, Order Quantity, Supply Quantity, and Order Status.\nDelivery Records track the delivery details of orders, including Delivery Time, Location, and Status.\nFinancial Records manage income and expenses, recording Transaction Type, Amount, Date, and Status.\nAdditionally, the system includes Supplier Information, Pizza Recipes, and Raw Material Details to ensure the smooth progression of production processes.",
+  "ddl": "-- Schema for database: rschema_0476\nCREATE TABLE `customer` (\n  `customer_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `contact_number` varchar(50) NOT NULL,\n  `address` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`customer_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `supplier` (\n  `supplier_id` int(11) NOT NULL AUTO_INCREMENT,\n  `supplier_name` varchar(255) NOT NULL,\n  `contact_number` varchar(50) DEFAULT NULL,\n  `address` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`supplier_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `raw_material` (\n  `raw_material_id` int(11) NOT NULL AUTO_INCREMENT,\n  `material_name` varchar(255) NOT NULL,\n  `unit` varchar(50) NOT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`raw_material_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `pizza_recipe` (\n  `recipe_id` int(11) NOT NULL AUTO_INCREMENT,\n  `pizza_name` varchar(255) NOT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`recipe_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `pizza_recipe_item` (\n  `recipe_item_id` int(11) NOT NULL AUTO_INCREMENT,\n  `recipe_id` int(11) NOT NULL,\n  `raw_material_id` int(11) NOT NULL,\n  `quantity_required` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`recipe_item_id`),\n  KEY `recipe_id` (`recipe_id`),\n  KEY `raw_material_id` (`raw_material_id`),\n  CONSTRAINT `pizza_recipe_item_ibfk_1` FOREIGN KEY (`recipe_id`) REFERENCES `pizza_recipe` (`recipe_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `pizza_recipe_item_ibfk_2` FOREIGN KEY (`raw_material_id`) REFERENCES `raw_material` (`raw_material_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sales_order` (\n  `order_id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_id` int(11) NOT NULL,\n  `expected_delivery_date` datetime NOT NULL,\n  `order_status` varchar(50) NOT NULL,\n  PRIMARY KEY (`order_id`),\n  KEY `customer_id` (`customer_id`),\n  CONSTRAINT `sales_order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sales_order_item` (\n  `order_item_id` int(11) NOT NULL AUTO_INCREMENT,\n  `order_id` int(11) NOT NULL,\n  `recipe_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  PRIMARY KEY (`order_item_id`),\n  KEY `order_id` (`order_id`),\n  KEY `recipe_id` (`recipe_id`),\n  CONSTRAINT `sales_order_item_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `sales_order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `sales_order_item_ibfk_2` FOREIGN KEY (`recipe_id`) REFERENCES `pizza_recipe` (`recipe_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `inventory` (\n  `inventory_id` int(11) NOT NULL AUTO_INCREMENT,\n  `inventory_type` varchar(50) NOT NULL,\n  `pizza_name` varchar(255) DEFAULT NULL,\n  `recipe_id` int(11) DEFAULT NULL,\n  `raw_material_id` int(11) DEFAULT NULL,\n  `quantity` decimal(10,2) NOT NULL,\n  `status` varchar(50) NOT NULL,\n  PRIMARY KEY (`inventory_id`),\n  KEY `recipe_id` (`recipe_id`),\n  KEY `raw_material_id` (`raw_material_id`),\n  CONSTRAINT `inventory_ibfk_1` FOREIGN KEY (`recipe_id`) REFERENCES `pizza_recipe` (`recipe_id`) ON DELETE SET NULL ON UPDATE CASCADE,\n  CONSTRAINT `inventory_ibfk_2` FOREIGN KEY (`raw_material_id`) REFERENCES `raw_material` (`raw_material_id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `production_plan` (\n  `production_plan_id` int(11) NOT NULL AUTO_INCREMENT,\n  `order_id` int(11) NOT NULL,\n  `planned_quantity` int(11) NOT NULL,\n  `production_status` varchar(50) NOT NULL,\n  `planned_date` datetime DEFAULT NULL,\n  PRIMARY KEY (`production_plan_id`),\n  KEY `order_id` (`order_id`),\n  CONSTRAINT `production_plan_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `sales_order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `purchase_order` (\n  `purchase_order_id` int(11) NOT NULL AUTO_INCREMENT,\n  `supplier_id` int(11) NOT NULL,\n  `raw_material_id` int(11) NOT NULL,\n  `order_quantity` decimal(10,2) NOT NULL,\n  `supply_quantity` decimal(10,2) DEFAULT NULL,\n  `order_status` varchar(50) NOT NULL,\n  PRIMARY KEY (`purchase_order_id`),\n  KEY `supplier_id` (`supplier_id`),\n  KEY `raw_material_id` (`raw_material_id`),\n  CONSTRAINT `purchase_order_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `purchase_order_ibfk_2` FOREIGN KEY (`raw_material_id`) REFERENCES `raw_material` (`raw_material_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `delivery_record` (\n  `delivery_id` int(11) NOT NULL AUTO_INCREMENT,\n  `order_id` int(11) NOT NULL,\n  `delivery_time` datetime NOT NULL,\n  `location` varchar(255) NOT NULL,\n  `status` varchar(50) NOT NULL,\n  PRIMARY KEY (`delivery_id`),\n  KEY `order_id` (`order_id`),\n  CONSTRAINT `delivery_record_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `sales_order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `financial_record` (\n  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,\n  `transaction_type` varchar(50) NOT NULL,\n  `amount` decimal(10,2) NOT NULL,\n  `transaction_date` datetime NOT NULL,\n  `status` varchar(50) NOT NULL,\n  PRIMARY KEY (`transaction_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "rschema_0476",
+    "tables": [
+      "customer",
+      "supplier",
+      "raw_material",
+      "pizza_recipe",
+      "pizza_recipe_item",
+      "sales_order",
+      "sales_order_item",
+      "inventory",
+      "production_plan",
+      "purchase_order",
+      "delivery_record",
+      "financial_record"
+    ],
+    "columns_by_table": {
+      "customer": [
+        {
+          "COLUMN_NAME": "customer_id",
+          "ORDINAL_POSITION": 1,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "int",
+          "CHARACTER_MAXIMUM_LENGTH": null,
+          "NUMERIC_PRECISION": 10,
+          "NUMERIC_SCALE": 0,
+          "COLUMN_TYPE": "int(11)",
+          "COLUMN_KEY": "PRI",
+          "EXTRA": "auto_increment",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "name",
+          "ORDINAL_POSITION": 2,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "contact_number",
+          "ORDINAL_POSITION": 3,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "NO",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 50,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(50)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        },
+        {
+          "COLUMN_NAME": "address",
+          "ORDINAL_POSITION": 4,
+          "COLUMN_DEFAULT": null,
+          "IS_NULLABLE": "YES",
+          "DATA_TYPE": "varchar",
+          "CHARACTER_MAXIMUM_LENGTH": 255,
+          "NUMERIC_PRECISION": null,
+          "NUMERIC_SCALE": null,
+          "COLUMN_TYPE": "varchar(255)",
+          "COLUMN_KEY": "",
+          "EXTRA": "",
+          "COLUMN_COMMENT": ""
+        }
+      ]
+    },
+    "supplier": [
+      {
+        "COLUMN_NAME": "supplier_id",
+        "ORDINAL_POSITION": 1,
+        "COLUMN_DEFAULT": null,
+        "IS_NULLABLE": "NO",
+        "DATA_TYPE": "int",
+        "CHARACTER_MAXIMUM_LENGTH": null,
+        "NUMERIC_PRECISION": 10,
+        "NUMERIC_SCALE": 0,
+        "COLUMN_TYPE": "int(11)",
+        "COLUMN_KEY": "PRI",
+        "EXTRA": "auto_increment",
+        "COLUMN_COMMENT": ""
+      },
+      {
+        "COLUMN_NAME": "supplier_name",
+        "ORDINAL_POSITION": 2,
+        "COLUMN_DEFAULT": null,
+        "IS_NULLABLE": "NO",
+        "DATA_TYPE": "varchar",
+        "CHARACTER_MAXIMUM_LENGTH": 255,
+        "NUMERIC_PRECISION": null,
+        "NUMERIC_SCALE": null,
+        "COLUMN_TYPE": "varchar(255)",
+        "COLUMN_KEY": "",
+        "EXTRA": "",
+        "COLUMN_COMMENT": ""
+      },
+      {
+        "COLUMN_NAME": "contact_number",
+        "ORDINAL_POSITION": 3,
+        "COLUMN_DEFAULT": null,
+        "IS_NULLABLE": "YES",
+        "DATA_TYPE": "varchar",
+        "CHARACTER_MAXIMUM_LENGTH": 50,
+        "NUMERIC_PRECISION": null,
+        "NUMERIC_SCALE": null,
+        "COLUMN_TYPE": "varchar(50)",
+        "COLUMN_KEY": "",
+        "EXTRA": "",
+        "COLUMN_COMMENT": ""
+      },
+      {
+        "COLUMN_NAME": "address",
+        "ORDINAL_POSITION": 4,
+        "COLUMN_DEFAULT": null,
+        "IS_NULLABLE": "YES",
+        "DATA_TYPE": "varchar",
+        "CHARACTER_MAXIMUM_LENGTH": 255,
+        "NUMERIC_PRECISION": null,
+        "NUMERIC_SCALE": null,
+        "COLUMN_TYPE": "varchar(255)",
+        "COLUMN_KEY": "",
+        "EXTRA": "",
+        "COLUMN_COMMENT": ""
+      }
+    ]
+  }
+}
