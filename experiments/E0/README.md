@@ -60,7 +60,9 @@ python3 experiments/E0/reproduce_genuine_tables.py --include-gpt4o-mini   # opti
 Outputs: `results/metrics/reproduced/E0_TABLE_{V,VI}_FINAL.*`
 Verification: `audit/E0_VERIFICATION_REPORT.md`, `audit/E0_PAPER_COMPARISON.csv`
 
-**Honesty note:** PaperMethods baseline `results.jsonl` trees are not recoverable on the research server, so Table VI One-shot / CoT / Few-shot rows remain `BLOCKED` until those predictions are restored. SchemaAgent multi-agent code is intentionally **not** shipped. Original prompting helpers live under `original_benchmarks/`.
+**Honesty note:** PaperMethods baseline `results.jsonl` trees are not recoverable on the research server. Offline reproduction falls back to `ARCHIVE_AGGREGATE` metrics from `results/baselines/e0_rschema_papermethods_evaluation.json` (pooled G/P/M → micro T/A/E/R + Hall4; nGED = historical macro mean). Full per-schema names-only recompute remains blocked until trees are restored. Do **not** substitute `prompt_conditions_v2`. SchemaAgent multi-agent code is intentionally **not** shipped. Original prompting helpers live under `original_benchmarks/`.
+
+Status vocabulary: `COMPLETE` | `INCOMPLETE` | `INVALID` | `BLOCKED` | `ARCHIVE_AGGREGATE` | experiment-level `PARTIAL`.
 
 ## Closed Direct inference (paid; opt-in)
 

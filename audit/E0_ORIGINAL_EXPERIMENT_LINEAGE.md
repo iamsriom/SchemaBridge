@@ -76,26 +76,30 @@ Prompts: `prompts/e0/{one_shot,one_shot_cot,few_shot}.txt` + `examples_manifest.
 
 Historical local settings (from `agent_format` / runners): `temperature=0`, `max_tokens=4096`.
 
-### Predictions — **MISSING**
+### Predictions — **MISSING** (per-schema trees)
 
 Canonical trees expected at:
 
 - `/data/LLM4DBdesign_PaperMethods/{codellama13b,llama31,deepseek}/{one_shot,one_shot_cot,few_shot}/results.jsonl`
 - SchemaBridge `results/predictions/e0/rschema_papermethods/...`
 
-**Status: unrecoverable on this host** (directory deleted; not in GitHub; not in archives/agent stores).
+**Status: unrecoverable on this host** (directory deleted; not in GitHub; not in archives/agent stores; exhaustive `/` search 2026-11-11).
 
-Near-miss only: `/data/LLM4DBdesign/outputs/prompt_conditions_v2/*.jsonl` (518×9) — **different failure counts**, must not be relabeled as PaperMethods.
+Near-miss only: `/data/LLM4DBdesign/outputs/prompt_conditions_v2/*.jsonl` (518×9) — **different failure counts** (e.g. CodeLlama one_shot zeros 199 vs archived 3), must not be relabeled as PaperMethods.
 
-### Archived aggregate scores (survive)
+### Archived aggregate scores (survive; used as ARCHIVE_AGGREGATE)
 
-| Artifact | Path |
-|---|---|
-| RSchema PaperMethods eval | `results/baselines/e0_rschema_papermethods_evaluation.json` (2026-10-12) |
-| RSchema PaperMethods report | `results/baselines/e0_rschema_papermethods_report.txt` |
-| Comparison vs older paper draft | `results/baselines/paper_methods_vs_paper_tables_comparison.txt` |
+| Artifact | Path | SHA-256 (prefix) |
+|---|---|---|
+| RSchema PaperMethods eval | `results/baselines/e0_rschema_papermethods_evaluation.json` (2026-10-12) | `644d8217beac7510…` |
+| RSchema PaperMethods report | `results/baselines/e0_rschema_papermethods_report.txt` | `c21c38ab6b938209…` |
+| SchemaBench PaperMethods eval | `results/baselines/e0_schemabench_papermethods_evaluation.json` | `c7a38a9021a9d598…` |
+| Comparison vs older paper draft | `results/baselines/paper_methods_vs_paper_tables_comparison.txt` | `c70fcf08d3d6b8e3…` |
 
 Original scorer: `third_party/evaluate_paper_methods_exp4_metrics.py` (macro means + embedded `f1_micro` / G·P·M counts).
+
+`reproduce_genuine_tables.py` falls back to ARCHIVE_AGGREGATE when trees are missing:
+micro T/A/E/R + Hall4 from pooled counts; nGED = archived historical macro mean.
 
 ### SchemaAgent
 
@@ -107,7 +111,7 @@ Multi-agent path in `agent_format.py` (`expert_analyse` / quality-control loops)
 |---|---|---|
 | Table V | Current manuscript values in `audit/E0_CURRENT_MANUSCRIPT_VALUES.json` | `python3 experiments/E0/reproduce_genuine_tables.py` on Direct prediction trees |
 | Table VI Direct rows | Must equal Table V RSchema rows | Copied from Table V in reproduce script |
-| Table VI One-shot / CoT / Few-shot | Current manuscript; historically PaperMethods trees | **BLOCKED** until trees recovered |
+| Table VI One-shot / CoT / Few-shot | Current manuscript; historically PaperMethods trees | **ARCHIVE_AGGREGATE** from pooled G/P/M (full per-schema recompute **BLOCKED** until trees recovered) |
 
 ## Important provenance caveat
 
