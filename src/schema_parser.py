@@ -424,16 +424,16 @@ def iter_ddl_table_bodies(ddl: str, *, legacy: bool = False) -> Iterator[tuple[s
             i = _body_end_legacy(ddl, start)
             yield table, ddl[start : i - 1]
         return
-    # Walk headers on a noise-masked copy so parentheses inside string literals
-    # do not affect body boundaries; table names come from the original text.
+    # Find headers on the *original* text. LLM dumps sometimes prefix a real
+    # ``CREATE TABLE`` with ``--Foreachtable:`` on the same line; masking that
+    # line as a SQL comment would drop the table and (via the empty-body
+    # fallback) invent zero-column tables. Parenthesis depth still uses the
+    # noise-masked copy so string/comment parens do not shift body ends (F2).
     masked = _mask_noise(ddl, lenient_apostrophe=True)
-    heads = list(_ROBUST_HEADER_RE.finditer(masked))
+    heads = list(_ROBUST_HEADER_RE.finditer(ddl))
     for k, m in enumerate(heads):
-        mo = _ROBUST_HEADER_RE.match(ddl, m.start())
-        if mo is None:
-            continue
-        table = unquote_identifier(mo.group(1)).strip()
-        start = mo.end()
+        table = unquote_identifier(m.group(1)).strip()
+        start = m.end()
         limit = heads[k + 1].start() if k + 1 < len(heads) else len(ddl)
         depth = 1
         i = start

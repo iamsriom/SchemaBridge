@@ -1,0 +1,145 @@
+% =============================================================================
+% E0 final subsection for ICDE 2027 (paste into the manuscript under Results).
+% Labels: sec:e0, tab:e0_overall, tab:e0_baselines
+% Numbers: results/metrics/reproduced/E0_TABLE_{V,VI}_FINAL.csv (2026-11-11)
+% Direct: VERIFIED_FROM_PREDICTIONS. Prompting: ARCHIVE_AGGREGATE (provisional).
+% =============================================================================
+
+\subsection{E0: Schema Design from Natural Language Requirements}
+\label{sec:e0}
+
+\paragraph{Setup.}
+E0 evaluates Text2Schema constructors that map a dataset-authored natural-language
+requirement to a relational schema.
+We use five constructors---CodeLlama-13B, Llama-3.1-8B, DeepSeek-Coder-6.7B,
+Claude Sonnet~4.6 and GPT-5.4-mini---with a fixed Direct constructor prompt.
+Each model receives only the gold NL text (never gold DDL) and emits MySQL-style DDL
+with structured metadata.
+RSchema contributes 518 logical references for Tables/Attributes/Entity/Referential
+$F_1$, Hallucination and type-independent nGED, and 381 ID-matched genuine DDL
+references for Domain $F_1$.
+SchemaBench contributes 239 DDL-backed references for all five structural dimensions.
+We report micro-averaged $F_1$ on $T,A,D,E,R$, the four-dimensional hallucination rate
+\[
+H=\tfrac14\sum_{d\in\{T,A,E,R\}} \max(0,P_d-M_d)/P_d
+\]
+(Domain excluded; $P_d{=}0\Rightarrow H_d{=}0$), and mean names-only nGED over tables,
+table-qualified attribute names and directed foreign keys.
+Failed or unparseable generations remain in the population as empty predictions
+(structural matches zero; nGED${=}1$ on nonempty gold; Hallucination not forced to 1).
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.0}
+\caption{E0: Direct Text2Schema from gold natural-language
+requirements. Mean structural nGED and four-dimensional
+micro-aggregated hallucination (lower is better), and
+micro-averaged structural $F_1$ (higher is better).
+RSchema uses 518 logical references for structural metrics
+and 381 matched DDL references for Domain $F_1$.
+Best values per dataset and column are bold.}
+\label{tab:e0_overall}
+\begin{tabular*}{\textwidth}
+{@{\extracolsep{\fill}}llccccccc@{}}
+\toprule
+\multirow{2}{*}{\textbf{Dataset}}
+& \multirow{2}{*}{\textbf{Constructor}}
+& \multirow{2}{*}{\textbf{nGED} $\downarrow$}
+& \multirow{2}{*}{\textbf{Hall.} $\downarrow$}
+& \multicolumn{5}{c}{\textbf{Structural} $F_1$ $\uparrow$} \\
+\cmidrule(lr){5-9}
+& & & &
+\textbf{Tables} & \textbf{Attr.}
+& \textbf{Domain} & \textbf{Entity}
+& \textbf{Ref.} \\
+\midrule
+RSchema & CodeLlama-13B & 0.583 & 0.669 & 0.554 & 0.414 & 0.115 & 0.301 & 0.141 \\
+ & Llama-3.1-8B & 0.615 & 0.696 & 0.572 & 0.377 & 0.121 & 0.199 & 0.104 \\
+ & DeepSeek-Coder-6.7B & 0.561 & \textbf{0.595} & 0.566 & \textbf{0.443} & 0.150 & 0.391 & 0.184 \\
+ & Claude Sonnet 4.6 & 0.560 & 0.635 & \textbf{0.602} & 0.401 & 0.208 & \textbf{0.407} & 0.204 \\
+ & GPT-5.4-mini & \textbf{0.553} & 0.605 & 0.600 & 0.433 & \textbf{0.223} & 0.399 & \textbf{0.225} \\
+\midrule
+SchemaBench & CodeLlama-13B & 0.794 & 0.773 & 0.350 & 0.125 & 0.067 & 0.183 & 0.082 \\
+ & Llama-3.1-8B & 0.810 & 0.768 & 0.363 & 0.112 & 0.061 & 0.145 & 0.063 \\
+ & DeepSeek-Coder-6.7B & 0.731 & 0.641 & 0.398 & 0.185 & 0.100 & 0.240 & 0.128 \\
+ & Claude Sonnet 4.6 & \textbf{0.574} & \textbf{0.598} & \textbf{0.530} & \textbf{0.358} & \textbf{0.247} & \textbf{0.345} & \textbf{0.263} \\
+ & GPT-5.4-mini & 0.675 & 0.651 & 0.465 & 0.245 & 0.159 & 0.255 & 0.174 \\
+\bottomrule
+\end{tabular*}
+\end{table*}
+
+\paragraph{Requirements under-specify schema content.}
+Table~\ref{tab:e0_overall} shows that even strong constructors recover tables more
+reliably than domains or relationships.
+On RSchema, GPT-5.4-mini attains the best nGED (0.553), Domain $F_1$ (0.223) and
+Referential $F_1$ (0.225); Claude Sonnet~4.6 leads Tables (0.602) and Entity (0.407);
+DeepSeek-Coder-6.7B is the strongest open-weight model on hallucination (0.595) and
+Attributes (0.443), with nGED close to the closed models (0.561).
+On SchemaBench, Claude Sonnet~4.6 is best on every reported column (nGED 0.574,
+Hall.\ 0.598, and all five $F_1$ scores).
+Across both datasets, Domain and Referential $F_1$ remain low relative to Tables
+(maximum Referential $F_1$ is 0.263), which is consistent with NL requirements that
+name entities more clearly than types, nullability and foreign keys.
+No single constructor dominates every RSchema metric; SchemaBench is more
+one-sided toward Claude.
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.0}
+\caption{E0: Prompting baselines versus Direct Text2Schema on RSchema.
+Direct rows equal Table~\ref{tab:e0_overall}.
+One-shot / One-shot+CoT / Few-shot rows are \texttt{ARCHIVE\_AGGREGATE}
+pooled micro counts from the historical PaperMethods summary
+(Domain unavailable for untyped logical outputs; nGED is the historical
+macro mean and is \emph{not} re-verified under the names-only Direct protocol).
+Per-schema baseline trees were not recovered; a regeneration campaign is in progress.}
+\label{tab:e0_baselines}
+\begin{tabular*}{\textwidth}
+{@{\extracolsep{\fill}}llccccccc@{}}
+\toprule
+\multirow{2}{*}{\textbf{Model}}
+& \multirow{2}{*}{\textbf{Method}}
+& \multirow{2}{*}{\textbf{nGED} $\downarrow$}
+& \multirow{2}{*}{\textbf{Hall.} $\downarrow$}
+& \multicolumn{5}{c}{\textbf{Structural} $F_1$ $\uparrow$} \\
+\cmidrule(lr){5-9}
+& & & &
+\textbf{Tables} & \textbf{Attr.}
+& \textbf{Domain} & \textbf{Entity}
+& \textbf{Ref.} \\
+\midrule
+\multirow{4}{*}{CodeLlama-13B}
+ & One-shot$^{\dagger}$ & 0.613 & 0.727 & 0.587 & 0.378 & -- & 0.130 & 0.035 \\
+ & One-shot+CoT$^{\dagger}$ & 0.668 & 0.737 & 0.580 & 0.342 & -- & 0.047 & 0.004 \\
+ & Few-shot$^{\dagger}$ & 0.541 & 0.589 & 0.600 & 0.460 & -- & 0.356 & 0.119 \\
+ & Direct & 0.583 & 0.669 & 0.554 & 0.414 & 0.115 & 0.301 & 0.141 \\
+\midrule
+\multirow{4}{*}{Llama-3.1-8B}
+ & One-shot$^{\dagger}$ & 0.603 & 0.714 & 0.564 & 0.398 & -- & 0.221 & 0.086 \\
+ & One-shot+CoT$^{\dagger}$ & 0.670 & 0.765 & 0.553 & 0.332 & -- & 0.067 & 0.020 \\
+ & Few-shot$^{\dagger}$ & 0.548 & 0.638 & 0.585 & 0.460 & -- & 0.373 & 0.146 \\
+ & Direct & 0.615 & 0.696 & 0.572 & 0.377 & 0.121 & 0.199 & 0.104 \\
+\midrule
+\multirow{4}{*}{DeepSeek-Coder-6.7B}
+ & One-shot$^{\dagger}$ & 0.720 & 0.723 & 0.406 & 0.318 & -- & 0.246 & 0.115 \\
+ & One-shot+CoT$^{\dagger}$ & 0.849 & 0.839 & 0.251 & 0.168 & -- & 0.091 & 0.046 \\
+ & Few-shot$^{\dagger}$ & 0.530 & 0.583 & 0.600 & 0.476 & -- & 0.419 & 0.186 \\
+ & Direct & 0.561 & 0.595 & 0.566 & 0.443 & 0.150 & 0.391 & 0.184 \\
+\bottomrule
+\end{tabular*}
+\end{table*}
+
+\paragraph{Prompting baselines.}
+Table~\ref{tab:e0_baselines} contrasts PaperMethods prompting with Direct on RSchema.
+Direct rows are copied from the verified Table~\ref{tab:e0_overall} evaluation.
+Archive micro-$F_1$ and Hallucination indicate that One-shot+CoT weakens structural
+fidelity relative to One-shot, while Few-shot improves several $F_1$ columns among
+open-weight models.
+We do \emph{not} claim that archive Few-shot nGED is directly comparable with Direct
+names-only nGED: baseline nGED remains a historical macro aggregate pending recovery
+of per-schema PaperMethods trees.
+Domain is reported as ``--'' for untyped prompting outputs.

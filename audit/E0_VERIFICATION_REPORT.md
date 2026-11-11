@@ -1,30 +1,33 @@
 # E0 Verification Report
 
 **Branch:** `icde2027-e0-verified`  
-**Updated:** 2026-11-11 (parser F1–F6 repair)  
-**Experiment status:** **PARTIAL**
+**Updated:** 2026-11-11 (F1–F6 + comment-prefix CREATE recovery)  
+**Experiment status:** **PARTIAL** (Direct COMPLETE; Table VI prompting ARCHIVE_AGGREGATE)
 
-## Executive verdict (post-repair)
+## Executive verdict
 
 | Layer | Status |
 |---|---|
-| Direct predictions (757) | VERIFIED_FROM_PREDICTIONS (hash-identical originals) |
-| Evaluator protocol | Matches manuscript (micro F1, Domain-381, Hall4, names-only nGED) |
-| DDL parser | F1–F6 **fixed**; independent audit tests PASS |
-| Table V vs locked targets | **70/70 PASS** against `E0_CURRENT_MANUSCRIPT_VALUES.json` (scientifically recommended) |
+| Direct predictions (3,785) | VERIFIED_FROM_PREDICTIONS |
+| Evaluator protocol | Matches manuscript (micro F1, Domain-381/239, Hall4, names-only nGED) |
+| DDL parser | F1–F6 + header-on-original (DeepSeek `--Foreachtable:`) |
+| Table V vs lock | **70/70 PASS** (`E0_FINAL_INDEPENDENT_VERIFICATION.csv`) |
 | Table VI Direct | Equals Table V RSchema |
-| Table VI prompting | PASS_ARCHIVE (54) provisional; REGENERATED_NEW_RUN in progress on GPUs |
+| Table VI prompting | PASS_ARCHIVE provisional |
+| Candidate DeepSeek 0.579 | **SUPERSEDED** (comment-mask regression) |
 | SchemaAgent | Excluded |
 
-Previous hybrid manuscript values preserved in `audit/E0_PREVIOUS_HYBRID_MANUSCRIPT_VALUES.json`.  
-Cell-level file: `audit/E0_PAPER_COMPARISON.csv`.  
-Mismatch root-cause audit: `audit/E0_TABLE_V_DIAGNOSTIC.md`.  
-Manuscript edits: `audit/E0_MANUSCRIPT_CORRECTIONS.md`.  
-Repair log: `audit/E0_PR3_REPAIR_LOG.md`.
+## Coverage
 
----
+- RSchema Direct: 5 × 518 COMPLETE  
+- SchemaBench Direct: 5 × 239 COMPLETE  
+- No gold DDL in constructor prompts (`run_direct_api.py` reads `question` only)
 
+## Key artifacts
 
-## Prior report (pre-parser-repair)
-
-See git history at `d0eed4a` for the pre-repair 29/70 PASS analysis.
+- `results/metrics/reproduced/E0_TABLE_{V,VI}_FINAL.*`
+- `audit/E0_CURRENT_MANUSCRIPT_VALUES.json`
+- `audit/E0_FINAL_INDEPENDENT_VERIFICATION.csv`
+- `audit/E0_FINAL_PARSER_DIFFERENCE_REPORT.md`
+- `audit/E0_FINAL_SECTION.tex`
+- `audit/E0_PAPER_COMPARISON.csv`

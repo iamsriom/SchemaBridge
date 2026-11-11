@@ -168,6 +168,20 @@ class TestGenuineDefects:
         assert len(m_esc["columns_by_table"]["a"]) == len(m_real["columns_by_table"]["a"]) == 2
         assert parse_ddl_primary_unique(escaped) == parse_ddl_primary_unique(real)
 
+    def test_comment_prefix_before_create_table_still_recovers_columns(self):
+        """DeepSeek-style prompt echo: ``--Foreachtable:CREATE TABLE ...`` on one line."""
+        ddl = (
+            "--Schemafordatabase:demo\n"
+            "--Foreachtable:CREATE TABLE `t1` (`id` int(11) NOT NULL,`name` varchar(255) NOT NULL,"
+            "PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n"
+            "--Foreachtable:CREATE TABLE `t2` (`t1_id` int(11) NOT NULL,PRIMARY KEY (`t1_id`))"
+            " ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;"
+        )
+        meta = metadata_from_ddl(ddl)
+        assert meta["tables"] == ["t1", "t2"]
+        assert [c["COLUMN_NAME"] for c in meta["columns_by_table"]["t1"]] == ["id", "name"]
+        assert [c["COLUMN_NAME"] for c in meta["columns_by_table"]["t2"]] == ["t1_id"]
+
     def test_alter_table_foreign_key_counted(self):
         ddl = (
             "CREATE TABLE p (id int PRIMARY KEY);\n"

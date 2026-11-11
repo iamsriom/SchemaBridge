@@ -94,3 +94,14 @@
 - Merged remote tip; kept local scientific repair tree for parser/CI/runner/FINAL tables/locks.
 - Retained remote forensic evidence artifacts.
 - Clean-clone offline: 236 passed, VERIFY PASS (--allow-archive), baseline dry-run OK.
+
+## 2026-11-11 — Final verification + DeepSeek comment-prefix fix
+
+- Independent 70-cell recount vs regenerated FINAL: lock match **70/70**.
+- Found F1–F6 regression: header scan on comment-masked DDL dropped
+  `--Foreachtable:CREATE TABLE` bodies (DeepSeek 35 RSchema / 3 SchemaBench files → 0 columns).
+- Fix: find headers on original text; keep masked paren-depth for F2.
+- Candidate DeepSeek RSchema nGED 0.579 **superseded** by verified 0.561 (Attr 0.443).
+- SchemaBench Claude Attr 0.358 retained (F5 literal `\n`, 19 files); scientifically justified.
+- Deliverables: `E0_FINAL_PARSER_DIFFERENCE_REPORT.md`, `E0_FINAL_INDEPENDENT_VERIFICATION.csv`,
+  `E0_FINAL_SECTION.tex`, relocked `E0_CURRENT_MANUSCRIPT_VALUES.json`.
