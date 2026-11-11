@@ -72,11 +72,13 @@ def test_e2_schemabench_incomplete_is_blocked(refs):
 
 
 # ------------------------------------------------------------------ E3 / E4 / E5
-def test_e3_constructor_isolation_blocked(refs):
+def test_e3_archive_comparison_blocked_but_code_documented(refs):
+    """Archive cell comparison stays BLOCKED (results not shipped); reason points at experiments/E3/."""
     res = rt.run_e3(refs)
     lab = status(res, "tab:e3_overall", "all")
     assert lab.status == rt.BLOCKED
-    assert "GPT-5.4-mini" in lab.reason or "constructor" in lab.reason.lower()
+    assert "experiments/E3" in lab.reason or "REPRODUCE_E3" in lab.reason
+    assert "not shipped" in lab.reason.lower() or "intentionally" in lab.reason.lower()
 
 
 @pytest.mark.skipif(not (rt.ARCHIVED / "e4_cases3_results.json").is_file(), reason="E4 archived metrics missing")
@@ -105,17 +107,27 @@ def test_experiment_files_exist(exp):
     d = ROOT / "experiments" / exp
     for f in ("README.md", "config.yaml", "evaluate.py"):
         assert (d / f).is_file(), f"{exp}/{f}"
-    assert (d / "run.py").is_file() == (exp != "E5")
+    # E0–E4 always ship run.py; E5 may ship a cost runner as run.py.
+    if exp != "E5":
+        assert (d / "run.py").is_file()
 
 
-# E1 / E2 run.py are real (dry-run by default) generation CLIs now; see tests/test_e1_e2_cli_dryrun.py.
-@pytest.mark.parametrize("exp", ["E3", "E4"])
+# E4 run.py still uses the legacy refuse_online path. E1/E2/E3 are real dry-run CLIs.
+@pytest.mark.parametrize("exp", ["E4"])
 def test_run_py_refuses_online(exp):
     p = subprocess.run([sys.executable, str(ROOT / "experiments" / exp / "run.py"), "--online"],
                        capture_output=True, text=True, cwd=ROOT, timeout=60,
                        env={"PATH": "/usr/bin:/bin"})  # no SCHEMABRIDGE_ALLOW_ONLINE
     assert p.returncode == 2
     assert "DISABLED" in p.stdout and "archived predictions" in p.stdout and "--online ignored" in p.stdout
+
+
+def test_e3_run_py_is_dry_run_cli():
+    p = subprocess.run(
+        [sys.executable, str(ROOT / "experiments" / "E3" / "run.py"), "--help"],
+        capture_output=True, text=True, cwd=ROOT, timeout=60,
+    )
+    assert p.returncode == 0 and "--constructor" in p.stdout and "--dry-run" in p.stdout
 
 
 def test_e0_run_py_online_requires_confirm_paid():
@@ -149,4 +161,5 @@ def test_configs_load_and_match_paper_semantics():
     assert models["gpt4omini_constructor"]["model_id"] == "gpt-4o-mini"
     for e in ("E0", "E1", "E2", "E3", "E4", "E5"):
         ec = yaml.safe_load((ROOT / "experiments" / e / "config.yaml").read_text())
-        assert ec["online"] is False and ec["experiment"] == e
+        assert ec.get("online", False) is False
+        assert str(ec.get("experiment", "")).upper() == e

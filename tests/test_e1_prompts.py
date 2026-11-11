@@ -70,8 +70,10 @@ def test_constructor_request_and_role_guards():
     assert req.system == pa.load_constructor_system() and req.max_tokens == 16384
     with pytest.raises(ValueError):
         ic.build_request("gpt4omini", task="schema2text", database="d", ddl=DDL, variant="basic")
-    with pytest.raises(ValueError):
-        ic.build_request("llama31", task="constructor", database="d", nl_text="x")
+    # E3 constructors reuse the five describer keys as Text2Schema constructors.
+    e3 = ic.build_request("llama31", task="constructor", database="d", nl_text="x")
+    assert e3.max_tokens == ic.E3_HF_MAX_NEW_TOKENS["llama31"]
+    assert e3.temperature == ic.E3_CONSTRUCTOR_TEMPERATURE["llama31"]
     with pytest.raises(ValueError):
         ic.build_request("llama31", task="schema2text", database="d", ddl=None, variant="basic")
 

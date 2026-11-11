@@ -1,4 +1,4 @@
-"""Inference clients (Hugging Face, Anthropic, OpenAI) for E1 schema2text and the E2 constructor.
+"""Inference clients (Hugging Face, Anthropic, OpenAI) for E1 schema2text, E2 and E3 constructors.
 
 Safety model
 ------------
@@ -11,8 +11,10 @@ Safety model
 * Generated text is written only when ``--out-dir`` is given and it lies outside the repo tree or
   inside an ``outputs/`` directory (git-ignored).
 
-Generation settings (from the original runs): temperature 0.2 for schema2text and constructor;
-max new tokens 3072 (open models), 1024 / 2048 (API basic / detailed), 16384 (constructor).
+Generation settings (from the original runs): temperature 0.2 for schema2text and the E2
+GPT-4o-mini constructor; E3 Exp4 constructors use the per-model temperatures / token budgets
+in ``E3_CONSTRUCTOR_TEMPERATURE`` / ``E3_HF_MAX_NEW_TOKENS`` / ``E3_API_MAX_TOKENS``.
+Describer max new tokens: 3072 (open), 1024 / 2048 (API basic / detailed).
 """
 
 from __future__ import annotations
@@ -57,6 +59,25 @@ MODELS: dict[str, ModelSpec] = {
     "gpt4omini": ModelSpec("gpt4omini", "openai", "gpt-4o-mini", role="constructor"),
 }
 DESCRIBER_KEYS = tuple(k for k, m in MODELS.items() if m.role == "describer")
+# E3 constructor isolation: the five Exp4 constructors share the Text2Schema prompt.
+E3_CONSTRUCTOR_KEYS = DESCRIBER_KEYS
+# Historical Exp4 decoding budgets (max_new_tokens) for open-weight constructors.
+E3_HF_MAX_NEW_TOKENS = {
+    "codellama13b": 1536,
+    "llama31": 2048,
+    "deepseek": 4096,
+}
+E3_API_MAX_TOKENS = {
+    "sonnet46": 4096,
+    "gpt54mini": 16384,
+}
+E3_CONSTRUCTOR_TEMPERATURE = {
+    "codellama13b": 0.1,
+    "llama31": 0.1,
+    "deepseek": 0.1,
+    "sonnet46": 0.1,
+    "gpt54mini": 0.2,  # Enterprise Exp4 OpenAI Batch path
+}
 
 
 @dataclass(frozen=True)
@@ -76,10 +97,20 @@ class Request:
 
 def max_tokens_for(model: ModelSpec, task: str, variant: str | None) -> int:
     if task == "constructor":
-        return 16384
+        if model.key in E3_HF_MAX_NEW_TOKENS:
+            return E3_HF_MAX_NEW_TOKENS[model.key]
+        if model.key in E3_API_MAX_TOKENS:
+            return E3_API_MAX_TOKENS[model.key]
+        return 16384  # E2 GPT-4o-mini default
     if model.provider == "hf":
         return 3072
     return 1024 if variant == "basic" else 2048
+
+
+def temperature_for(model: ModelSpec, task: str) -> float:
+    if task == "constructor" and model.key in E3_CONSTRUCTOR_TEMPERATURE:
+        return E3_CONSTRUCTOR_TEMPERATURE[model.key]
+    return TEMPERATURE
 
 
 def build_request(
@@ -106,15 +137,23 @@ def build_request(
         system = pa.load_describer_system(variant, prompt_dir)
         user = pa.build_describer_user_message(variant, database, ddl)
     elif task == "constructor":
-        if model.role != "constructor":
-            raise ValueError(f"{model_key} is not the E2 constructor model")
+        # E2: gpt4omini. E3: any of the five Exp4 constructors (DESCRIBER_KEYS).
+        if model.role != "constructor" and model_key not in E3_CONSTRUCTOR_KEYS:
+            raise ValueError(f"{model_key} is not a supported constructor model")
         if nl_text is None:
             raise ValueError("constructor requires nl_text")
         system = pa.load_constructor_system(prompt_dir)
         user = pa.build_constructor_user_message(nl_text, database)
     else:
         raise ValueError(f"unknown task {task!r}")
-    return Request(model_key, task, system, user, TEMPERATURE, max_tokens_for(model, task, variant))
+    return Request(
+        model_key,
+        task,
+        system,
+        user,
+        temperature_for(model, task),
+        max_tokens_for(model, task, variant),
+    )
 
 
 # --------------------------------------------------------------------------- guards

@@ -533,8 +533,10 @@ def run_e3(refs: dict) -> Result:
     ]
     col.force_label(
         "tab:e3_overall", "all", BLOCKED,
-        "paper E3 requires fixed GPT-5.4-mini detailed descriptions + per-constructor "
-        "reconstructions; neither predictions nor tab:e3_overall numbers exist on disk. "
+        "archive comparison BLOCKED: experimental GPT-5.4-mini Detailed descriptions, "
+        "per-constructor reconstructions, and tab:e3_overall cell dumps are intentionally "
+        "not shipped. Reproduction *code* is available under experiments/E3/ "
+        "(see docs/REPRODUCE_E3.md). "
         f"Note: {len(dirs)} historical masking describer dirs are inventoriable but are E4 artifacts.",
     )
     res.cells = col.cells

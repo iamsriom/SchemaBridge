@@ -33,3 +33,25 @@ python scripts/plot_e1_e2_figures.py --synthetic --out-dir figures/generated
 * All generated predictions, metrics, tables and figures are git-ignored (`experiments/E*/outputs/`,
   `figures/generated/`, `results/metrics/local/`, `**/latex_generated/`, `**/api_cache/`).
 * Tests: `pytest -q tests/test_e1_*.py tests/test_e2_structural_repro.py tests/test_plot_pearson.py` (synthetic, offline).
+
+## E3 constructor-isolation reproduction code (code only; no results are shipped)
+
+Full guide: [REPRODUCE_E3.md](REPRODUCE_E3.md).
+
+```bash
+python experiments/E3/prepare_inputs.py --dataset rschema \
+    --descriptions-dir experiments/E1/outputs/rschema_detailed_gpt54mini
+python experiments/E3/run.py --dataset rschema --constructor llama31 \
+    --descriptions-dir experiments/E1/outputs/rschema_detailed_gpt54mini              # dry-run
+python experiments/E3/validate_inputs.py --dataset rschema \
+    --descriptions-dir experiments/E1/outputs/rschema_detailed_gpt54mini \
+    --pred-parent experiments/E3/outputs
+python experiments/E3/evaluate.py --dataset rschema --constructor llama31 \
+    --pred-dir experiments/E3/outputs/rschema_detailed_llama31
+python experiments/E3/generate_table_ix.py --metrics-dir experiments/E3/outputs/metrics
+```
+
+* Fixed describer = GPT-5.4-mini Detailed; five constructors share identical `nl_text` hashes.
+* Empty gold + empty reconstruction ⇒ nGED = 0; Hall. = mean of five micro `(R−M)/R` rates.
+* Paid API constructor `--execute` is disabled; open-weight HF `--execute` is available.
+* Tests: `pytest -q tests/test_e3_*.py` (synthetic, offline).

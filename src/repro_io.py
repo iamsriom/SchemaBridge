@@ -1,18 +1,21 @@
-"""Shared I/O helpers for the E1 / E2 reproduction CLIs (no results, no network, no heavy imports).
+"""Shared I/O helpers for the E1 / E2 / E3 reproduction CLIs (no results, no network, no heavy imports).
 
 Contents
 --------
 * output-directory guard (generated files may only go to git-ignored locations),
-* ``<dataset>_<prompt>_<model>`` run-directory naming used by every E1/E2 CLI,
+* ``<dataset>_<prompt>_<model>`` run-directory naming used by every E1/E2/E3 CLI,
 * prediction-directory loading and alignment against the gold records (by serial / schema id),
 * retry-with-backoff wrapper for rate limits,
-* constructor (E2) JSON response parsing,
+* constructor (E2/E3) JSON response parsing,
+* E3 empty-gold / empty-reconstruction validity helpers,
+* fixed-description hash helpers for constructor isolation,
 * small CSV / JSON helpers.
 """
 
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import random
 import re
@@ -194,6 +197,62 @@ def ddl_failure(entry: dict | None) -> str | None:
     return None
 
 
+def gold_is_empty(ddl: str, meta: dict | None = None) -> bool:
+    """True when the gold schema has no tables/columns (Enterprise archive/tmp placeholders)."""
+    meta = meta or {}
+    tables = meta.get("tables") or []
+    cbt = meta.get("columns_by_table") or {}
+    n_cols = sum(len(v or []) for v in cbt.values())
+    if tables or n_cols:
+        return False
+    return "CREATE TABLE" not in (ddl or "").upper()
+
+
+def pred_is_structurally_empty(ddl: str, meta: dict | None = None) -> bool:
+    """True when a reconstruction has no CREATE TABLE / no parsed tables or columns."""
+    meta = meta or {}
+    tables = meta.get("tables") or []
+    cbt = meta.get("columns_by_table") or {}
+    n_cols = sum(len(v or []) for v in cbt.values())
+    if tables or n_cols:
+        return False
+    text = (ddl or "").strip()
+    if not text:
+        return True
+    return "CREATE TABLE" not in text.upper()
+
+
+def e3_reconstruction_failure(
+    entry: dict | None,
+    *,
+    gold_ddl: str = "",
+    gold_meta: dict | None = None,
+) -> str | None:
+    """E3 validity: empty-gold + empty-pred is a *valid* reconstruction (nGED=0).
+
+    Malformed/missing nonempty reconstructions still fail.  Comment-only DDL against a
+    nonempty gold is a failure.  Error/skipped fields always fail.
+    """
+    if entry is None:
+        return "missing"
+    if entry.get("error") or entry.get("skipped"):
+        return "error_field"
+    ddl = entry.get("ddl")
+    if not isinstance(ddl, str):
+        return "empty_ddl"
+    from .schema_parser import ensure_prediction_metadata, metadata_from_ddl
+
+    g_meta = gold_meta if gold_meta is not None else metadata_from_ddl(gold_ddl or "")
+    p_meta = ensure_prediction_metadata(entry.get("metadata") or {}, ddl, database=entry.get("database") or "")
+    if gold_is_empty(gold_ddl or "", g_meta) and pred_is_structurally_empty(ddl, p_meta):
+        return None
+    if not ddl.strip():
+        return "empty_ddl"
+    if pred_is_structurally_empty(ddl, p_meta):
+        return "empty_or_unparseable"
+    return None
+
+
 def _complete(path: Path, schema_id: str, failure: Callable[[dict | None], str | None]) -> bool:
     try:
         data = json.loads(Path(path).read_text(encoding="utf-8"))
@@ -210,6 +269,36 @@ def is_complete_nl_record(path: Path, schema_id: str) -> bool:
 def is_complete_ddl_record(path: Path, schema_id: str) -> bool:
     """True if ``path`` is a readable JSON with a non-empty reconstructed ``ddl`` for ``schema_id``."""
     return _complete(path, schema_id, ddl_failure)
+
+
+def is_complete_e3_ddl_record(
+    path: Path,
+    schema_id: str,
+    *,
+    gold_ddl: str = "",
+    gold_meta: dict | None = None,
+) -> bool:
+    """E3 resume check: allows valid empty-gold + empty-reconstruction records."""
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return False
+    if not isinstance(data, dict) or str(data.get("id") or "") != str(schema_id):
+        return False
+    return e3_reconstruction_failure(data, gold_ddl=gold_ddl, gold_meta=gold_meta) is None
+
+
+def sha256_text(text: str) -> str:
+    """SHA-256 hex digest of UTF-8 text (used for fixed-description isolation checks)."""
+    return hashlib.sha256((text or "").encode("utf-8")).hexdigest()
+
+
+def description_hash(entry: dict | None) -> str | None:
+    """Return the SHA-256 of ``nl_text`` when the entry is a usable description, else ``None``."""
+    if nl_failure(entry) is not None:
+        return None
+    assert entry is not None
+    return sha256_text(entry["nl_text"])
 
 
 # --------------------------------------------------------------------------- retries
@@ -295,15 +384,21 @@ __all__ = [
     "combo_dir",
     "combo_name",
     "ddl_failure",
+    "description_hash",
+    "e3_reconstruction_failure",
     "expand",
     "generate_with_backoff",
+    "gold_is_empty",
     "is_complete_ddl_record",
+    "is_complete_e3_ddl_record",
     "is_complete_nl_record",
     "is_transient_error",
     "load_prediction_dir",
     "nl_failure",
     "parse_constructor_response",
+    "pred_is_structurally_empty",
     "read_csv",
+    "sha256_text",
     "upsert_csv",
     "write_csv",
     "write_json",
