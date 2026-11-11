@@ -99,12 +99,28 @@ def main() -> int:
             paper = paper_row[m]
             paper_disp = "--" if paper is None else paper
             recomputed = num_or_none(r.get(m))
+            method = r.get("method") or ""
             if src == "BLOCKED" and m != "domain":
                 st, p, rec = "BLOCKED", (None if paper is None else float(paper)), None
             elif m == "domain":
-                st, p, rec = status_for(None if paper is None else "--", recomputed)
-                if paper is None and recomputed is None:
-                    st = "PASS"
+                # Direct Domain is numeric and must be compared as numbers.
+                # Prompting baselines omit Domain ("--") because outputs are untyped.
+                if method == "Direct":
+                    st, p, rec = status_for(paper, recomputed)
+                else:
+                    paper_is_dash = paper is None or paper == "--"
+                    rec_is_dash = recomputed is None
+                    if paper_is_dash and rec_is_dash:
+                        st, p, rec = "PASS", None, None
+                    else:
+                        st, p, rec = status_for(
+                            None if paper_is_dash else paper,
+                            recomputed,
+                        )
+                if src == "ARCHIVE_AGGREGATE" and st == "PASS":
+                    st = "PASS_ARCHIVE"
+                elif src == "ARCHIVE_AGGREGATE" and st == "MISMATCH":
+                    st = "MISMATCH_ARCHIVE"
             else:
                 st, p, rec = status_for(paper, recomputed)
                 if src == "ARCHIVE_AGGREGATE" and st == "PASS":

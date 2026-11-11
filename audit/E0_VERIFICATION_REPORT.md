@@ -129,3 +129,42 @@ Outputs: `results/metrics/reproduced/E0_TABLE_{V,VI}_FINAL.*`, `audit/E0_PAPER_C
 4. **Attributes rounding on Table VI:** manuscript Attributes are ~0.001 above archive `f1_micro`; prefer archive micro values or recover trees to re-score.
 5. Do **not** mark E0 COMPLETE while trees are missing or hybrid manuscript cells remain unexplained.
 6. Do **not** substitute `prompt_conditions_v2` for PaperMethods.
+
+
+## Independent verification addendum (2026-11-11)
+
+Performed against recovery workspace + this branch without regenerating predictions or paid API calls.
+
+### CodeLlama-13B RSchema pilot — VERIFIED
+
+| Metric | Full precision | Round-3 | Manuscript | Status |
+|---|---:|---:|---:|---|
+| nGED | 0.583048 | 0.583 | 0.583 | PASS |
+| Hallucination | 0.668598 | 0.669 | 0.669 | PASS |
+| Tables F1 | 0.553864 | 0.554 | 0.554 | PASS |
+| Attributes F1 | 0.414443 | 0.414 | 0.414 | PASS |
+| Domain F1 | 0.114962 | 0.115 | 0.115 | PASS |
+| Entity F1 | 0.300543 | 0.301 | 0.301 | PASS |
+| Referential F1 | 0.139797 | 0.140 | 0.140 | PASS |
+
+G/P/M: Tables 2436/2753/1437; Attr 11705/13138/5148; Entity 2435/2902/802; Ref 2146/2289/310; Domain(381) 8410/9509/1030.
+
+Artifacts: `audit/E0_CODELLAMA_PILOT_CHECKPOINT.json`, `audit/E0_CODELLAMA_MANUAL_VALIDATION.csv` (10 unique records; manual table/attr set counts agree with evaluator).
+
+### Workspace comparison
+
+See `audit/E0_WORKSPACE_COMPARISON.md` and `audit/E0_CONSTRUCTOR_VERIFICATION.md`.
+
+Recovery open-weight trees are **byte-identical** to this branch. Claude/GPT trees exist **only** here — do not overwrite from recovery.
+
+### Comparator fix
+
+`scripts/build_e0_paper_comparison.py`: Table VI Domain branch no longer coerces Direct Domain paper values to `"--"` before comparison. Baseline Domain remains `"--"`. Tests in `tests/test_e0_paper_comparison.py`.
+
+### Table V independent audit
+
+`audit/E0_TABLE_V_INDEPENDENT_AUDIT.csv`: **29 PASS / 41 MISMATCH** vs current manuscript targets under genuine protocol. CodeLlama (both datasets) fully PASS. Remaining mismatches are manuscript/protocol lineage issues, not missing predictions.
+
+### Status unchanged
+
+Experiment remains **PARTIAL**: Direct offline COMPLETE; PaperMethods per-schema trees still missing (ARCHIVE_AGGREGATE). Do not merge as E0 COMPLETE.
