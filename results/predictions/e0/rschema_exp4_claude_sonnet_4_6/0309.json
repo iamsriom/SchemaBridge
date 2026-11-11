@@ -1,0 +1,32 @@
+{
+  "text_number": 309,
+  "id": "67552f0a13602ec03b41a89b",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0309",
+  "question": "\"The insurance management system is required to manage information about customers, regions, income groups, vehicle segments, and policies. A customer includes their name, email, phone number, gender, date of birth, marital status, relevant region, and income group. The system must also record various insurance Attributes of a policy such as personal injury liability insurance, collision insurance, etc., along with their premiums, and link them to the corresponding vehicle segments. When a customer purchases a policy, an insurance record is generated, including the purchase date and expiration date. The system should be capable of conducting statistical analysis on customers from different regions and income groups, and according to vehicle segments or types of policies, thereby supporting subsequent business decisions and customer services.\"",
+  "ddl": "-- Schema for database: rschema_0309\n\nCREATE TABLE `region` (\n  `region_id` int(11) NOT NULL AUTO_INCREMENT,\n  `region_name` varchar(255) NOT NULL,\n  `region_code` varchar(50) DEFAULT NULL,\n  PRIMARY KEY (`region_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `income_group` (\n  `income_group_id` int(11) NOT NULL AUTO_INCREMENT,\n  `group_name` varchar(255) NOT NULL,\n  `min_income` decimal(15,2) DEFAULT NULL,\n  `max_income` decimal(15,2) DEFAULT NULL,\n  PRIMARY KEY (`income_group_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `customer` (\n  `customer_id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_name` varchar(255) NOT NULL,\n  `email` varchar(255) DEFAULT NULL,\n  `phone_number` varchar(50) DEFAULT NULL,\n  `gender` varchar(20) DEFAULT NULL,\n  `date_of_birth` date DEFAULT NULL,\n  `marital_status` varchar(50) DEFAULT NULL,\n  `region_id` int(11) NOT NULL,\n  `income_group_id` int(11) NOT NULL,\n  PRIMARY KEY (`customer_id`),\n  CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `customer_ibfk_2` FOREIGN KEY (`income_group_id`) REFERENCES `income_group` (`income_group_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `vehicle_segment` (\n  `segment_id` int(11) NOT NULL AUTO_INCREMENT,\n  `segment_name` varchar(255) NOT NULL,\n  `segment_description` varchar(500) DEFAULT NULL,\n  PRIMARY KEY (`segment_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `policy_attribute` (\n  `attribute_id` int(11) NOT NULL AUTO_INCREMENT,\n  `attribute_name` varchar(255) NOT NULL,\n  `attribute_description` varchar(500) DEFAULT NULL,\n  `premium` decimal(15,2) NOT NULL,\n  `segment_id` int(11) NOT NULL,\n  PRIMARY KEY (`attribute_id`),\n  CONSTRAINT `policy_attribute_ibfk_1` FOREIGN KEY (`segment_id`) REFERENCES `vehicle_segment` (`segment_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `policy` (\n  `policy_id` int(11) NOT NULL AUTO_INCREMENT,\n  `policy_name` varchar(255) NOT NULL,\n  `policy_type` varchar(255) NOT NULL,\n  `segment_id` int(11) NOT NULL,\n  `total_premium` decimal(15,2) DEFAULT NULL,\n  `policy_description` varchar(500) DEFAULT NULL,\n  PRIMARY KEY (`policy_id`),\n  CONSTRAINT `policy_ibfk_1` FOREIGN KEY (`segment_id`) REFERENCES `vehicle_segment` (`segment_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `policy_attribute_mapping` (\n  `mapping_id` int(11) NOT NULL AUTO_INCREMENT,\n  `policy_id` int(11) NOT NULL,\n  `attribute_id` int(11) NOT NULL,\n  PRIMARY KEY (`mapping_id`),\n  CONSTRAINT `policy_attribute_mapping_ibfk_1` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`policy_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `policy_attribute_mapping_ibfk_2` FOREIGN KEY (`attribute_id`) REFERENCES `policy_attribute` (`attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `insurance_record` (\n  `record_id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_id` int(11) NOT NULL,\n  `policy_id` int(11) NOT NULL,\n  `purchase_date` date NOT NULL,\n  `expiration_date` date NOT NULL,\n  `total_amount_paid` decimal(15,2) DEFAULT NULL,\n  `status` varchar(50) DEFAULT NULL,\n  PRIMARY KEY (`record_id`),\n  CONSTRAINT `insurance_record_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `insurance_record_ibfk_2` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`policy_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "region",
+      "income_group",
+      "customer",
+      "vehicle_segment",
+      "policy_attribute",
+      "policy",
+      "policy_attribute_mapping",
+      "insurance_record"
+    ],
+    "columns_by_table": {
+      "region": [],
+      "income_group": [],
+      "customer": [],
+      "vehicle_segment": [],
+      "policy_attribute": [],
+      "policy": [],
+      "policy_attribute_mapping": [],
+      "insurance_record": []
+    }
+  }
+}

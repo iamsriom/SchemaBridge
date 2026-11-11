@@ -1,0 +1,60 @@
+-- Schema for database: rschema_0447
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `unit` varchar(255) DEFAULT NULL,
+  `role` varchar(50) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `financial_documents` (
+  `document_id` int(11) NOT NULL AUTO_INCREMENT,
+  `document_title` varchar(255) NOT NULL,
+  `document_number` varchar(100) NOT NULL,
+  `issuing_unit` varchar(255) DEFAULT NULL,
+  `issue_date` date DEFAULT NULL,
+  `document_category` varchar(100) NOT NULL,
+  `document_level` varchar(100) DEFAULT NULL,
+  `validity_status` varchar(50) NOT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  `document_content` text,
+  `attachment_path` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`document_id`),
+  UNIQUE KEY `uk_financial_documents_document_number` (`document_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `document_operations` (
+  `operation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `document_id` int(11) NOT NULL,
+  `admin_user_id` int(11) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `operation_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`operation_id`),
+  KEY `document_operations_ibfk_1` (`document_id`),
+  KEY `document_operations_ibfk_2` (`admin_user_id`),
+  CONSTRAINT `document_operations_ibfk_1` FOREIGN KEY (`document_id`) REFERENCES `financial_documents` (`document_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `document_operations_ibfk_2` FOREIGN KEY (`admin_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notifications` (
+  `notification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `publisher_user_id` int(11) NOT NULL,
+  `notification_content` text NOT NULL,
+  `issue_date` datetime NOT NULL,
+  `notification_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`notification_id`),
+  KEY `notifications_ibfk_1` (`publisher_user_id`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`publisher_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `system_configurations` (
+  `config_id` int(11) NOT NULL AUTO_INCREMENT,
+  `system_name` varchar(255) NOT NULL,
+  `database_directory` varchar(500) NOT NULL,
+  `data_type` varchar(100) NOT NULL,
+  `file_upload_directory` varchar(500) NOT NULL,
+  PRIMARY KEY (`config_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

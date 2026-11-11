@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0126
+
+CREATE TABLE `death_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `deceased_name` varchar(255) NOT NULL,
+  `deceased_id_number` char(18) NOT NULL,
+  `inspector_id_number` char(18) NOT NULL,
+  `confirmed_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `institution_name` varchar(255) DEFAULT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inspector` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `inspector_id_number` char(18) NOT NULL,
+  `inspector_name` varchar(255) NOT NULL,
+  `department` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `inspector_id_number` (`inspector_id_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `deceased` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `deceased_name` varchar(255) NOT NULL,
+  `deceased_id_number` char(18) NOT NULL,
+  `gender` tinyint(1) DEFAULT NULL,
+  `birth_date` datetime DEFAULT NULL,
+  `address` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `deceased_id_number` (`deceased_id_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `death_confirmation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `deceased_id` int(11) NOT NULL,
+  `inspector_id` int(11) NOT NULL,
+  `confirmation_time` datetime NOT NULL,
+  `cause_of_death` varchar(500) DEFAULT NULL,
+  `institution_name` varchar(255) DEFAULT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `death_confirmation_ibfk_1` FOREIGN KEY (`deceased_id`) REFERENCES `deceased` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `death_confirmation_ibfk_2` FOREIGN KEY (`inspector_id`) REFERENCES `inspector` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

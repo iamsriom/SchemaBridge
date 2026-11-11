@@ -1,0 +1,77 @@
+-- Schema for database: schemabench_0218
+CREATE TABLE `grampanchayat` (
+  `grampanchayat_id` int(11) NOT NULL AUTO_INCREMENT,
+  `taluka_name` varchar(255) NOT NULL,
+  `total_wards` int(11) NOT NULL,
+  `total_villages` int(11) NOT NULL,
+  PRIMARY KEY (`grampanchayat_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `village` (
+  `village_id` int(11) NOT NULL AUTO_INCREMENT,
+  `grampanchayat_id` int(11) NOT NULL,
+  `village_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`village_id`),
+  KEY `grampanchayat_id` (`grampanchayat_id`),
+  CONSTRAINT `village_ibfk_1` FOREIGN KEY (`grampanchayat_id`) REFERENCES `grampanchayat` (`grampanchayat_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ward` (
+  `ward_id` int(11) NOT NULL AUTO_INCREMENT,
+  `village_id` int(11) NOT NULL,
+  `ward_name` varchar(255) NOT NULL,
+  `member_name` varchar(255) NOT NULL,
+  `member_phone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`ward_id`),
+  KEY `village_id` (`village_id`),
+  CONSTRAINT `ward_ibfk_1` FOREIGN KEY (`village_id`) REFERENCES `village` (`village_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `farmer` (
+  `aad_h_no` char(12) NOT NULL,
+  `farmer_name` varchar(255) NOT NULL,
+  `gender` varchar(10) NOT NULL,
+  `village_id` int(11) DEFAULT NULL,
+  `ward_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`aad_h_no`),
+  KEY `village_id` (`village_id`),
+  KEY `ward_id` (`ward_id`),
+  CONSTRAINT `farmer_ibfk_1` FOREIGN KEY (`village_id`) REFERENCES `village` (`village_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `farmer_ibfk_2` FOREIGN KEY (`ward_id`) REFERENCES `ward` (`ward_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `machine` (
+  `mach_id` int(11) NOT NULL AUTO_INCREMENT,
+  `machine_name` varchar(255) NOT NULL,
+  `availability_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`mach_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `rental` (
+  `rental_id` int(11) NOT NULL AUTO_INCREMENT,
+  `aad_h_no` char(12) NOT NULL,
+  `mach_id` int(11) NOT NULL,
+  `ward_id` int(11) NOT NULL,
+  `member_name` varchar(255) NOT NULL,
+  `rental_start_date` datetime NOT NULL,
+  `rental_end_date` datetime DEFAULT NULL,
+  `duration_days` int(11) NOT NULL,
+  PRIMARY KEY (`rental_id`),
+  KEY `aad_h_no` (`aad_h_no`),
+  KEY `mach_id` (`mach_id`),
+  KEY `ward_id` (`ward_id`),
+  CONSTRAINT `rental_ibfk_1` FOREIGN KEY (`aad_h_no`) REFERENCES `farmer` (`aad_h_no`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `rental_ibfk_2` FOREIGN KEY (`mach_id`) REFERENCES `machine` (`mach_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `rental_ibfk_3` FOREIGN KEY (`ward_id`) REFERENCES `ward` (`ward_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bill` (
+  `bill_id` int(11) NOT NULL AUTO_INCREMENT,
+  `rental_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `payment_method` varchar(50) NOT NULL,
+  `payment_date` datetime NOT NULL,
+  PRIMARY KEY (`bill_id`),
+  KEY `rental_id` (`rental_id`),
+  CONSTRAINT `bill_ibfk_1` FOREIGN KEY (`rental_id`) REFERENCES `rental` (`rental_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,69 @@
+-- Schema for database: schemabench_0034
+CREATE TABLE `filer_folder` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `filer_folder_parent_id_idx` (`parent_id`),
+  CONSTRAINT `filer_folder_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `filer_folder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `filer_file` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `folder_id` int(11) DEFAULT NULL,
+  `file` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `original_filename` varchar(255) DEFAULT NULL,
+  `size` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `filer_file_folder_id_idx` (`folder_id`),
+  CONSTRAINT `filer_file_ibfk_1` FOREIGN KEY (`folder_id`) REFERENCES `filer_folder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `filer_image` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `file_ptr_id` int(11) NOT NULL,
+  `width` int(11) NOT NULL,
+  `height` int(11) NOT NULL,
+  `alt_text` varchar(255) DEFAULT NULL,
+  `caption` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `filer_image_file_ptr_id_uniq` (`file_ptr_id`),
+  CONSTRAINT `filer_image_ibfk_1` FOREIGN KEY (`file_ptr_id`) REFERENCES `filer_file` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `filer_clipboard` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `filer_clipboard_user_id_uniq` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `filer_clipboarditem` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `clipboard_id` int(11) NOT NULL,
+  `file_id` int(11) NOT NULL,
+  `action` varchar(20) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `filer_clipboarditem_clipboard_id_idx` (`clipboard_id`),
+  KEY `filer_clipboarditem_file_id_idx` (`file_id`),
+  CONSTRAINT `filer_clipboarditem_ibfk_1` FOREIGN KEY (`clipboard_id`) REFERENCES `filer_clipboard` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `filer_clipboarditem_ibfk_2` FOREIGN KEY (`file_id`) REFERENCES `filer_file` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `filer_folderpermission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `folder_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `group_id` int(11) DEFAULT NULL,
+  `can_read` tinyint(1) NOT NULL DEFAULT '0',
+  `can_edit` tinyint(1) NOT NULL DEFAULT '0',
+  `can_add` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `filer_folderpermission_folder_id_idx` (`folder_id`),
+  KEY `filer_folderpermission_user_id_idx` (`user_id`),
+  KEY `filer_folderpermission_group_id_idx` (`group_id`),
+  CONSTRAINT `filer_folderpermission_ibfk_1` FOREIGN KEY (`folder_id`) REFERENCES `filer_folder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

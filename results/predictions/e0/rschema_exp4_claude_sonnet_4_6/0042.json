@@ -1,0 +1,28 @@
+{
+  "text_number": 42,
+  "id": "67552f0a13602ec03b41a7e8",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0042",
+  "question": "A property management company needs to manage multiple communities and related information. Each community has a unique number, name, location and corresponding property manager. The property manager needs to record basic information such as name, phone number and email address. Each community contains multiple residents. Each resident needs to associate the information of the community to which he belongs, and record the resident number, name, phone number, email address and building number. The building needs to include the building number, building name, and building location. At the same time, the company needs to comprehensively manage the maintenance services in the community. The maintenance order needs to include the maintenance order number, community number, resident number, maintenance date, maintenance content, maintenance cost and maintenance personnel information. The basic information of the maintenance personnel includes name, phone number and email address. The property management information system needs to realize the comprehensive recording and management of the community, residents, maintenance services and related personnel information, so as to track the operation status of the community in real time, improve service efficiency and ensure user satisfaction.",
+  "ddl": "-- Schema for database: rschema_0042\n\nCREATE TABLE `property_manager` (\n  `manager_id` int(11) NOT NULL AUTO_INCREMENT,\n  `manager_name` varchar(255) NOT NULL,\n  `phone` varchar(50) NOT NULL,\n  `email` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`manager_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `community` (\n  `community_id` int(11) NOT NULL AUTO_INCREMENT,\n  `community_number` varchar(50) NOT NULL,\n  `community_name` varchar(255) NOT NULL,\n  `location` varchar(255) DEFAULT NULL,\n  `manager_id` int(11) NOT NULL,\n  PRIMARY KEY (`community_id`),\n  UNIQUE KEY `community_number` (`community_number`),\n  CONSTRAINT `community_ibfk_1` FOREIGN KEY (`manager_id`) REFERENCES `property_manager` (`manager_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `building` (\n  `building_id` int(11) NOT NULL AUTO_INCREMENT,\n  `building_number` varchar(50) NOT NULL,\n  `building_name` varchar(255) NOT NULL,\n  `building_location` varchar(255) DEFAULT NULL,\n  `community_id` int(11) NOT NULL,\n  PRIMARY KEY (`building_id`),\n  CONSTRAINT `building_ibfk_1` FOREIGN KEY (`community_id`) REFERENCES `community` (`community_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `resident` (\n  `resident_id` int(11) NOT NULL AUTO_INCREMENT,\n  `resident_number` varchar(50) NOT NULL,\n  `resident_name` varchar(255) NOT NULL,\n  `phone` varchar(50) DEFAULT NULL,\n  `email` varchar(255) DEFAULT NULL,\n  `community_id` int(11) NOT NULL,\n  `building_id` int(11) NOT NULL,\n  PRIMARY KEY (`resident_id`),\n  UNIQUE KEY `resident_number` (`resident_number`),\n  CONSTRAINT `resident_ibfk_1` FOREIGN KEY (`community_id`) REFERENCES `community` (`community_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `resident_ibfk_2` FOREIGN KEY (`building_id`) REFERENCES `building` (`building_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `maintenance_staff` (\n  `staff_id` int(11) NOT NULL AUTO_INCREMENT,\n  `staff_name` varchar(255) NOT NULL,\n  `phone` varchar(50) DEFAULT NULL,\n  `email` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`staff_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `maintenance_order` (\n  `order_id` int(11) NOT NULL AUTO_INCREMENT,\n  `order_number` varchar(50) NOT NULL,\n  `community_id` int(11) NOT NULL,\n  `resident_id` int(11) NOT NULL,\n  `maintenance_date` datetime NOT NULL,\n  `maintenance_content` text DEFAULT NULL,\n  `maintenance_cost` decimal(10,2) DEFAULT NULL,\n  `staff_id` int(11) NOT NULL,\n  PRIMARY KEY (`order_id`),\n  UNIQUE KEY `order_number` (`order_number`),\n  CONSTRAINT `maintenance_order_ibfk_1` FOREIGN KEY (`community_id`) REFERENCES `community` (`community_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `maintenance_order_ibfk_2` FOREIGN KEY (`resident_id`) REFERENCES `resident` (`resident_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `maintenance_order_ibfk_3` FOREIGN KEY (`staff_id`) REFERENCES `maintenance_staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "property_manager",
+      "community",
+      "building",
+      "resident",
+      "maintenance_staff",
+      "maintenance_order"
+    ],
+    "columns_by_table": {
+      "property_manager": [],
+      "community": [],
+      "building": [],
+      "resident": [],
+      "maintenance_staff": [],
+      "maintenance_order": []
+    }
+  }
+}

@@ -1,0 +1,163 @@
+-- Schema for database: schemabench_0100
+
+CREATE TABLE `survey_year` (
+  `year_id` int(11) NOT NULL AUTO_INCREMENT,
+  `survey_year` year NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`year_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `geographic_region` (
+  `region_id` int(11) NOT NULL AUTO_INCREMENT,
+  `region_code` char(4) NOT NULL,
+  `region_name` varchar(100) NOT NULL,
+  `division_code` char(4) DEFAULT NULL,
+  `division_name` varchar(100) DEFAULT NULL,
+  `state_code` char(2) DEFAULT NULL,
+  `urban_rural_code` char(2) DEFAULT NULL,
+  PRIMARY KEY (`region_id`),
+  UNIQUE KEY `region_code` (`region_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `household` (
+  `household_id` int(11) NOT NULL AUTO_INCREMENT,
+  `consumer_unit_id` varchar(20) NOT NULL,
+  `year_id` int(11) NOT NULL,
+  `region_id` int(11) NOT NULL,
+  `interview_quarter` tinyint(4) NOT NULL,
+  `household_size` tinyint(4) NOT NULL,
+  `num_children` tinyint(4) DEFAULT NULL,
+  `num_adults` tinyint(4) DEFAULT NULL,
+  `housing_tenure` char(2) DEFAULT NULL,
+  `housing_type` char(2) DEFAULT NULL,
+  `num_vehicles` tinyint(4) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`household_id`),
+  UNIQUE KEY `consumer_unit_id` (`consumer_unit_id`),
+  KEY `year_id` (`year_id`),
+  KEY `region_id` (`region_id`),
+  CONSTRAINT `household_ibfk_1` FOREIGN KEY (`year_id`) REFERENCES `survey_year` (`year_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `household_ibfk_2` FOREIGN KEY (`region_id`) REFERENCES `geographic_region` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `respondent` (
+  `respondent_id` int(11) NOT NULL AUTO_INCREMENT,
+  `household_id` int(11) NOT NULL,
+  `age_group` varchar(20) NOT NULL,
+  `sex_code` char(1) NOT NULL,
+  `education_level` char(2) DEFAULT NULL,
+  `marital_status` char(2) DEFAULT NULL,
+  `employment_status` char(2) DEFAULT NULL,
+  `occupation_code` char(4) DEFAULT NULL,
+  `race_code` char(2) DEFAULT NULL,
+  `hispanic_origin` char(1) DEFAULT NULL,
+  `is_reference_person` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`respondent_id`),
+  KEY `household_id` (`household_id`),
+  CONSTRAINT `respondent_ibfk_1` FOREIGN KEY (`household_id`) REFERENCES `household` (`household_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `income` (
+  `income_id` int(11) NOT NULL AUTO_INCREMENT,
+  `household_id` int(11) NOT NULL,
+  `income_before_tax` decimal(12,2) DEFAULT NULL,
+  `income_after_tax` decimal(12,2) DEFAULT NULL,
+  `wage_salary_income` decimal(12,2) DEFAULT NULL,
+  `self_employment_income` decimal(12,2) DEFAULT NULL,
+  `social_security_income` decimal(12,2) DEFAULT NULL,
+  `pension_income` decimal(12,2) DEFAULT NULL,
+  `interest_dividend_income` decimal(12,2) DEFAULT NULL,
+  `rental_income` decimal(12,2) DEFAULT NULL,
+  `other_income` decimal(12,2) DEFAULT NULL,
+  `income_quintile` tinyint(4) DEFAULT NULL,
+  `income_decile` tinyint(4) DEFAULT NULL,
+  `reference_period` char(10) DEFAULT NULL,
+  PRIMARY KEY (`income_id`),
+  KEY `household_id` (`household_id`),
+  CONSTRAINT `income_ibfk_1` FOREIGN KEY (`household_id`) REFERENCES `household` (`household_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `expenditure_category` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_code` varchar(10) NOT NULL,
+  `category_name` varchar(150) NOT NULL,
+  `parent_category_id` int(11) DEFAULT NULL,
+  `ucc_code` varchar(10) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`category_id`),
+  UNIQUE KEY `category_code` (`category_code`),
+  KEY `parent_category_id` (`parent_category_id`),
+  CONSTRAINT `expenditure_category_ibfk_1` FOREIGN KEY (`parent_category_id`) REFERENCES `expenditure_category` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `expenditure` (
+  `expenditure_id` int(11) NOT NULL AUTO_INCREMENT,
+  `household_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `reference_period` char(10) NOT NULL,
+  `frequency_code` char(2) DEFAULT NULL,
+  `annualized_amount` decimal(12,2) DEFAULT NULL,
+  `is_imputed` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`expenditure_id`),
+  KEY `household_id` (`household_id`),
+  KEY `category_id` (`category_id`),
+  CONSTRAINT `expenditure_ibfk_1` FOREIGN KEY (`household_id`) REFERENCES `household` (`household_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `expenditure_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `expenditure_category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `asset` (
+  `asset_id` int(11) NOT NULL AUTO_INCREMENT,
+  `household_id` int(11) NOT NULL,
+  `asset_type` varchar(50) NOT NULL,
+  `asset_value` decimal(14,2) DEFAULT NULL,
+  `liability_value` decimal(14,2) DEFAULT NULL,
+  `net_worth` decimal(14,2) DEFAULT NULL,
+  `reference_period` char(10) DEFAULT NULL,
+  PRIMARY KEY (`asset_id`),
+  KEY `household_id` (`household_id`),
+  CONSTRAINT `asset_ibfk_1` FOREIGN KEY (`household_id`) REFERENCES `household` (`household_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `public_use_file` (
+  `file_id` int(11) NOT NULL AUTO_INCREMENT,
+  `year_id` int(11) NOT NULL,
+  `file_name` varchar(150) NOT NULL,
+  `file_type` varchar(50) NOT NULL,
+  `interview_type` char(10) NOT NULL,
+  `release_date` date DEFAULT NULL,
+  `record_count` int(11) DEFAULT NULL,
+  `anonymization_method` varchar(100) DEFAULT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
+  `file_size_kb` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`file_id`),
+  KEY `year_id` (`year_id`),
+  CONSTRAINT `public_use_file_ibfk_1` FOREIGN KEY (`year_id`) REFERENCES `survey_year` (`year_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_download_log` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `file_id` int(11) NOT NULL,
+  `user_identifier` varchar(100) DEFAULT NULL,
+  `download_timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `ip_address_hash` varchar(64) DEFAULT NULL,
+  `purpose` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`log_id`),
+  KEY `file_id` (`file_id`),
+  CONSTRAINT `data_download_log_ibfk_1` FOREIGN KEY (`file_id`) REFERENCES `public_use_file` (`file_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `survey_weight` (
+  `weight_id` int(11) NOT NULL AUTO_INCREMENT,
+  `household_id` int(11) NOT NULL,
+  `final_weight` decimal(14,6) NOT NULL,
+  `calibration_factor` decimal(10,6) DEFAULT NULL,
+  `weight_type` varchar(50) DEFAULT NULL,
+  `reference_period` char(10) DEFAULT NULL,
+  PRIMARY KEY (`weight_id`),
+  KEY `household_id` (`household_id`),
+  CONSTRAINT `survey_weight_ibfk_1` FOREIGN KEY (`household_id`) REFERENCES `household` (`household_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

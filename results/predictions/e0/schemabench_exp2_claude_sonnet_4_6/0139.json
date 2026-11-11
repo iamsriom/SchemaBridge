@@ -1,0 +1,30 @@
+{
+  "text_number": 139,
+  "id": "SB-139",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "schemabench_0139",
+  "question": "1) Background / Context\n\nVisual Genome is an ongoing project aimed at creating a comprehensive dataset that connects structured image concepts with language. It offers a knowledge base intended to enhance understanding and capabilities in image recognition and interpretation by linking visual elements to linguistic descriptions.\n\n2) Objectives\n\nThe primary objective of Visual Genome is to develop a robust dataset that facilitates the integration of image-based concepts with language. This supports advancements in visual recognition, natural language processing, and AI-driven understanding of visual data.\n\n3) Stakeholders & Users\n\n- Researchers and Developers: The tool is primarily for individuals working in AI, machine learning, and data science fields who require a robust dataset for training models related to image recognition and natural language processing.\n- Educational Institutions: Universities and educational bodies may use this dataset for research and academic purposes.\n- Tech Companies: Companies specializing in image processing and AI development could benefit from using this as a resource for developing new technologies.\n\n4) Functional Descriptions\n\n- Image Annotation: Images are annotated with objects, attributes, and relationships between objects to connect visual information with language.\n  \n- Data Management: The database schema defines tables for handling:\n  - Attributes (`ATT_CLASSES`, `IMG_OBJ_ATT`)\n  - Objects (`OBJ_CLASSES`, `IMG_OBJ`)\n  - Relationships (`PRED_CLASSES`, `IMG_REL`)\n\n- Relational Mapping: \n  - Objects within images are stored with position and size.\n  - Attributes and relationships of objects are mapped to create rich semantic connections.\n  \n- Database Integration: Images and their components (objects, attributes, relationships) are stored and referenced through an SQL-based structured database, facilitating efficient data retrieval and manipulation.\n  \n5) Non-Functional Descriptions\n\n- Scalability: The system should efficiently handle a growing dataset as new images and annotations are continually added.\n- Usability: The dataset must be easily accessible for users with varying levels of technical expertise.\n- Interoperability: The database should support integration with other systems and tools for extended use in diverse applications.",
+  "ddl": "-- Schema for database: schemabench_0139\n\nCREATE TABLE `img` (\n  `img_id` int(11) NOT NULL,\n  `width` int(11) NOT NULL,\n  `height` int(11) NOT NULL,\n  `url` varchar(512) NOT NULL,\n  PRIMARY KEY (`img_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `att_classes` (\n  `att_class_id` int(11) NOT NULL,\n  `att_class` varchar(255) NOT NULL,\n  PRIMARY KEY (`att_class_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `obj_classes` (\n  `obj_class_id` int(11) NOT NULL,\n  `obj_class` varchar(255) NOT NULL,\n  PRIMARY KEY (`obj_class_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `pred_classes` (\n  `pred_class_id` int(11) NOT NULL,\n  `pred_class` varchar(255) NOT NULL,\n  PRIMARY KEY (`pred_class_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `img_obj` (\n  `obj_id` int(11) NOT NULL,\n  `img_id` int(11) NOT NULL,\n  `obj_class_id` int(11) DEFAULT NULL,\n  `x` int(11) DEFAULT NULL,\n  `y` int(11) DEFAULT NULL,\n  `w` int(11) DEFAULT NULL,\n  `h` int(11) DEFAULT NULL,\n  PRIMARY KEY (`obj_id`),\n  KEY `img_id` (`img_id`),\n  KEY `obj_class_id` (`obj_class_id`),\n  CONSTRAINT `img_obj_ibfk_1` FOREIGN KEY (`img_id`) REFERENCES `img` (`img_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `img_obj_ibfk_2` FOREIGN KEY (`obj_class_id`) REFERENCES `obj_classes` (`obj_class_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `img_obj_att` (\n  `img_obj_att_id` int(11) NOT NULL,\n  `img_id` int(11) NOT NULL,\n  `obj_id` int(11) NOT NULL,\n  `att_class_id` int(11) NOT NULL,\n  PRIMARY KEY (`img_obj_att_id`),\n  KEY `img_id` (`img_id`),\n  KEY `obj_id` (`obj_id`),\n  KEY `att_class_id` (`att_class_id`),\n  CONSTRAINT `img_obj_att_ibfk_1` FOREIGN KEY (`img_id`) REFERENCES `img` (`img_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `img_obj_att_ibfk_2` FOREIGN KEY (`obj_id`) REFERENCES `img_obj` (`obj_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `img_obj_att_ibfk_3` FOREIGN KEY (`att_class_id`) REFERENCES `att_classes` (`att_class_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `img_rel` (\n  `rel_id` int(11) NOT NULL,\n  `img_id` int(11) NOT NULL,\n  `pred_class_id` int(11) NOT NULL,\n  `obj1_id` int(11) NOT NULL,\n  `obj2_id` int(11) NOT NULL,\n  PRIMARY KEY (`rel_id`),\n  KEY `img_id` (`img_id`),\n  KEY `pred_class_id` (`pred_class_id`),\n  KEY `obj1_id` (`obj1_id`),\n  KEY `obj2_id` (`obj2_id`),\n  CONSTRAINT `img_rel_ibfk_1` FOREIGN KEY (`img_id`) REFERENCES `img` (`img_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `img_rel_ibfk_2` FOREIGN KEY (`pred_class_id`) REFERENCES `pred_classes` (`pred_class_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `img_rel_ibfk_3` FOREIGN KEY (`obj1_id`) REFERENCES `img_obj` (`obj_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `img_rel_ibfk_4` FOREIGN KEY (`obj2_id`) REFERENCES `img_obj` (`obj_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "img",
+      "att_classes",
+      "obj_classes",
+      "pred_classes",
+      "img_obj",
+      "img_obj_att",
+      "img_rel"
+    ],
+    "columns_by_table": {
+      "img": [],
+      "att_classes": [],
+      "obj_classes": [],
+      "pred_classes": [],
+      "img_obj": [],
+      "img_obj_att": [],
+      "img_rel": []
+    }
+  }
+}

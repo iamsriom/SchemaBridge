@@ -1,0 +1,26 @@
+{
+  "text_number": 190,
+  "id": "SB-190",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "schemabench_0190",
+  "question": "1) Background / Context  \nUdiddit is a social news aggregation platform designed for web content rating and discussion. Currently, the system employs a Postgres database schema to manage user-generated content, including forum posts, discussions, and votes. However, the existing schema is considered risky and unreliable, necessitating improvements for data integrity and system robustness.\n\n2) Objectives  \n- Enhance the reliability and security of the database schema for Udiddit.\n- Ensure seamless content creation and interaction among users.\n- Support scalable user activities including posting, voting, and commenting.\n\n3) Stakeholders & Users  \n- Registered Users: Individuals who create posts, engage in discussions, and vote on content.\n- Developers: Responsible for maintaining and upgrading the database schema and ensuring system integrity.\n- Administrators: Oversee user management and general platform operations.\n\n4) Functional Descriptions  \n- User Registration: Allow users to register with unique usernames, up to 25 characters, and ensure active user management.\n- Content Posting: Enable users to create posts under various topics, with titles up to 100 characters. Posts can include URLs (up to 2000 characters) or text content.\n- Commenting System: Users can add comments to posts, as well as reply to existing comments (nested commenting).\n- Voting Mechanism: Implement a voting system allowing users to upvote or downvote posts, with each vote represented as 1 (upvote) or -1 (downvote).\n- Topic Management: Facilitate the creation and management of topics, allowing description fields up to 500 characters.\n\n5) Non-Functional Descriptions  \n- Data Integrity: Implement constraints to ensure the accuracy and completeness of data entries.\n- Performance: Optimize the database to handle a large volume of concurrent operations efficiently.\n- Security: Enforce secure operations such as reliable logins and safe handling of user-generated content to prevent misuse and ensure data protection.",
+  "ddl": "-- Schema for database: schemabench_0190\n\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(25) NOT NULL,\n  `last_login` datetime DEFAULT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `username` (`username`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `topics` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(100) NOT NULL,\n  `description` varchar(500) DEFAULT NULL,\n  `created_by` int(11) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `name` (`name`),\n  CONSTRAINT `topics_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `posts` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `title` varchar(100) NOT NULL,\n  `url` varchar(2000) DEFAULT NULL,\n  `text_content` text DEFAULT NULL,\n  `user_id` int(11) NOT NULL,\n  `topic_id` int(11) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `posts_ibfk_2` FOREIGN KEY (`topic_id`) REFERENCES `topics` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `comments` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `text_content` text NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `post_id` int(11) NOT NULL,\n  `parent_comment_id` int(11) DEFAULT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`parent_comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `votes` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `post_id` int(11) NOT NULL,\n  `vote` tinyint(4) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `user_post_vote` (`user_id`, `post_id`),\n  CONSTRAINT `votes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `votes_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "topics",
+      "posts",
+      "comments",
+      "votes"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "topics": [],
+      "posts": [],
+      "comments": [],
+      "votes": []
+    }
+  }
+}

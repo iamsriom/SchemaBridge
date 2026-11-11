@@ -1,0 +1,52 @@
+-- Schema for database: schemabench_0105
+
+CREATE TABLE `sentence` (
+  `sentence_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sentence_text` varchar(1024) NOT NULL,
+  `word_count` int(11) NOT NULL DEFAULT 0,
+  `classification` enum('positive','negative') NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`sentence_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `term` (
+  `term_id` int(11) NOT NULL AUTO_INCREMENT,
+  `term_text` varchar(255) NOT NULL,
+  `part_of_speech` varchar(64) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`term_id`),
+  UNIQUE KEY `term_text` (`term_text`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sentence_term` (
+  `sentence_term_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sentence_id` int(11) NOT NULL,
+  `term_id` int(11) NOT NULL,
+  `position` int(11) NOT NULL,
+  PRIMARY KEY (`sentence_term_id`),
+  KEY `sentence_id` (`sentence_id`),
+  KEY `term_id` (`term_id`),
+  CONSTRAINT `sentence_term_ibfk_1` FOREIGN KEY (`sentence_id`) REFERENCES `sentence` (`sentence_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sentence_term_ibfk_2` FOREIGN KEY (`term_id`) REFERENCES `term` (`term_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dcg_rule` (
+  `rule_id` int(11) NOT NULL AUTO_INCREMENT,
+  `rule_name` varchar(255) NOT NULL,
+  `rule_body` varchar(1024) NOT NULL,
+  `description` varchar(512) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`rule_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sentence_rule` (
+  `sentence_rule_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sentence_id` int(11) NOT NULL,
+  `rule_id` int(11) NOT NULL,
+  PRIMARY KEY (`sentence_rule_id`),
+  KEY `sentence_id` (`sentence_id`),
+  KEY `rule_id` (`rule_id`),
+  CONSTRAINT `sentence_rule_ibfk_1` FOREIGN KEY (`sentence_id`) REFERENCES `sentence` (`sentence_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sentence_rule_ibfk_2` FOREIGN KEY (`rule_id`) REFERENCES `dcg_rule` (`rule_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

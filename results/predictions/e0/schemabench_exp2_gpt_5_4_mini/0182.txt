@@ -1,0 +1,91 @@
+-- Schema for database: schemabench_0182
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`customer_id`),
+  UNIQUE KEY `uk_customers_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `drivers` (
+  `driver_id` int(11) NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `car_type` varchar(100) NOT NULL,
+  `car_number` varchar(50) NOT NULL,
+  `current_location` varchar(255) DEFAULT NULL,
+  `working_status` varchar(20) NOT NULL DEFAULT 'available',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`driver_id`),
+  UNIQUE KEY `uk_drivers_email` (`email`),
+  UNIQUE KEY `uk_drivers_car_number` (`car_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `admins` (
+  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`admin_id`),
+  UNIQUE KEY `uk_admins_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bookings` (
+  `booking_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `driver_id` int(11) DEFAULT NULL,
+  `pickup_location` varchar(255) NOT NULL,
+  `destination` varchar(255) NOT NULL,
+  `car_type` varchar(100) NOT NULL,
+  `passenger_count` int(11) NOT NULL,
+  `estimated_fare` decimal(10,2) NOT NULL,
+  `booking_status` varchar(30) NOT NULL DEFAULT 'requested',
+  `requested_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `accepted_at` datetime DEFAULT NULL,
+  `cancelled_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`booking_id`),
+  KEY `bookings_ibfk_1` (`customer_id`),
+  KEY `bookings_ibfk_2` (`driver_id`),
+  CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bookings_ibfk_2` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`driver_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payments` (
+  `payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `booking_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `driver_id` int(11) DEFAULT NULL,
+  `payment_method` varchar(30) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `payment_status` varchar(30) NOT NULL DEFAULT 'pending',
+  `transaction_reference` varchar(255) DEFAULT NULL,
+  `paid_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`payment_id`),
+  KEY `payments_ibfk_1` (`booking_id`),
+  KEY `payments_ibfk_2` (`customer_id`),
+  KEY `payments_ibfk_3` (`driver_id`),
+  CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`booking_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `payments_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `payments_ibfk_3` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`driver_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `driver_location_updates` (
+  `location_update_id` int(11) NOT NULL AUTO_INCREMENT,
+  `driver_id` int(11) NOT NULL,
+  `updated_by_admin_id` int(11) DEFAULT NULL,
+  `location` varchar(255) NOT NULL,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`location_update_id`),
+  KEY `driver_location_updates_ibfk_1` (`driver_id`),
+  KEY `driver_location_updates_ibfk_2` (`updated_by_admin_id`),
+  CONSTRAINT `driver_location_updates_ibfk_1` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`driver_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `driver_location_updates_ibfk_2` FOREIGN KEY (`updated_by_admin_id`) REFERENCES `admins` (`admin_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

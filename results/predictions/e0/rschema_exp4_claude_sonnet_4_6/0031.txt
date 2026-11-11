@@ -1,0 +1,57 @@
+-- Schema for database: rschema_0031
+
+CREATE TABLE `moving_team` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_name` varchar(100) NOT NULL,
+  `team_leader` varchar(100) DEFAULT NULL,
+  `contact_phone` varchar(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `mover` (
+  `mover_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_id` int(11) NOT NULL,
+  `mover_name` varchar(100) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `hire_date` datetime DEFAULT NULL,
+  `tasks_completed` int(11) DEFAULT NULL,
+  `avg_satisfaction_score` decimal(3,2) DEFAULT NULL,
+  PRIMARY KEY (`mover_id`),
+  CONSTRAINT `mover_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `moving_team` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `moving_task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_id` int(11) NOT NULL,
+  `customer_name` varchar(100) NOT NULL,
+  `customer_phone` varchar(20) NOT NULL,
+  `moving_date` datetime NOT NULL,
+  `starting_address` varchar(255) NOT NULL,
+  `destination_address` varchar(255) NOT NULL,
+  `item_quantity` int(11) DEFAULT NULL,
+  `moving_cost` decimal(10,2) DEFAULT NULL,
+  `task_status` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  CONSTRAINT `moving_task_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `moving_team` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_mover` (
+  `task_mover_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `mover_id` int(11) NOT NULL,
+  PRIMARY KEY (`task_mover_id`),
+  CONSTRAINT `task_mover_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `moving_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_mover_ibfk_2` FOREIGN KEY (`mover_id`) REFERENCES `mover` (`mover_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_feedback` (
+  `feedback_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `satisfaction_score` int(11) DEFAULT NULL,
+  `feedback_comment` text DEFAULT NULL,
+  `feedback_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`feedback_id`),
+  CONSTRAINT `customer_feedback_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `moving_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

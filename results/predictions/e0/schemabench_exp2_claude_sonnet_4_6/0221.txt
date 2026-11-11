@@ -1,0 +1,92 @@
+-- Schema for database: schemabench_0221
+
+CREATE TABLE `consumers` (
+  `consumer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `city` varchar(255) DEFAULT NULL,
+  `state` varchar(255) DEFAULT NULL,
+  `country` varchar(255) DEFAULT NULL,
+  `latitude` decimal(10,6) DEFAULT NULL,
+  `longitude` decimal(10,6) DEFAULT NULL,
+  `smoker` tinyint(1) DEFAULT NULL,
+  `drink_level` varchar(50) DEFAULT NULL,
+  `dress_preference` varchar(100) DEFAULT NULL,
+  `ambience` varchar(100) DEFAULT NULL,
+  `transport` varchar(100) DEFAULT NULL,
+  `marital_status` varchar(50) DEFAULT NULL,
+  `children` varchar(50) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `occupation` varchar(100) DEFAULT NULL,
+  `budget` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`consumer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `consumer_cuisine_preferences` (
+  `preference_id` int(11) NOT NULL AUTO_INCREMENT,
+  `consumer_id` int(11) NOT NULL,
+  `cuisine` varchar(100) NOT NULL,
+  PRIMARY KEY (`preference_id`),
+  CONSTRAINT `consumer_cuisine_preferences_ibfk_1` FOREIGN KEY (`consumer_id`) REFERENCES `consumers` (`consumer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `restaurants` (
+  `restaurant_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `city` varchar(255) DEFAULT NULL,
+  `state` varchar(255) DEFAULT NULL,
+  `country` varchar(255) DEFAULT NULL,
+  `latitude` decimal(10,6) DEFAULT NULL,
+  `longitude` decimal(10,6) DEFAULT NULL,
+  `zip_code` varchar(20) DEFAULT NULL,
+  `alcohol` varchar(100) DEFAULT NULL,
+  `smoking_allowed` tinyint(1) DEFAULT NULL,
+  `dress_code` varchar(100) DEFAULT NULL,
+  `accessibility` varchar(100) DEFAULT NULL,
+  `price_range` varchar(50) DEFAULT NULL,
+  `ambience` varchar(100) DEFAULT NULL,
+  `franchise` tinyint(1) DEFAULT NULL,
+  `area` varchar(100) DEFAULT NULL,
+  `parking` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`restaurant_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `restaurant_cuisines` (
+  `cuisine_id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(11) NOT NULL,
+  `cuisine` varchar(100) NOT NULL,
+  PRIMARY KEY (`cuisine_id`),
+  CONSTRAINT `restaurant_cuisines_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`restaurant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `restaurant_hours` (
+  `hours_id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(11) NOT NULL,
+  `day_of_week` varchar(20) NOT NULL,
+  `open_time` time DEFAULT NULL,
+  `close_time` time DEFAULT NULL,
+  PRIMARY KEY (`hours_id`),
+  CONSTRAINT `restaurant_hours_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`restaurant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `restaurant_parking` (
+  `parking_id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(11) NOT NULL,
+  `parking_type` varchar(100) NOT NULL,
+  PRIMARY KEY (`parking_id`),
+  CONSTRAINT `restaurant_parking_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`restaurant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ratings` (
+  `rating_id` int(11) NOT NULL AUTO_INCREMENT,
+  `consumer_id` int(11) NOT NULL,
+  `restaurant_id` int(11) NOT NULL,
+  `overall_rating` int(11) NOT NULL,
+  `food_rating` int(11) NOT NULL,
+  `service_rating` int(11) NOT NULL,
+  `rating_date` datetime DEFAULT NULL,
+  `review_text` text DEFAULT NULL,
+  `sentiment_score` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`rating_id`),
+  CONSTRAINT `ratings_ibfk_1` FOREIGN KEY (`consumer_id`) REFERENCES `consumers` (`consumer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ratings_ibfk_2` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`restaurant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

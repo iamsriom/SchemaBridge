@@ -1,0 +1,32 @@
+-- Schema for database: rschema_0289
+CREATE TABLE `operators` (
+  `operator_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `department` varchar(255) DEFAULT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`operator_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `production_processes` (
+  `process_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `operator_id` int(11) NOT NULL,
+  PRIMARY KEY (`process_id`),
+  KEY `production_processes_ibfk_1` (`operator_id`),
+  CONSTRAINT `production_processes_ibfk_1` FOREIGN KEY (`operator_id`) REFERENCES `operators` (`operator_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `monitoring_records` (
+  `record_id` int(11) NOT NULL,
+  `recording_time` datetime NOT NULL,
+  `monitoring_parameters` varchar(255) NOT NULL,
+  `production_process_id` int(11) NOT NULL,
+  `operator_id` int(11) NOT NULL,
+  PRIMARY KEY (`record_id`),
+  KEY `monitoring_records_ibfk_1` (`production_process_id`),
+  KEY `monitoring_records_ibfk_2` (`operator_id`),
+  CONSTRAINT `monitoring_records_ibfk_1` FOREIGN KEY (`production_process_id`) REFERENCES `production_processes` (`process_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `monitoring_records_ibfk_2` FOREIGN KEY (`operator_id`) REFERENCES `operators` (`operator_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

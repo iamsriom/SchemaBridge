@@ -1,0 +1,88 @@
+-- Schema for database: rschema_0087
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `user_account` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `user_description` text DEFAULT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `interest_area` varchar(255) DEFAULT NULL,
+  `follower_count` int(11) NOT NULL DEFAULT 0,
+  `following_count` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `user_account` (`user_account`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `podcasts` (
+  `podcast_id` int(11) NOT NULL AUTO_INCREMENT,
+  `publisher_id` int(11) NOT NULL,
+  `podcast_file_path` varchar(500) NOT NULL,
+  `podcast_type` varchar(100) NOT NULL,
+  `podcast_name` varchar(255) NOT NULL,
+  `cover_image_path` varchar(500) DEFAULT NULL,
+  `visit_count` int(11) NOT NULL DEFAULT 0,
+  `like_count` int(11) NOT NULL DEFAULT 0,
+  `favorite_count` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`podcast_id`),
+  KEY `publisher_id` (`publisher_id`),
+  CONSTRAINT `podcasts_ibfk_1` FOREIGN KEY (`publisher_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `playlists` (
+  `playlist_id` int(11) NOT NULL AUTO_INCREMENT,
+  `creator_id` int(11) NOT NULL,
+  `playlist_name` varchar(255) NOT NULL,
+  `visit_count` int(11) NOT NULL DEFAULT 0,
+  `like_count` int(11) NOT NULL DEFAULT 0,
+  `favorite_count` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`playlist_id`),
+  KEY `creator_id` (`creator_id`),
+  CONSTRAINT `playlists_ibfk_1` FOREIGN KEY (`creator_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `playlist_podcasts` (
+  `playlist_id` int(11) NOT NULL,
+  `podcast_id` int(11) NOT NULL,
+  `added_at` datetime NOT NULL,
+  PRIMARY KEY (`playlist_id`,`podcast_id`),
+  KEY `podcast_id` (`podcast_id`),
+  CONSTRAINT `playlist_podcasts_ibfk_1` FOREIGN KEY (`playlist_id`) REFERENCES `playlists` (`playlist_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `playlist_podcasts_ibfk_2` FOREIGN KEY (`podcast_id`) REFERENCES `podcasts` (`podcast_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_follows` (
+  `follower_id` int(11) NOT NULL,
+  `following_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`follower_id`,`following_id`),
+  KEY `following_id` (`following_id`),
+  CONSTRAINT `user_follows_ibfk_1` FOREIGN KEY (`follower_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_follows_ibfk_2` FOREIGN KEY (`following_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_podcast_collections` (
+  `user_id` int(11) NOT NULL,
+  `podcast_id` int(11) NOT NULL,
+  `collected_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`,`podcast_id`),
+  KEY `podcast_id` (`podcast_id`),
+  CONSTRAINT `user_podcast_collections_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_podcast_collections_ibfk_2` FOREIGN KEY (`podcast_id`) REFERENCES `podcasts` (`podcast_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_playlist_collections` (
+  `user_id` int(11) NOT NULL,
+  `playlist_id` int(11) NOT NULL,
+  `collected_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`,`playlist_id`),
+  KEY `playlist_id` (`playlist_id`),
+  CONSTRAINT `user_playlist_collections_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_playlist_collections_ibfk_2` FOREIGN KEY (`playlist_id`) REFERENCES `playlists` (`playlist_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

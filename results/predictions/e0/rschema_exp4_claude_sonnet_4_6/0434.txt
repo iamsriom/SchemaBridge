@@ -1,0 +1,55 @@
+-- Schema for database: rschema_0434
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `registration_date` datetime NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `mazes` (
+  `maze_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `creation_date` datetime NOT NULL,
+  `last_modified_date` datetime NOT NULL,
+  PRIMARY KEY (`maze_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maps` (
+  `map_id` int(11) NOT NULL AUTO_INCREMENT,
+  `maze_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `map_data` json DEFAULT NULL,
+  `creation_date` datetime NOT NULL,
+  `last_modified_date` datetime NOT NULL,
+  PRIMARY KEY (`map_id`),
+  CONSTRAINT `maps_ibfk_1` FOREIGN KEY (`maze_id`) REFERENCES `mazes` (`maze_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `skyboxes` (
+  `skybox_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `file_path` varchar(512) NOT NULL,
+  `description` text DEFAULT NULL,
+  `creation_date` datetime NOT NULL,
+  `last_modified_date` datetime NOT NULL,
+  PRIMARY KEY (`skybox_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `games` (
+  `game_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `maze_id` int(11) NOT NULL,
+  `user_score` int(11) DEFAULT NULL,
+  `game_start_time` datetime DEFAULT NULL,
+  `game_end_time` datetime DEFAULT NULL,
+  `game_status` varchar(50) NOT NULL DEFAULT 'In Progress',
+  `creation_date` datetime NOT NULL,
+  `last_modified_date` datetime NOT NULL,
+  PRIMARY KEY (`game_id`),
+  CONSTRAINT `games_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `games_ibfk_2` FOREIGN KEY (`maze_id`) REFERENCES `mazes` (`maze_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

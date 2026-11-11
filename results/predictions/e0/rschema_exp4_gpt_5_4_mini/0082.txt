@@ -1,0 +1,38 @@
+-- Schema for database: rschema_0082
+CREATE TABLE `political_parties` (
+  `party_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`party_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `candidates` (
+  `candidate_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `party_id` int(11) NOT NULL,
+  `has_industry_connections` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`candidate_id`),
+  KEY `party_id` (`party_id`),
+  CONSTRAINT `candidates_ibfk_1` FOREIGN KEY (`party_id`) REFERENCES `political_parties` (`party_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `voters` (
+  `voter_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`voter_id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `voting_records` (
+  `vote_id` int(11) NOT NULL AUTO_INCREMENT,
+  `voter_id` int(11) NOT NULL,
+  `candidate_id` int(11) NOT NULL,
+  `voted_at` datetime NOT NULL,
+  PRIMARY KEY (`vote_id`),
+  UNIQUE KEY `voter_id` (`voter_id`),
+  KEY `candidate_id` (`candidate_id`),
+  CONSTRAINT `voting_records_ibfk_1` FOREIGN KEY (`voter_id`) REFERENCES `voters` (`voter_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `voting_records_ibfk_2` FOREIGN KEY (`candidate_id`) REFERENCES `candidates` (`candidate_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

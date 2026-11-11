@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0433
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `department` varchar(255) DEFAULT NULL,
+  `role` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `business_modules` (
+  `module_code` varchar(50) NOT NULL,
+  `module_name` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`module_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `business_entities` (
+  `entity_id` int(11) NOT NULL AUTO_INCREMENT,
+  `entity_type` varchar(100) NOT NULL,
+  `module_code` varchar(50) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `creator_user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`entity_id`),
+  KEY `business_entities_ibfk_1` (`module_code`),
+  KEY `business_entities_ibfk_2` (`creator_user_id`),
+  CONSTRAINT `business_entities_ibfk_1` FOREIGN KEY (`module_code`) REFERENCES `business_modules` (`module_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `business_entities_ibfk_2` FOREIGN KEY (`creator_user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attachments` (
+  `attachment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `entity_id` int(11) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `file_size` bigint(20) DEFAULT NULL,
+  `file_path` varchar(500) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `file_status` varchar(50) DEFAULT NULL,
+  `uploader_user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`attachment_id`),
+  KEY `attachments_ibfk_1` (`entity_id`),
+  KEY `attachments_ibfk_2` (`uploader_user_id`),
+  CONSTRAINT `attachments_ibfk_1` FOREIGN KEY (`entity_id`) REFERENCES `business_entities` (`entity_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `attachments_ibfk_2` FOREIGN KEY (`uploader_user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

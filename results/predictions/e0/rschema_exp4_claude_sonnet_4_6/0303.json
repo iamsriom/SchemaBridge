@@ -1,0 +1,28 @@
+{
+  "text_number": 303,
+  "id": "67552f0a13602ec03b41a87f",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0303",
+  "question": "Business Requirements Description:\nThis database is for an Agile Development Management System used to manage stories (requirements), tasks, sprints (iterations), and acceptance criteria within a project. The primary features include:\n1.Manage Stories (Requirements): Create and edit stories, including story descriptions, status, story points, and titles. Assign stories to specific projects and sprints.\n2.Manage Tasks: For each story, create and assign tasks, including task titles, descriptions, and status.\n3.Manage Sprints (Iterations): Create and manage sprints within a project. Each sprint belongs to a project and includes a name, start time, end time, and status. Assign stories to specific sprints.\n4.Manage Acceptance Criteria: For each story, create acceptance criteria, including criteria ID, description, and status. Track and manage the acceptance criteria for stories.\n5.Message Event Management: Record message events related to specific topics, including event ID, subject, message reference, version, creation time, and update time. This is used for messaging and event recording within the project.\nThrough these features, the system helps teams better manage and track project progress, ensuring each story and task is completed on time and meets the acceptance criteria.",
+  "ddl": "-- Schema for database: rschema_0303\n\nCREATE TABLE `project` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` text DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sprint` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `project_id` int(11) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `start_time` datetime DEFAULT NULL,\n  `end_time` datetime DEFAULT NULL,\n  `status` varchar(50) NOT NULL DEFAULT 'planned',\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `sprint_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `story` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `project_id` int(11) NOT NULL,\n  `sprint_id` int(11) DEFAULT NULL,\n  `title` varchar(255) NOT NULL,\n  `description` text DEFAULT NULL,\n  `status` varchar(50) NOT NULL DEFAULT 'open',\n  `story_points` int(11) DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `story_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `story_ibfk_2` FOREIGN KEY (`sprint_id`) REFERENCES `sprint` (`id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `task` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `story_id` int(11) NOT NULL,\n  `title` varchar(255) NOT NULL,\n  `description` text DEFAULT NULL,\n  `status` varchar(50) NOT NULL DEFAULT 'todo',\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `task_ibfk_1` FOREIGN KEY (`story_id`) REFERENCES `story` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `acceptance_criteria` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `story_id` int(11) NOT NULL,\n  `description` text NOT NULL,\n  `status` varchar(50) NOT NULL DEFAULT 'pending',\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `acceptance_criteria_ibfk_1` FOREIGN KEY (`story_id`) REFERENCES `story` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `message_event` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `topic` varchar(255) NOT NULL,\n  `subject` varchar(255) NOT NULL,\n  `message_reference` varchar(255) DEFAULT NULL,\n  `version` int(11) NOT NULL DEFAULT 1,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "project",
+      "sprint",
+      "story",
+      "task",
+      "acceptance_criteria",
+      "message_event"
+    ],
+    "columns_by_table": {
+      "project": [],
+      "sprint": [],
+      "story": [],
+      "task": [],
+      "acceptance_criteria": [],
+      "message_event": []
+    }
+  }
+}

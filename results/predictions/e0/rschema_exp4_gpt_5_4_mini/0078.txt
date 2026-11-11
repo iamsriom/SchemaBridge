@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0078
+CREATE TABLE `author` (
+  `author_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `phone_number` varchar(50) DEFAULT NULL,
+  `email_address` varchar(255) DEFAULT NULL,
+  `introduction` text DEFAULT NULL,
+  PRIMARY KEY (`author_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `article` (
+  `article_id` int(11) NOT NULL,
+  `article_title` varchar(255) NOT NULL,
+  `article_content` longtext DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  `total_word_count` int(11) DEFAULT NULL,
+  `reading_volume` int(11) DEFAULT NULL,
+  `like_volume` int(11) DEFAULT NULL,
+  `collection_volume` int(11) DEFAULT NULL,
+  `comment_volume` int(11) DEFAULT NULL,
+  `last_modified_save_time` datetime DEFAULT NULL,
+  `last_modified_save_author_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`article_id`),
+  KEY `article_ibfk_1` (`last_modified_save_author_id`),
+  CONSTRAINT `article_ibfk_1` FOREIGN KEY (`last_modified_save_author_id`) REFERENCES `author` (`author_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `article_author` (
+  `article_id` int(11) NOT NULL,
+  `author_id` int(11) NOT NULL,
+  `author_order` int(11) NOT NULL,
+  `responsible_part` varchar(255) DEFAULT NULL,
+  `author_role` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`article_id`,`author_id`),
+  KEY `article_author_ibfk_2` (`author_id`),
+  CONSTRAINT `article_author_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `article` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `article_author_ibfk_2` FOREIGN KEY (`author_id`) REFERENCES `author` (`author_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `article_modification` (
+  `modification_id` int(11) NOT NULL,
+  `article_id` int(11) NOT NULL,
+  `author_id` int(11) NOT NULL,
+  `modification_start_time` datetime NOT NULL,
+  `modification_save_time` datetime DEFAULT NULL,
+  `modification_notes` text DEFAULT NULL,
+  PRIMARY KEY (`modification_id`),
+  KEY `article_modification_ibfk_1` (`article_id`),
+  KEY `article_modification_ibfk_2` (`author_id`),
+  CONSTRAINT `article_modification_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `article` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `article_modification_ibfk_2` FOREIGN KEY (`author_id`) REFERENCES `author` (`author_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

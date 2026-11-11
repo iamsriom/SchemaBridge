@@ -1,0 +1,771 @@
+SchemaBench Text2Schema — Evaluation Report
+====================================================================================================
+Generated: 2026-11-11 18:16:39 UTC
+Gold: /data/SchemaBench/Dataset/annotation_ddl.jsonl (239 schemas per LLM)
+
+Five schema elements evaluated (Gold = original, Recreated = LLM output, Matched = correct).
+  Hallucinated = Recreated - Matched.
+  Hallucination rate = Hallucinated / Recreated  (0 when Recreated = 0).
+  Precision = Matched/Recreated.  Recall = Matched/Gold.  F1 = 2*P*R/(P+R).
+
+  Normalized Graph Edit Distance (nGED): symmetric-difference edit cost on the schema graph
+    (table nodes + column labels + directed FK edges), divided by (gold_size + pred_size).
+    Range [0, 1]; lower is better; 0 = identical structure under name normalization.
+
+  Size (structural scale, unified across datasets):
+    small  = table_count ≤ 5 AND column_count ≤ 50
+    medium = not small AND table_count ≤ 15 AND column_count ≤ 150
+    large  = everything else
+
+  Content complexity (constraint richness, orthogonal to size):
+    content_score = 2*min(fk_count,10) + 3*composite_fk_count + min(unique_count,5) + max(0, cols_per_table-10)/5
+    easy   = content_score < 4
+    medium = 4 ≤ content_score < 10
+    hard   = content_score ≥ 10
+
+  Gold: SchemaBench annotation_ddl.jsonl DDL answer.
+  Recreated: text2schema_<llm> outputs (metadata parsed from DDL when empty).
+  Name matching: RSchema normalization (spaces/plurals/suffixes).
+
+
+SUMMARY BY LLM
+----------------------------------------------------------------------------------------------------
+LLM               Eval  Skip  mean nGED  Tables F1  Attr F1  Domain F1  Entity F1  Ref F1
+-----------------------------------------------------------------------------------------
+codellama13b       239     0      0.830     0.351   0.126     0.089     0.182   0.083
+deepseek           239     0      0.795     0.402   0.154     0.104     0.240   0.129
+gpt54mini          239     0      0.759     0.466   0.218     0.144     0.255   0.175
+llama31            239     0      0.842     0.364   0.112     0.081     0.128   0.063
+sonnet46           239     0      0.685     0.530   0.278     0.193     0.345   0.264
+
+--- LLM: codellama13b  (evaluated=239, skipped=0, mean nGED=0.8302) ---
+
+OVERALL (micro-aggregate)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 2614       | 1915       | 794      | 1121         | 0.585        | 0.415      | 0.304    | 0.351   
+2. Schema: Attributes                            | 18382      | 9175       | 1742     | 7433         | 0.810        | 0.190      | 0.095    | 0.126   
+3. Domain: types, NULL/NOT NULL                  | 18382      | 9175       | 1221     | 7954         | 0.867        | 0.133      | 0.066    | 0.089   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 2481       | 2111       | 419      | 1692         | 0.802        | 0.198      | 0.169    | 0.182   
+5. Referential: Foreign Keys (single/multi col.) | 2802       | 1898       | 194      | 1704         | 0.898        | 0.102      | 0.069    | 0.083   
+
+BY SIZE — SMALL  (n = 83)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 296        | 586        | 169      | 417          | 0.712        | 0.288      | 0.571    | 0.383   
+2. Schema: Attributes                            | 1854       | 2721       | 405      | 2316         | 0.851        | 0.149      | 0.218    | 0.177   
+3. Domain: types, NULL/NOT NULL                  | 1854       | 2721       | 304      | 2417         | 0.888        | 0.112      | 0.164    | 0.133   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 265        | 667        | 93       | 574          | 0.861        | 0.139      | 0.351    | 0.200   
+5. Referential: Foreign Keys (single/multi col.) | 203        | 588        | 43       | 545          | 0.927        | 0.073      | 0.212    | 0.109   
+
+BY SIZE — MEDIUM  (n = 104)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 902        | 845        | 417      | 428          | 0.507        | 0.493      | 0.462    | 0.477   
+2. Schema: Attributes                            | 5456       | 3748       | 901      | 2847         | 0.760        | 0.240      | 0.165    | 0.196   
+3. Domain: types, NULL/NOT NULL                  | 5456       | 3748       | 644      | 3104         | 0.828        | 0.172      | 0.118    | 0.140   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 859        | 927        | 214      | 713          | 0.769        | 0.231      | 0.249    | 0.240   
+5. Referential: Foreign Keys (single/multi col.) | 862        | 851        | 110      | 741          | 0.871        | 0.129      | 0.128    | 0.128   
+
+BY SIZE — LARGE  (n = 52)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 1416       | 484        | 208      | 276          | 0.570        | 0.430      | 0.147    | 0.219   
+2. Schema: Attributes                            | 11072      | 2706       | 436      | 2270         | 0.839        | 0.161      | 0.039    | 0.063   
+3. Domain: types, NULL/NOT NULL                  | 11072      | 2706       | 273      | 2433         | 0.899        | 0.101      | 0.025    | 0.040   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 1357       | 517        | 112      | 405          | 0.783        | 0.217      | 0.083    | 0.120   
+5. Referential: Foreign Keys (single/multi col.) | 1737       | 459        | 41       | 418          | 0.911        | 0.089      | 0.024    | 0.037   
+
+BY CONTENT — EASY  (n = 41)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 239        | 315        | 90       | 225          | 0.714        | 0.286      | 0.377    | 0.325   
+2. Schema: Attributes                            | 1440       | 1401       | 148      | 1253         | 0.894        | 0.106      | 0.103    | 0.104   
+3. Domain: types, NULL/NOT NULL                  | 1440       | 1401       | 108      | 1293         | 0.923        | 0.077      | 0.075    | 0.076   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 177        | 367        | 28       | 339          | 0.924        | 0.076      | 0.158    | 0.103   
+5. Referential: Foreign Keys (single/multi col.) | 12         | 301        | 2        | 299          | 0.993        | 0.007      | 0.167    | 0.013   
+
+BY CONTENT — MEDIUM  (n = 49)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 201        | 341        | 111      | 230          | 0.674        | 0.326      | 0.552    | 0.410   
+2. Schema: Attributes                            | 1310       | 1589       | 283      | 1306         | 0.822        | 0.178      | 0.216    | 0.195   
+3. Domain: types, NULL/NOT NULL                  | 1310       | 1589       | 203      | 1386         | 0.872        | 0.128      | 0.155    | 0.140   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 190        | 361        | 67       | 294          | 0.814        | 0.186      | 0.353    | 0.243   
+5. Referential: Foreign Keys (single/multi col.) | 144        | 324        | 31       | 293          | 0.904        | 0.096      | 0.215    | 0.132   
+
+BY CONTENT — HARD  (n = 149)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 2174       | 1259       | 593      | 666          | 0.529        | 0.471      | 0.273    | 0.345   
+2. Schema: Attributes                            | 15632      | 6185       | 1311     | 4874         | 0.788        | 0.212      | 0.084    | 0.120   
+3. Domain: types, NULL/NOT NULL                  | 15632      | 6185       | 910      | 5275         | 0.853        | 0.147      | 0.058    | 0.083   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 2114       | 1383       | 324      | 1059         | 0.766        | 0.234      | 0.153    | 0.185   
+5. Referential: Foreign Keys (single/multi col.) | 2646       | 1273       | 161      | 1112         | 0.874        | 0.126      | 0.061    | 0.082   
+
+BY SIZE x CONTENT — codellama13b
+Cell format: nGED  Tables/Attr/Ref F1  (n)
+                                    easy                          medium                            hard
+   small        0.85 0.31/0.13/0.02 (28)        0.79 0.38/0.19/0.13 (44)        0.73 0.56/0.24/0.18 (11)
+  medium        0.84 0.49/0.13/0.00 (12)         0.77 0.64/0.25/0.16 (5)        0.80 0.47/0.20/0.13 (87)
+   large         1.00 0.00/0.00/0.00 (1)                               —        0.93 0.23/0.07/0.04 (51)
+
+  Five-element detail by cell — codellama13b
+
+  SMALL x EASY  (n=28, mean nGED=0.8476)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 72         | 203        | 42       | 161          | 0.793        | 0.207      | 0.583    | 0.305   
+  2. Schema: Attributes                            | 446        | 918        | 86       | 832          | 0.906        | 0.094      | 0.193    | 0.126   
+  3. Domain: types, NULL/NOT NULL                  | 446        | 918        | 61       | 857          | 0.934        | 0.066      | 0.137    | 0.089   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 47         | 247        | 16       | 231          | 0.935        | 0.065      | 0.340    | 0.109   
+  5. Referential: Foreign Keys (single/multi col.) | 12         | 204        | 2        | 202          | 0.990        | 0.010      | 0.167    | 0.019   
+
+  SMALL x MEDIUM  (n=44, mean nGED=0.7887)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 170        | 313        | 92       | 221          | 0.706        | 0.294      | 0.541    | 0.381   
+  2. Schema: Attributes                            | 1082       | 1482       | 241      | 1241         | 0.837        | 0.163      | 0.223    | 0.188   
+  3. Domain: types, NULL/NOT NULL                  | 1082       | 1482       | 178      | 1304         | 0.880        | 0.120      | 0.165    | 0.139   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 161        | 328        | 57       | 271          | 0.826        | 0.174      | 0.354    | 0.233   
+  5. Referential: Foreign Keys (single/multi col.) | 128        | 302        | 28       | 274          | 0.907        | 0.093      | 0.219    | 0.130   
+
+  SMALL x HARD  (n=11, mean nGED=0.7275)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 54         | 70         | 35       | 35           | 0.500        | 0.500      | 0.648    | 0.565   
+  2. Schema: Attributes                            | 326        | 321        | 78       | 243          | 0.757        | 0.243      | 0.239    | 0.241   
+  3. Domain: types, NULL/NOT NULL                  | 326        | 321        | 65       | 256          | 0.798        | 0.202      | 0.199    | 0.201   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 57         | 92         | 20       | 72           | 0.783        | 0.217      | 0.351    | 0.268   
+  5. Referential: Foreign Keys (single/multi col.) | 63         | 82         | 13       | 69           | 0.841        | 0.159      | 0.206    | 0.179   
+
+  MEDIUM x EASY  (n=12, mean nGED=0.8449)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 98         | 98         | 48       | 50           | 0.510        | 0.490      | 0.490    | 0.490   
+  2. Schema: Attributes                            | 571        | 399        | 62       | 337          | 0.845        | 0.155      | 0.109    | 0.128   
+  3. Domain: types, NULL/NOT NULL                  | 571        | 399        | 47       | 352          | 0.882        | 0.118      | 0.082    | 0.097   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 61         | 105        | 12       | 93           | 0.886        | 0.114      | 0.197    | 0.145   
+  5. Referential: Foreign Keys (single/multi col.) | 0          | 87         | 0        | 87           | 1.000        | 0.000      | 0.000    | 0.000   
+
+  MEDIUM x MEDIUM  (n=5, mean nGED=0.7741)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 31         | 28         | 19       | 9            | 0.321        | 0.679      | 0.613    | 0.644   
+  2. Schema: Attributes                            | 228        | 107        | 42       | 65           | 0.607        | 0.393      | 0.184    | 0.251   
+  3. Domain: types, NULL/NOT NULL                  | 228        | 107        | 25       | 82           | 0.766        | 0.234      | 0.110    | 0.149   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 29         | 33         | 10       | 23           | 0.697        | 0.303      | 0.345    | 0.323   
+  5. Referential: Foreign Keys (single/multi col.) | 16         | 22         | 3        | 19           | 0.864        | 0.136      | 0.188    | 0.158   
+
+  MEDIUM x HARD  (n=87, mean nGED=0.7999)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 773        | 719        | 350      | 369          | 0.513        | 0.487      | 0.453    | 0.469   
+  2. Schema: Attributes                            | 4657       | 3242       | 797      | 2445         | 0.754        | 0.246      | 0.171    | 0.202   
+  3. Domain: types, NULL/NOT NULL                  | 4657       | 3242       | 572      | 2670         | 0.824        | 0.176      | 0.123    | 0.145   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 769        | 789        | 192      | 597          | 0.757        | 0.243      | 0.250    | 0.246   
+  5. Referential: Foreign Keys (single/multi col.) | 846        | 742        | 107      | 635          | 0.856        | 0.144      | 0.126    | 0.135   
+
+  LARGE x EASY  (n=1, mean nGED=1.0000)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 69         | 14         | 0        | 14           | 1.000        | 0.000      | 0.000    | 0.000   
+  2. Schema: Attributes                            | 423        | 84         | 0        | 84           | 1.000        | 0.000      | 0.000    | 0.000   
+  3. Domain: types, NULL/NOT NULL                  | 423        | 84         | 0        | 84           | 1.000        | 0.000      | 0.000    | 0.000   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 69         | 15         | 0        | 15           | 1.000        | 0.000      | 0.000    | 0.000   
+  5. Referential: Foreign Keys (single/multi col.) | 0          | 10         | 0        | 10           | 1.000        | 0.000      | 0.000    | 0.000   
+
+  LARGE x HARD  (n=51, mean nGED=0.9289)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 1347       | 470        | 208      | 262          | 0.557        | 0.443      | 0.154    | 0.229   
+  2. Schema: Attributes                            | 10649      | 2622       | 436      | 2186         | 0.834        | 0.166      | 0.041    | 0.066   
+  3. Domain: types, NULL/NOT NULL                  | 10649      | 2622       | 273      | 2349         | 0.896        | 0.104      | 0.026    | 0.041   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 1288       | 502        | 112      | 390          | 0.777        | 0.223      | 0.087    | 0.125   
+  5. Referential: Foreign Keys (single/multi col.) | 1737       | 449        | 41       | 408          | 0.909        | 0.091      | 0.024    | 0.038   
+
+--- LLM: deepseek  (evaluated=239, skipped=0, mean nGED=0.7946) ---
+
+OVERALL (micro-aggregate)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 2614       | 1425       | 812      | 613          | 0.430        | 0.570      | 0.311    | 0.402   
+2. Schema: Attributes                            | 18382      | 5699       | 1860     | 3839         | 0.674        | 0.326      | 0.101    | 0.154   
+3. Domain: types, NULL/NOT NULL                  | 18382      | 5699       | 1258     | 4441         | 0.779        | 0.221      | 0.068    | 0.104   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 2481       | 1521       | 480      | 1041         | 0.684        | 0.316      | 0.193    | 0.240   
+5. Referential: Foreign Keys (single/multi col.) | 2802       | 1265       | 262      | 1003         | 0.793        | 0.207      | 0.094    | 0.129   
+
+BY SIZE — SMALL  (n = 83)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 296        | 351        | 177      | 174          | 0.496        | 0.504      | 0.598    | 0.547   
+2. Schema: Attributes                            | 1854       | 1657       | 512      | 1145         | 0.691        | 0.309      | 0.276    | 0.292   
+3. Domain: types, NULL/NOT NULL                  | 1854       | 1657       | 358      | 1299         | 0.784        | 0.216      | 0.193    | 0.204   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 265        | 406        | 96       | 310          | 0.764        | 0.236      | 0.362    | 0.286   
+5. Referential: Foreign Keys (single/multi col.) | 203        | 286        | 49       | 237          | 0.829        | 0.171      | 0.241    | 0.200   
+
+BY SIZE — MEDIUM  (n = 104)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 902        | 650        | 411      | 239          | 0.368        | 0.632      | 0.456    | 0.530   
+2. Schema: Attributes                            | 5456       | 2699       | 966      | 1733         | 0.642        | 0.358      | 0.177    | 0.237   
+3. Domain: types, NULL/NOT NULL                  | 5456       | 2699       | 667      | 2032         | 0.753        | 0.247      | 0.122    | 0.164   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 859        | 687        | 253      | 434          | 0.632        | 0.368      | 0.295    | 0.327   
+5. Referential: Foreign Keys (single/multi col.) | 862        | 596        | 157      | 439          | 0.737        | 0.263      | 0.182    | 0.215   
+
+BY SIZE — LARGE  (n = 52)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 1416       | 424        | 224      | 200          | 0.472        | 0.528      | 0.158    | 0.243   
+2. Schema: Attributes                            | 11072      | 1343       | 382      | 961          | 0.716        | 0.284      | 0.035    | 0.062   
+3. Domain: types, NULL/NOT NULL                  | 11072      | 1343       | 233      | 1110         | 0.827        | 0.173      | 0.021    | 0.038   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 1357       | 428        | 131      | 297          | 0.694        | 0.306      | 0.097    | 0.147   
+5. Referential: Foreign Keys (single/multi col.) | 1737       | 383        | 56       | 327          | 0.854        | 0.146      | 0.032    | 0.053   
+
+BY CONTENT — EASY  (n = 41)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 239        | 195        | 91       | 104          | 0.533        | 0.467      | 0.381    | 0.419   
+2. Schema: Attributes                            | 1440       | 756        | 161      | 595          | 0.787        | 0.213      | 0.112    | 0.147   
+3. Domain: types, NULL/NOT NULL                  | 1440       | 756        | 98       | 658          | 0.870        | 0.130      | 0.068    | 0.089   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 177        | 216        | 37       | 179          | 0.829        | 0.171      | 0.209    | 0.188   
+5. Referential: Foreign Keys (single/multi col.) | 12         | 145        | 1        | 144          | 0.993        | 0.007      | 0.083    | 0.013   
+
+BY CONTENT — MEDIUM  (n = 49)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 201        | 215        | 120      | 95           | 0.442        | 0.558      | 0.597    | 0.577   
+2. Schema: Attributes                            | 1310       | 1047       | 370      | 677          | 0.647        | 0.353      | 0.282    | 0.314   
+3. Domain: types, NULL/NOT NULL                  | 1310       | 1047       | 260      | 787          | 0.752        | 0.248      | 0.198    | 0.221   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 190        | 239        | 86       | 153          | 0.640        | 0.360      | 0.453    | 0.401   
+5. Referential: Foreign Keys (single/multi col.) | 144        | 171        | 44       | 127          | 0.743        | 0.257      | 0.306    | 0.279   
+
+BY CONTENT — HARD  (n = 149)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 2174       | 1015       | 601      | 414          | 0.408        | 0.592      | 0.276    | 0.377   
+2. Schema: Attributes                            | 15632      | 3896       | 1329     | 2567         | 0.659        | 0.341      | 0.085    | 0.136   
+3. Domain: types, NULL/NOT NULL                  | 15632      | 3896       | 900      | 2996         | 0.769        | 0.231      | 0.058    | 0.092   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 2114       | 1066       | 357      | 709          | 0.665        | 0.335      | 0.169    | 0.225   
+5. Referential: Foreign Keys (single/multi col.) | 2646       | 949        | 217      | 732          | 0.771        | 0.229      | 0.082    | 0.121   
+
+BY SIZE x CONTENT — deepseek
+Cell format: nGED  Tables/Attr/Ref F1  (n)
+                                    easy                          medium                            hard
+   small        0.78 0.46/0.26/0.02 (28)        0.73 0.55/0.31/0.27 (44)        0.72 0.66/0.29/0.16 (11)
+  medium        0.87 0.47/0.09/0.00 (12)         0.71 0.71/0.34/0.32 (5)        0.76 0.53/0.25/0.22 (87)
+   large         0.97 0.21/0.00/0.00 (1)                               —        0.92 0.25/0.06/0.05 (51)
+
+  Five-element detail by cell — deepseek
+
+  SMALL x EASY  (n=28, mean nGED=0.7845)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 72         | 106        | 41       | 65           | 0.613        | 0.387      | 0.569    | 0.461   
+  2. Schema: Attributes                            | 446        | 501        | 122      | 379          | 0.756        | 0.244      | 0.274    | 0.258   
+  3. Domain: types, NULL/NOT NULL                  | 446        | 501        | 74       | 427          | 0.852        | 0.148      | 0.166    | 0.156   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 47         | 127        | 11       | 116          | 0.913        | 0.087      | 0.234    | 0.126   
+  5. Referential: Foreign Keys (single/multi col.) | 12         | 77         | 1        | 76           | 0.987        | 0.013      | 0.083    | 0.022   
+
+  SMALL x MEDIUM  (n=44, mean nGED=0.7308)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 170        | 187        | 99       | 88           | 0.471        | 0.529      | 0.582    | 0.555   
+  2. Schema: Attributes                            | 1082       | 938        | 312      | 626          | 0.667        | 0.333      | 0.288    | 0.309   
+  3. Domain: types, NULL/NOT NULL                  | 1082       | 938        | 227      | 711          | 0.758        | 0.242      | 0.210    | 0.225   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 161        | 210        | 69       | 141          | 0.671        | 0.329      | 0.429    | 0.372   
+  5. Referential: Foreign Keys (single/multi col.) | 128        | 150        | 38       | 112          | 0.747        | 0.253      | 0.297    | 0.273   
+
+  SMALL x HARD  (n=11, mean nGED=0.7214)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 54         | 58         | 37       | 21           | 0.362        | 0.638      | 0.685    | 0.661   
+  2. Schema: Attributes                            | 326        | 218        | 78       | 140          | 0.642        | 0.358      | 0.239    | 0.287   
+  3. Domain: types, NULL/NOT NULL                  | 326        | 218        | 57       | 161          | 0.739        | 0.261      | 0.175    | 0.210   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 57         | 69         | 16       | 53           | 0.768        | 0.232      | 0.281    | 0.254   
+  5. Referential: Foreign Keys (single/multi col.) | 63         | 59         | 10       | 49           | 0.831        | 0.169      | 0.159    | 0.164   
+
+  MEDIUM x EASY  (n=12, mean nGED=0.8697)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 98         | 80         | 42       | 38           | 0.475        | 0.525      | 0.429    | 0.472   
+  2. Schema: Attributes                            | 571        | 255        | 39       | 216          | 0.847        | 0.153      | 0.068    | 0.094   
+  3. Domain: types, NULL/NOT NULL                  | 571        | 255        | 24       | 231          | 0.906        | 0.094      | 0.042    | 0.058   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 61         | 80         | 18       | 62           | 0.775        | 0.225      | 0.295    | 0.255   
+  5. Referential: Foreign Keys (single/multi col.) | 0          | 61         | 0        | 61           | 1.000        | 0.000      | 0.000    | 0.000   
+
+  MEDIUM x MEDIUM  (n=5, mean nGED=0.7068)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 31         | 28         | 21       | 7            | 0.250        | 0.750      | 0.677    | 0.712   
+  2. Schema: Attributes                            | 228        | 109        | 58       | 51           | 0.468        | 0.532      | 0.254    | 0.344   
+  3. Domain: types, NULL/NOT NULL                  | 228        | 109        | 33       | 76           | 0.697        | 0.303      | 0.145    | 0.196   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 29         | 29         | 17       | 12           | 0.414        | 0.586      | 0.586    | 0.586   
+  5. Referential: Foreign Keys (single/multi col.) | 16         | 21         | 6        | 15           | 0.714        | 0.286      | 0.375    | 0.324   
+
+  MEDIUM x HARD  (n=87, mean nGED=0.7560)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 773        | 542        | 348      | 194          | 0.358        | 0.642      | 0.450    | 0.529   
+  2. Schema: Attributes                            | 4657       | 2335       | 869      | 1466         | 0.628        | 0.372      | 0.187    | 0.249   
+  3. Domain: types, NULL/NOT NULL                  | 4657       | 2335       | 610      | 1725         | 0.739        | 0.261      | 0.131    | 0.174   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 769        | 578        | 218      | 360          | 0.623        | 0.377      | 0.283    | 0.324   
+  5. Referential: Foreign Keys (single/multi col.) | 846        | 514        | 151      | 363          | 0.706        | 0.294      | 0.178    | 0.222   
+
+  LARGE x EASY  (n=1, mean nGED=0.9683)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 69         | 9          | 8        | 1            | 0.111        | 0.889      | 0.116    | 0.205   
+  2. Schema: Attributes                            | 423        | 0          | 0        | 0            | 0.000        | 0.000      | 0.000    | 0.000   
+  3. Domain: types, NULL/NOT NULL                  | 423        | 0          | 0        | 0            | 0.000        | 0.000      | 0.000    | 0.000   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 69         | 9          | 8        | 1            | 0.111        | 0.889      | 0.116    | 0.205   
+  5. Referential: Foreign Keys (single/multi col.) | 0          | 7          | 0        | 7            | 1.000        | 0.000      | 0.000    | 0.000   
+
+  LARGE x HARD  (n=51, mean nGED=0.9245)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 1347       | 415        | 216      | 199          | 0.480        | 0.520      | 0.160    | 0.245   
+  2. Schema: Attributes                            | 10649      | 1343       | 382      | 961          | 0.716        | 0.284      | 0.036    | 0.064   
+  3. Domain: types, NULL/NOT NULL                  | 10649      | 1343       | 233      | 1110         | 0.827        | 0.173      | 0.022    | 0.039   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 1288       | 419        | 123      | 296          | 0.706        | 0.294      | 0.095    | 0.144   
+  5. Referential: Foreign Keys (single/multi col.) | 1737       | 376        | 56       | 320          | 0.851        | 0.149      | 0.032    | 0.053   
+
+--- LLM: gpt54mini  (evaluated=239, skipped=0, mean nGED=0.7587) ---
+
+OVERALL (micro-aggregate)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 2614       | 1729       | 1011     | 718          | 0.415        | 0.585      | 0.387    | 0.466   
+2. Schema: Attributes                            | 18382      | 10211      | 3113     | 7098         | 0.695        | 0.305      | 0.169    | 0.218   
+3. Domain: types, NULL/NOT NULL                  | 18382      | 10211      | 2064     | 8147         | 0.798        | 0.202      | 0.112    | 0.144   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 2481       | 2348       | 615      | 1733         | 0.738        | 0.262      | 0.248    | 0.255   
+5. Referential: Foreign Keys (single/multi col.) | 2802       | 1836       | 406      | 1430         | 0.779        | 0.221      | 0.145    | 0.175   
+
+BY SIZE — SMALL  (n = 83)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 296        | 345        | 187      | 158          | 0.458        | 0.542      | 0.632    | 0.583   
+2. Schema: Attributes                            | 1854       | 2200       | 685      | 1515         | 0.689        | 0.311      | 0.369    | 0.338   
+3. Domain: types, NULL/NOT NULL                  | 1854       | 2200       | 446      | 1754         | 0.797        | 0.203      | 0.241    | 0.220   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 265        | 480        | 102      | 378          | 0.787        | 0.212      | 0.385    | 0.274   
+5. Referential: Foreign Keys (single/multi col.) | 203        | 307        | 53       | 254          | 0.827        | 0.173      | 0.261    | 0.208   
+
+BY SIZE — MEDIUM  (n = 104)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 902        | 774        | 486      | 288          | 0.372        | 0.628      | 0.539    | 0.580   
+2. Schema: Attributes                            | 5456       | 4580       | 1408     | 3172         | 0.693        | 0.307      | 0.258    | 0.281   
+3. Domain: types, NULL/NOT NULL                  | 5456       | 4580       | 920      | 3660         | 0.799        | 0.201      | 0.169    | 0.183   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 859        | 1035       | 297      | 738          | 0.713        | 0.287      | 0.346    | 0.314   
+5. Referential: Foreign Keys (single/multi col.) | 862        | 861        | 197      | 664          | 0.771        | 0.229      | 0.229    | 0.229   
+
+BY SIZE — LARGE  (n = 52)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 1416       | 610        | 338      | 272          | 0.446        | 0.554      | 0.239    | 0.334   
+2. Schema: Attributes                            | 11072      | 3431       | 1020     | 2411         | 0.703        | 0.297      | 0.092    | 0.141   
+3. Domain: types, NULL/NOT NULL                  | 11072      | 3431       | 698      | 2733         | 0.797        | 0.203      | 0.063    | 0.096   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 1357       | 833        | 216      | 617          | 0.741        | 0.259      | 0.159    | 0.197   
+5. Referential: Foreign Keys (single/multi col.) | 1737       | 668        | 156      | 512          | 0.766        | 0.234      | 0.090    | 0.130   
+
+BY CONTENT — EASY  (n = 41)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 239        | 196        | 104      | 92           | 0.469        | 0.531      | 0.435    | 0.478   
+2. Schema: Attributes                            | 1440       | 1044       | 300      | 744          | 0.713        | 0.287      | 0.208    | 0.242   
+3. Domain: types, NULL/NOT NULL                  | 1440       | 1044       | 181      | 863          | 0.827        | 0.173      | 0.126    | 0.146   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 177        | 271        | 40       | 231          | 0.852        | 0.148      | 0.226    | 0.179   
+5. Referential: Foreign Keys (single/multi col.) | 12         | 156        | 2        | 154          | 0.987        | 0.013      | 0.167    | 0.024   
+
+BY CONTENT — MEDIUM  (n = 49)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 201        | 229        | 122      | 107          | 0.467        | 0.533      | 0.607    | 0.567   
+2. Schema: Attributes                            | 1310       | 1446       | 468      | 978          | 0.676        | 0.324      | 0.357    | 0.340   
+3. Domain: types, NULL/NOT NULL                  | 1310       | 1446       | 303      | 1143         | 0.790        | 0.210      | 0.231    | 0.220   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 190        | 316        | 89       | 227          | 0.718        | 0.282      | 0.468    | 0.352   
+5. Referential: Foreign Keys (single/multi col.) | 144        | 207        | 47       | 160          | 0.773        | 0.227      | 0.326    | 0.268   
+
+BY CONTENT — HARD  (n = 149)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 2174       | 1304       | 785      | 519          | 0.398        | 0.602      | 0.361    | 0.451   
+2. Schema: Attributes                            | 15632      | 7721       | 2345     | 5376         | 0.696        | 0.304      | 0.150    | 0.201   
+3. Domain: types, NULL/NOT NULL                  | 15632      | 7721       | 1580     | 6141         | 0.795        | 0.205      | 0.101    | 0.135   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 2114       | 1761       | 486      | 1275         | 0.724        | 0.276      | 0.230    | 0.251   
+5. Referential: Foreign Keys (single/multi col.) | 2646       | 1473       | 357      | 1116         | 0.758        | 0.242      | 0.135    | 0.173   
+
+BY SIZE x CONTENT — gpt54mini
+Cell format: nGED  Tables/Attr/Ref F1  (n)
+                                    easy                          medium                            hard
+   small        0.66 0.61/0.38/0.06 (28)        0.72 0.54/0.34/0.27 (44)        0.75 0.68/0.28/0.13 (11)
+  medium        0.82 0.62/0.21/0.00 (12)         0.70 0.72/0.35/0.22 (5)        0.74 0.57/0.29/0.24 (87)
+   large         1.00 0.00/0.00/0.00 (1)                               —        0.86 0.35/0.14/0.13 (51)
+
+  Five-element detail by cell — gpt54mini
+
+  SMALL x EASY  (n=28, mean nGED=0.6648)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 72         | 86         | 48       | 38           | 0.442        | 0.558      | 0.667    | 0.608   
+  2. Schema: Attributes                            | 446        | 559        | 190      | 369          | 0.660        | 0.340      | 0.426    | 0.378   
+  3. Domain: types, NULL/NOT NULL                  | 446        | 559        | 123      | 436          | 0.780        | 0.220      | 0.276    | 0.245   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 47         | 115        | 16       | 99           | 0.861        | 0.139      | 0.340    | 0.198   
+  5. Referential: Foreign Keys (single/multi col.) | 12         | 57         | 2        | 55           | 0.965        | 0.035      | 0.167    | 0.058   
+
+  SMALL x MEDIUM  (n=44, mean nGED=0.7205)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 170        | 202        | 101      | 101          | 0.500        | 0.500      | 0.594    | 0.543   
+  2. Schema: Attributes                            | 1082       | 1271       | 397      | 874          | 0.688        | 0.312      | 0.367    | 0.337   
+  3. Domain: types, NULL/NOT NULL                  | 1082       | 1271       | 256      | 1015         | 0.799        | 0.201      | 0.237    | 0.218   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 161        | 285        | 71       | 214          | 0.751        | 0.249      | 0.441    | 0.318   
+  5. Referential: Foreign Keys (single/multi col.) | 128        | 186        | 43       | 143          | 0.769        | 0.231      | 0.336    | 0.274   
+
+  SMALL x HARD  (n=11, mean nGED=0.7537)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 54         | 57         | 38       | 19           | 0.333        | 0.667      | 0.704    | 0.685   
+  2. Schema: Attributes                            | 326        | 370        | 98       | 272          | 0.735        | 0.265      | 0.301    | 0.282   
+  3. Domain: types, NULL/NOT NULL                  | 326        | 370        | 67       | 303          | 0.819        | 0.181      | 0.206    | 0.193   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 57         | 80         | 15       | 65           | 0.812        | 0.188      | 0.263    | 0.219   
+  5. Referential: Foreign Keys (single/multi col.) | 63         | 64         | 8        | 56           | 0.875        | 0.125      | 0.127    | 0.126   
+
+  MEDIUM x EASY  (n=12, mean nGED=0.8182)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 98         | 84         | 56       | 28           | 0.333        | 0.667      | 0.571    | 0.615   
+  2. Schema: Attributes                            | 571        | 485        | 110      | 375          | 0.773        | 0.227      | 0.193    | 0.208   
+  3. Domain: types, NULL/NOT NULL                  | 571        | 485        | 58       | 427          | 0.880        | 0.120      | 0.102    | 0.110   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 61         | 109        | 24       | 85           | 0.780        | 0.220      | 0.393    | 0.282   
+  5. Referential: Foreign Keys (single/multi col.) | 0          | 84         | 0        | 84           | 1.000        | 0.000      | 0.000    | 0.000   
+
+  MEDIUM x MEDIUM  (n=5, mean nGED=0.7034)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 31         | 27         | 21       | 6            | 0.222        | 0.778      | 0.677    | 0.724   
+  2. Schema: Attributes                            | 228        | 175        | 71       | 104          | 0.594        | 0.406      | 0.311    | 0.352   
+  3. Domain: types, NULL/NOT NULL                  | 228        | 175        | 47       | 128          | 0.731        | 0.269      | 0.206    | 0.233   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 29         | 31         | 18       | 13           | 0.419        | 0.581      | 0.621    | 0.600   
+  5. Referential: Foreign Keys (single/multi col.) | 16         | 21         | 4        | 17           | 0.810        | 0.190      | 0.250    | 0.216   
+
+  MEDIUM x HARD  (n=87, mean nGED=0.7417)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 773        | 663        | 409      | 254          | 0.383        | 0.617      | 0.529    | 0.570   
+  2. Schema: Attributes                            | 4657       | 3920       | 1227     | 2693         | 0.687        | 0.313      | 0.263    | 0.286   
+  3. Domain: types, NULL/NOT NULL                  | 4657       | 3920       | 815      | 3105         | 0.792        | 0.208      | 0.175    | 0.190   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 769        | 895        | 255      | 640          | 0.715        | 0.285      | 0.332    | 0.306   
+  5. Referential: Foreign Keys (single/multi col.) | 846        | 756        | 193      | 563          | 0.745        | 0.255      | 0.228    | 0.241   
+
+  LARGE x EASY  (n=1, mean nGED=1.0000)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 69         | 26         | 0        | 26           | 1.000        | 0.000      | 0.000    | 0.000   
+  2. Schema: Attributes                            | 423        | 0          | 0        | 0            | 0.000        | 0.000      | 0.000    | 0.000   
+  3. Domain: types, NULL/NOT NULL                  | 423        | 0          | 0        | 0            | 0.000        | 0.000      | 0.000    | 0.000   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 69         | 47         | 0        | 47           | 1.000        | 0.000      | 0.000    | 0.000   
+  5. Referential: Foreign Keys (single/multi col.) | 0          | 15         | 0        | 15           | 1.000        | 0.000      | 0.000    | 0.000   
+
+  LARGE x HARD  (n=51, mean nGED=0.8601)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 1347       | 584        | 338      | 246          | 0.421        | 0.579      | 0.251    | 0.350   
+  2. Schema: Attributes                            | 10649      | 3431       | 1020     | 2411         | 0.703        | 0.297      | 0.096    | 0.145   
+  3. Domain: types, NULL/NOT NULL                  | 10649      | 3431       | 698      | 2733         | 0.797        | 0.203      | 0.066    | 0.099   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 1288       | 786        | 216      | 570          | 0.725        | 0.275      | 0.168    | 0.208   
+  5. Referential: Foreign Keys (single/multi col.) | 1737       | 653        | 156      | 497          | 0.761        | 0.239      | 0.090    | 0.131   
+
+--- LLM: llama31  (evaluated=239, skipped=0, mean nGED=0.8422) ---
+
+OVERALL (micro-aggregate)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 2614       | 1767       | 797      | 970          | 0.549        | 0.451      | 0.305    | 0.364   
+2. Schema: Attributes                            | 18382      | 6510       | 1397     | 5113         | 0.785        | 0.215      | 0.076    | 0.112   
+3. Domain: types, NULL/NOT NULL                  | 18382      | 6510       | 1008     | 5502         | 0.845        | 0.155      | 0.055    | 0.081   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 2481       | 2832       | 341      | 2491         | 0.880        | 0.120      | 0.137    | 0.128   
+5. Referential: Foreign Keys (single/multi col.) | 2802       | 1648       | 141      | 1507         | 0.914        | 0.086      | 0.050    | 0.063   
+
+BY SIZE — SMALL  (n = 83)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 296        | 432        | 151      | 281          | 0.650        | 0.350      | 0.510    | 0.415   
+2. Schema: Attributes                            | 1854       | 1729       | 354      | 1375         | 0.795        | 0.205      | 0.191    | 0.198   
+3. Domain: types, NULL/NOT NULL                  | 1854       | 1729       | 263      | 1466         | 0.848        | 0.152      | 0.142    | 0.147   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 265        | 705        | 85       | 620          | 0.879        | 0.121      | 0.321    | 0.175   
+5. Referential: Foreign Keys (single/multi col.) | 203        | 367        | 29       | 338          | 0.921        | 0.079      | 0.143    | 0.102   
+
+BY SIZE — MEDIUM  (n = 104)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 902        | 785        | 407      | 378          | 0.482        | 0.518      | 0.451    | 0.483   
+2. Schema: Attributes                            | 5456       | 3173       | 745      | 2428         | 0.765        | 0.235      | 0.137    | 0.173   
+3. Domain: types, NULL/NOT NULL                  | 5456       | 3173       | 546      | 2627         | 0.828        | 0.172      | 0.100    | 0.127   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 859        | 1037       | 135      | 902          | 0.870        | 0.130      | 0.157    | 0.142   
+5. Referential: Foreign Keys (single/multi col.) | 862        | 771        | 61       | 710          | 0.921        | 0.079      | 0.071    | 0.075   
+
+BY SIZE — LARGE  (n = 52)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 1416       | 550        | 239      | 311          | 0.565        | 0.435      | 0.169    | 0.243   
+2. Schema: Attributes                            | 11072      | 1608       | 298      | 1310         | 0.815        | 0.185      | 0.027    | 0.047   
+3. Domain: types, NULL/NOT NULL                  | 11072      | 1608       | 199      | 1409         | 0.876        | 0.124      | 0.018    | 0.031   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 1357       | 1090       | 121      | 969          | 0.889        | 0.111      | 0.089    | 0.099   
+5. Referential: Foreign Keys (single/multi col.) | 1737       | 510        | 51       | 459          | 0.900        | 0.100      | 0.029    | 0.045   
+
+BY CONTENT — EASY  (n = 41)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 239        | 244        | 81       | 163          | 0.668        | 0.332      | 0.339    | 0.335   
+2. Schema: Attributes                            | 1440       | 884        | 148      | 736          | 0.833        | 0.167      | 0.103    | 0.127   
+3. Domain: types, NULL/NOT NULL                  | 1440       | 884        | 109      | 775          | 0.877        | 0.123      | 0.076    | 0.094   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 177        | 422        | 24       | 398          | 0.943        | 0.057      | 0.136    | 0.080   
+5. Referential: Foreign Keys (single/multi col.) | 12         | 214        | 2        | 212          | 0.991        | 0.009      | 0.167    | 0.018   
+
+BY CONTENT — MEDIUM  (n = 49)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 201        | 267        | 104      | 163          | 0.610        | 0.390      | 0.517    | 0.444   
+2. Schema: Attributes                            | 1310       | 1058       | 231      | 827          | 0.782        | 0.218      | 0.176    | 0.195   
+3. Domain: types, NULL/NOT NULL                  | 1310       | 1058       | 173      | 885          | 0.836        | 0.164      | 0.132    | 0.146   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 190        | 397        | 57       | 340          | 0.856        | 0.144      | 0.300    | 0.194   
+5. Referential: Foreign Keys (single/multi col.) | 144        | 227        | 19       | 208          | 0.916        | 0.084      | 0.132    | 0.102   
+
+BY CONTENT — HARD  (n = 149)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 2174       | 1256       | 612      | 644          | 0.513        | 0.487      | 0.282    | 0.357   
+2. Schema: Attributes                            | 15632      | 4568       | 1018     | 3550         | 0.777        | 0.223      | 0.065    | 0.101   
+3. Domain: types, NULL/NOT NULL                  | 15632      | 4568       | 726      | 3842         | 0.841        | 0.159      | 0.046    | 0.072   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 2114       | 2013       | 260      | 1753         | 0.871        | 0.129      | 0.123    | 0.126   
+5. Referential: Foreign Keys (single/multi col.) | 2646       | 1207       | 120      | 1087         | 0.901        | 0.099      | 0.045    | 0.062   
+
+BY SIZE x CONTENT — llama31
+Cell format: nGED  Tables/Attr/Ref F1  (n)
+                                    easy                          medium                            hard
+   small        0.85 0.33/0.19/0.03 (28)        0.80 0.42/0.20/0.12 (44)        0.78 0.55/0.19/0.13 (11)
+  medium        0.86 0.48/0.12/0.00 (12)         0.81 0.63/0.15/0.00 (5)        0.82 0.48/0.18/0.08 (87)
+   large         1.00 0.00/0.00/0.00 (1)                               —        0.93 0.25/0.05/0.05 (51)
+
+  Five-element detail by cell — llama31
+
+  SMALL x EASY  (n=28, mean nGED=0.8520)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 72         | 131        | 34       | 97           | 0.740        | 0.260      | 0.472    | 0.335   
+  2. Schema: Attributes                            | 446        | 516        | 92       | 424          | 0.822        | 0.178      | 0.206    | 0.191   
+  3. Domain: types, NULL/NOT NULL                  | 446        | 516        | 63       | 453          | 0.878        | 0.122      | 0.141    | 0.131   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 47         | 222        | 17       | 205          | 0.923        | 0.077      | 0.362    | 0.126   
+  5. Referential: Foreign Keys (single/multi col.) | 12         | 105        | 2        | 103          | 0.981        | 0.019      | 0.167    | 0.034   
+
+  SMALL x MEDIUM  (n=44, mean nGED=0.7959)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 170        | 238        | 85       | 153          | 0.643        | 0.357      | 0.500    | 0.417   
+  2. Schema: Attributes                            | 1082       | 948        | 205      | 743          | 0.784        | 0.216      | 0.189    | 0.202   
+  3. Domain: types, NULL/NOT NULL                  | 1082       | 948        | 152      | 796          | 0.840        | 0.160      | 0.140    | 0.150   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 161        | 365        | 49       | 316          | 0.866        | 0.134      | 0.304    | 0.186   
+  5. Referential: Foreign Keys (single/multi col.) | 128        | 202        | 19       | 183          | 0.906        | 0.094      | 0.148    | 0.115   
+
+  SMALL x HARD  (n=11, mean nGED=0.7775)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 54         | 63         | 32       | 31           | 0.492        | 0.508      | 0.593    | 0.547   
+  2. Schema: Attributes                            | 326        | 265        | 57       | 208          | 0.785        | 0.215      | 0.175    | 0.193   
+  3. Domain: types, NULL/NOT NULL                  | 326        | 265        | 48       | 217          | 0.819        | 0.181      | 0.147    | 0.162   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 57         | 118        | 19       | 99           | 0.839        | 0.161      | 0.333    | 0.217   
+  5. Referential: Foreign Keys (single/multi col.) | 63         | 60         | 8        | 52           | 0.867        | 0.133      | 0.127    | 0.130   
+
+  MEDIUM x EASY  (n=12, mean nGED=0.8631)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 98         | 97         | 47       | 50           | 0.515        | 0.485      | 0.480    | 0.482   
+  2. Schema: Attributes                            | 571        | 368        | 56       | 312          | 0.848        | 0.152      | 0.098    | 0.119   
+  3. Domain: types, NULL/NOT NULL                  | 571        | 368        | 46       | 322          | 0.875        | 0.125      | 0.081    | 0.098   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 61         | 182        | 7        | 175          | 0.962        | 0.038      | 0.115    | 0.058   
+  5. Referential: Foreign Keys (single/multi col.) | 0          | 96         | 0        | 96           | 1.000        | 0.000      | 0.000    | 0.000   
+
+  MEDIUM x MEDIUM  (n=5, mean nGED=0.8095)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 31         | 29         | 19       | 10           | 0.345        | 0.655      | 0.613    | 0.633   
+  2. Schema: Attributes                            | 228        | 110        | 26       | 84           | 0.764        | 0.236      | 0.114    | 0.154   
+  3. Domain: types, NULL/NOT NULL                  | 228        | 110        | 21       | 89           | 0.809        | 0.191      | 0.092    | 0.124   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 29         | 32         | 8        | 24           | 0.750        | 0.250      | 0.276    | 0.262   
+  5. Referential: Foreign Keys (single/multi col.) | 16         | 25         | 0        | 25           | 1.000        | 0.000      | 0.000    | 0.000   
+
+  MEDIUM x HARD  (n=87, mean nGED=0.8174)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 773        | 659        | 341      | 318          | 0.483        | 0.517      | 0.441    | 0.476   
+  2. Schema: Attributes                            | 4657       | 2695       | 663      | 2032         | 0.754        | 0.246      | 0.142    | 0.180   
+  3. Domain: types, NULL/NOT NULL                  | 4657       | 2695       | 479      | 2216         | 0.822        | 0.178      | 0.103    | 0.130   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 769        | 823        | 120      | 703          | 0.854        | 0.146      | 0.156    | 0.151   
+  5. Referential: Foreign Keys (single/multi col.) | 846        | 650        | 61       | 589          | 0.906        | 0.094      | 0.072    | 0.082   
+
+  LARGE x EASY  (n=1, mean nGED=1.0000)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 69         | 16         | 0        | 16           | 1.000        | 0.000      | 0.000    | 0.000   
+  2. Schema: Attributes                            | 423        | 0          | 0        | 0            | 0.000        | 0.000      | 0.000    | 0.000   
+  3. Domain: types, NULL/NOT NULL                  | 423        | 0          | 0        | 0            | 0.000        | 0.000      | 0.000    | 0.000   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 69         | 18         | 0        | 18           | 1.000        | 0.000      | 0.000    | 0.000   
+  5. Referential: Foreign Keys (single/multi col.) | 0          | 13         | 0        | 13           | 1.000        | 0.000      | 0.000    | 0.000   
+
+  LARGE x HARD  (n=51, mean nGED=0.9282)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 1347       | 534        | 239      | 295          | 0.552        | 0.448      | 0.177    | 0.254   
+  2. Schema: Attributes                            | 10649      | 1608       | 298      | 1310         | 0.815        | 0.185      | 0.028    | 0.049   
+  3. Domain: types, NULL/NOT NULL                  | 10649      | 1608       | 199      | 1409         | 0.876        | 0.124      | 0.019    | 0.032   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 1288       | 1072       | 121      | 951          | 0.887        | 0.113      | 0.094    | 0.103   
+  5. Referential: Foreign Keys (single/multi col.) | 1737       | 497        | 51       | 446          | 0.897        | 0.103      | 0.029    | 0.046   
+
+--- LLM: sonnet46  (evaluated=239, skipped=0, mean nGED=0.6851) ---
+
+OVERALL (micro-aggregate)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 2614       | 2158       | 1265     | 893          | 0.414        | 0.586      | 0.484    | 0.530   
+2. Schema: Attributes                            | 18382      | 12856      | 4349     | 8507         | 0.662        | 0.338      | 0.237    | 0.278   
+3. Domain: types, NULL/NOT NULL                  | 18382      | 12856      | 3008     | 9848         | 0.766        | 0.234      | 0.164    | 0.193   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 2481       | 2529       | 865      | 1664         | 0.658        | 0.342      | 0.349    | 0.345   
+5. Referential: Foreign Keys (single/multi col.) | 2802       | 2387       | 685      | 1702         | 0.713        | 0.287      | 0.244    | 0.264   
+
+BY SIZE — SMALL  (n = 83)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 296        | 469        | 220      | 249          | 0.531        | 0.469      | 0.743    | 0.575   
+2. Schema: Attributes                            | 1854       | 3292       | 983      | 2309         | 0.701        | 0.299      | 0.530    | 0.382   
+3. Domain: types, NULL/NOT NULL                  | 1854       | 3292       | 686      | 2606         | 0.792        | 0.208      | 0.370    | 0.267   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 265        | 575        | 133      | 442          | 0.769        | 0.231      | 0.502    | 0.317   
+5. Referential: Foreign Keys (single/multi col.) | 203        | 446        | 77       | 369          | 0.827        | 0.173      | 0.379    | 0.237   
+
+BY SIZE — MEDIUM  (n = 104)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 902        | 922        | 597      | 325          | 0.352        | 0.648      | 0.662    | 0.655   
+2. Schema: Attributes                            | 5456       | 6115       | 2305     | 3810         | 0.623        | 0.377      | 0.422    | 0.398   
+3. Domain: types, NULL/NOT NULL                  | 5456       | 6115       | 1605     | 4510         | 0.738        | 0.262      | 0.294    | 0.277   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 859        | 1067       | 406      | 661          | 0.619        | 0.381      | 0.473    | 0.422   
+5. Referential: Foreign Keys (single/multi col.) | 862        | 1061       | 321      | 740          | 0.697        | 0.303      | 0.372    | 0.334   
+
+BY SIZE — LARGE  (n = 52)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 1416       | 767        | 448      | 319          | 0.416        | 0.584      | 0.316    | 0.410   
+2. Schema: Attributes                            | 11072      | 3449       | 1061     | 2388         | 0.692        | 0.308      | 0.096    | 0.146   
+3. Domain: types, NULL/NOT NULL                  | 11072      | 3449       | 717      | 2732         | 0.792        | 0.208      | 0.065    | 0.099   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 1357       | 887        | 326      | 561          | 0.632        | 0.368      | 0.240    | 0.291   
+5. Referential: Foreign Keys (single/multi col.) | 1737       | 880        | 287      | 593          | 0.674        | 0.326      | 0.165    | 0.219   
+
+BY CONTENT — EASY  (n = 41)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 239        | 270        | 126      | 144          | 0.533        | 0.467      | 0.527    | 0.495   
+2. Schema: Attributes                            | 1440       | 1631       | 423      | 1208         | 0.741        | 0.259      | 0.294    | 0.275   
+3. Domain: types, NULL/NOT NULL                  | 1440       | 1631       | 278      | 1353         | 0.830        | 0.170      | 0.193    | 0.181   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 177        | 314        | 57       | 257          | 0.818        | 0.182      | 0.322    | 0.232   
+5. Referential: Foreign Keys (single/multi col.) | 12         | 262        | 5        | 257          | 0.981        | 0.019      | 0.417    | 0.036   
+
+BY CONTENT — MEDIUM  (n = 49)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 201        | 293        | 151      | 142          | 0.485        | 0.515      | 0.751    | 0.611   
+2. Schema: Attributes                            | 1310       | 2167       | 723      | 1444         | 0.666        | 0.334      | 0.552    | 0.416   
+3. Domain: types, NULL/NOT NULL                  | 1310       | 2167       | 497      | 1670         | 0.771        | 0.229      | 0.379    | 0.286   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 190        | 359        | 111      | 248          | 0.691        | 0.309      | 0.584    | 0.404   
+5. Referential: Foreign Keys (single/multi col.) | 144        | 268        | 63       | 205          | 0.765        | 0.235      | 0.438    | 0.306   
+
+BY CONTENT — HARD  (n = 149)
+Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. Schema: Table name                            | 2174       | 1595       | 988      | 607          | 0.381        | 0.619      | 0.454    | 0.524   
+2. Schema: Attributes                            | 15632      | 9058       | 3203     | 5855         | 0.646        | 0.354      | 0.205    | 0.259   
+3. Domain: types, NULL/NOT NULL                  | 15632      | 9058       | 2233     | 6825         | 0.753        | 0.247      | 0.143    | 0.181   
+4. Entity: Primary, UNIQUE (single/multi col.)   | 2114       | 1856       | 697      | 1159         | 0.624        | 0.376      | 0.330    | 0.351   
+5. Referential: Foreign Keys (single/multi col.) | 2646       | 1857       | 617      | 1240         | 0.668        | 0.332      | 0.233    | 0.274   
+
+BY SIZE x CONTENT — sonnet46
+Cell format: nGED  Tables/Attr/Ref F1  (n)
+                                    easy                          medium                            hard
+   small        0.60 0.50/0.40/0.08 (28)        0.65 0.58/0.38/0.29 (44)        0.67 0.68/0.36/0.24 (11)
+  medium        0.76 0.56/0.24/0.00 (12)         0.57 0.83/0.61/0.42 (5)        0.64 0.66/0.41/0.36 (87)
+   large         0.95 0.31/0.00/0.00 (1)                               —        0.83 0.41/0.15/0.22 (51)
+
+  Five-element detail by cell — sonnet46
+
+  SMALL x EASY  (n=28, mean nGED=0.5959)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 72         | 139        | 53       | 86           | 0.619        | 0.381      | 0.736    | 0.502   
+  2. Schema: Attributes                            | 446        | 918        | 270      | 648          | 0.706        | 0.294      | 0.605    | 0.396   
+  3. Domain: types, NULL/NOT NULL                  | 446        | 918        | 190      | 728          | 0.793        | 0.207      | 0.426    | 0.279   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 47         | 157        | 20       | 137          | 0.873        | 0.127      | 0.426    | 0.196   
+  5. Referential: Foreign Keys (single/multi col.) | 12         | 119        | 5        | 114          | 0.958        | 0.042      | 0.417    | 0.076   
+
+  SMALL x MEDIUM  (n=44, mean nGED=0.6457)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 170        | 261        | 125      | 136          | 0.521        | 0.479      | 0.735    | 0.580   
+  2. Schema: Attributes                            | 1082       | 1875       | 565      | 1310         | 0.699        | 0.301      | 0.522    | 0.382   
+  3. Domain: types, NULL/NOT NULL                  | 1082       | 1875       | 388      | 1487         | 0.793        | 0.207      | 0.359    | 0.262   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 161        | 324        | 90       | 234          | 0.722        | 0.278      | 0.559    | 0.371   
+  5. Referential: Foreign Keys (single/multi col.) | 128        | 241        | 54       | 187          | 0.776        | 0.224      | 0.422    | 0.293   
+
+  SMALL x HARD  (n=11, mean nGED=0.6706)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 54         | 69         | 42       | 27           | 0.391        | 0.609      | 0.778    | 0.683   
+  2. Schema: Attributes                            | 326        | 499        | 148      | 351          | 0.703        | 0.297      | 0.454    | 0.359   
+  3. Domain: types, NULL/NOT NULL                  | 326        | 499        | 108      | 391          | 0.784        | 0.216      | 0.331    | 0.262   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 57         | 94         | 23       | 71           | 0.755        | 0.245      | 0.404    | 0.305   
+  5. Referential: Foreign Keys (single/multi col.) | 63         | 86         | 18       | 68           | 0.791        | 0.209      | 0.286    | 0.242   
+
+  MEDIUM x EASY  (n=12, mean nGED=0.7554)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 98         | 111        | 59       | 52           | 0.468        | 0.532      | 0.602    | 0.565   
+  2. Schema: Attributes                            | 571        | 713        | 153      | 560          | 0.785        | 0.215      | 0.268    | 0.238   
+  3. Domain: types, NULL/NOT NULL                  | 571        | 713        | 88       | 625          | 0.877        | 0.123      | 0.154    | 0.137   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 61         | 126        | 26       | 100          | 0.794        | 0.206      | 0.426    | 0.278   
+  5. Referential: Foreign Keys (single/multi col.) | 0          | 123        | 0        | 123          | 1.000        | 0.000      | 0.000    | 0.000   
+
+  MEDIUM x MEDIUM  (n=5, mean nGED=0.5680)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 31         | 32         | 26       | 6            | 0.188        | 0.812      | 0.839    | 0.825   
+  2. Schema: Attributes                            | 228        | 292        | 158      | 134          | 0.459        | 0.541      | 0.693    | 0.608   
+  3. Domain: types, NULL/NOT NULL                  | 228        | 292        | 109      | 183          | 0.627        | 0.373      | 0.478    | 0.419   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 29         | 35         | 21       | 14           | 0.400        | 0.600      | 0.724    | 0.656   
+  5. Referential: Foreign Keys (single/multi col.) | 16         | 27         | 9        | 18           | 0.667        | 0.333      | 0.562    | 0.419   
+
+  MEDIUM x HARD  (n=87, mean nGED=0.6432)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 773        | 779        | 512      | 267          | 0.343        | 0.657      | 0.662    | 0.660   
+  2. Schema: Attributes                            | 4657       | 5110       | 1994     | 3116         | 0.610        | 0.390      | 0.428    | 0.408   
+  3. Domain: types, NULL/NOT NULL                  | 4657       | 5110       | 1408     | 3702         | 0.724        | 0.276      | 0.302    | 0.288   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 769        | 906        | 359      | 547          | 0.604        | 0.396      | 0.467    | 0.429   
+  5. Referential: Foreign Keys (single/multi col.) | 846        | 911        | 312      | 599          | 0.658        | 0.342      | 0.369    | 0.355   
+
+  LARGE x EASY  (n=1, mean nGED=0.9470)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 69         | 20         | 14       | 6            | 0.300        | 0.700      | 0.203    | 0.315   
+  2. Schema: Attributes                            | 423        | 0          | 0        | 0            | 0.000        | 0.000      | 0.000    | 0.000   
+  3. Domain: types, NULL/NOT NULL                  | 423        | 0          | 0        | 0            | 0.000        | 0.000      | 0.000    | 0.000   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 69         | 31         | 11       | 20           | 0.645        | 0.355      | 0.159    | 0.220   
+  5. Referential: Foreign Keys (single/multi col.) | 0          | 20         | 0        | 20           | 1.000        | 0.000      | 0.000    | 0.000   
+
+  LARGE x HARD  (n=51, mean nGED=0.8322)
+  Element                                          | Gold       | Recreated  | Matched  | Hallucinated | Hall.Rate    | Precision  | Recall   | F1      
+  ------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Schema: Table name                            | 1347       | 747        | 434      | 313          | 0.419        | 0.581      | 0.322    | 0.415   
+  2. Schema: Attributes                            | 10649      | 3449       | 1061     | 2388         | 0.692        | 0.308      | 0.100    | 0.151   
+  3. Domain: types, NULL/NOT NULL                  | 10649      | 3449       | 717      | 2732         | 0.792        | 0.208      | 0.067    | 0.102   
+  4. Entity: Primary, UNIQUE (single/multi col.)   | 1288       | 856        | 315      | 541          | 0.632        | 0.368      | 0.245    | 0.294   
+  5. Referential: Foreign Keys (single/multi col.) | 1737       | 860        | 287      | 573          | 0.666        | 0.334      | 0.165    | 0.221   
+
+====================================================================================================

@@ -1,0 +1,68 @@
+-- Schema for database: rschema_0125
+CREATE TABLE `pages` (
+  `page_id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_slug` varchar(255) NOT NULL,
+  `is_editable` tinyint(1) NOT NULL DEFAULT '1',
+  `is_visible` tinyint(1) NOT NULL DEFAULT '1',
+  `current_version_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`page_id`),
+  UNIQUE KEY `uk_pages_page_slug` (`page_slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `page_translations` (
+  `translation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_id` int(11) NOT NULL,
+  `language_code` char(6) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` longtext DEFAULT NULL,
+  PRIMARY KEY (`translation_id`),
+  UNIQUE KEY `uk_page_translations_page_language` (`page_id`,`language_code`),
+  KEY `page_id` (`page_id`),
+  CONSTRAINT `page_translations_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `pages` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `page_versions` (
+  `version_id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_id` int(11) NOT NULL,
+  `version_number` int(11) NOT NULL,
+  `created_by_user_id` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `version_content` longtext NOT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `image_alt_text` varchar(255) DEFAULT NULL,
+  `is_current` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`version_id`),
+  UNIQUE KEY `uk_page_versions_page_version_number` (`page_id`,`version_number`),
+  KEY `page_id` (`page_id`),
+  CONSTRAINT `page_versions_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `pages` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `page_comments` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_id` int(11) NOT NULL,
+  `parent_comment_id` int(11) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `comment_text` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`comment_id`),
+  KEY `page_id` (`page_id`),
+  KEY `parent_comment_id` (`parent_comment_id`),
+  CONSTRAINT `page_comments_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `pages` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `page_comments_ibfk_2` FOREIGN KEY (`parent_comment_id`) REFERENCES `page_comments` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `page_history_records` (
+  `history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_id` int(11) NOT NULL,
+  `version_id` int(11) NOT NULL,
+  `action_type` varchar(50) NOT NULL,
+  `changed_by_user_id` int(11) DEFAULT NULL,
+  `changed_at` datetime NOT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`history_id`),
+  KEY `page_id` (`page_id`),
+  KEY `version_id` (`version_id`),
+  CONSTRAINT `page_history_records_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `pages` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `page_history_records_ibfk_2` FOREIGN KEY (`version_id`) REFERENCES `page_versions` (`version_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

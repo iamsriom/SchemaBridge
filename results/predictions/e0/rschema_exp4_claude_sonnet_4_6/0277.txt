@@ -1,0 +1,63 @@
+-- Schema for database: rschema_0277
+
+CREATE TABLE `service_team` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_name` varchar(255) NOT NULL,
+  `team_leader` varchar(255) DEFAULT NULL,
+  `contact_number` varchar(20) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `housekeeper` (
+  `staff_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact_number` varchar(20) DEFAULT NULL,
+  `service_type` varchar(100) DEFAULT NULL,
+  `years_of_experience` int(11) DEFAULT NULL,
+  `professional_skills` varchar(500) DEFAULT NULL,
+  `completed_tasks` int(11) DEFAULT 0,
+  `customer_satisfaction` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`staff_id`),
+  CONSTRAINT `housekeeper_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `service_team` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_id` int(11) NOT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  `customer_phone` varchar(20) DEFAULT NULL,
+  `service_date` datetime NOT NULL,
+  `service_address` varchar(500) DEFAULT NULL,
+  `service_type` varchar(100) DEFAULT NULL,
+  `service_duration` decimal(5,2) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  CONSTRAINT `service_task_ibfk_1` FOREIGN KEY (`staff_id`) REFERENCES `housekeeper` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `service_fee` decimal(10,2) DEFAULT NULL,
+  `service_effectiveness` varchar(255) DEFAULT NULL,
+  `customer_evaluation` varchar(500) DEFAULT NULL,
+  `satisfaction_score` decimal(5,2) DEFAULT NULL,
+  `record_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `service_record_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `service_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `performance_evaluation` (
+  `evaluation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_id` int(11) NOT NULL,
+  `evaluation_period` varchar(50) DEFAULT NULL,
+  `completed_tasks_count` int(11) DEFAULT NULL,
+  `average_satisfaction` decimal(5,2) DEFAULT NULL,
+  `evaluation_score` decimal(5,2) DEFAULT NULL,
+  `evaluation_comment` varchar(500) DEFAULT NULL,
+  `evaluation_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`evaluation_id`),
+  CONSTRAINT `performance_evaluation_ibfk_1` FOREIGN KEY (`staff_id`) REFERENCES `housekeeper` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

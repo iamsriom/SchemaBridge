@@ -1,0 +1,45 @@
+-- Schema for database: rschema_0337
+CREATE TABLE `exam` (
+  `exam_id` int(11) NOT NULL AUTO_INCREMENT,
+  `exam_name` varchar(255) NOT NULL,
+  `exam_time` datetime NOT NULL,
+  PRIMARY KEY (`exam_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `practice_question` (
+  `question_id` int(11) NOT NULL AUTO_INCREMENT,
+  `exam_id` int(11) NOT NULL,
+  `question_content` text NOT NULL,
+  `score` int(11) NOT NULL,
+  PRIMARY KEY (`question_id`),
+  KEY `practice_question_ibfk_1` (`exam_id`),
+  CONSTRAINT `practice_question_ibfk_1` FOREIGN KEY (`exam_id`) REFERENCES `exam` (`exam_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `submission` (
+  `submission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `exam_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `submission_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`submission_id`),
+  KEY `submission_ibfk_1` (`exam_id`),
+  KEY `submission_ibfk_2` (`student_id`),
+  CONSTRAINT `submission_ibfk_1` FOREIGN KEY (`exam_id`) REFERENCES `exam` (`exam_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `submission_answer` (
+  `submission_id` int(11) NOT NULL,
+  `question_id` int(11) NOT NULL,
+  `answer_content` text NOT NULL,
+  PRIMARY KEY (`submission_id`, `question_id`),
+  KEY `submission_answer_ibfk_2` (`question_id`),
+  CONSTRAINT `submission_answer_ibfk_1` FOREIGN KEY (`submission_id`) REFERENCES `submission` (`submission_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `submission_answer_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `practice_question` (`question_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

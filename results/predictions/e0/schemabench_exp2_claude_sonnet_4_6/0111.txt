@@ -1,0 +1,80 @@
+-- Schema for database: schemabench_0111
+
+CREATE TABLE `patient` (
+  `patient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `age` int(11) DEFAULT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `disease_type` varchar(20) NOT NULL COMMENT 'Hepatitis B or Hepatitis C',
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fibrosis_activity` (
+  `fibrosis_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `fibrosis_score` int(11) DEFAULT NULL,
+  `activity_score` int(11) DEFAULT NULL,
+  `histological_activity` varchar(50) DEFAULT NULL,
+  `fibrosis_stage` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`fibrosis_id`),
+  CONSTRAINT `fibrosis_activity_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medical_parameters` (
+  `parameter_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `alt` float DEFAULT NULL COMMENT 'Alanine aminotransferase level',
+  `ast` float DEFAULT NULL COMMENT 'Aspartate aminotransferase level',
+  `bilirubin` float DEFAULT NULL,
+  `albumin` float DEFAULT NULL,
+  `platelet_count` float DEFAULT NULL,
+  `prothrombin_time` float DEFAULT NULL,
+  `alkaline_phosphatase` float DEFAULT NULL,
+  `gamma_gt` float DEFAULT NULL COMMENT 'Gamma-glutamyl transferase',
+  `hemoglobin` float DEFAULT NULL,
+  `white_blood_cell_count` float DEFAULT NULL,
+  `red_blood_cell_count` float DEFAULT NULL,
+  PRIMARY KEY (`parameter_id`),
+  CONSTRAINT `medical_parameters_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medical_history` (
+  `history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `duration_of_infection` int(11) DEFAULT NULL COMMENT 'Duration in months',
+  `transmission_route` varchar(100) DEFAULT NULL,
+  `previous_treatment` varchar(255) DEFAULT NULL,
+  `comorbidities` varchar(255) DEFAULT NULL,
+  `alcohol_use` varchar(20) DEFAULT NULL,
+  `smoking_status` varchar(20) DEFAULT NULL,
+  `family_history` varchar(255) DEFAULT NULL,
+  `diagnosis_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`history_id`),
+  CONSTRAINT `medical_history_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bio_data` (
+  `bio_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `weight` float DEFAULT NULL,
+  `height` float DEFAULT NULL,
+  `bmi` float DEFAULT NULL,
+  `blood_pressure_systolic` int(11) DEFAULT NULL,
+  `blood_pressure_diastolic` int(11) DEFAULT NULL,
+  `heart_rate` int(11) DEFAULT NULL,
+  `temperature` float DEFAULT NULL,
+  `recorded_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`bio_id`),
+  CONSTRAINT `bio_data_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dataset_entry` (
+  `entry_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `dataset_source` varchar(100) DEFAULT NULL COMMENT 'e.g. PKDD02',
+  `hepatitis_class` char(1) NOT NULL COMMENT 'B or C',
+  `split_set` varchar(20) DEFAULT NULL COMMENT 'train or test',
+  `entry_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`entry_id`),
+  CONSTRAINT `dataset_entry_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

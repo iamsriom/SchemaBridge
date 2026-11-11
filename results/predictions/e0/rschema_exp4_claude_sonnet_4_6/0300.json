@@ -1,0 +1,22 @@
+{
+  "text_number": 300,
+  "id": "67552f0a13602ec03b41a874",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0300",
+  "question": "This database is a database used to manage and record the central material supply and billing system, mainly used for material procurement and expense management of scientific research institutions or laboratories.\n\nMain functions that the database can achieve\n\n1. Central material supply project management:\nRecord detailed information of each material supply project, including project number, material code, description, quantity, unit, cost, charge amount, etc.\nManage time information such as the creation date and closing date of the material supply project.\nRecord project number, bill and other information.\n\n2. Bill management:\nGenerate and record bill details for each material supply project, including material quantity, unit, cost, charge amount, etc.\nRecord the creation and modification time of the bill.\nManage the verification errors of the bill and their handling.",
+  "ddl": "-- Schema for database: rschema_0300\n\nCREATE TABLE `supply_project` (\n  `project_id` int(11) NOT NULL AUTO_INCREMENT,\n  `project_number` varchar(64) NOT NULL,\n  `material_code` varchar(64) NOT NULL,\n  `material_description` varchar(255) DEFAULT NULL,\n  `quantity` decimal(15,4) NOT NULL,\n  `unit` varchar(32) DEFAULT NULL,\n  `cost` decimal(15,2) NOT NULL,\n  `charge_amount` decimal(15,2) NOT NULL,\n  `creation_date` datetime NOT NULL,\n  `closing_date` datetime DEFAULT NULL,\n  `bill_number` varchar(64) DEFAULT NULL,\n  `status` varchar(32) DEFAULT NULL,\n  `remarks` varchar(512) DEFAULT NULL,\n  PRIMARY KEY (`project_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `bill` (\n  `bill_id` int(11) NOT NULL AUTO_INCREMENT,\n  `project_id` int(11) NOT NULL,\n  `bill_number` varchar(64) NOT NULL,\n  `material_code` varchar(64) NOT NULL,\n  `material_description` varchar(255) DEFAULT NULL,\n  `quantity` decimal(15,4) NOT NULL,\n  `unit` varchar(32) DEFAULT NULL,\n  `cost` decimal(15,2) NOT NULL,\n  `charge_amount` decimal(15,2) NOT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  `remarks` varchar(512) DEFAULT NULL,\n  PRIMARY KEY (`bill_id`),\n  CONSTRAINT `bill_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `supply_project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `bill_verification_error` (\n  `error_id` int(11) NOT NULL AUTO_INCREMENT,\n  `bill_id` int(11) NOT NULL,\n  `error_code` varchar(64) DEFAULT NULL,\n  `error_description` varchar(512) DEFAULT NULL,\n  `error_type` varchar(64) DEFAULT NULL,\n  `handling_status` varchar(32) DEFAULT NULL,\n  `handling_remarks` varchar(512) DEFAULT NULL,\n  `detected_at` datetime NOT NULL,\n  `resolved_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`error_id`),\n  CONSTRAINT `bill_verification_error_ibfk_1` FOREIGN KEY (`bill_id`) REFERENCES `bill` (`bill_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "supply_project",
+      "bill",
+      "bill_verification_error"
+    ],
+    "columns_by_table": {
+      "supply_project": [],
+      "bill": [],
+      "bill_verification_error": []
+    }
+  }
+}

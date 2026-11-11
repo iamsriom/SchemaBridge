@@ -1,0 +1,26 @@
+{
+  "text_number": 367,
+  "id": "67552f0a13602ec03b41a944",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0367",
+  "question": "Business Requirements Description:\nThis system is designed for managing user information, appointment records for medical exams (check-ups), medical institution information, institution operating hours, and operator account information. The core features include:\n1.User Management: Stores basic user information, including name, email, phone number, birth date, gender, password, address, and insurance status.\n2.Appointment Management: Users can make appointments for medical checks. Appointment records include examination description, examination document, the medical institution where the appointment is made, payment amount, creation date, appointment date, and status.\n3.Medical Institution Management: Stores basic information about medical institutions, including name, address, opening time, and closing time.\n4.Operator Management: Stores account information for operators, including username and password. Each operator belongs to a specific medical institution and can manage that institution’s appointments and user information.",
+  "ddl": "-- Schema for database: rschema_0367\n\nCREATE TABLE `medical_institution` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `address` varchar(500) NOT NULL,\n  `opening_time` time NOT NULL,\n  `closing_time` time NOT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `institution_operating_hours` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `institution_id` int(11) NOT NULL,\n  `day_of_week` varchar(20) NOT NULL,\n  `open_time` time NOT NULL,\n  `close_time` time NOT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `institution_operating_hours_ibfk_1` FOREIGN KEY (`institution_id`) REFERENCES `medical_institution` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `phone_number` varchar(20) DEFAULT NULL,\n  `birth_date` date DEFAULT NULL,\n  `gender` varchar(10) DEFAULT NULL,\n  `password` varchar(255) NOT NULL,\n  `address` varchar(500) DEFAULT NULL,\n  `insurance_status` tinyint(1) NOT NULL DEFAULT 0,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `appointment` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `institution_id` int(11) NOT NULL,\n  `examination_description` text DEFAULT NULL,\n  `examination_document` varchar(500) DEFAULT NULL,\n  `payment_amount` decimal(10,2) DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `appointment_date` datetime NOT NULL,\n  `status` varchar(50) NOT NULL DEFAULT 'pending',\n  PRIMARY KEY (`id`),\n  CONSTRAINT `appointment_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `appointment_ibfk_2` FOREIGN KEY (`institution_id`) REFERENCES `medical_institution` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `operator` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `institution_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `operator_ibfk_1` FOREIGN KEY (`institution_id`) REFERENCES `medical_institution` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "medical_institution",
+      "institution_operating_hours",
+      "user",
+      "appointment",
+      "operator"
+    ],
+    "columns_by_table": {
+      "medical_institution": [],
+      "institution_operating_hours": [],
+      "user": [],
+      "appointment": [],
+      "operator": []
+    }
+  }
+}

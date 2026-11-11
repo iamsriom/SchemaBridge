@@ -1,0 +1,68 @@
+-- Schema for database: rschema_0474
+
+CREATE TABLE `student` (
+  `student_id` varchar(20) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `class` varchar(50) NOT NULL,
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `instructor` (
+  `instructor_id` varchar(20) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `course` varchar(100) NOT NULL,
+  PRIMARY KEY (`instructor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `assignment` (
+  `assignment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` varchar(20) NOT NULL,
+  `instructor_id` varchar(20) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `submission_content` text NOT NULL,
+  `submitted_at` datetime NOT NULL,
+  `is_graded` tinyint(1) NOT NULL DEFAULT 0,
+  `overall_evaluation` text DEFAULT NULL,
+  `total_score` decimal(5,2) DEFAULT NULL,
+  `graded_at` datetime DEFAULT NULL,
+  `notification_sent` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`assignment_id`),
+  CONSTRAINT `assignment_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `assignment_ibfk_2` FOREIGN KEY (`instructor_id`) REFERENCES `instructor` (`instructor_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `question` (
+  `question_id` int(11) NOT NULL AUTO_INCREMENT,
+  `assignment_id` int(11) NOT NULL,
+  `question_number` int(11) NOT NULL,
+  `question_content` text NOT NULL,
+  `answer_content` text DEFAULT NULL,
+  `format` varchar(100) DEFAULT NULL,
+  `score` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`question_id`),
+  CONSTRAINT `question_ibfk_1` FOREIGN KEY (`assignment_id`) REFERENCES `assignment` (`assignment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `grading_record` (
+  `grading_id` int(11) NOT NULL AUTO_INCREMENT,
+  `assignment_id` int(11) NOT NULL,
+  `instructor_id` varchar(20) NOT NULL,
+  `total_score` decimal(5,2) NOT NULL,
+  `overall_evaluation` text NOT NULL,
+  `graded_at` datetime NOT NULL,
+  PRIMARY KEY (`grading_id`),
+  CONSTRAINT `grading_record_ibfk_1` FOREIGN KEY (`assignment_id`) REFERENCES `assignment` (`assignment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `grading_record_ibfk_2` FOREIGN KEY (`instructor_id`) REFERENCES `instructor` (`instructor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `notification` (
+  `notification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` varchar(20) NOT NULL,
+  `assignment_id` int(11) NOT NULL,
+  `message` varchar(255) NOT NULL,
+  `sent_at` datetime NOT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`notification_id`),
+  CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `notification_ibfk_2` FOREIGN KEY (`assignment_id`) REFERENCES `assignment` (`assignment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

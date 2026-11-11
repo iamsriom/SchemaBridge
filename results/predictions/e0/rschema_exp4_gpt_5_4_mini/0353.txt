@@ -1,0 +1,80 @@
+-- Schema for database: rschema_0353
+CREATE TABLE `admin_users` (
+  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `admin_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`admin_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `page_users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `full_name` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_page_users_username` (`username`),
+  UNIQUE KEY `uk_page_users_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `page_groups` (
+  `group_id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_name` varchar(255) NOT NULL,
+  `group_description` varchar(500) DEFAULT NULL,
+  `created_by_admin_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`group_id`),
+  KEY `page_groups_ibfk_1` (`created_by_admin_id`),
+  CONSTRAINT `page_groups_ibfk_1` FOREIGN KEY (`created_by_admin_id`) REFERENCES `admin_users` (`admin_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permission_schemes` (
+  `scheme_id` int(11) NOT NULL AUTO_INCREMENT,
+  `scheme_name` varchar(255) NOT NULL,
+  `scheme_description` varchar(500) DEFAULT NULL,
+  `created_by_admin_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`scheme_id`),
+  KEY `permission_schemes_ibfk_1` (`created_by_admin_id`),
+  CONSTRAINT `permission_schemes_ibfk_1` FOREIGN KEY (`created_by_admin_id`) REFERENCES `admin_users` (`admin_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pages` (
+  `page_id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_name` varchar(255) NOT NULL,
+  `page_alias` varchar(255) DEFAULT NULL,
+  `page_title` varchar(255) DEFAULT NULL,
+  `page_description` varchar(500) DEFAULT NULL,
+  `display_order` int(11) NOT NULL DEFAULT '0',
+  `style_class` varchar(255) DEFAULT NULL,
+  `redirect_target` varchar(500) DEFAULT NULL,
+  `click_event` varchar(255) DEFAULT NULL,
+  `is_visible` tinyint(1) NOT NULL DEFAULT '1',
+  `group_id` int(11) DEFAULT NULL,
+  `scheme_id` int(11) DEFAULT NULL,
+  `created_by_admin_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`page_id`),
+  KEY `pages_ibfk_1` (`group_id`),
+  KEY `pages_ibfk_2` (`scheme_id`),
+  KEY `pages_ibfk_3` (`created_by_admin_id`),
+  CONSTRAINT `pages_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `page_groups` (`group_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `pages_ibfk_2` FOREIGN KEY (`scheme_id`) REFERENCES `permission_schemes` (`scheme_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `pages_ibfk_3` FOREIGN KEY (`created_by_admin_id`) REFERENCES `admin_users` (`admin_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `page_update_records` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_id` int(11) NOT NULL,
+  `admin_id` int(11) NOT NULL,
+  `field_name` varchar(255) NOT NULL,
+  `old_value` varchar(1000) DEFAULT NULL,
+  `new_value` varchar(1000) DEFAULT NULL,
+  `change_reason` varchar(500) DEFAULT NULL,
+  `changed_at` datetime NOT NULL,
+  PRIMARY KEY (`record_id`),
+  KEY `page_update_records_ibfk_1` (`page_id`),
+  KEY `page_update_records_ibfk_2` (`admin_id`),
+  CONSTRAINT `page_update_records_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `pages` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `page_update_records_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `admin_users` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

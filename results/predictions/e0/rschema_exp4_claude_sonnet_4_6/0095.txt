@@ -1,0 +1,123 @@
+-- Schema for database: rschema_0095
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `company` varchar(255) DEFAULT NULL,
+  `industry` varchar(100) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `customer_status` varchar(50) DEFAULT NULL,
+  `customer_type` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_representative` (
+  `rep_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `department` varchar(100) DEFAULT NULL,
+  `hire_date` datetime DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`rep_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `communication_record` (
+  `communication_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `rep_id` int(11) DEFAULT NULL,
+  `communication_type` varchar(50) DEFAULT NULL,
+  `subject` varchar(255) DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `communication_date` datetime DEFAULT NULL,
+  `direction` varchar(20) DEFAULT NULL,
+  `outcome` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`communication_id`),
+  CONSTRAINT `communication_record_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `communication_record_ibfk_2` FOREIGN KEY (`rep_id`) REFERENCES `sales_representative` (`rep_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_opportunity` (
+  `opportunity_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `rep_id` int(11) DEFAULT NULL,
+  `opportunity_name` varchar(255) NOT NULL,
+  `stage` varchar(100) DEFAULT NULL,
+  `estimated_value` decimal(15,2) DEFAULT NULL,
+  `probability` decimal(5,2) DEFAULT NULL,
+  `expected_close_date` datetime DEFAULT NULL,
+  `actual_close_date` datetime DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`opportunity_id`),
+  CONSTRAINT `sales_opportunity_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_opportunity_ibfk_2` FOREIGN KEY (`rep_id`) REFERENCES `sales_representative` (`rep_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_request` (
+  `request_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `rep_id` int(11) DEFAULT NULL,
+  `request_type` varchar(100) DEFAULT NULL,
+  `subject` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `priority` varchar(50) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `submitted_at` datetime DEFAULT NULL,
+  `resolved_at` datetime DEFAULT NULL,
+  `resolution_notes` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`request_id`),
+  CONSTRAINT `service_request_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `service_request_ibfk_2` FOREIGN KEY (`rep_id`) REFERENCES `sales_representative` (`rep_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `market_segment` (
+  `segment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `segment_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `criteria` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`segment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_segment` (
+  `customer_segment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `segment_id` int(11) NOT NULL,
+  `assigned_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`customer_segment_id`),
+  CONSTRAINT `customer_segment_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customer_segment_ibfk_2` FOREIGN KEY (`segment_id`) REFERENCES `market_segment` (`segment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `follow_up` (
+  `follow_up_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `rep_id` int(11) DEFAULT NULL,
+  `opportunity_id` int(11) DEFAULT NULL,
+  `follow_up_type` varchar(100) DEFAULT NULL,
+  `scheduled_date` datetime DEFAULT NULL,
+  `completed_date` datetime DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`follow_up_id`),
+  CONSTRAINT `follow_up_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `follow_up_ibfk_2` FOREIGN KEY (`rep_id`) REFERENCES `sales_representative` (`rep_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `follow_up_ibfk_3` FOREIGN KEY (`opportunity_id`) REFERENCES `sales_opportunity` (`opportunity_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

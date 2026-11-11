@@ -1,0 +1,51 @@
+-- Schema for database: rschema_0005
+CREATE TABLE `service` (
+  `service_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`service_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_usage` (
+  `usage_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  `usage_time` datetime NOT NULL,
+  `duration` int(11) NOT NULL,
+  PRIMARY KEY (`usage_id`),
+  CONSTRAINT `service_usage_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `service_usage_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `service` (`service_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `service_monitoring` (
+  `monitoring_id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `monitor_time` datetime NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `response_time` decimal(10,3) DEFAULT NULL,
+  `error_count` int(11) DEFAULT NULL,
+  PRIMARY KEY (`monitoring_id`),
+  CONSTRAINT `service_monitoring_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `service` (`service_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `performance_evaluation` (
+  `evaluation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `evaluation_time` datetime NOT NULL,
+  `availability` decimal(5,2) DEFAULT NULL,
+  `avg_response_time` decimal(10,3) DEFAULT NULL,
+  `total_usage_count` int(11) DEFAULT NULL,
+  `total_duration` int(11) DEFAULT NULL,
+  `score` decimal(5,2) DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  PRIMARY KEY (`evaluation_id`),
+  CONSTRAINT `performance_evaluation_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `service` (`service_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

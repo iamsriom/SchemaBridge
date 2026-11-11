@@ -1,0 +1,47 @@
+-- Schema for database: rschema_0092
+CREATE TABLE `operator` (
+  `operator_id` int(11) NOT NULL AUTO_INCREMENT,
+  `operator_name` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `permission_level` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`operator_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `identity_type` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `identity_status` varchar(50) NOT NULL,
+  `superior_user_id` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `expires_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  KEY `user_ibfk_1` (`superior_user_id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`superior_user_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_hierarchy_change` (
+  `change_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `operator_id` int(11) NOT NULL,
+  `change_time` datetime NOT NULL,
+  `old_superior_user_id` int(11) DEFAULT NULL,
+  `new_superior_user_id` int(11) DEFAULT NULL,
+  `old_subordinate_user_id` int(11) DEFAULT NULL,
+  `new_subordinate_user_id` int(11) DEFAULT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`change_id`),
+  KEY `user_hierarchy_change_ibfk_1` (`user_id`),
+  KEY `user_hierarchy_change_ibfk_2` (`operator_id`),
+  KEY `user_hierarchy_change_ibfk_3` (`old_superior_user_id`),
+  KEY `user_hierarchy_change_ibfk_4` (`new_superior_user_id`),
+  KEY `user_hierarchy_change_ibfk_5` (`old_subordinate_user_id`),
+  KEY `user_hierarchy_change_ibfk_6` (`new_subordinate_user_id`),
+  CONSTRAINT `user_hierarchy_change_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_hierarchy_change_ibfk_2` FOREIGN KEY (`operator_id`) REFERENCES `operator` (`operator_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_hierarchy_change_ibfk_3` FOREIGN KEY (`old_superior_user_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `user_hierarchy_change_ibfk_4` FOREIGN KEY (`new_superior_user_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `user_hierarchy_change_ibfk_5` FOREIGN KEY (`old_subordinate_user_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `user_hierarchy_change_ibfk_6` FOREIGN KEY (`new_subordinate_user_id`) REFERENCES `user` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -95,6 +95,17 @@ BASELINE_ROOT = {
     "RSchema": ROOT / "results/predictions/e0/rschema_papermethods",
     "SchemaBench": ROOT / "results/predictions/e0/schemabench_papermethods",
 }
+# Prefer regenerated per-schema trees when present (Phase 4 new runs).
+BASELINE_REGENERATED_ROOT = {
+    "RSchema": ROOT / "results/predictions/e0/rschema_papermethods_regenerated",
+    "SchemaBench": ROOT / "results/predictions/e0/schemabench_papermethods_regenerated",
+}
+# Surviving PaperMethods aggregate scores (2026-10-12). Used only when
+# per-schema results.jsonl trees are unavailable — status ARCHIVE_AGGREGATE.
+PAPERMETHODS_ARCHIVE = {
+    "RSchema": ROOT / "results/baselines/e0_rschema_papermethods_evaluation.json",
+    "SchemaBench": ROOT / "results/baselines/e0_schemabench_papermethods_evaluation.json",
+}
 OLD_GENUINE_V = OUT / "E0_TABLE_V_GENUINE.csv"
 OLD_GENUINE_VI = OUT / "E0_TABLE_VI_GENUINE.csv"
 # Historical Hall4 freeze kept for archive comparison only.
@@ -113,6 +124,7 @@ METHOD_LABEL = {
     "one_shot_cot": "One-shot+CoT",
     "few_shot": "Few-shot",
 }
+LABEL_METHOD = {v: k for k, v in METHOD_LABEL.items()}
 STRUCT_DIMS = ("tables", "attributes", "entity", "referential")
 METRICS_V = ["nged", "halluc", "tables", "attributes", "domain", "entity", "referential"]
 LOWER = {"nged", "halluc"}
@@ -299,7 +311,21 @@ def load_baseline_predictions(
         }
     Empty ``answer`` dict marks a recorded generation failure (scored as empty).
     """
-    path = BASELINE_ROOT[dataset] / model_file / method / "results.jsonl"
+    regen = BASELINE_REGENERATED_ROOT.get(dataset)
+    hist = BASELINE_ROOT[dataset]
+    regen_path = (regen / model_file / method / "results.jsonl") if regen else None
+    hist_path = hist / model_file / method / "results.jsonl"
+    # Prefer historical PaperMethods trees when present (original evidence).
+    # Use regenerated trees only when historical trees are absent.
+    if hist_path.is_file() and hist_path.stat().st_size > 0:
+        path = hist_path
+        tree_label = "HISTORICAL"
+    elif regen_path is not None and regen_path.is_file() and regen_path.stat().st_size > 0:
+        path = regen_path
+        tree_label = "REGENERATED_NEW_RUN"
+    else:
+        path = hist_path
+        tree_label = "HISTORICAL"
     expected = set(expected_ids or [])
     empty_cov = {
         "expected": len(expected),
@@ -391,12 +417,20 @@ def load_baseline_predictions(
             f"INCOMPLETE: baseline coverage {coverage['present']}/{coverage['expected']} "
             f"(missing={coverage['missing']})"
         )
+    elif tree_label == "REGENERATED_NEW_RUN":
+        status_s = "REGENERATED_NEW_RUN"
+        msg = (
+            f"REGENERATED_NEW_RUN: {coverage['present']}/{coverage['expected']} present, "
+            f"{coverage['valid']} valid, {coverage['generation_failed']} recorded failures "
+            f"(path={path})"
+        )
     else:
         status_s = "COMPLETE"
         msg = (
             f"COMPLETE: baseline {coverage['present']}/{coverage['expected']} present, "
             f"{coverage['valid']} valid, {coverage['generation_failed']} recorded failures"
         )
+    coverage["tree_label"] = tree_label
     return {
         "path": path,
         "status": status_s,
@@ -916,6 +950,106 @@ def evaluate_direct_schemabench(pred_dir: Path, gold_rows: list[dict]) -> dict:
 # --------------------------------------------------------------------------- Baseline evaluation
 
 
+def _micro_f1_from_counts(gold: int, recreated: int, matched: int) -> float:
+    den = gold + recreated
+    return 0.0 if den == 0 else (2.0 * matched) / den
+
+
+def _hall_rate(recreated: int, hallucinated: int) -> float:
+    return 0.0 if recreated == 0 else hallucinated / recreated
+
+
+def metrics_from_papermethods_archive(
+    dataset: str,
+    model: str,
+    method: str,
+) -> dict[str, Any] | None:
+    """Recompute Table VI cells from archived pooled G/P/M when trees are missing.
+
+    Returns None if the archive entry is unavailable. Status is always
+    ``ARCHIVE_AGGREGATE`` — not a per-schema genuine-protocol recompute.
+
+    Provenance notes:
+      * T/A/E/R F1 = micro from pooled gold/recreated/matched counts
+      * Hall = unweighted mean of T/A/E/R hallucination rates (empty P → 0)
+      * nGED = archived ``mean_normalized_graph_edit_distance`` (historical
+        macro mean; names-only per-schema nGED cannot be recomputed without trees)
+      * Domain = None (``--``)
+    """
+    path = PAPERMETHODS_ARCHIVE.get(dataset)
+    if path is None or not path.is_file():
+        return None
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    model_file = MODEL_FILE[model]
+    entry = None
+    for m in payload.get("methods") or []:
+        if m.get("model") == model_file and m.get("method") == method:
+            entry = m
+            break
+    if entry is None or method == "schema_agent":
+        return None
+    fe = entry.get("five_elements") or {}
+    struct: dict[str, float] = {}
+    struct_counts: dict[str, dict[str, int]] = {}
+    rates: dict[str, float] = {}
+    totals: dict[str, dict[str, int]] = {}
+    for dim in STRUCT_DIMS:
+        c = fe.get(dim) or {}
+        g = int(c.get("gold") or 0)
+        p = int(c.get("recreated") or 0)
+        matched = int(c.get("matched") or 0)
+        hall = int(c.get("hallucinated") or 0)
+        f1 = _micro_f1_from_counts(g, p, matched)
+        archived_micro = c.get("f1_micro")
+        if archived_micro is not None and abs(f1 - float(archived_micro)) > 1e-9:
+            raise RuntimeError(
+                f"Archive f1_micro mismatch {dataset}/{model}/{method}/{dim}: "
+                f"{f1} vs {archived_micro}"
+            )
+        struct[dim] = f1
+        struct_counts[dim] = {"gold": g, "recreated": p, "matched": matched}
+        rates[dim] = _hall_rate(p, hall)
+        totals[dim] = {"P": p, "M": matched, "hall": hall}
+    hall4 = sum(rates[d] for d in STRUCT_DIMS) / float(len(STRUCT_DIMS))
+    n = int(entry.get("gold_total") or entry.get("total_schemas") or 0)
+    zero = int(entry.get("scored_zero") or 0)
+    return {
+        "n": n,
+        "failed": zero,
+        "status": "ARCHIVE_AGGREGATE",
+        "coverage": {
+            "expected": n,
+            "present": n - zero,
+            "valid": int(entry.get("scored_ok") or (n - zero)),
+            "generation_failed": zero,
+            "malformed": 0,
+            "missing": 0,
+            "duplicate_ids": 0,
+            "unexpected_ids": 0,
+            "source": "archived_aggregate",
+            "archive_path": str(path),
+        },
+        "message": (
+            f"ARCHIVE_AGGREGATE: per-schema results.jsonl missing; "
+            f"metrics from {path.name} pooled G/P/M "
+            f"(nGED=historical macro mean; Hall4/T/A/E/R from counts)"
+        ),
+        "nged": float(entry["mean_normalized_graph_edit_distance"]),
+        "halluc": hall4,
+        "tables": struct["tables"],
+        "attributes": struct["attributes"],
+        "domain": None,
+        "entity": struct["entity"],
+        "referential": struct["referential"],
+        "hall_rates": rates,
+        "hall_totals": totals,
+        "struct_counts": struct_counts,
+        "items": [],
+        "archive_path": str(path),
+        "archive_generated": payload.get("generated"),
+    }
+
+
 def evaluate_baseline(
     dataset: str,
     model: str,
@@ -924,25 +1058,44 @@ def evaluate_baseline(
 ) -> dict:
     expected_ids = {str(r["id"]) for r in gold_rows}
     bundle = load_baseline_predictions(dataset, MODEL_FILE[model], method, expected_ids=expected_ids)
-    if bundle["status"] == "BLOCKED":
-        return {
-            "n": 0,
-            "failed": 0,
-            "status": "BLOCKED",
-            "coverage": bundle["coverage"],
-            "message": bundle["message"],
-            "nged": None,
-            "halluc": None,
-            "tables": None,
-            "attributes": None,
-            "domain": None,
-            "entity": None,
-            "referential": None,
-            "hall_rates": None,
-            "hall_totals": None,
-            "struct_counts": None,
-            "items": [],
-        }
+    # Incomplete REGENERATED_NEW_RUN trees must not enter Table VI — they would
+    # score missing IDs as empty and silently understate every metric. Fall back
+    # to ARCHIVE_AGGREGATE until regeneration coverage is complete.
+    tree_label = (bundle.get("coverage") or {}).get("tree_label")
+    use_archive = bundle["status"] == "BLOCKED" or (
+        bundle["status"] == "INCOMPLETE" and tree_label == "REGENERATED_NEW_RUN"
+    )
+    if use_archive:
+        archived = metrics_from_papermethods_archive(dataset, model, method)
+        if archived is not None:
+            if bundle["status"] == "INCOMPLETE":
+                cov = bundle["coverage"]
+                archived["message"] = (
+                    archived["message"]
+                    + f"; ignoring partial REGENERATED_NEW_RUN "
+                    f"{cov.get('present', 0)}/{cov.get('expected', 0)} until complete"
+                )
+                archived["regen_partial"] = cov
+            return archived
+        if bundle["status"] == "BLOCKED":
+            return {
+                "n": 0,
+                "failed": 0,
+                "status": "BLOCKED",
+                "coverage": bundle["coverage"],
+                "message": bundle["message"],
+                "nged": None,
+                "halluc": None,
+                "tables": None,
+                "attributes": None,
+                "domain": None,
+                "entity": None,
+                "referential": None,
+                "hall_rates": None,
+                "hall_totals": None,
+                "struct_counts": None,
+                "items": [],
+            }
 
     preds = bundle["preds"]
     items: list[dict] = []
@@ -1219,7 +1372,9 @@ def build_table_vi_tex(rows: list[dict]) -> str:
 
 def write_csv(path: Path, rows: list[dict], fields: list[str]) -> None:
     with path.open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
+        w = csv.DictWriter(
+            f, fieldnames=fields, extrasaction="ignore", lineterminator="\n"
+        )
         w.writeheader()
         for r in rows:
             out = {}
@@ -1539,6 +1694,7 @@ def main() -> int:
     # ---- Table VI
     print(f"[{utcnow()}] Table VI baselines...", flush=True)
     tvi_rows = []
+    archive_aggregate: list[str] = []
     for ds, gold_rows in (("RSchema", logical_rows), ("SchemaBench", sb_rows)):
         if ds not in datasets_wanted:
             continue
@@ -1580,6 +1736,10 @@ def main() -> int:
                         }
                     )
                     continue
+                if res.get("status") == "ARCHIVE_AGGREGATE":
+                    archive_aggregate.append(
+                        f"{ds}/{METHOD_LABEL[method]}/{model}: {res.get('message')}"
+                    )
                 if res.get("status") in ("INCOMPLETE", "INVALID"):
                     incomplete.append(
                         f"{ds}/{METHOD_LABEL[method]}/{model}: {res.get('message') or res.get('status')}"
@@ -1602,6 +1762,7 @@ def main() -> int:
                         "_struct_counts": res.get("struct_counts"),
                         "_hall_rates": res.get("hall_rates"),
                         "_hall_totals": res.get("hall_totals"),
+                        "_archive_path": res.get("archive_path"),
                     }
                 )
                 print(
@@ -1710,11 +1871,19 @@ def main() -> int:
                     "direct_rows": "copied from Table V FINAL",
                     "f1": "micro",
                     "hallucination": "4-dim micro mean T/A/E/R",
-                    "nged": "names_only=True",
+                    "nged": "names_only=True when per-schema trees present; "
+                    "ARCHIVE_AGGREGATE uses historical macro mean from "
+                    "results/baselines/e0_*_papermethods_evaluation.json",
+                    "archive_fallback": (
+                        "When results.jsonl trees are missing, RSchema prompting "
+                        "rows use ARCHIVE_AGGREGATE pooled G/P/M; not a full "
+                        "genuine-protocol per-schema recompute."
+                    ),
                 },
                 "commit": commit,
                 "rows": tvi_rows,
                 "direct_consistency": consistency,
+                "archive_aggregate_rows": archive_aggregate,
             },
             indent=2,
             default=str,
@@ -1752,6 +1921,32 @@ def main() -> int:
         )
     for r in tvi_rows:
         if r["method"] == "Direct":
+            continue
+        # Skip BLOCKED baseline rows (missing predictions and no archive fallback).
+        if r.get("nged") is None or r.get("status") == "BLOCKED":
+            cmp_rows.append(
+                {
+                    "table": "VI",
+                    "dataset": r["dataset"],
+                    "method": r["method"],
+                    "model": r["model"],
+                    "old_nged": "",
+                    "new_nged": "",
+                    "old_hall": "",
+                    "new_hall": "",
+                    "old_tables": "",
+                    "new_tables": "",
+                    "old_attributes": "",
+                    "new_attributes": "",
+                    "old_domain": "",
+                    "new_domain": "--",
+                    "old_entity": "",
+                    "new_entity": "",
+                    "old_referential": "",
+                    "new_referential": "",
+                    "status": r.get("status") or "BLOCKED",
+                }
+            )
             continue
         old = next(
             (
@@ -1903,6 +2098,12 @@ def main() -> int:
     md.append("- Never substitute `configs/paper_reference_values.json` for missing predictions.")
     md.append("- PaperMethods Domain F1: untyped logical outputs → reported as `--`.")
     md.append("- Domain eligibility is computed from gold DDL; do not hardcode denominators.")
+    md.append(
+        "- `ARCHIVE_AGGREGATE`: per-schema PaperMethods trees missing; "
+        "RSchema prompting metrics recomputed from archived pooled G/P/M "
+        "(`results/baselines/e0_rschema_papermethods_evaluation.json`). "
+        "nGED remains the historical macro mean stored in that archive."
+    )
     md.append("")
     md.append("## Outputs")
     md.append("")
@@ -1943,6 +2144,10 @@ def main() -> int:
         )
 
     print(f"[{utcnow()}] Wrote FINAL tables + verification.", flush=True)
+    if archive_aggregate:
+        print(f"[{utcnow()}] Archive-aggregate baselines ({len(archive_aggregate)}):", flush=True)
+        for msg in archive_aggregate:
+            print(f"  - {msg}", flush=True)
     if blocked:
         print(f"[{utcnow()}] Blocked baselines ({len(blocked)}):", flush=True)
         for msg in blocked:
@@ -1951,10 +2156,12 @@ def main() -> int:
         print(f"[{utcnow()}] Incomplete/invalid coverage ({len(incomplete)}):", flush=True)
         for msg in incomplete:
             print(f"  - {msg}", flush=True)
-    if blocked and not incomplete:
+    if blocked and not incomplete and not archive_aggregate:
         status = "BLOCKED"
     elif incomplete:
         status = "INCOMPLETE"
+    elif archive_aggregate:
+        status = "PARTIAL"
     else:
         status = "COMPLETE"
     print(f"[{utcnow()}] Experiment status: {status}", flush=True)

@@ -1,0 +1,32 @@
+-- Schema for database: rschema_0014
+
+CREATE TABLE `irrigation_system` (
+  `system_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `installation_date` date NOT NULL,
+  `maintenance_records` text DEFAULT NULL,
+  PRIMARY KEY (`system_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `plot` (
+  `plot_id` int(11) NOT NULL AUTO_INCREMENT,
+  `system_id` int(11) NOT NULL,
+  `area` decimal(10,2) NOT NULL,
+  `soil_type` varchar(100) NOT NULL,
+  `irrigation_status` varchar(50) NOT NULL DEFAULT 'Not Irrigated',
+  PRIMARY KEY (`plot_id`),
+  CONSTRAINT `plot_ibfk_1` FOREIGN KEY (`system_id`) REFERENCES `irrigation_system` (`system_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `irrigation_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `system_id` int(11) NOT NULL,
+  `plot_id` int(11) NOT NULL,
+  `irrigation_date` date NOT NULL,
+  `irrigation_duration` decimal(10,2) NOT NULL,
+  `irrigation_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `irrigation_record_ibfk_1` FOREIGN KEY (`system_id`) REFERENCES `irrigation_system` (`system_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `irrigation_record_ibfk_2` FOREIGN KEY (`plot_id`) REFERENCES `plot` (`plot_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

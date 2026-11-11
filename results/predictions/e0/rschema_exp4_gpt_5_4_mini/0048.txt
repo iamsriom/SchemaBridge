@@ -1,0 +1,62 @@
+-- Schema for database: rschema_0048
+CREATE TABLE `reporters` (
+  `reporter_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_number` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`reporter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `editors` (
+  `editor_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_number` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`editor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `publishers` (
+  `publisher_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_number` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`publisher_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `manuscripts` (
+  `manuscript_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `submission_time` datetime NOT NULL,
+  `review_time` datetime DEFAULT NULL,
+  `publication_time` datetime DEFAULT NULL,
+  `status` varchar(20) NOT NULL,
+  PRIMARY KEY (`manuscript_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `manuscript_reporters` (
+  `manuscript_id` int(11) NOT NULL,
+  `reporter_id` int(11) NOT NULL,
+  PRIMARY KEY (`manuscript_id`,`reporter_id`),
+  KEY `manuscript_reporters_ibfk_2` (`reporter_id`),
+  CONSTRAINT `manuscript_reporters_ibfk_1` FOREIGN KEY (`manuscript_id`) REFERENCES `manuscripts` (`manuscript_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `manuscript_reporters_ibfk_2` FOREIGN KEY (`reporter_id`) REFERENCES `reporters` (`reporter_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `manuscript_editors` (
+  `manuscript_id` int(11) NOT NULL,
+  `editor_id` int(11) NOT NULL,
+  PRIMARY KEY (`manuscript_id`,`editor_id`),
+  KEY `manuscript_editors_ibfk_2` (`editor_id`),
+  CONSTRAINT `manuscript_editors_ibfk_1` FOREIGN KEY (`manuscript_id`) REFERENCES `manuscripts` (`manuscript_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `manuscript_editors_ibfk_2` FOREIGN KEY (`editor_id`) REFERENCES `editors` (`editor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `manuscript_publishers` (
+  `manuscript_id` int(11) NOT NULL,
+  `publisher_id` int(11) NOT NULL,
+  PRIMARY KEY (`manuscript_id`,`publisher_id`),
+  KEY `manuscript_publishers_ibfk_2` (`publisher_id`),
+  CONSTRAINT `manuscript_publishers_ibfk_1` FOREIGN KEY (`manuscript_id`) REFERENCES `manuscripts` (`manuscript_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `manuscript_publishers_ibfk_2` FOREIGN KEY (`publisher_id`) REFERENCES `publishers` (`publisher_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

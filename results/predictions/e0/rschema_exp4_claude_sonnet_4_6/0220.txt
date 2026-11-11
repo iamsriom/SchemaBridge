@@ -1,0 +1,66 @@
+-- Schema for database: rschema_0220
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `type` varchar(100) DEFAULT NULL,
+  `brand` varchar(100) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `image_link` varchar(500) DEFAULT NULL,
+  `click_count` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_description` (
+  `description_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `description_content` text NOT NULL,
+  `description_type` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`description_id`),
+  CONSTRAINT `product_description_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `postal_code` (
+  `postal_code` char(10) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `state` varchar(100) NOT NULL,
+  PRIMARY KEY (`postal_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tax_rate` (
+  `tax_rate_id` int(11) NOT NULL AUTO_INCREMENT,
+  `postal_code` char(10) NOT NULL,
+  `region` varchar(100) DEFAULT NULL,
+  `tax_rate` decimal(5,4) NOT NULL,
+  PRIMARY KEY (`tax_rate_id`),
+  CONSTRAINT `tax_rate_ibfk_1` FOREIGN KEY (`postal_code`) REFERENCES `postal_code` (`postal_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_price` decimal(10,2) NOT NULL,
+  `tax` decimal(10,2) NOT NULL,
+  `total_price` decimal(10,2) NOT NULL,
+  `order_date` datetime NOT NULL,
+  `customer_first_name` varchar(100) NOT NULL,
+  `customer_last_name` varchar(100) NOT NULL,
+  `customer_email` varchar(255) DEFAULT NULL,
+  `customer_phone` varchar(50) DEFAULT NULL,
+  `street_address` varchar(255) DEFAULT NULL,
+  `postal_code` char(10) DEFAULT NULL,
+  `payment_method` varchar(100) DEFAULT NULL,
+  `shipping_method` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`postal_code`) REFERENCES `postal_code` (`postal_code`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_item` (
+  `order_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT '1',
+  `unit_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`order_item_id`),
+  CONSTRAINT `order_item_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_item_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

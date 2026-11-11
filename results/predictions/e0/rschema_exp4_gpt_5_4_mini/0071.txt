@@ -1,0 +1,38 @@
+-- Schema for database: rschema_0071
+CREATE TABLE `mine` (
+  `mine_id` int(11) NOT NULL AUTO_INCREMENT,
+  `mine_number` varchar(50) NOT NULL,
+  `mine_name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `person_in_charge` varchar(255) NOT NULL,
+  PRIMARY KEY (`mine_id`),
+  UNIQUE KEY `mine_number` (`mine_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `safety_officer` (
+  `safety_officer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `mine_id` int(11) NOT NULL,
+  `safety_officer_number` varchar(50) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(10) NOT NULL,
+  `telephone_number` varchar(20) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  PRIMARY KEY (`safety_officer_id`),
+  UNIQUE KEY `safety_officer_number` (`safety_officer_number`),
+  KEY `mine_id` (`mine_id`),
+  CONSTRAINT `safety_officer_ibfk_1` FOREIGN KEY (`mine_id`) REFERENCES `mine` (`mine_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `safety_inspection` (
+  `inspection_id` int(11) NOT NULL AUTO_INCREMENT,
+  `mine_id` int(11) NOT NULL,
+  `inspection_date` datetime NOT NULL,
+  `inspection_content` text NOT NULL,
+  `inspection_results` text NOT NULL,
+  `inspector_id` int(11) NOT NULL,
+  PRIMARY KEY (`inspection_id`),
+  KEY `mine_id` (`mine_id`),
+  KEY `inspector_id` (`inspector_id`),
+  CONSTRAINT `safety_inspection_ibfk_1` FOREIGN KEY (`mine_id`) REFERENCES `mine` (`mine_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `safety_inspection_ibfk_2` FOREIGN KEY (`inspector_id`) REFERENCES `safety_officer` (`safety_officer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

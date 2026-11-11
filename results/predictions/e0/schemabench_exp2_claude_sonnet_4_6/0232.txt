@@ -1,0 +1,103 @@
+-- Schema for database: schemabench_0232
+
+CREATE TABLE `ocean_region` (
+  `ocean_region_id` int(11) NOT NULL AUTO_INCREMENT,
+  `region_code` varchar(10) NOT NULL,
+  `region_name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ocean_region_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `channel_type` (
+  `channel_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_code` varchar(20) NOT NULL,
+  `type_name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`channel_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `channel_name` (
+  `channel_name_id` int(11) NOT NULL AUTO_INCREMENT,
+  `channel_label` varchar(50) NOT NULL,
+  `channel_type_id` int(11) NOT NULL,
+  `frequency_mhz` decimal(10,4) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`channel_name_id`),
+  CONSTRAINT `channel_name_ibfk_1` FOREIGN KEY (`channel_type_id`) REFERENCES `channel_type` (`channel_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ground_station` (
+  `ground_station_id` int(11) NOT NULL AUTO_INCREMENT,
+  `station_code` varchar(20) NOT NULL,
+  `station_name` varchar(100) NOT NULL,
+  `location` varchar(100) DEFAULT NULL,
+  `ocean_region_id` int(11) NOT NULL,
+  PRIMARY KEY (`ground_station_id`),
+  CONSTRAINT `ground_station_ibfk_1` FOREIGN KEY (`ocean_region_id`) REFERENCES `ocean_region` (`ocean_region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `satellite` (
+  `satellite_id` int(11) NOT NULL AUTO_INCREMENT,
+  `satellite_name` varchar(100) NOT NULL,
+  `operator` varchar(100) DEFAULT NULL,
+  `ocean_region_id` int(11) NOT NULL,
+  `orbital_position` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`satellite_id`),
+  CONSTRAINT `satellite_ibfk_1` FOREIGN KEY (`ocean_region_id`) REFERENCES `ocean_region` (`ocean_region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `aircraft` (
+  `aircraft_id` int(11) NOT NULL AUTO_INCREMENT,
+  `flight_number` varchar(20) NOT NULL,
+  `registration` varchar(20) DEFAULT NULL,
+  `aircraft_type` varchar(50) DEFAULT NULL,
+  `airline` varchar(100) DEFAULT NULL,
+  `departure_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`aircraft_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `communication_log` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `aircraft_id` int(11) NOT NULL,
+  `satellite_id` int(11) NOT NULL,
+  `ground_station_id` int(11) NOT NULL,
+  `channel_name_id` int(11) NOT NULL,
+  `log_timestamp` datetime NOT NULL,
+  `message_type` varchar(50) DEFAULT NULL,
+  `burst_timing_offset` int(11) DEFAULT NULL,
+  `burst_frequency_offset` decimal(10,4) DEFAULT NULL,
+  `signal_strength` decimal(8,4) DEFAULT NULL,
+  `raw_message` text DEFAULT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`log_id`),
+  CONSTRAINT `communication_log_ibfk_1` FOREIGN KEY (`aircraft_id`) REFERENCES `aircraft` (`aircraft_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `communication_log_ibfk_2` FOREIGN KEY (`satellite_id`) REFERENCES `satellite` (`satellite_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `communication_log_ibfk_3` FOREIGN KEY (`ground_station_id`) REFERENCES `ground_station` (`ground_station_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `communication_log_ibfk_4` FOREIGN KEY (`channel_name_id`) REFERENCES `channel_name` (`channel_name_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bto_analysis` (
+  `bto_analysis_id` int(11) NOT NULL AUTO_INCREMENT,
+  `log_id` int(11) NOT NULL,
+  `bto_value` int(11) NOT NULL,
+  `estimated_distance_km` decimal(12,4) DEFAULT NULL,
+  `arc_radius_km` decimal(12,4) DEFAULT NULL,
+  `analysis_notes` varchar(255) DEFAULT NULL,
+  `analyzed_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`bto_analysis_id`),
+  CONSTRAINT `bto_analysis_ibfk_1` FOREIGN KEY (`log_id`) REFERENCES `communication_log` (`log_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bfo_analysis` (
+  `bfo_analysis_id` int(11) NOT NULL AUTO_INCREMENT,
+  `log_id` int(11) NOT NULL,
+  `bfo_value` decimal(10,4) NOT NULL,
+  `doppler_correction` decimal(10,4) DEFAULT NULL,
+  `oscillator_drift` decimal(10,4) DEFAULT NULL,
+  `estimated_speed_kmh` decimal(10,4) DEFAULT NULL,
+  `estimated_heading_deg` decimal(7,4) DEFAULT NULL,
+  `analysis_notes` varchar(255) DEFAULT NULL,
+  `analyzed_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`bfo_analysis_id`),
+  CONSTRAINT `bfo_analysis_ibfk_1` FOREIGN KEY (`log_id`) REFERENCES `communication_log` (`log_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

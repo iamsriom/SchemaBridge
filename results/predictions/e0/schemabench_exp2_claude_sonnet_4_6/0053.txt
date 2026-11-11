@@ -1,0 +1,112 @@
+-- Schema for database: schemabench_0053
+
+CREATE TABLE `canvas_users` (
+  `id` char(36) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `username` varchar(255) DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `summary` text DEFAULT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
+  `dark_mode` tinyint(1) NOT NULL DEFAULT 0,
+  `digest` tinyint(1) NOT NULL DEFAULT 0,
+  `locale` varchar(64) DEFAULT NULL,
+  `role` tinyint(4) NOT NULL DEFAULT 1,
+  `remember_token` varchar(100) DEFAULT NULL,
+  `email_verified_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `canvas_users_email_unique` (`email`),
+  UNIQUE KEY `canvas_users_username_unique` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `canvas_posts` (
+  `id` char(36) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `summary` text DEFAULT NULL,
+  `body` longtext DEFAULT NULL,
+  `published_at` datetime DEFAULT NULL,
+  `featured_image` varchar(255) DEFAULT NULL,
+  `featured_image_caption` varchar(255) DEFAULT NULL,
+  `meta` json DEFAULT NULL,
+  `user_id` char(36) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `canvas_posts_slug_unique` (`slug`),
+  KEY `canvas_posts_user_id_foreign` (`user_id`),
+  CONSTRAINT `canvas_posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `canvas_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `canvas_tags` (
+  `id` char(36) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `user_id` char(36) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `canvas_tags_slug_unique` (`slug`),
+  KEY `canvas_tags_user_id_foreign` (`user_id`),
+  CONSTRAINT `canvas_tags_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `canvas_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `canvas_topics` (
+  `id` char(36) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `user_id` char(36) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `canvas_topics_slug_unique` (`slug`),
+  KEY `canvas_topics_user_id_foreign` (`user_id`),
+  CONSTRAINT `canvas_topics_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `canvas_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `canvas_posts_tags` (
+  `post_id` char(36) NOT NULL,
+  `tag_id` char(36) NOT NULL,
+  PRIMARY KEY (`post_id`, `tag_id`),
+  KEY `canvas_posts_tags_tag_id_foreign` (`tag_id`),
+  CONSTRAINT `canvas_posts_tags_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `canvas_posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `canvas_posts_tags_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `canvas_tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `canvas_posts_topics` (
+  `post_id` char(36) NOT NULL,
+  `topic_id` char(36) NOT NULL,
+  PRIMARY KEY (`post_id`, `topic_id`),
+  KEY `canvas_posts_topics_topic_id_foreign` (`topic_id`),
+  CONSTRAINT `canvas_posts_topics_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `canvas_posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `canvas_posts_topics_ibfk_2` FOREIGN KEY (`topic_id`) REFERENCES `canvas_topics` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `canvas_views` (
+  `id` char(36) NOT NULL,
+  `post_id` char(36) NOT NULL,
+  `ip` varchar(45) DEFAULT NULL,
+  `agent` text DEFAULT NULL,
+  `referer` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `canvas_views_post_id_foreign` (`post_id`),
+  CONSTRAINT `canvas_views_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `canvas_posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `canvas_visits` (
+  `id` char(36) NOT NULL,
+  `post_id` char(36) NOT NULL,
+  `ip` varchar(45) DEFAULT NULL,
+  `agent` text DEFAULT NULL,
+  `referer` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `canvas_visits_post_id_foreign` (`post_id`),
+  CONSTRAINT `canvas_visits_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `canvas_posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

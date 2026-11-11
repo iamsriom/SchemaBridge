@@ -1,0 +1,30 @@
+{
+  "text_number": 53,
+  "id": "SB-053",
+  "llm": "gpt54mini",
+  "model_id": "gpt-5.4-mini",
+  "database": "schemabench_0053",
+  "question": "Laravel Publishing Platform: Canvas\n\n 1) Background / Context\nCanvas is an open-source blogging package designed to integrate seamlessly into existing Laravel applications. Inspired by Medium, the platform offers a clean, distraction-free writing environment and advanced analytics to help users understand content performance and reader engagement.\n\n 2) Objectives\nThe primary objective of Canvas is to provide a robust and user-friendly blogging platform that can be easily incorporated into a Laravel project. It aims to facilitate content creation, management, and detailed analytics on user interaction.\n\n 3) Stakeholders & Users\n- Administrators: Manage overall platform settings, user roles, and permissions.\n- Editors: Publish and manage posts (including those of other users).\n- Contributors: Create and manage their own posts, without publishing rights.\n- Readers: Access published content and contribute to viewing statistics.\n\n 4) Functional Descriptions\n- User Management: \n  - Default admin user setup on installation.\n  - CRUD operations for user profiles and role assignments.\n\n- Content Management:\n  - Create, edit, and delete posts with features like tagging and categorization by topics.\n  - Schedule posts with publishing dates.\n\n- Roles and Permissions:\n  - Three predefined roles: Contributor, Editor, Admin.\n  - Role-specific access for content creation, management, and publication.\n\n- Analytics:\n  - Track monthly trends and reader traffic.\n  - Collect and display post view data based on IP, user agent, and referer.\n\n 5) Non-Functional Descriptions\n- Performance: The platform should efficiently support typical load usage scenarios consistent with medium-sized blogging environments.\n- Usability: The interface should be intuitive and easy to navigate for all roles.\n- Security: Ensure secure user authentication and data protection, especially regarding publish and view analytics data linkage.",
+  "ddl": "-- Schema for database: schemabench_0053\nCREATE TABLE `roles` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `slug` varchar(255) NOT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `roles_slug_unique` (`slug`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `role_id` int(11) NOT NULL,\n  `remember_token` varchar(100) DEFAULT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `users_email_unique` (`email`),\n  KEY `users_role_id_index` (`role_id`),\n  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `topics` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `slug` varchar(255) NOT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `topics_slug_unique` (`slug`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `posts` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `topic_id` int(11) DEFAULT NULL,\n  `title` varchar(255) NOT NULL,\n  `slug` varchar(255) NOT NULL,\n  `excerpt` text DEFAULT NULL,\n  `body` longtext NOT NULL,\n  `published_at` datetime DEFAULT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `posts_slug_unique` (`slug`),\n  KEY `posts_user_id_index` (`user_id`),\n  KEY `posts_topic_id_index` (`topic_id`),\n  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `posts_ibfk_2` FOREIGN KEY (`topic_id`) REFERENCES `topics` (`id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `tags` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `slug` varchar(255) NOT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `tags_slug_unique` (`slug`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `post_tag` (\n  `post_id` int(11) NOT NULL,\n  `tag_id` int(11) NOT NULL,\n  PRIMARY KEY (`post_id`,`tag_id`),\n  KEY `post_tag_tag_id_index` (`tag_id`),\n  CONSTRAINT `post_tag_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `post_tag_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `post_views` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `post_id` int(11) NOT NULL,\n  `user_id` int(11) DEFAULT NULL,\n  `ip_address` varchar(45) NOT NULL,\n  `user_agent` varchar(255) DEFAULT NULL,\n  `referer` varchar(255) DEFAULT NULL,\n  `viewed_at` datetime NOT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  KEY `post_views_post_id_index` (`post_id`),\n  KEY `post_views_user_id_index` (`user_id`),\n  CONSTRAINT `post_views_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `post_views_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "roles",
+      "users",
+      "topics",
+      "posts",
+      "tags",
+      "post_tag",
+      "post_views"
+    ],
+    "columns_by_table": {
+      "roles": [],
+      "users": [],
+      "topics": [],
+      "posts": [],
+      "tags": [],
+      "post_tag": [],
+      "post_views": []
+    }
+  }
+}

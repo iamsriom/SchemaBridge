@@ -1,0 +1,26 @@
+{
+  "text_number": 63,
+  "id": "SB-063",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "schemabench_0063",
+  "question": "Background / Context\n\nLarametrics is designed for Laravel applications as a self-hosted metrics and notifications platform. It functions similarly to simplified versions of services like Sentry or Rollbar by monitoring and notifying changes within the application. It captures changes to models, log activity, and route requests, providing timely notifications via email or Slack.\n\n Objectives\n\n- Monitor changes in Laravel applications’ models, logs, and route requests.\n- Provide alerts for specified triggers through predefined notification channels such as email and Slack.\n- Offer a responsive dashboard using Tabler to display stored events and metrics since the installation of Larametrics.\n\n Stakeholders & Users\n\n- Application Developers: Use the platform to track changes and receive notifications about significant events.\n- System Administrators: Monitor system activity and errors for maintenance and troubleshooting.\n- Business Analysts: Analyze metrics for model and application usage.\n\n Functional Descriptions\n\n1. Model Monitoring:\n   - Track creation, updates, or deletion of models.\n   - Capture details like user actions and model specifics.\n   \n2. Log Monitoring:\n   - Record log entries based on severity (e.g., notice, info, error).\n   - Set up notifications for specific log actions such as errors.\n\n3. Request Tracking:\n   - Log incoming requests, including method, URI, IP address, and headers.\n   - Analyze request times using start and end timestamps.\n\n4. Notifications System:\n   - Define custom triggers for different actions (e.g., errors, model creation).\n   - Configure notifications to be sent via email or Slack based on rulesets.\n\n5. Dashboard:\n   - Deliver a clean, responsive interface displaying all collected data.\n   - Utilize Tabler for user-friendly navigation and display.\n\n Non-Functional Descriptions\n\n- Scalability: Efficiently handle increasing number of logs and model changes.\n- Usability: User-friendly interface that provides quick access to relevant data.\n- Performance: Low latency in logging and notification delivery.\n- Security: Ensure that all captured data, such as user actions and error logs, are securely stored and accessed.",
+  "ddl": "-- Schema for database: schemabench_0063\n\nCREATE TABLE `larametrics_model_changes` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `model` varchar(255) NOT NULL,\n  `model_id` int(11) DEFAULT NULL,\n  `action` varchar(50) NOT NULL,\n  `user_id` int(11) DEFAULT NULL,\n  `before` text DEFAULT NULL,\n  `after` text DEFAULT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `larametrics_logs` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `level` varchar(50) NOT NULL,\n  `message` text NOT NULL,\n  `context` text DEFAULT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `larametrics_requests` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `method` varchar(10) NOT NULL,\n  `uri` varchar(255) NOT NULL,\n  `ip_address` varchar(45) DEFAULT NULL,\n  `headers` text DEFAULT NULL,\n  `response_code` int(11) DEFAULT NULL,\n  `started_at` datetime DEFAULT NULL,\n  `ended_at` datetime DEFAULT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `larametrics_notification_rules` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `type` varchar(50) NOT NULL,\n  `action` varchar(50) NOT NULL,\n  `value` varchar(255) DEFAULT NULL,\n  `channel` varchar(50) NOT NULL,\n  `channel_address` varchar(255) NOT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `larametrics_notifications` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `notification_rule_id` int(11) NOT NULL,\n  `notifiable_type` varchar(255) NOT NULL,\n  `notifiable_id` int(11) NOT NULL,\n  `channel` varchar(50) NOT NULL,\n  `channel_address` varchar(255) NOT NULL,\n  `sent_at` datetime DEFAULT NULL,\n  `created_at` datetime DEFAULT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `larametrics_notifications_ibfk_1` FOREIGN KEY (`notification_rule_id`) REFERENCES `larametrics_notification_rules` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "larametrics_model_changes",
+      "larametrics_logs",
+      "larametrics_requests",
+      "larametrics_notification_rules",
+      "larametrics_notifications"
+    ],
+    "columns_by_table": {
+      "larametrics_model_changes": [],
+      "larametrics_logs": [],
+      "larametrics_requests": [],
+      "larametrics_notification_rules": [],
+      "larametrics_notifications": []
+    }
+  }
+}

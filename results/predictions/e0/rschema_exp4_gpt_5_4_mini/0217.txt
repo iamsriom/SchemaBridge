@@ -1,0 +1,62 @@
+-- Schema for database: rschema_0217
+CREATE TABLE `courses` (
+  `course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `teacher` varchar(255) NOT NULL,
+  `class_hours` int(11) NOT NULL,
+  `description` text DEFAULT NULL,
+  `schedule` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`course_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `students` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `grade` varchar(50) NOT NULL,
+  `class` varchar(50) NOT NULL,
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_enrollments` (
+  `student_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  PRIMARY KEY (`student_id`,`course_id`),
+  CONSTRAINT `course_enrollments_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_enrollments_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_email` (`email`),
+  UNIQUE KEY `uk_users_username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `system_settings` (
+  `setting_id` int(11) NOT NULL AUTO_INCREMENT,
+  `system_name` varchar(255) NOT NULL,
+  `theme` varchar(100) NOT NULL,
+  `page_configuration` text DEFAULT NULL,
+  `version` varchar(50) NOT NULL,
+  PRIMARY KEY (`setting_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tools` (
+  `tool_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `asset_number` varchar(100) NOT NULL,
+  `holder` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`tool_id`),
+  UNIQUE KEY `uk_tools_asset_number` (`asset_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tool_loan_records` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `borrower` varchar(255) NOT NULL,
+  `asset_number` varchar(100) NOT NULL,
+  `time` datetime NOT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `tool_loan_records_ibfk_1` FOREIGN KEY (`asset_number`) REFERENCES `tools` (`asset_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,116 @@
+-- Schema for database: schemabench_0120
+CREATE TABLE `teams` (
+  `team_id` int(11) NOT NULL,
+  `team_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `seasons` (
+  `season` int(11) NOT NULL,
+  PRIMARY KEY (`season`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `regular_season_results` (
+  `season` int(11) NOT NULL,
+  `daynum` int(11) NOT NULL,
+  `wteam_id` int(11) NOT NULL,
+  `wscore` int(11) NOT NULL,
+  `lteam_id` int(11) NOT NULL,
+  `lscore` int(11) NOT NULL,
+  `wloc` char(1) DEFAULT NULL,
+  `numot` int(11) NOT NULL,
+  PRIMARY KEY (`season`, `daynum`, `wteam_id`, `lteam_id`),
+  KEY `regular_season_results_ibfk_1` (`wteam_id`),
+  KEY `regular_season_results_ibfk_2` (`lteam_id`),
+  KEY `regular_season_results_ibfk_3` (`season`),
+  CONSTRAINT `regular_season_results_ibfk_1` FOREIGN KEY (`wteam_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `regular_season_results_ibfk_2` FOREIGN KEY (`lteam_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `regular_season_results_ibfk_3` FOREIGN KEY (`season`) REFERENCES `seasons` (`season`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tourney_results` (
+  `season` int(11) NOT NULL,
+  `daynum` int(11) NOT NULL,
+  `wteam_id` int(11) NOT NULL,
+  `wscore` int(11) NOT NULL,
+  `lteam_id` int(11) NOT NULL,
+  `lscore` int(11) NOT NULL,
+  `wloc` char(1) DEFAULT NULL,
+  `numot` int(11) NOT NULL,
+  PRIMARY KEY (`season`, `daynum`, `wteam_id`, `lteam_id`),
+  KEY `tourney_results_ibfk_1` (`wteam_id`),
+  KEY `tourney_results_ibfk_2` (`lteam_id`),
+  KEY `tourney_results_ibfk_3` (`season`),
+  CONSTRAINT `tourney_results_ibfk_1` FOREIGN KEY (`wteam_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tourney_results_ibfk_2` FOREIGN KEY (`lteam_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tourney_results_ibfk_3` FOREIGN KEY (`season`) REFERENCES `seasons` (`season`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `seeds` (
+  `season` int(11) NOT NULL,
+  `seed` char(3) NOT NULL,
+  `team_id` int(11) NOT NULL,
+  PRIMARY KEY (`season`, `seed`),
+  KEY `seeds_ibfk_1` (`team_id`),
+  KEY `seeds_ibfk_2` (`season`),
+  CONSTRAINT `seeds_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `seeds_ibfk_2` FOREIGN KEY (`season`) REFERENCES `seasons` (`season`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `slots` (
+  `slot` varchar(255) NOT NULL,
+  `strongseed` char(3) DEFAULT NULL,
+  `weakseed` char(3) DEFAULT NULL,
+  PRIMARY KEY (`slot`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `team_metrics` (
+  `season` int(11) NOT NULL,
+  `team_id` int(11) NOT NULL,
+  `offensive_efficiency` decimal(10,4) DEFAULT NULL,
+  `defensive_efficiency` decimal(10,4) DEFAULT NULL,
+  `tempo` decimal(10,4) DEFAULT NULL,
+  `strength_of_schedule` decimal(10,4) DEFAULT NULL,
+  PRIMARY KEY (`season`, `team_id`),
+  KEY `team_metrics_ibfk_1` (`team_id`),
+  KEY `team_metrics_ibfk_2` (`season`),
+  CONSTRAINT `team_metrics_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `team_metrics_ibfk_2` FOREIGN KEY (`season`) REFERENCES `seasons` (`season`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prediction_models` (
+  `model_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `predictions` (
+  `prediction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_id` int(11) NOT NULL,
+  `season` int(11) NOT NULL,
+  `slot` varchar(255) DEFAULT NULL,
+  `team1_id` int(11) NOT NULL,
+  `team2_id` int(11) NOT NULL,
+  `predicted_winner_id` int(11) NOT NULL,
+  `predicted_probability` decimal(6,4) NOT NULL,
+  `actual_winner_id` int(11) DEFAULT NULL,
+  `is_correct` tinyint(1) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`prediction_id`),
+  KEY `predictions_ibfk_1` (`model_id`),
+  KEY `predictions_ibfk_2` (`season`),
+  KEY `predictions_ibfk_3` (`slot`),
+  KEY `predictions_ibfk_4` (`team1_id`),
+  KEY `predictions_ibfk_5` (`team2_id`),
+  KEY `predictions_ibfk_6` (`predicted_winner_id`),
+  KEY `predictions_ibfk_7` (`actual_winner_id`),
+  CONSTRAINT `predictions_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `prediction_models` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `predictions_ibfk_2` FOREIGN KEY (`season`) REFERENCES `seasons` (`season`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `predictions_ibfk_3` FOREIGN KEY (`slot`) REFERENCES `slots` (`slot`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `predictions_ibfk_4` FOREIGN KEY (`team1_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `predictions_ibfk_5` FOREIGN KEY (`team2_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `predictions_ibfk_6` FOREIGN KEY (`predicted_winner_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `predictions_ibfk_7` FOREIGN KEY (`actual_winner_id`) REFERENCES `teams` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

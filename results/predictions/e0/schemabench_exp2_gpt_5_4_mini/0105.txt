@@ -1,0 +1,28 @@
+-- Schema for database: schemabench_0105
+CREATE TABLE `term` (
+  `term_id` int(11) NOT NULL AUTO_INCREMENT,
+  `term_text` varchar(255) NOT NULL,
+  `term_type` varchar(50) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`term_id`),
+  UNIQUE KEY `term_text` (`term_text`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sentence` (
+  `sentence_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sentence_text` varchar(1000) NOT NULL,
+  `classification` enum('positive','negative') NOT NULL,
+  `word_count` int(11) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`sentence_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sentence_term` (
+  `sentence_id` int(11) NOT NULL,
+  `term_id` int(11) NOT NULL,
+  `position_in_sentence` int(11) NOT NULL,
+  PRIMARY KEY (`sentence_id`,`term_id`,`position_in_sentence`),
+  KEY `term_id` (`term_id`),
+  CONSTRAINT `sentence_term_ibfk_1` FOREIGN KEY (`sentence_id`) REFERENCES `sentence` (`sentence_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sentence_term_ibfk_2` FOREIGN KEY (`term_id`) REFERENCES `term` (`term_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

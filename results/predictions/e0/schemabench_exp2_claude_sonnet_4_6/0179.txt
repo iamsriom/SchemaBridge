@@ -1,0 +1,115 @@
+-- Schema for database: schemabench_0179
+
+CREATE TABLE `circuit` (
+  `circuit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `length_km` decimal(6,3) DEFAULT NULL,
+  `configuration` varchar(255) DEFAULT NULL,
+  `configuration_year` year(4) DEFAULT NULL,
+  PRIMARY KEY (`circuit_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `race` (
+  `race_id` int(11) NOT NULL AUTO_INCREMENT,
+  `year` year(4) NOT NULL,
+  `date` date DEFAULT NULL,
+  `start_time` time DEFAULT NULL,
+  `circuit_id` int(11) NOT NULL,
+  `is_cancelled` tinyint(1) NOT NULL DEFAULT 0,
+  `cancellation_reason` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`race_id`),
+  CONSTRAINT `race_ibfk_1` FOREIGN KEY (`circuit_id`) REFERENCES `circuit` (`circuit_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `country` (
+  `country_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `code` char(3) DEFAULT NULL,
+  PRIMARY KEY (`country_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `driver` (
+  `driver_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `nationality` varchar(100) DEFAULT NULL,
+  `country_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`driver_id`),
+  CONSTRAINT `driver_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `team` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `country_id` int(11) DEFAULT NULL,
+  `is_private_entrant` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`team_id`),
+  CONSTRAINT `team_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tyre` (
+  `tyre_id` int(11) NOT NULL AUTO_INCREMENT,
+  `brand` varchar(100) NOT NULL,
+  PRIMARY KEY (`tyre_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `car` (
+  `car_id` int(11) NOT NULL AUTO_INCREMENT,
+  `class` varchar(50) DEFAULT NULL,
+  `chassis` varchar(100) DEFAULT NULL,
+  `engine` varchar(100) DEFAULT NULL,
+  `tyre_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`car_id`),
+  CONSTRAINT `car_ibfk_1` FOREIGN KEY (`tyre_id`) REFERENCES `tyre` (`tyre_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `result` (
+  `result_id` int(11) NOT NULL AUTO_INCREMENT,
+  `race_id` int(11) NOT NULL,
+  `car_id` int(11) NOT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  `position` int(11) DEFAULT NULL,
+  `class_position` int(11) DEFAULT NULL,
+  `laps_completed` int(11) DEFAULT NULL,
+  `distance_km` decimal(10,3) DEFAULT NULL,
+  `race_time` varchar(50) DEFAULT NULL,
+  `status` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`result_id`),
+  CONSTRAINT `result_ibfk_1` FOREIGN KEY (`race_id`) REFERENCES `race` (`race_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `result_ibfk_2` FOREIGN KEY (`car_id`) REFERENCES `car` (`car_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `result_ibfk_3` FOREIGN KEY (`team_id`) REFERENCES `team` (`team_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `result_driver` (
+  `result_driver_id` int(11) NOT NULL AUTO_INCREMENT,
+  `result_id` int(11) NOT NULL,
+  `driver_id` int(11) NOT NULL,
+  PRIMARY KEY (`result_driver_id`),
+  CONSTRAINT `result_driver_ibfk_1` FOREIGN KEY (`result_id`) REFERENCES `result` (`result_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `result_driver_ibfk_2` FOREIGN KEY (`driver_id`) REFERENCES `driver` (`driver_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `result_buffer` (
+  `buffer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `raw_data` text DEFAULT NULL,
+  `race_year` year(4) DEFAULT NULL,
+  `car_number` varchar(20) DEFAULT NULL,
+  `team_name` varchar(255) DEFAULT NULL,
+  `driver_names` varchar(500) DEFAULT NULL,
+  `chassis` varchar(100) DEFAULT NULL,
+  `engine` varchar(100) DEFAULT NULL,
+  `tyre_brand` varchar(100) DEFAULT NULL,
+  `class` varchar(50) DEFAULT NULL,
+  `position` int(11) DEFAULT NULL,
+  `laps_completed` int(11) DEFAULT NULL,
+  `distance_km` decimal(10,3) DEFAULT NULL,
+  `race_time` varchar(50) DEFAULT NULL,
+  `status` varchar(100) DEFAULT NULL,
+  `is_processed` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `processed_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`buffer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

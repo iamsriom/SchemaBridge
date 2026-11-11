@@ -1,0 +1,28 @@
+{
+  "text_number": 470,
+  "id": "67552f0b13602ec03b41aae9",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0470",
+  "question": "The business requirements description for the ordering system is as follows: Enterprise employees can view menus and place orders through the system, while restaurant staff are responsible for preparing meals, generating payment requests, and requesting meal deliveries. The enterprise has multiple employees, each with an employee ID, name, phone number, and address. The system offers multiple menu items, each with a dish ID, dish name, price, and special offer indicator. Registered enterprise employees can place orders, with each order having an order number, employee ID, menu number, quantity, total price, delivery time, delivery address, and payment method. Each order requires recording delivery information, including a delivery record ID, order ID, delivery time, and delivery person ID. Delivery personnel have a delivery person ID, name, phone number, and address. Restaurant staff generate payment requests based on orders, with each payment request containing an order ID, employee ID, payment status, and payment amount.",
+  "ddl": "-- Schema for database: rschema_0470\n\nCREATE TABLE `employee` (\n  `employee_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `phone_number` varchar(20) DEFAULT NULL,\n  `address` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`employee_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `menu_item` (\n  `dish_id` int(11) NOT NULL AUTO_INCREMENT,\n  `dish_name` varchar(255) NOT NULL,\n  `price` decimal(10,2) NOT NULL,\n  `special_offer` tinyint(1) NOT NULL DEFAULT 0,\n  PRIMARY KEY (`dish_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `delivery_person` (\n  `delivery_person_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `phone_number` varchar(20) DEFAULT NULL,\n  `address` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`delivery_person_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `order` (\n  `order_id` int(11) NOT NULL AUTO_INCREMENT,\n  `employee_id` int(11) NOT NULL,\n  `dish_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `total_price` decimal(10,2) NOT NULL,\n  `delivery_time` datetime DEFAULT NULL,\n  `delivery_address` varchar(255) DEFAULT NULL,\n  `payment_method` varchar(50) DEFAULT NULL,\n  PRIMARY KEY (`order_id`),\n  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `order_ibfk_2` FOREIGN KEY (`dish_id`) REFERENCES `menu_item` (`dish_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `delivery_record` (\n  `delivery_record_id` int(11) NOT NULL AUTO_INCREMENT,\n  `order_id` int(11) NOT NULL,\n  `delivery_time` datetime DEFAULT NULL,\n  `delivery_person_id` int(11) NOT NULL,\n  PRIMARY KEY (`delivery_record_id`),\n  CONSTRAINT `delivery_record_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `delivery_record_ibfk_2` FOREIGN KEY (`delivery_person_id`) REFERENCES `delivery_person` (`delivery_person_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `payment_request` (\n  `payment_request_id` int(11) NOT NULL AUTO_INCREMENT,\n  `order_id` int(11) NOT NULL,\n  `employee_id` int(11) NOT NULL,\n  `payment_status` varchar(50) NOT NULL DEFAULT 'pending',\n  `payment_amount` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`payment_request_id`),\n  CONSTRAINT `payment_request_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `payment_request_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "employee",
+      "menu_item",
+      "delivery_person",
+      "order",
+      "delivery_record",
+      "payment_request"
+    ],
+    "columns_by_table": {
+      "employee": [],
+      "menu_item": [],
+      "delivery_person": [],
+      "order": [],
+      "delivery_record": [],
+      "payment_request": []
+    }
+  }
+}

@@ -1,0 +1,74 @@
+-- Schema for database: rschema_0437
+
+CREATE TABLE `student` (
+  `student_id` varchar(20) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `class` varchar(50) NOT NULL,
+  `major` varchar(100) NOT NULL,
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_title` varchar(200) NOT NULL,
+  `task_description` text DEFAULT NULL,
+  `task_start_date` datetime NOT NULL,
+  `task_end_date` datetime NOT NULL,
+  `task_location` varchar(200) DEFAULT NULL,
+  PRIMARY KEY (`task_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `simulation_module` (
+  `module_id` int(11) NOT NULL AUTO_INCREMENT,
+  `module_name` varchar(200) NOT NULL,
+  `module_type` varchar(50) NOT NULL,
+  `module_description` text DEFAULT NULL,
+  `module_code` text DEFAULT NULL,
+  PRIMARY KEY (`module_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_assignment` (
+  `assignment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` varchar(20) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `completion_status` varchar(50) DEFAULT 'pending',
+  `assigned_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`assignment_id`),
+  CONSTRAINT `task_assignment_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_assignment_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `simulation_result` (
+  `result_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` varchar(20) NOT NULL,
+  `module_id` int(11) NOT NULL,
+  `simulation_result_data` text DEFAULT NULL,
+  `result_analysis` text DEFAULT NULL,
+  `simulation_date` datetime NOT NULL,
+  PRIMARY KEY (`result_id`),
+  CONSTRAINT `simulation_result_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `simulation_result_ibfk_2` FOREIGN KEY (`module_id`) REFERENCES `simulation_module` (`module_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `thesis` (
+  `thesis_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` varchar(20) NOT NULL,
+  `thesis_title` varchar(300) NOT NULL,
+  `thesis_content` longtext DEFAULT NULL,
+  `submission_date` datetime NOT NULL,
+  PRIMARY KEY (`thesis_id`),
+  CONSTRAINT `thesis_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_design_report` (
+  `report_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` varchar(20) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `result_id` int(11) DEFAULT NULL,
+  `report_content` text DEFAULT NULL,
+  `generated_date` datetime NOT NULL,
+  PRIMARY KEY (`report_id`),
+  CONSTRAINT `course_design_report_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_design_report_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_design_report_ibfk_3` FOREIGN KEY (`result_id`) REFERENCES `simulation_result` (`result_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

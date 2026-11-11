@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0308
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `user_name` varchar(255) NOT NULL,
+  `abbreviation` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `active_status` tinyint(1) NOT NULL DEFAULT '1',
+  `status_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `abbreviation` (`abbreviation`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project` (
+  `project_id` int(11) NOT NULL,
+  `project_name` varchar(255) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `project_manager_id` int(11) NOT NULL,
+  `start_date` date DEFAULT NULL,
+  `status` varchar(100) DEFAULT NULL,
+  `scale` varchar(100) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`project_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `project_manager_id` (`project_manager_id`),
+  CONSTRAINT `project_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_ibfk_2` FOREIGN KEY (`project_manager_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `report` (
+  `report_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `report_date` date DEFAULT NULL,
+  `report_time` time DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `creator_id` int(11) NOT NULL,
+  PRIMARY KEY (`report_id`),
+  KEY `project_id` (`project_id`),
+  KEY `creator_id` (`creator_id`),
+  CONSTRAINT `report_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `report_ibfk_2` FOREIGN KEY (`creator_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

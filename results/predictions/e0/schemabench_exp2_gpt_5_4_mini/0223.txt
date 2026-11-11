@@ -1,0 +1,47 @@
+-- Schema for database: schemabench_0223
+CREATE TABLE `positions` (
+  `position_id` int(11) NOT NULL AUTO_INCREMENT,
+  `position_name` varchar(255) NOT NULL,
+  `position_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`position_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `candidates` (
+  `candidate_id` int(11) NOT NULL AUTO_INCREMENT,
+  `position_id` int(11) NOT NULL,
+  `candidate_name` varchar(255) NOT NULL,
+  `designation` varchar(255) DEFAULT NULL,
+  `workplace` varchar(255) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `photo` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`candidate_id`),
+  KEY `candidates_ibfk_1` (`position_id`),
+  CONSTRAINT `candidates_ibfk_1` FOREIGN KEY (`position_id`) REFERENCES `positions` (`position_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `voters` (
+  `voter_id` int(11) NOT NULL AUTO_INCREMENT,
+  `voter_name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `has_voted` tinyint(1) NOT NULL DEFAULT '0',
+  `is_eligible` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`voter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `votes` (
+  `vote_id` int(11) NOT NULL AUTO_INCREMENT,
+  `voter_id` int(11) NOT NULL,
+  `candidate_id` int(11) NOT NULL,
+  `position_id` int(11) NOT NULL,
+  `cast_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`vote_id`),
+  UNIQUE KEY `votes_uniq_1` (`voter_id`,`position_id`),
+  KEY `votes_ibfk_1` (`voter_id`),
+  KEY `votes_ibfk_2` (`candidate_id`),
+  KEY `votes_ibfk_3` (`position_id`),
+  CONSTRAINT `votes_ibfk_1` FOREIGN KEY (`voter_id`) REFERENCES `voters` (`voter_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `votes_ibfk_2` FOREIGN KEY (`candidate_id`) REFERENCES `candidates` (`candidate_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `votes_ibfk_3` FOREIGN KEY (`position_id`) REFERENCES `positions` (`position_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

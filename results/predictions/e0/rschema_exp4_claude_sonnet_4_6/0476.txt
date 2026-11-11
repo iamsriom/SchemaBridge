@@ -1,0 +1,124 @@
+-- Schema for database: rschema_0476
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `contact_number` varchar(20) NOT NULL,
+  `address` varchar(500) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_order` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `expected_delivery_date` datetime NOT NULL,
+  `order_status` varchar(50) NOT NULL DEFAULT 'pending',
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `sales_order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pizza` (
+  `pizza_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pizza_name` varchar(255) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`pizza_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `raw_material` (
+  `material_id` int(11) NOT NULL AUTO_INCREMENT,
+  `material_name` varchar(255) NOT NULL,
+  `unit` varchar(50) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`material_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pizza_recipe` (
+  `recipe_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pizza_id` int(11) NOT NULL,
+  `material_id` int(11) NOT NULL,
+  `quantity_required` decimal(10,3) NOT NULL,
+  PRIMARY KEY (`recipe_id`),
+  CONSTRAINT `pizza_recipe_ibfk_1` FOREIGN KEY (`pizza_id`) REFERENCES `pizza` (`pizza_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pizza_recipe_ibfk_2` FOREIGN KEY (`material_id`) REFERENCES `raw_material` (`material_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pizza_inventory` (
+  `inventory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pizza_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 0,
+  `status` varchar(50) NOT NULL DEFAULT 'available',
+  `last_updated` datetime NOT NULL,
+  PRIMARY KEY (`inventory_id`),
+  CONSTRAINT `pizza_inventory_ibfk_1` FOREIGN KEY (`pizza_id`) REFERENCES `pizza` (`pizza_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `raw_material_inventory` (
+  `inventory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `material_id` int(11) NOT NULL,
+  `quantity` decimal(10,3) NOT NULL DEFAULT 0.000,
+  `status` varchar(50) NOT NULL DEFAULT 'available',
+  `last_updated` datetime NOT NULL,
+  PRIMARY KEY (`inventory_id`),
+  CONSTRAINT `raw_material_inventory_ibfk_1` FOREIGN KEY (`material_id`) REFERENCES `raw_material` (`material_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `production_plan` (
+  `plan_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `pizza_id` int(11) NOT NULL,
+  `production_sequence` int(11) NOT NULL,
+  `planned_quantity` int(11) NOT NULL,
+  `produced_quantity` int(11) NOT NULL DEFAULT 0,
+  `production_status` varchar(50) NOT NULL DEFAULT 'scheduled',
+  `planned_date` datetime NOT NULL,
+  `completed_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`plan_id`),
+  CONSTRAINT `production_plan_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `sales_order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `production_plan_ibfk_2` FOREIGN KEY (`pizza_id`) REFERENCES `pizza` (`pizza_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supplier` (
+  `supplier_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_name` varchar(255) NOT NULL,
+  `contact_number` varchar(20) NOT NULL,
+  `address` varchar(500) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`supplier_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `purchase_order` (
+  `purchase_order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_id` int(11) NOT NULL,
+  `material_id` int(11) NOT NULL,
+  `order_quantity` decimal(10,3) NOT NULL,
+  `supply_quantity` decimal(10,3) NOT NULL DEFAULT 0.000,
+  `order_status` varchar(50) NOT NULL DEFAULT 'pending',
+  `order_date` datetime NOT NULL,
+  `expected_delivery_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`purchase_order_id`),
+  CONSTRAINT `purchase_order_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchase_order_ibfk_2` FOREIGN KEY (`material_id`) REFERENCES `raw_material` (`material_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `delivery_record` (
+  `delivery_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `delivery_time` datetime DEFAULT NULL,
+  `location` varchar(500) NOT NULL,
+  `delivery_status` varchar(50) NOT NULL DEFAULT 'pending',
+  `driver_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`delivery_id`),
+  CONSTRAINT `delivery_record_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `sales_order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `financial_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_type` varchar(50) NOT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `transaction_date` datetime NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'pending',
+  `reference_id` int(11) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`record_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

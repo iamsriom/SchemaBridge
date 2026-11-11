@@ -1,0 +1,58 @@
+-- Schema for database: schemabench_0117
+
+CREATE TABLE `molecule` (
+  `molecule_id` varchar(20) NOT NULL,
+  `activity` varchar(10) DEFAULT NULL,
+  `logp` float DEFAULT NULL,
+  `lumo` float DEFAULT NULL,
+  `mutagenic` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`molecule_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `atom` (
+  `atom_id` varchar(20) NOT NULL,
+  `molecule_id` varchar(20) NOT NULL,
+  `element` varchar(10) DEFAULT NULL,
+  `charge` float DEFAULT NULL,
+  `atom_type` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`atom_id`),
+  CONSTRAINT `atom_ibfk_1` FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bond` (
+  `bond_id` varchar(20) NOT NULL,
+  `molecule_id` varchar(20) NOT NULL,
+  `atom_id_1` varchar(20) NOT NULL,
+  `atom_id_2` varchar(20) NOT NULL,
+  `bond_type` varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`bond_id`),
+  CONSTRAINT `bond_ibfk_1` FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bond_ibfk_2` FOREIGN KEY (`atom_id_1`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bond_ibfk_3` FOREIGN KEY (`atom_id_2`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ring` (
+  `ring_id` int(11) NOT NULL AUTO_INCREMENT,
+  `molecule_id` varchar(20) NOT NULL,
+  `ring_size` int(11) DEFAULT NULL,
+  PRIMARY KEY (`ring_id`),
+  CONSTRAINT `ring_ibfk_1` FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ring_atom` (
+  `ring_id` int(11) NOT NULL,
+  `atom_id` varchar(20) NOT NULL,
+  PRIMARY KEY (`ring_id`, `atom_id`),
+  CONSTRAINT `ring_atom_ibfk_1` FOREIGN KEY (`ring_id`) REFERENCES `ring` (`ring_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ring_atom_ibfk_2` FOREIGN KEY (`atom_id`) REFERENCES `atom` (`atom_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `active_compound` (
+  `active_id` int(11) NOT NULL AUTO_INCREMENT,
+  `molecule_id` varchar(20) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `regression_friendly` tinyint(1) NOT NULL DEFAULT 0,
+  `notes` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`active_id`),
+  CONSTRAINT `active_compound_ibfk_1` FOREIGN KEY (`molecule_id`) REFERENCES `molecule` (`molecule_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

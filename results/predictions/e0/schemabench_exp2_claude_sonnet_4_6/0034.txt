@@ -1,0 +1,106 @@
+-- Schema for database: schemabench_0034
+
+CREATE TABLE `filer_folder` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent_id` int(11) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `owner_id` int(11) DEFAULT NULL,
+  `uploaded_at` datetime NOT NULL,
+  `created_at` datetime NOT NULL,
+  `modified_at` datetime NOT NULL,
+  `lft` int(11) NOT NULL,
+  `rght` int(11) NOT NULL,
+  `tree_id` int(11) NOT NULL,
+  `level` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `filer_folder_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `filer_folder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `filer_folder_ibfk_2` FOREIGN KEY (`owner_id`) REFERENCES `auth_user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `auth_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `password` varchar(128) NOT NULL,
+  `last_login` datetime DEFAULT NULL,
+  `is_superuser` tinyint(1) NOT NULL,
+  `username` varchar(150) NOT NULL,
+  `first_name` varchar(150) NOT NULL,
+  `last_name` varchar(150) NOT NULL,
+  `email` varchar(254) NOT NULL,
+  `is_staff` tinyint(1) NOT NULL,
+  `is_active` tinyint(1) NOT NULL,
+  `date_joined` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `auth_group` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(150) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `filer_file` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `folder_id` int(11) DEFAULT NULL,
+  `file` varchar(255) DEFAULT NULL,
+  `_file_size` int(11) DEFAULT NULL,
+  `sha1` varchar(40) NOT NULL,
+  `has_all_mandatory_data` tinyint(1) NOT NULL,
+  `original_filename` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` longtext DEFAULT NULL,
+  `owner_id` int(11) DEFAULT NULL,
+  `uploaded_at` datetime NOT NULL,
+  `modified_at` datetime NOT NULL,
+  `is_public` tinyint(1) NOT NULL,
+  `polymorphic_ctype_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `filer_file_ibfk_1` FOREIGN KEY (`folder_id`) REFERENCES `filer_folder` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `filer_file_ibfk_2` FOREIGN KEY (`owner_id`) REFERENCES `auth_user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `filer_image` (
+  `file_ptr_id` int(11) NOT NULL,
+  `_width` int(11) DEFAULT NULL,
+  `_height` int(11) DEFAULT NULL,
+  `default_alt_text` varchar(255) DEFAULT NULL,
+  `default_caption` varchar(255) DEFAULT NULL,
+  `subject_location` varchar(64) DEFAULT NULL,
+  `file_date` date DEFAULT NULL,
+  `author` varchar(255) DEFAULT NULL,
+  `must_always_publish_author_credit` tinyint(1) NOT NULL,
+  `must_always_publish_copyright` tinyint(1) NOT NULL,
+  PRIMARY KEY (`file_ptr_id`),
+  CONSTRAINT `filer_image_ibfk_1` FOREIGN KEY (`file_ptr_id`) REFERENCES `filer_file` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `filer_clipboard` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `filer_clipboard_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `filer_clipboarditem` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `clipboard_id` int(11) NOT NULL,
+  `file_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `filer_clipboarditem_ibfk_1` FOREIGN KEY (`clipboard_id`) REFERENCES `filer_clipboard` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `filer_clipboarditem_ibfk_2` FOREIGN KEY (`file_id`) REFERENCES `filer_file` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `filer_folderpermission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `folder_id` int(11) DEFAULT NULL,
+  `type` smallint(6) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `group_id` int(11) DEFAULT NULL,
+  `everybody` tinyint(1) NOT NULL,
+  `can_edit` smallint(6) NOT NULL,
+  `can_read` smallint(6) NOT NULL,
+  `can_add_children` smallint(6) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `filer_folderpermission_ibfk_1` FOREIGN KEY (`folder_id`) REFERENCES `filer_folder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `filer_folderpermission_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `filer_folderpermission_ibfk_3` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

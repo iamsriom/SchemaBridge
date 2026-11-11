@@ -1,0 +1,42 @@
+-- Schema for database: rschema_0036
+
+CREATE TABLE `projects` (
+  `project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_name` varchar(255) NOT NULL,
+  `start_date` date NOT NULL,
+  `expected_completion_date` date DEFAULT NULL,
+  `actual_completion_date` date DEFAULT NULL,
+  `budget` decimal(15,2) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `contracts` (
+  `contract_id` int(11) NOT NULL AUTO_INCREMENT,
+  `contract_name` varchar(255) NOT NULL,
+  `signing_date` date NOT NULL,
+  `amount` decimal(15,2) NOT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `project_id` int(11) NOT NULL,
+  PRIMARY KEY (`contract_id`),
+  CONSTRAINT `contracts_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_contracts` (
+  `project_contract_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `contract_id` int(11) NOT NULL,
+  PRIMARY KEY (`project_contract_id`),
+  CONSTRAINT `project_contracts_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_contracts_ibfk_2` FOREIGN KEY (`contract_id`) REFERENCES `contracts` (`contract_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `contract_changes` (
+  `change_id` int(11) NOT NULL AUTO_INCREMENT,
+  `contract_id` int(11) NOT NULL,
+  `change_date` date NOT NULL,
+  `change_content` text DEFAULT NULL,
+  `changed_amount` decimal(15,2) DEFAULT NULL,
+  PRIMARY KEY (`change_id`),
+  CONSTRAINT `contract_changes_ibfk_1` FOREIGN KEY (`contract_id`) REFERENCES `contracts` (`contract_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

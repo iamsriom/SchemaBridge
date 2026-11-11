@@ -1,0 +1,117 @@
+-- Schema for database: rschema_0419
+CREATE TABLE `dish_basic_info` (
+  `dish_id` int(11) NOT NULL AUTO_INCREMENT,
+  `dish_name` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `dish_image` varchar(255) DEFAULT NULL,
+  `dish_description` varchar(500) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`dish_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dish_detail_info` (
+  `dish_id` int(11) NOT NULL,
+  `ingredients` varchar(500) DEFAULT NULL,
+  `taste` varchar(100) DEFAULT NULL,
+  `recommendation_index` int(11) DEFAULT NULL,
+  `spicy_level` varchar(50) DEFAULT NULL,
+  `cooking_method` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`dish_id`),
+  CONSTRAINT `dish_detail_info_ibfk_1` FOREIGN KEY (`dish_id`) REFERENCES `dish_basic_info` (`dish_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dish_classification_info` (
+  `classification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `dish_id` int(11) NOT NULL,
+  `cuisine_type` varchar(100) DEFAULT NULL,
+  `special_features` varchar(255) DEFAULT NULL,
+  `recommendation_status` tinyint(1) NOT NULL DEFAULT '0',
+  `is_vegetarian` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`classification_id`),
+  KEY `dish_id` (`dish_id`),
+  CONSTRAINT `dish_classification_info_ibfk_1` FOREIGN KEY (`dish_id`) REFERENCES `dish_basic_info` (`dish_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_basic_info` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_detail_info` (
+  `user_id` int(11) NOT NULL,
+  `full_name` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `birthday` date DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `user_detail_info_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_basic_info` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_account_info` (
+  `account_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `registration_time` datetime NOT NULL,
+  `account_status` varchar(50) NOT NULL DEFAULT 'active',
+  `last_login_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`account_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `user_account_info_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_basic_info` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_info` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `order_time` datetime NOT NULL,
+  `order_status` varchar(50) NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `remark` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `order_info_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_basic_info` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_detail_info` (
+  `order_detail_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `dish_id` int(11) NOT NULL,
+  `dish_quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`order_detail_id`),
+  KEY `order_id` (`order_id`),
+  KEY `dish_id` (`dish_id`),
+  CONSTRAINT `order_detail_info_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order_info` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_detail_info_ibfk_2` FOREIGN KEY (`dish_id`) REFERENCES `dish_basic_info` (`dish_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `delivery_info` (
+  `delivery_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `delivery_address` varchar(255) NOT NULL,
+  `delivery_time` datetime DEFAULT NULL,
+  `delivery_person` varchar(100) DEFAULT NULL,
+  `delivery_status` varchar(50) NOT NULL DEFAULT 'pending',
+  PRIMARY KEY (`delivery_id`),
+  UNIQUE KEY `order_id` (`order_id`),
+  CONSTRAINT `delivery_info_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order_info` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shopping_cart_info` (
+  `cart_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `dish_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT '1',
+  `add_time` datetime NOT NULL,
+  `settlement_status` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`cart_id`),
+  KEY `user_id` (`user_id`),
+  KEY `dish_id` (`dish_id`),
+  CONSTRAINT `shopping_cart_info_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_basic_info` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `shopping_cart_info_ibfk_2` FOREIGN KEY (`dish_id`) REFERENCES `dish_basic_info` (`dish_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

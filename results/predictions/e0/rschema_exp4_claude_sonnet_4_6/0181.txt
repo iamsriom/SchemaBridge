@@ -1,0 +1,38 @@
+-- Schema for database: rschema_0181
+
+CREATE TABLE `truck` (
+  `truck_id` int(11) NOT NULL AUTO_INCREMENT,
+  `license_plate` varchar(20) NOT NULL,
+  `model` varchar(100) NOT NULL,
+  `load_capacity` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`truck_id`),
+  UNIQUE KEY `license_plate` (`license_plate`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_name` varchar(100) NOT NULL,
+  `employee_phone` varchar(20) NOT NULL,
+  `employee_role` enum('driver','assistant') NOT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transportation_task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_number` varchar(50) NOT NULL,
+  `origin` varchar(255) NOT NULL,
+  `destination` varchar(255) NOT NULL,
+  `cargo_name` varchar(255) NOT NULL,
+  `weight` decimal(10,2) NOT NULL,
+  `transportation_time` datetime NOT NULL,
+  `truck_id` int(11) NOT NULL,
+  `driver_id` int(11) NOT NULL,
+  `assistant_id` int(11) NOT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  UNIQUE KEY `task_number` (`task_number`),
+  CONSTRAINT `transportation_task_ibfk_1` FOREIGN KEY (`truck_id`) REFERENCES `truck` (`truck_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transportation_task_ibfk_2` FOREIGN KEY (`driver_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transportation_task_ibfk_3` FOREIGN KEY (`assistant_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

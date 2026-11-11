@@ -1,0 +1,55 @@
+-- Schema for database: rschema_0345
+
+CREATE TABLE `professor` (
+  `professor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  PRIMARY KEY (`professor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course` (
+  `course_code` char(10) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `total_credits` int(11) NOT NULL,
+  `coordinator_id` int(11) NOT NULL,
+  PRIMARY KEY (`course_code`),
+  CONSTRAINT `course_ibfk_1` FOREIGN KEY (`coordinator_id`) REFERENCES `professor` (`professor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subject` (
+  `subject_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `credits` int(11) NOT NULL,
+  `equivalent_subject_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`subject_id`),
+  CONSTRAINT `subject_ibfk_1` FOREIGN KEY (`equivalent_subject_id`) REFERENCES `subject` (`subject_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subject_prerequisite` (
+  `subject_id` int(11) NOT NULL,
+  `prerequisite_subject_id` int(11) NOT NULL,
+  PRIMARY KEY (`subject_id`, `prerequisite_subject_id`),
+  CONSTRAINT `subject_prerequisite_ibfk_1` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `subject_prerequisite_ibfk_2` FOREIGN KEY (`prerequisite_subject_id`) REFERENCES `subject` (`subject_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course_subject` (
+  `course_code` char(10) NOT NULL,
+  `subject_id` int(11) NOT NULL,
+  `semester` int(11) NOT NULL,
+  PRIMARY KEY (`course_code`, `subject_id`),
+  CONSTRAINT `course_subject_ibfk_1` FOREIGN KEY (`course_code`) REFERENCES `course` (`course_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_subject_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `credits_completed` int(11) NOT NULL DEFAULT 0,
+  `average_grade` decimal(5,2) DEFAULT NULL,
+  `course_code` char(10) DEFAULT NULL,
+  PRIMARY KEY (`student_id`),
+  CONSTRAINT `student_ibfk_1` FOREIGN KEY (`course_code`) REFERENCES `course` (`course_code`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,43 @@
+-- Schema for database: rschema_0210
+CREATE TABLE `attendees` (
+  `attendee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `organization` varchar(255) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`attendee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `conferences` (
+  `conference_id` int(11) NOT NULL AUTO_INCREMENT,
+  `conference_name` varchar(255) NOT NULL,
+  `conference_date` datetime DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`conference_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attendance` (
+  `attendance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `attendee_id` int(11) NOT NULL,
+  `conference_id` int(11) NOT NULL,
+  `check_in_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`attendance_id`),
+  KEY `attendance_ibfk_1` (`attendee_id`),
+  KEY `attendance_ibfk_2` (`conference_id`),
+  CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`attendee_id`) REFERENCES `attendees` (`attendee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`conference_id`) REFERENCES `conferences` (`conference_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `presentations` (
+  `presentation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `conference_id` int(11) NOT NULL,
+  `speaker_id` int(11) NOT NULL,
+  `topic` varchar(255) NOT NULL,
+  `presentation_time` datetime DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`presentation_id`),
+  KEY `presentations_ibfk_1` (`conference_id`),
+  KEY `presentations_ibfk_2` (`speaker_id`),
+  CONSTRAINT `presentations_ibfk_1` FOREIGN KEY (`conference_id`) REFERENCES `conferences` (`conference_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `presentations_ibfk_2` FOREIGN KEY (`speaker_id`) REFERENCES `attendees` (`attendee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

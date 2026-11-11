@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0133
+CREATE TABLE `book_category` (
+  `book_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`book_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reader_category` (
+  `reader_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`reader_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `book` (
+  `book_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `author` varchar(255) NOT NULL,
+  `publisher` varchar(255) DEFAULT NULL,
+  `publication_date` date DEFAULT NULL,
+  `price` decimal(10,2) DEFAULT NULL,
+  `book_type_id` int(11) NOT NULL,
+  `content_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`book_id`),
+  KEY `book_ibfk_1` (`book_type_id`),
+  CONSTRAINT `book_ibfk_1` FOREIGN KEY (`book_type_id`) REFERENCES `book_category` (`book_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reader` (
+  `reader_id` int(11) NOT NULL AUTO_INCREMENT,
+  `reader_type_id` int(11) NOT NULL,
+  `contact_number` varchar(20) DEFAULT NULL,
+  `credit_score` int(11) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`reader_id`),
+  KEY `reader_ibfk_1` (`reader_type_id`),
+  CONSTRAINT `reader_ibfk_1` FOREIGN KEY (`reader_type_id`) REFERENCES `reader_category` (`reader_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `borrowing` (
+  `borrowing_id` int(11) NOT NULL AUTO_INCREMENT,
+  `book_id` int(11) NOT NULL,
+  `reader_id` int(11) NOT NULL,
+  `borrow_date` datetime NOT NULL,
+  `return_date` datetime DEFAULT NULL,
+  `renewal_count` int(11) NOT NULL DEFAULT '0',
+  `fine` decimal(10,2) NOT NULL DEFAULT '0.00',
+  PRIMARY KEY (`borrowing_id`),
+  KEY `borrowing_ibfk_1` (`book_id`),
+  KEY `borrowing_ibfk_2` (`reader_id`),
+  CONSTRAINT `borrowing_ibfk_1` FOREIGN KEY (`book_id`) REFERENCES `book` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `borrowing_ibfk_2` FOREIGN KEY (`reader_id`) REFERENCES `reader` (`reader_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

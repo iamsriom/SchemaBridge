@@ -1,0 +1,64 @@
+-- Schema for database: rschema_0498
+
+CREATE TABLE `school` (
+  `school_id` int(11) NOT NULL AUTO_INCREMENT,
+  `school_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`school_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dormitory` (
+  `dormitory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `dormitory_number` varchar(50) NOT NULL,
+  `building_number` varchar(50) NOT NULL,
+  `capacity` int(11) NOT NULL,
+  `administrator` varchar(100) NOT NULL,
+  PRIMARY KEY (`dormitory_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `classroom` (
+  `classroom_id` int(11) NOT NULL AUTO_INCREMENT,
+  `classroom_number` varchar(50) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`classroom_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `class` (
+  `class_id` int(11) NOT NULL AUTO_INCREMENT,
+  `class_number` varchar(50) NOT NULL,
+  `classroom_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`class_id`),
+  CONSTRAINT `class_ibfk_1` FOREIGN KEY (`classroom_id`) REFERENCES `classroom` (`classroom_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_number` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `gender` varchar(10) NOT NULL,
+  `age` int(11) NOT NULL,
+  `class_id` int(11) DEFAULT NULL,
+  `dormitory_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`student_id`),
+  CONSTRAINT `student_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `student_ibfk_2` FOREIGN KEY (`dormitory_id`) REFERENCES `dormitory` (`dormitory_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sports_team` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_name` varchar(255) NOT NULL,
+  `activity_time` varchar(100) NOT NULL,
+  `coach` varchar(100) NOT NULL,
+  `activity_venue` varchar(255) NOT NULL,
+  `school_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`team_id`),
+  CONSTRAINT `sports_team_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `school` (`school_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `student_sports_team` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `team_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `student_sports_team_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `student_sports_team_ibfk_2` FOREIGN KEY (`team_id`) REFERENCES `sports_team` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

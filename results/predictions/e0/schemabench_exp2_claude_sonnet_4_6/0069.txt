@@ -1,0 +1,66 @@
+-- Schema for database: schemabench_0069
+
+CREATE TABLE `oauth_applications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `uid` varchar(255) NOT NULL,
+  `secret` varchar(255) NOT NULL,
+  `redirect_uri` text NOT NULL,
+  `scopes` varchar(255) NOT NULL DEFAULT '',
+  `confidential` tinyint(1) NOT NULL DEFAULT 1,
+  `owner_id` int(11) DEFAULT NULL,
+  `owner_type` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_oauth_applications_on_uid` (`uid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth_access_grants` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `resource_owner_id` int(11) NOT NULL,
+  `application_id` int(11) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expires_in` int(11) NOT NULL,
+  `redirect_uri` text NOT NULL,
+  `scopes` varchar(255) NOT NULL DEFAULT '',
+  `code_challenge` varchar(255) DEFAULT NULL,
+  `code_challenge_method` varchar(255) DEFAULT NULL,
+  `revoked_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_oauth_access_grants_on_token` (`token`),
+  KEY `index_oauth_access_grants_on_application_id` (`application_id`),
+  KEY `index_oauth_access_grants_on_resource_owner_id` (`resource_owner_id`),
+  CONSTRAINT `oauth_access_grants_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `oauth_applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `oauth_access_tokens` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `resource_owner_id` int(11) DEFAULT NULL,
+  `application_id` int(11) DEFAULT NULL,
+  `token` varchar(255) NOT NULL,
+  `refresh_token` varchar(255) DEFAULT NULL,
+  `expires_in` int(11) DEFAULT NULL,
+  `scopes` varchar(255) DEFAULT NULL,
+  `previous_refresh_token` varchar(255) NOT NULL DEFAULT '',
+  `revoked_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_oauth_access_tokens_on_token` (`token`),
+  UNIQUE KEY `index_oauth_access_tokens_on_refresh_token` (`refresh_token`),
+  KEY `index_oauth_access_tokens_on_application_id` (`application_id`),
+  KEY `index_oauth_access_tokens_on_resource_owner_id` (`resource_owner_id`),
+  CONSTRAINT `oauth_access_tokens_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `oauth_applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `encrypted_password` varchar(255) NOT NULL,
+  `username` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_users_on_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

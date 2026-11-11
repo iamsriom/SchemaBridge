@@ -1,0 +1,42 @@
+-- Schema for database: rschema_0013
+CREATE TABLE `weather_station` (
+  `weather_station_id` int(11) NOT NULL AUTO_INCREMENT,
+  `station_name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `person_in_charge` varchar(255) NOT NULL,
+  `contact_information` varchar(255) NOT NULL,
+  PRIMARY KEY (`weather_station_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `meteorological_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `weather_station_id` int(11) NOT NULL,
+  `recording_date` datetime NOT NULL,
+  `temperature` decimal(5,2) DEFAULT NULL,
+  `humidity` decimal(5,2) DEFAULT NULL,
+  `precipitation` decimal(8,2) DEFAULT NULL,
+  `wind_speed` decimal(5,2) DEFAULT NULL,
+  `wind_direction` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  KEY `meteorological_record_ibfk_1` (`weather_station_id`),
+  CONSTRAINT `meteorological_record_ibfk_1` FOREIGN KEY (`weather_station_id`) REFERENCES `weather_station` (`weather_station_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `farm` (
+  `farm_id` int(11) NOT NULL AUTO_INCREMENT,
+  `farm_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`farm_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `farm_weather_station_subscription` (
+  `subscription_id` int(11) NOT NULL AUTO_INCREMENT,
+  `farm_id` int(11) NOT NULL,
+  `weather_station_id` int(11) NOT NULL,
+  `subscription_date` datetime NOT NULL,
+  `unsubscription_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`subscription_id`),
+  KEY `farm_weather_station_subscription_ibfk_1` (`farm_id`),
+  KEY `farm_weather_station_subscription_ibfk_2` (`weather_station_id`),
+  CONSTRAINT `farm_weather_station_subscription_ibfk_1` FOREIGN KEY (`farm_id`) REFERENCES `farm` (`farm_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `farm_weather_station_subscription_ibfk_2` FOREIGN KEY (`weather_station_id`) REFERENCES `weather_station` (`weather_station_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

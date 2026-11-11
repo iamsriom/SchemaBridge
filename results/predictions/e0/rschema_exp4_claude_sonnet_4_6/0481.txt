@@ -1,0 +1,75 @@
+-- Schema for database: rschema_0481
+
+CREATE TABLE `crop` (
+  `crop_id` int(11) NOT NULL AUTO_INCREMENT,
+  `crop_name` varchar(255) NOT NULL,
+  `crop_type` varchar(255) NOT NULL,
+  PRIMARY KEY (`crop_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `monitoring_rule` (
+  `rule_id` int(11) NOT NULL AUTO_INCREMENT,
+  `crop_id` int(11) NOT NULL,
+  `rule_name` varchar(255) NOT NULL,
+  `rule_description` varchar(1000) DEFAULT NULL,
+  `data_type` varchar(100) NOT NULL,
+  `min_value` decimal(10,4) DEFAULT NULL,
+  `max_value` decimal(10,4) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`rule_id`),
+  CONSTRAINT `monitoring_rule_ibfk_1` FOREIGN KEY (`crop_id`) REFERENCES `crop` (`crop_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sensor` (
+  `sensor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sensor_location` varchar(255) NOT NULL,
+  `sensor_type` varchar(100) NOT NULL,
+  `installed_at` datetime DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`sensor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sensor_data` (
+  `data_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sensor_id` int(11) NOT NULL,
+  `data_type` varchar(100) NOT NULL,
+  `collection_time` datetime NOT NULL,
+  `data_value` decimal(10,4) NOT NULL,
+  `temperature` decimal(6,2) DEFAULT NULL,
+  `rainfall` decimal(8,2) DEFAULT NULL,
+  `light_intensity` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`data_id`),
+  CONSTRAINT `sensor_data_ibfk_1` FOREIGN KEY (`sensor_id`) REFERENCES `sensor` (`sensor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `realtime_analysis_result` (
+  `result_id` int(11) NOT NULL AUTO_INCREMENT,
+  `data_id` int(11) NOT NULL,
+  `rule_id` int(11) NOT NULL,
+  `analysis_time` datetime NOT NULL,
+  `analysis_value` decimal(10,4) DEFAULT NULL,
+  `analysis_status` varchar(100) DEFAULT NULL,
+  `visualization_data` text DEFAULT NULL,
+  `remark` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`result_id`),
+  CONSTRAINT `realtime_analysis_result_ibfk_1` FOREIGN KEY (`data_id`) REFERENCES `sensor_data` (`data_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `realtime_analysis_result_ibfk_2` FOREIGN KEY (`rule_id`) REFERENCES `monitoring_rule` (`rule_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `historical_prediction_result` (
+  `prediction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sensor_id` int(11) NOT NULL,
+  `rule_id` int(11) NOT NULL,
+  `data_type` varchar(100) NOT NULL,
+  `prediction_time` datetime NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  `statistical_value` decimal(10,4) DEFAULT NULL,
+  `predicted_value` decimal(10,4) DEFAULT NULL,
+  `visualization_data` text DEFAULT NULL,
+  `remark` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`prediction_id`),
+  CONSTRAINT `historical_prediction_result_ibfk_1` FOREIGN KEY (`sensor_id`) REFERENCES `sensor` (`sensor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `historical_prediction_result_ibfk_2` FOREIGN KEY (`rule_id`) REFERENCES `monitoring_rule` (`rule_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

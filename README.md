@@ -25,7 +25,7 @@ Academic authors: Sriom Chakrabarti, Sean Bin Yang, Arijit Khan, Sebastian Link.
 
 | ID | Objective | Docs | Verification |
 |----|-----------|------|--------------|
-| **E0** | Text2Schema from NL | [docs/experiments/E0.md](docs/experiments/E0.md) | Offline Tables V–VI (genuine-gold); closed Direct via API runner |
+| **E0** | Text2Schema from NL | [docs/experiments/E0.md](docs/experiments/E0.md) | **PARTIAL** — Direct VERIFIED_FROM_PREDICTIONS (parser F1–F6 fixed); Table VI prompting ARCHIVE / REGENERATED in progress; see `audit/E0_VERIFICATION_REPORT.md` |
 | **E1** | Schema verbalization | [docs/experiments/E1.md](docs/experiments/E1.md) | PARTIAL — RSchema open detailed BLEU/ROUGE/SCR match |
 | **E2** | Round-trip preservation | [docs/experiments/E2.md](docs/experiments/E2.md) | PARTIAL — RSchema open detailed mostly matches |
 | **E3** | Constructor isolation | [docs/experiments/E3.md](docs/experiments/E3.md) | UNVERIFIED — frozen descriptions missing |

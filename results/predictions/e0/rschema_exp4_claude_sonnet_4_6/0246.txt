@@ -1,0 +1,183 @@
+-- Schema for database: rschema_0246
+
+CREATE TABLE `admin` (
+  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `real_name` varchar(100) DEFAULT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'admin',
+  `created_at` datetime NOT NULL,
+  `last_login` datetime DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`admin_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `avatar` varchar(500) DEFAULT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `birthday` datetime DEFAULT NULL,
+  `bio` varchar(500) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  `last_login` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `crew_member` (
+  `crew_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `real_name` varchar(100) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `avatar` varchar(500) DEFAULT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `birthday` datetime DEFAULT NULL,
+  `nationality` varchar(100) DEFAULT NULL,
+  `biography` text DEFAULT NULL,
+  `role_type` varchar(100) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  `last_login` datetime DEFAULT NULL,
+  PRIMARY KEY (`crew_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `news_column` (
+  `column_id` int(11) NOT NULL AUTO_INCREMENT,
+  `column_name` varchar(200) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  `admin_id` int(11) NOT NULL,
+  PRIMARY KEY (`column_id`),
+  CONSTRAINT `news_column_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `news` (
+  `news_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(500) NOT NULL,
+  `content` text NOT NULL,
+  `cover_image` varchar(500) DEFAULT NULL,
+  `column_id` int(11) NOT NULL,
+  `admin_id` int(11) NOT NULL,
+  `view_count` int(11) NOT NULL DEFAULT 0,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `published_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`news_id`),
+  CONSTRAINT `news_ibfk_1` FOREIGN KEY (`column_id`) REFERENCES `news_column` (`column_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `news_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `film_tv` (
+  `film_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(500) NOT NULL,
+  `original_title` varchar(500) DEFAULT NULL,
+  `type` varchar(50) NOT NULL COMMENT 'movie or tv_series',
+  `genre` varchar(200) DEFAULT NULL,
+  `language` varchar(100) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `release_date` datetime DEFAULT NULL,
+  `duration` int(11) DEFAULT NULL COMMENT 'in minutes',
+  `episodes` int(11) DEFAULT NULL,
+  `cover_image` varchar(500) DEFAULT NULL,
+  `synopsis` text DEFAULT NULL,
+  `rating` decimal(3,1) DEFAULT NULL,
+  `rating_count` int(11) NOT NULL DEFAULT 0,
+  `view_count` int(11) NOT NULL DEFAULT 0,
+  `share_count` int(11) NOT NULL DEFAULT 0,
+  `rank_score` decimal(10,4) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `admin_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`film_id`),
+  CONSTRAINT `film_tv_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `film_crew` (
+  `film_crew_id` int(11) NOT NULL AUTO_INCREMENT,
+  `film_id` int(11) NOT NULL,
+  `crew_id` int(11) NOT NULL,
+  `role_in_film` varchar(100) NOT NULL COMMENT 'director, actor, producer, etc.',
+  `character_name` varchar(200) DEFAULT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`film_crew_id`),
+  CONSTRAINT `film_crew_ibfk_1` FOREIGN KEY (`film_id`) REFERENCES `film_tv` (`film_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `film_crew_ibfk_2` FOREIGN KEY (`crew_id`) REFERENCES `crew_member` (`crew_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comment` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `film_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `rating` tinyint(1) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0=pending, 1=approved, 2=rejected',
+  `created_at` datetime NOT NULL,
+  `reviewed_at` datetime DEFAULT NULL,
+  `admin_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`comment_id`),
+  CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`film_id`) REFERENCES `film_tv` (`film_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comment_ibfk_3` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `film_share` (
+  `share_id` int(11) NOT NULL AUTO_INCREMENT,
+  `film_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `platform` varchar(100) DEFAULT NULL,
+  `share_message` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`share_id`),
+  CONSTRAINT `film_share_ibfk_1` FOREIGN KEY (`film_id`) REFERENCES `film_tv` (`film_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `film_share_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `film_ranking` (
+  `ranking_id` int(11) NOT NULL AUTO_INCREMENT,
+  `film_id` int(11) NOT NULL,
+  `rank_position` int(11) NOT NULL,
+  `ranking_type` varchar(100) NOT NULL COMMENT 'weekly, monthly, all_time, etc.',
+  `score` decimal(10,4) DEFAULT NULL,
+  `ranking_date` datetime NOT NULL,
+  `admin_id` int(11) NOT NULL,
+  PRIMARY KEY (`ranking_id`),
+  CONSTRAINT `film_ranking_ibfk_1` FOREIGN KEY (`film_id`) REFERENCES `film_tv` (`film_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `film_ranking_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `admin_log` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `admin_id` int(11) NOT NULL,
+  `action` varchar(255) NOT NULL,
+  `target_table` varchar(100) DEFAULT NULL,
+  `target_id` int(11) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `ip_address` varchar(50) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`log_id`),
+  CONSTRAINT `admin_log_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `system_backup` (
+  `backup_id` int(11) NOT NULL AUTO_INCREMENT,
+  `backup_name` varchar(255) NOT NULL,
+  `backup_path` varchar(500) NOT NULL,
+  `backup_size` bigint(20) DEFAULT NULL,
+  `backup_type` varchar(50) NOT NULL DEFAULT 'database',
+  `admin_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`backup_id`),
+  CONSTRAINT `system_backup_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

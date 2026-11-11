@@ -1,0 +1,113 @@
+-- Schema for database: schemabench_0173
+
+CREATE TABLE `donor` (
+  `donor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `gender` varchar(10) NOT NULL,
+  `blood_type` varchar(5) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `zip_code` varchar(20) DEFAULT NULL,
+  `medical_history` text DEFAULT NULL,
+  `is_eligible` tinyint(1) NOT NULL DEFAULT 1,
+  `registered_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`donor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patient` (
+  `patient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `gender` varchar(10) NOT NULL,
+  `blood_type` varchar(5) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `zip_code` varchar(20) DEFAULT NULL,
+  `medical_condition` text DEFAULT NULL,
+  `blood_compatibility_notes` text DEFAULT NULL,
+  `registered_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `hospital` (
+  `hospital_id` int(11) NOT NULL AUTO_INCREMENT,
+  `hospital_name` varchar(200) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `state` varchar(100) NOT NULL,
+  `zip_code` varchar(20) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `services_offered` text DEFAULT NULL,
+  `has_emergency_capability` tinyint(1) NOT NULL DEFAULT 0,
+  `bed_capacity` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`hospital_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `private_facility` (
+  `facility_id` int(11) NOT NULL AUTO_INCREMENT,
+  `facility_name` varchar(200) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `state` varchar(100) NOT NULL,
+  `zip_code` varchar(20) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `services_offered` text DEFAULT NULL,
+  `has_emergency_capability` tinyint(1) NOT NULL DEFAULT 0,
+  `license_number` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`facility_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `blood_donation` (
+  `donation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `donor_id` int(11) NOT NULL,
+  `blood_type` varchar(5) NOT NULL,
+  `component_type` varchar(50) NOT NULL,
+  `volume_ml` int(11) NOT NULL,
+  `collection_date` date NOT NULL,
+  `expiry_date` date NOT NULL,
+  `is_contaminated` tinyint(1) NOT NULL DEFAULT 0,
+  `contamination_notes` text DEFAULT NULL,
+  `storage_location` varchar(100) DEFAULT NULL,
+  `hospital_id` int(11) DEFAULT NULL,
+  `facility_id` int(11) DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'available',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`donation_id`),
+  CONSTRAINT `blood_donation_ibfk_1` FOREIGN KEY (`donor_id`) REFERENCES `donor` (`donor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `blood_donation_ibfk_2` FOREIGN KEY (`hospital_id`) REFERENCES `hospital` (`hospital_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `blood_donation_ibfk_3` FOREIGN KEY (`facility_id`) REFERENCES `private_facility` (`facility_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `blood_transfusion` (
+  `transfusion_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `donation_id` int(11) NOT NULL,
+  `hospital_id` int(11) DEFAULT NULL,
+  `facility_id` int(11) DEFAULT NULL,
+  `transfusion_date` datetime NOT NULL,
+  `admission_date` date NOT NULL,
+  `discharge_date` date DEFAULT NULL,
+  `volume_ml` int(11) NOT NULL,
+  `administered_by` varchar(150) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `outcome` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`transfusion_id`),
+  CONSTRAINT `blood_transfusion_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `blood_transfusion_ibfk_2` FOREIGN KEY (`donation_id`) REFERENCES `blood_donation` (`donation_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `blood_transfusion_ibfk_3` FOREIGN KEY (`hospital_id`) REFERENCES `hospital` (`hospital_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `blood_transfusion_ibfk_4` FOREIGN KEY (`facility_id`) REFERENCES `private_facility` (`facility_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

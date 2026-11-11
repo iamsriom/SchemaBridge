@@ -1,0 +1,49 @@
+-- Schema for database: rschema_0360
+CREATE TABLE `operators` (
+  `operator_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `permissions` varchar(255) DEFAULT NULL,
+  `user_role` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`operator_id`),
+  UNIQUE KEY `uk_operators_account` (`account`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `log_categories` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(255) NOT NULL,
+  `category_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`category_id`),
+  UNIQUE KEY `uk_log_categories_category_name` (`category_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `logs` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `operator_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `log_level` varchar(50) NOT NULL,
+  `content` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`log_id`),
+  KEY `logs_ibfk_1` (`operator_id`),
+  KEY `logs_ibfk_2` (`category_id`),
+  CONSTRAINT `logs_ibfk_1` FOREIGN KEY (`operator_id`) REFERENCES `operators` (`operator_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `logs_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `log_categories` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `log_operations` (
+  `operation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `log_id` int(11) NOT NULL,
+  `operator_id` int(11) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `operation_type` varchar(50) NOT NULL,
+  `execution_content` text DEFAULT NULL,
+  PRIMARY KEY (`operation_id`),
+  KEY `log_operations_ibfk_1` (`log_id`),
+  KEY `log_operations_ibfk_2` (`operator_id`),
+  CONSTRAINT `log_operations_ibfk_1` FOREIGN KEY (`log_id`) REFERENCES `logs` (`log_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `log_operations_ibfk_2` FOREIGN KEY (`operator_id`) REFERENCES `operators` (`operator_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

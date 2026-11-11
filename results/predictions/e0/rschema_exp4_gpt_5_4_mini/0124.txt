@@ -1,0 +1,24 @@
+-- Schema for database: rschema_0124
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `follow_relationships` (
+  `follow_id` int(11) NOT NULL AUTO_INCREMENT,
+  `follower_user_id` int(11) NOT NULL,
+  `followed_user_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`follow_id`),
+  UNIQUE KEY `uk_follow_relationships_pair` (`follower_user_id`,`followed_user_id`),
+  KEY `idx_follow_relationships_follower_user_id` (`follower_user_id`),
+  KEY `idx_follow_relationships_followed_user_id` (`followed_user_id`),
+  CONSTRAINT `follow_relationships_ibfk_1` FOREIGN KEY (`follower_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `follow_relationships_ibfk_2` FOREIGN KEY (`followed_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `chk_follow_relationships_no_self_follow` CHECK (`follower_user_id` <> `followed_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

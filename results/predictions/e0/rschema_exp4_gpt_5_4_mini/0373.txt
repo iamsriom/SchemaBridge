@@ -1,0 +1,75 @@
+-- Schema for database: rschema_0373
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_code` varchar(50) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
+  `parent_department_id` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`department_id`),
+  UNIQUE KEY `uk_department_code` (`department_code`),
+  KEY `department_ibfk_1` (`parent_department_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`parent_department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `fund_source` (
+  `fund_source_id` int(11) NOT NULL AUTO_INCREMENT,
+  `source_code` varchar(50) NOT NULL,
+  `source_name` varchar(255) NOT NULL,
+  `source_level` int(11) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`fund_source_id`),
+  UNIQUE KEY `uk_fund_source_code` (`source_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `project` (
+  `project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_code` varchar(50) NOT NULL,
+  `project_name` varchar(255) NOT NULL,
+  `objective` varchar(500) DEFAULT NULL,
+  `responsible_department_id` int(11) NOT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `status` varchar(50) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`project_id`),
+  UNIQUE KEY `uk_project_code` (`project_code`),
+  KEY `project_ibfk_1` (`responsible_department_id`),
+  CONSTRAINT `project_ibfk_1` FOREIGN KEY (`responsible_department_id`) REFERENCES `department` (`department_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `activity` (
+  `activity_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `activity_code` varchar(50) NOT NULL,
+  `activity_name` varchar(255) NOT NULL,
+  `objective` varchar(500) DEFAULT NULL,
+  `budget_level` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`activity_id`),
+  UNIQUE KEY `uk_activity_code` (`activity_code`),
+  KEY `activity_ibfk_1` (`project_id`),
+  CONSTRAINT `activity_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `budget_allocation` (
+  `allocation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `activity_id` int(11) NOT NULL,
+  `fund_source_id` int(11) NOT NULL,
+  `allocation_ratio` decimal(10,4) NOT NULL,
+  `allocated_amount` decimal(18,2) NOT NULL,
+  `budget_level` int(11) NOT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`allocation_id`),
+  KEY `budget_allocation_ibfk_1` (`activity_id`),
+  KEY `budget_allocation_ibfk_2` (`fund_source_id`),
+  CONSTRAINT `budget_allocation_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `budget_allocation_ibfk_2` FOREIGN KEY (`fund_source_id`) REFERENCES `fund_source` (`fund_source_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `project_change_history` (
+  `change_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `change_type` varchar(50) NOT NULL,
+  `change_summary` varchar(1000) NOT NULL,
+  `changed_by` varchar(255) NOT NULL,
+  `changed_at` datetime NOT NULL,
+  PRIMARY KEY (`change_id`),
+  KEY `project_change_history_ibfk_1` (`project_id`),
+  CONSTRAINT `project_change_history_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

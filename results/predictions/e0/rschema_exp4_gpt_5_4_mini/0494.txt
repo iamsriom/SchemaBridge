@@ -1,0 +1,67 @@
+-- Schema for database: rschema_0494
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `nickname` varchar(255) DEFAULT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  `biography` text DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `categories` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent_category_id` int(11) DEFAULT NULL,
+  `level` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `icon_link` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`category_id`),
+  KEY `parent_category_id` (`parent_category_id`),
+  CONSTRAINT `categories_ibfk_1` FOREIGN KEY (`parent_category_id`) REFERENCES `categories` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `articles` (
+  `article_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `author` int(11) NOT NULL,
+  `cover_image_link` varchar(255) DEFAULT NULL,
+  `summary` text DEFAULT NULL,
+  `comment_permission` tinyint(1) NOT NULL DEFAULT '1',
+  `status` varchar(50) NOT NULL,
+  `content` longtext NOT NULL,
+  `number_of_likes` int(11) NOT NULL DEFAULT '0',
+  `number_of_dislikes` int(11) NOT NULL DEFAULT '0',
+  `number_of_reads` int(11) NOT NULL DEFAULT '0',
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`article_id`),
+  KEY `author` (`author`),
+  CONSTRAINT `articles_ibfk_1` FOREIGN KEY (`author`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `article_categories` (
+  `article_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  PRIMARY KEY (`article_id`,`category_id`),
+  KEY `category_id` (`category_id`),
+  CONSTRAINT `article_categories_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `article_categories_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comments` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `replied_comment_id` int(11) DEFAULT NULL,
+  `article_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`comment_id`),
+  KEY `replied_comment_id` (`replied_comment_id`),
+  KEY `article_id` (`article_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`replied_comment_id`) REFERENCES `comments` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`article_id`) REFERENCES `articles` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

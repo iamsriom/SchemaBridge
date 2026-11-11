@@ -1,0 +1,99 @@
+-- Schema for database: schemabench_0108
+
+CREATE TABLE `gene` (
+  `gene_id` int(11) NOT NULL,
+  `gene_name` varchar(255) NOT NULL,
+  `essential` varchar(50) DEFAULT NULL,
+  `phenotype` varchar(255) DEFAULT NULL,
+  `function` varchar(255) DEFAULT NULL,
+  `localization` varchar(255) DEFAULT NULL,
+  `class` varchar(100) DEFAULT NULL,
+  `complex` varchar(255) DEFAULT NULL,
+  `motif` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`gene_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `gene_classification` (
+  `classification_id` int(11) NOT NULL,
+  `gene_id` int(11) NOT NULL,
+  `function_class` varchar(255) DEFAULT NULL,
+  `localization_class` varchar(255) DEFAULT NULL,
+  `phenotype_class` varchar(255) DEFAULT NULL,
+  `essential_flag` char(1) DEFAULT NULL,
+  `confidence_score` float DEFAULT NULL,
+  `classified_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`classification_id`),
+  CONSTRAINT `gene_classification_ibfk_1` FOREIGN KEY (`gene_id`) REFERENCES `gene` (`gene_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `gene_localization` (
+  `localization_id` int(11) NOT NULL,
+  `gene_id` int(11) NOT NULL,
+  `localization_label` varchar(255) NOT NULL,
+  `evidence_type` varchar(100) DEFAULT NULL,
+  `source` varchar(255) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`localization_id`),
+  CONSTRAINT `gene_localization_ibfk_1` FOREIGN KEY (`gene_id`) REFERENCES `gene` (`gene_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `gene_interaction` (
+  `interaction_id` int(11) NOT NULL,
+  `gene_id_a` int(11) NOT NULL,
+  `gene_id_b` int(11) NOT NULL,
+  `interaction_type` varchar(100) DEFAULT NULL,
+  `expression_correlation` float DEFAULT NULL,
+  `direction` varchar(50) DEFAULT NULL,
+  `source` varchar(255) DEFAULT NULL,
+  `recorded_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`interaction_id`),
+  CONSTRAINT `gene_interaction_ibfk_1` FOREIGN KEY (`gene_id_a`) REFERENCES `gene` (`gene_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `gene_interaction_ibfk_2` FOREIGN KEY (`gene_id_b`) REFERENCES `gene` (`gene_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `protein` (
+  `protein_id` int(11) NOT NULL,
+  `gene_id` int(11) NOT NULL,
+  `protein_name` varchar(255) NOT NULL,
+  `sequence` text DEFAULT NULL,
+  `molecular_weight` float DEFAULT NULL,
+  `isoelectric_point` float DEFAULT NULL,
+  `function` varchar(255) DEFAULT NULL,
+  `localization` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`protein_id`),
+  CONSTRAINT `protein_ibfk_1` FOREIGN KEY (`gene_id`) REFERENCES `gene` (`gene_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `protein_classification` (
+  `prot_classification_id` int(11) NOT NULL,
+  `protein_id` int(11) NOT NULL,
+  `function_class` varchar(255) DEFAULT NULL,
+  `localization_class` varchar(255) DEFAULT NULL,
+  `confidence_score` float DEFAULT NULL,
+  `classified_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`prot_classification_id`),
+  CONSTRAINT `protein_classification_ibfk_1` FOREIGN KEY (`protein_id`) REFERENCES `protein` (`protein_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `expression_data` (
+  `expression_id` int(11) NOT NULL,
+  `gene_id` int(11) NOT NULL,
+  `experiment_name` varchar(255) DEFAULT NULL,
+  `expression_level` float DEFAULT NULL,
+  `condition` varchar(255) DEFAULT NULL,
+  `time_point` varchar(100) DEFAULT NULL,
+  `recorded_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`expression_id`),
+  CONSTRAINT `expression_data_ibfk_1` FOREIGN KEY (`gene_id`) REFERENCES `gene` (`gene_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `interaction_expression` (
+  `ie_id` int(11) NOT NULL,
+  `interaction_id` int(11) NOT NULL,
+  `expression_id` int(11) NOT NULL,
+  `correlation_value` float DEFAULT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ie_id`),
+  CONSTRAINT `interaction_expression_ibfk_1` FOREIGN KEY (`interaction_id`) REFERENCES `gene_interaction` (`interaction_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `interaction_expression_ibfk_2` FOREIGN KEY (`expression_id`) REFERENCES `expression_data` (`expression_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

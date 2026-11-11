@@ -1,0 +1,76 @@
+-- Schema for database: rschema_0105
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account` varchar(64) NOT NULL,
+  `nickname` varchar(64) DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(128) DEFAULT NULL,
+  `gender` tinyint(1) DEFAULT NULL,
+  `birthday` date DEFAULT NULL,
+  `registration_time` datetime NOT NULL,
+  `privacy_setting` varchar(32) DEFAULT NULL,
+  `is_authenticated` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `account` (`account`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dynamics` (
+  `dynamic_id` int(11) NOT NULL AUTO_INCREMENT,
+  `publisher_id` int(11) NOT NULL,
+  `content` text DEFAULT NULL,
+  `media_url` varchar(512) DEFAULT NULL,
+  `publish_time` datetime NOT NULL,
+  `like_count` int(11) NOT NULL DEFAULT '0',
+  `comment_count` int(11) NOT NULL DEFAULT '0',
+  `favorite_count` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`dynamic_id`),
+  KEY `publisher_id` (`publisher_id`),
+  CONSTRAINT `dynamics_ibfk_1` FOREIGN KEY (`publisher_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `contacts` (
+  `contact_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `contact_user_id` int(11) NOT NULL,
+  `relationship_type` varchar(64) DEFAULT NULL,
+  `added_time` datetime NOT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`contact_id`),
+  KEY `user_id` (`user_id`),
+  KEY `contact_user_id` (`contact_user_id`),
+  CONSTRAINT `contacts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `contacts_ibfk_2` FOREIGN KEY (`contact_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `social_activities` (
+  `activity_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `dynamic_id` int(11) NOT NULL,
+  `activity_type` varchar(32) NOT NULL,
+  `activity_time` datetime NOT NULL,
+  `comment_content` text DEFAULT NULL,
+  PRIMARY KEY (`activity_id`),
+  KEY `user_id` (`user_id`),
+  KEY `dynamic_id` (`dynamic_id`),
+  CONSTRAINT `social_activities_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `social_activities_ibfk_2` FOREIGN KEY (`dynamic_id`) REFERENCES `dynamics` (`dynamic_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `interaction_history` (
+  `history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `activity_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `dynamic_id` int(11) NOT NULL,
+  `interaction_type` varchar(32) NOT NULL,
+  `interaction_time` datetime NOT NULL,
+  `detail` text DEFAULT NULL,
+  PRIMARY KEY (`history_id`),
+  KEY `activity_id` (`activity_id`),
+  KEY `user_id` (`user_id`),
+  KEY `dynamic_id` (`dynamic_id`),
+  CONSTRAINT `interaction_history_ibfk_1` FOREIGN KEY (`activity_id`) REFERENCES `social_activities` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `interaction_history_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `interaction_history_ibfk_3` FOREIGN KEY (`dynamic_id`) REFERENCES `dynamics` (`dynamic_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

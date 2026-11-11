@@ -1,0 +1,73 @@
+-- Schema for database: schemabench_0137
+
+CREATE TABLE `utube_state` (
+  `state_id` int(11) NOT NULL AUTO_INCREMENT,
+  `value1` double NOT NULL,
+  `value2` double NOT NULL,
+  `direction` varchar(50) NOT NULL,
+  `is_legal` tinyint(1) NOT NULL DEFAULT 0,
+  `class_label` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`state_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `state_attribute` (
+  `attribute_id` int(11) NOT NULL AUTO_INCREMENT,
+  `state_id` int(11) NOT NULL,
+  `attribute_name` varchar(100) NOT NULL,
+  `attribute_value` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`attribute_id`),
+  CONSTRAINT `state_attribute_ibfk_1` FOREIGN KEY (`state_id`) REFERENCES `utube_state` (`state_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `rule` (
+  `rule_id` int(11) NOT NULL AUTO_INCREMENT,
+  `rule_name` varchar(150) NOT NULL,
+  `rule_description` text DEFAULT NULL,
+  `condition_expression` text NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`rule_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `rule_state_mapping` (
+  `mapping_id` int(11) NOT NULL AUTO_INCREMENT,
+  `rule_id` int(11) NOT NULL,
+  `state_id` int(11) NOT NULL,
+  `match_result` tinyint(1) NOT NULL DEFAULT 0,
+  `evaluated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`mapping_id`),
+  CONSTRAINT `rule_state_mapping_ibfk_1` FOREIGN KEY (`rule_id`) REFERENCES `rule` (`rule_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `rule_state_mapping_ibfk_2` FOREIGN KEY (`state_id`) REFERENCES `utube_state` (`state_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `state_class` (
+  `class_id` int(11) NOT NULL AUTO_INCREMENT,
+  `class_name` varchar(100) NOT NULL,
+  `class_description` text DEFAULT NULL,
+  `is_legal` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`class_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `state_class_assignment` (
+  `assignment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `state_id` int(11) NOT NULL,
+  `class_id` int(11) NOT NULL,
+  `assigned_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`assignment_id`),
+  CONSTRAINT `state_class_assignment_ibfk_1` FOREIGN KEY (`state_id`) REFERENCES `utube_state` (`state_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `state_class_assignment_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `state_class` (`class_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `analysis_log` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `state_id` int(11) NOT NULL,
+  `analyst_name` varchar(150) DEFAULT NULL,
+  `analysis_notes` text DEFAULT NULL,
+  `analysis_result` varchar(100) DEFAULT NULL,
+  `analyzed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`log_id`),
+  CONSTRAINT `analysis_log_ibfk_1` FOREIGN KEY (`state_id`) REFERENCES `utube_state` (`state_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

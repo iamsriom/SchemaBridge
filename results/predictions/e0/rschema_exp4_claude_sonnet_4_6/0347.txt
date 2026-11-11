@@ -1,0 +1,124 @@
+-- Schema for database: rschema_0347
+
+CREATE TABLE `Leaderboard_Metadata` (
+  `run_id` varchar(255) NOT NULL,
+  `execution_time` datetime DEFAULT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `runtime` float DEFAULT NULL,
+  `run_path` varchar(512) DEFAULT NULL,
+  `max_models` int(11) DEFAULT NULL,
+  `model_types` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`run_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Leaderboard` (
+  `model_id` varchar(255) NOT NULL,
+  `model_name` varchar(255) DEFAULT NULL,
+  `rmse` float DEFAULT NULL,
+  `mse` float DEFAULT NULL,
+  `mae` float DEFAULT NULL,
+  `rmsle` float DEFAULT NULL,
+  `is_best_family` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Hyperparameter` (
+  `hyperparameter_id` int(11) NOT NULL AUTO_INCREMENT,
+  `hyperparameter_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`hyperparameter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Hyperparameter_Values` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_id` varchar(255) NOT NULL,
+  `hyperparameter_id` int(11) NOT NULL,
+  `value` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `hyperparameter_values_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `Leaderboard` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `hyperparameter_values_ibfk_2` FOREIGN KEY (`hyperparameter_id`) REFERENCES `Hyperparameter` (`hyperparameter_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Model_Run` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_id` varchar(255) NOT NULL,
+  `run_id` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `model_run_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `Leaderboard` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `model_run_ibfk_2` FOREIGN KEY (`run_id`) REFERENCES `Leaderboard_Metadata` (`run_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Dataset_Metadata` (
+  `dataset_id` int(11) NOT NULL AUTO_INCREMENT,
+  `dataset_name` varchar(255) NOT NULL,
+  `owner` varchar(255) DEFAULT NULL,
+  `license` varchar(255) DEFAULT NULL,
+  `visibility` varchar(100) DEFAULT NULL,
+  `url` varchar(512) DEFAULT NULL,
+  `creation_date` datetime DEFAULT NULL,
+  `last_update_date` datetime DEFAULT NULL,
+  `data_size` bigint(20) DEFAULT NULL,
+  `num_rows` int(11) DEFAULT NULL,
+  `num_columns` int(11) DEFAULT NULL,
+  PRIMARY KEY (`dataset_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Data_Map` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `dataset_id` int(11) NOT NULL,
+  `run_id` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `data_map_ibfk_1` FOREIGN KEY (`dataset_id`) REFERENCES `Dataset_Metadata` (`dataset_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `data_map_ibfk_2` FOREIGN KEY (`run_id`) REFERENCES `Leaderboard_Metadata` (`run_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Model_Map` (
+  `model_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_type_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`model_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Hyperparameter_Def_Values` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_type_id` int(11) NOT NULL,
+  `hyperparameter_id` int(11) NOT NULL,
+  `default_value` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `hyperparameter_def_values_ibfk_1` FOREIGN KEY (`model_type_id`) REFERENCES `Model_Map` (`model_type_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `hyperparameter_def_values_ibfk_2` FOREIGN KEY (`hyperparameter_id`) REFERENCES `Hyperparameter` (`hyperparameter_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ID_Map` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_id` varchar(255) NOT NULL,
+  `model_type_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_map_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `Leaderboard` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `id_map_ibfk_2` FOREIGN KEY (`model_type_id`) REFERENCES `Model_Map` (`model_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Dataset_Variable_Details` (
+  `variable_id` int(11) NOT NULL AUTO_INCREMENT,
+  `dataset_id` int(11) NOT NULL,
+  `variable_name` varchar(255) NOT NULL,
+  `data_type` varchar(100) DEFAULT NULL,
+  `num_unique` int(11) DEFAULT NULL,
+  `num_null` int(11) DEFAULT NULL,
+  PRIMARY KEY (`variable_id`),
+  CONSTRAINT `dataset_variable_details_ibfk_1` FOREIGN KEY (`dataset_id`) REFERENCES `Dataset_Metadata` (`dataset_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Tags` (
+  `tag_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tag_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`tag_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Tag_Map` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `dataset_id` int(11) NOT NULL,
+  `tag_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `tag_map_ibfk_1` FOREIGN KEY (`dataset_id`) REFERENCES `Dataset_Metadata` (`dataset_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tag_map_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `Tags` (`tag_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

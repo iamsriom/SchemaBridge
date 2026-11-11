@@ -1,0 +1,40 @@
+-- Schema for database: rschema_0185
+CREATE TABLE `member` (
+  `member_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `party_affiliation` varchar(255) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `proposal` (
+  `proposal_id` int(11) NOT NULL,
+  `proposal_content` text NOT NULL,
+  `proposal_time` datetime NOT NULL,
+  `status` varchar(50) NOT NULL,
+  PRIMARY KEY (`proposal_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `proposal_proposer` (
+  `proposal_id` int(11) NOT NULL,
+  `member_id` int(11) NOT NULL,
+  PRIMARY KEY (`proposal_id`,`member_id`),
+  KEY `proposal_proposer_ibfk_2` (`member_id`),
+  CONSTRAINT `proposal_proposer_ibfk_1` FOREIGN KEY (`proposal_id`) REFERENCES `proposal` (`proposal_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `proposal_proposer_ibfk_2` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `proposal_handling` (
+  `handling_id` int(11) NOT NULL AUTO_INCREMENT,
+  `proposal_id` int(11) NOT NULL,
+  `handling_time` datetime NOT NULL,
+  `handler_member_id` int(11) NOT NULL,
+  `handling_opinion` text NOT NULL,
+  PRIMARY KEY (`handling_id`),
+  KEY `proposal_handling_ibfk_1` (`proposal_id`),
+  KEY `proposal_handling_ibfk_2` (`handler_member_id`),
+  CONSTRAINT `proposal_handling_ibfk_1` FOREIGN KEY (`proposal_id`) REFERENCES `proposal` (`proposal_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `proposal_handling_ibfk_2` FOREIGN KEY (`handler_member_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

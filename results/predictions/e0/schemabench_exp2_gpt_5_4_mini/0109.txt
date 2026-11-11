@@ -1,0 +1,56 @@
+-- Schema for database: schemabench_0109
+CREATE TABLE `go_methods` (
+  `method_code` varchar(10) NOT NULL,
+  `method_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`method_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `go_products` (
+  `product_code` varchar(20) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `product_line` varchar(100) DEFAULT NULL,
+  `product_type` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`product_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `go_retailers` (
+  `retailer_code` varchar(20) NOT NULL,
+  `retailer_name` varchar(255) NOT NULL,
+  `retailer_type` varchar(100) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`retailer_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `go_1k` (
+  `sale_id` int(11) NOT NULL,
+  `sale_date` date NOT NULL,
+  `retailer_code` varchar(20) NOT NULL,
+  `product_code` varchar(20) NOT NULL,
+  `method_code` varchar(10) NOT NULL,
+  `sale_quantity` int(11) NOT NULL,
+  `sale_amount` decimal(12,2) DEFAULT NULL,
+  PRIMARY KEY (`sale_id`),
+  KEY `go_1k_ibfk_1` (`retailer_code`),
+  KEY `go_1k_ibfk_2` (`product_code`),
+  KEY `go_1k_ibfk_3` (`method_code`),
+  CONSTRAINT `go_1k_ibfk_1` FOREIGN KEY (`retailer_code`) REFERENCES `go_retailers` (`retailer_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `go_1k_ibfk_2` FOREIGN KEY (`product_code`) REFERENCES `go_products` (`product_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `go_1k_ibfk_3` FOREIGN KEY (`method_code`) REFERENCES `go_methods` (`method_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `go_daily_sales` (
+  `daily_sales_id` int(11) NOT NULL,
+  `sale_date` date NOT NULL,
+  `product_code` varchar(20) NOT NULL,
+  `retailer_code` varchar(20) NOT NULL,
+  `method_code` varchar(10) NOT NULL,
+  `total_quantity` int(11) NOT NULL,
+  `total_amount` decimal(12,2) DEFAULT NULL,
+  PRIMARY KEY (`daily_sales_id`),
+  KEY `go_daily_sales_ibfk_1` (`product_code`),
+  KEY `go_daily_sales_ibfk_2` (`retailer_code`),
+  KEY `go_daily_sales_ibfk_3` (`method_code`),
+  CONSTRAINT `go_daily_sales_ibfk_1` FOREIGN KEY (`product_code`) REFERENCES `go_products` (`product_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `go_daily_sales_ibfk_2` FOREIGN KEY (`retailer_code`) REFERENCES `go_retailers` (`retailer_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `go_daily_sales_ibfk_3` FOREIGN KEY (`method_code`) REFERENCES `go_methods` (`method_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

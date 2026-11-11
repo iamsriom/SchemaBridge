@@ -1,0 +1,60 @@
+-- Schema for database: rschema_0199
+CREATE TABLE `stores` (
+  `store_id` int(11) NOT NULL AUTO_INCREMENT,
+  `store_number` varchar(50) NOT NULL,
+  `store_name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `manager` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`store_id`),
+  UNIQUE KEY `store_number` (`store_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_number` varchar(50) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `model` varchar(255) DEFAULT NULL,
+  `barcode` varchar(100) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`product_id`),
+  UNIQUE KEY `product_number` (`product_number`),
+  UNIQUE KEY `barcode` (`barcode`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `store_products` (
+  `store_product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `store_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  PRIMARY KEY (`store_product_id`),
+  UNIQUE KEY `store_product_uk` (`store_id`,`product_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `store_products_ibfk_1` FOREIGN KEY (`store_id`) REFERENCES `stores` (`store_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `store_products_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `daily_sales` (
+  `sale_id` int(11) NOT NULL AUTO_INCREMENT,
+  `store_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `sales_time` datetime NOT NULL,
+  `sales_quantity` int(11) NOT NULL,
+  `sales_amount` decimal(10,2) NOT NULL,
+  `salesperson` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`sale_id`),
+  KEY `store_id` (`store_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `daily_sales_ibfk_1` FOREIGN KEY (`store_id`) REFERENCES `stores` (`store_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `daily_sales_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `store_appraisals` (
+  `appraisal_id` int(11) NOT NULL AUTO_INCREMENT,
+  `store_id` int(11) NOT NULL,
+  `appraisal_date` date NOT NULL,
+  `sales_score` decimal(5,2) NOT NULL,
+  `customer_satisfaction_score` decimal(5,2) NOT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`appraisal_id`),
+  KEY `store_id` (`store_id`),
+  CONSTRAINT `store_appraisals_ibfk_1` FOREIGN KEY (`store_id`) REFERENCES `stores` (`store_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

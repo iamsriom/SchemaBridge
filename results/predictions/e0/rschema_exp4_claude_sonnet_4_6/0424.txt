@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0424
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `account_status` tinyint(1) NOT NULL DEFAULT '1',
+  `last_login_time` datetime DEFAULT NULL,
+  `login_ip` varchar(64) DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `system` (
+  `system_id` int(11) NOT NULL AUTO_INCREMENT,
+  `system_name` varchar(255) NOT NULL,
+  `system_domain` varchar(255) NOT NULL,
+  `access_time` datetime DEFAULT NULL,
+  `callback_url` varchar(512) DEFAULT NULL,
+  `secret_key` varchar(255) DEFAULT NULL,
+  `token_validity` int(11) DEFAULT NULL,
+  `is_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `require_approval` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`system_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `login_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `system_id` int(11) NOT NULL,
+  `login_time` datetime NOT NULL,
+  `login_ip` varchar(64) DEFAULT NULL,
+  `token` varchar(512) DEFAULT NULL,
+  `expiration_time` datetime DEFAULT NULL,
+  `is_valid` tinyint(1) NOT NULL DEFAULT '1',
+  `logout_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `login_record_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `login_record_ibfk_2` FOREIGN KEY (`system_id`) REFERENCES `system` (`system_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `system_authorization` (
+  `auth_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `system_id` int(11) NOT NULL,
+  `authorization_time` datetime NOT NULL,
+  `is_effective` tinyint(1) NOT NULL DEFAULT '1',
+  `expiration_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`auth_id`),
+  CONSTRAINT `system_authorization_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `system_authorization_ibfk_2` FOREIGN KEY (`system_id`) REFERENCES `system` (`system_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

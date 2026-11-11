@@ -1,0 +1,55 @@
+-- Schema for database: schemabench_0191
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(255) NOT NULL,
+  `contact_number` varchar(20) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staff` (
+  `staff_id` int(11) NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(255) NOT NULL,
+  `role` varchar(100) NOT NULL,
+  `salary` decimal(10,2) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `contact_number` varchar(20) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`staff_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `menu_items` (
+  `menu_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `item_name` varchar(255) NOT NULL,
+  `category` varchar(50) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`menu_item_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bookings` (
+  `booking_id` int(11) NOT NULL AUTO_INCREMENT,
+  `booking_date` datetime NOT NULL,
+  `table_number` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  PRIMARY KEY (`booking_id`),
+  KEY `bookings_ibfk_1` (`customer_id`),
+  KEY `bookings_ibfk_2` (`staff_id`),
+  CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bookings_ibfk_2` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_date` datetime NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `total_cost` decimal(10,2) NOT NULL,
+  `delivery_status` varchar(50) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `menu_item_id` int(11) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `orders_ibfk_1` (`customer_id`),
+  KEY `orders_ibfk_2` (`menu_item_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`menu_item_id`) REFERENCES `menu_items` (`menu_item_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

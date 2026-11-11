@@ -1,0 +1,33 @@
+-- Schema for database: rschema_0486
+CREATE TABLE `mine` (
+  `mine_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `person_in_charge` varchar(255) NOT NULL,
+  PRIMARY KEY (`mine_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `mineral_resource` (
+  `resource_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `reserves` decimal(18,2) NOT NULL,
+  `discovery_date` date NOT NULL,
+  `first_discovered_mine_id` int(11) NOT NULL,
+  PRIMARY KEY (`resource_id`),
+  KEY `mineral_resource_ibfk_1` (`first_discovered_mine_id`),
+  CONSTRAINT `mineral_resource_ibfk_1` FOREIGN KEY (`first_discovered_mine_id`) REFERENCES `mine` (`mine_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `extraction` (
+  `extraction_id` int(11) NOT NULL,
+  `resource_id` int(11) NOT NULL,
+  `mine_id` int(11) NOT NULL,
+  `extraction_date` date NOT NULL,
+  `extraction_volume` decimal(18,2) NOT NULL,
+  `extraction_cost` decimal(18,2) NOT NULL,
+  PRIMARY KEY (`extraction_id`),
+  KEY `extraction_ibfk_1` (`resource_id`),
+  KEY `extraction_ibfk_2` (`mine_id`),
+  CONSTRAINT `extraction_ibfk_1` FOREIGN KEY (`resource_id`) REFERENCES `mineral_resource` (`resource_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `extraction_ibfk_2` FOREIGN KEY (`mine_id`) REFERENCES `mine` (`mine_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

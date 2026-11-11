@@ -1,0 +1,68 @@
+-- Schema for database: schemabench_0107
+CREATE TABLE `district` (
+  `district_id` int(11) NOT NULL,
+  `district_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`district_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `client` (
+  `client_id` int(11) NOT NULL,
+  `district_id` int(11) NOT NULL,
+  `birth_number` char(11) DEFAULT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `client_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`client_id`),
+  KEY `client_ibfk_1` (`district_id`),
+  CONSTRAINT `client_ibfk_1` FOREIGN KEY (`district_id`) REFERENCES `district` (`district_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `account` (
+  `account_id` int(11) NOT NULL,
+  `district_id` int(11) NOT NULL,
+  `frequency` varchar(20) DEFAULT NULL,
+  `date_opened` datetime DEFAULT NULL,
+  PRIMARY KEY (`account_id`),
+  KEY `account_ibfk_1` (`district_id`),
+  CONSTRAINT `account_ibfk_1` FOREIGN KEY (`district_id`) REFERENCES `district` (`district_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `disposition` (
+  `disp_id` int(11) NOT NULL,
+  `client_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `type` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`disp_id`),
+  KEY `disposition_ibfk_1` (`client_id`),
+  KEY `disposition_ibfk_2` (`account_id`),
+  CONSTRAINT `disposition_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `client` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `disposition_ibfk_2` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `loan` (
+  `loan_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `date_issued` datetime DEFAULT NULL,
+  `amount` int(11) DEFAULT NULL,
+  `duration_months` int(11) DEFAULT NULL,
+  `payments` decimal(10,2) DEFAULT NULL,
+  `status` char(1) DEFAULT NULL,
+  PRIMARY KEY (`loan_id`),
+  KEY `loan_ibfk_1` (`account_id`),
+  CONSTRAINT `loan_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction` (
+  `transaction_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `transaction_date` datetime DEFAULT NULL,
+  `transaction_type` varchar(20) DEFAULT NULL,
+  `operation` varchar(50) DEFAULT NULL,
+  `amount` decimal(10,2) DEFAULT NULL,
+  `balance` decimal(10,2) DEFAULT NULL,
+  `k_symbol` varchar(50) DEFAULT NULL,
+  `bank` varchar(20) DEFAULT NULL,
+  `account` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`transaction_id`),
+  KEY `transaction_ibfk_1` (`account_id`),
+  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,62 @@
+-- Schema for database: rschema_0045
+CREATE TABLE `warehouse` (
+  `warehouse_id` int(11) NOT NULL AUTO_INCREMENT,
+  `warehouse_number` varchar(50) NOT NULL,
+  `warehouse_name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  PRIMARY KEY (`warehouse_id`),
+  UNIQUE KEY `warehouse_number` (`warehouse_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_number` varchar(50) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `model` varchar(255) DEFAULT NULL,
+  `barcode` varchar(100) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `inventory_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`product_id`),
+  UNIQUE KEY `product_number` (`product_number`),
+  UNIQUE KEY `barcode` (`barcode`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inventory_count` (
+  `inventory_count_id` int(11) NOT NULL AUTO_INCREMENT,
+  `warehouse_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `inventory_time` datetime NOT NULL,
+  `inventory_counter` varchar(255) NOT NULL,
+  `inventory_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`inventory_count_id`),
+  KEY `warehouse_id` (`warehouse_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `inventory_count_ibfk_1` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `inventory_count_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shipment` (
+  `shipment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `warehouse_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `shipment_time` datetime NOT NULL,
+  `shipment_quantity` int(11) NOT NULL,
+  `shipment_person` varchar(255) NOT NULL,
+  `receiving_unit` varchar(255) NOT NULL,
+  PRIMARY KEY (`shipment_id`),
+  KEY `warehouse_id` (`warehouse_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `shipment_ibfk_1` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `shipment_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `warehouse_appraisal` (
+  `appraisal_id` int(11) NOT NULL AUTO_INCREMENT,
+  `warehouse_id` int(11) NOT NULL,
+  `appraisal_time` datetime NOT NULL,
+  `inventory_accuracy` decimal(5,2) NOT NULL,
+  `shipment_efficiency` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`appraisal_id`),
+  KEY `warehouse_id` (`warehouse_id`),
+  CONSTRAINT `warehouse_appraisal_ibfk_1` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

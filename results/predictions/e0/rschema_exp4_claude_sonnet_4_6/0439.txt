@@ -1,0 +1,123 @@
+-- Schema for database: rschema_0439
+
+CREATE TABLE `admin` (
+  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`admin_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `nickname` varchar(100) DEFAULT NULL,
+  `mobile` varchar(20) DEFAULT NULL,
+  `wechat_openid` varchar(100) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `avatar_url` varchar(255) DEFAULT NULL,
+  `gender` tinyint(1) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `mobile` (`mobile`),
+  UNIQUE KEY `wechat_openid` (`wechat_openid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `merchant` (
+  `merchant_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `mobile` varchar(20) NOT NULL,
+  `wechat_openid` varchar(100) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `avatar_url` varchar(255) DEFAULT NULL,
+  `business_license` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `service_area` varchar(255) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `rating` decimal(3,2) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`merchant_id`),
+  UNIQUE KEY `mobile` (`mobile`),
+  UNIQUE KEY `wechat_openid` (`wechat_openid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `waste_type` (
+  `type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `unit` varchar(20) DEFAULT NULL,
+  `unit_price` decimal(10,2) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `recycle_request` (
+  `request_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `waste_type_id` int(11) NOT NULL,
+  `quantity` decimal(10,2) NOT NULL,
+  `pickup_address` varchar(255) NOT NULL,
+  `pickup_longitude` decimal(10,6) DEFAULT NULL,
+  `pickup_latitude` decimal(10,6) DEFAULT NULL,
+  `pickup_time` datetime NOT NULL,
+  `remark` varchar(500) DEFAULT NULL,
+  `images` varchar(1000) DEFAULT NULL,
+  `status` tinyint(2) NOT NULL DEFAULT '0' COMMENT '0:pending,1:accepted,2:completed,3:cancelled',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`request_id`),
+  KEY `user_id` (`user_id`),
+  KEY `waste_type_id` (`waste_type_id`),
+  CONSTRAINT `recycle_request_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `recycle_request_ibfk_2` FOREIGN KEY (`waste_type_id`) REFERENCES `waste_type` (`type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_no` varchar(64) NOT NULL,
+  `request_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `merchant_id` int(11) NOT NULL,
+  `actual_quantity` decimal(10,2) DEFAULT NULL,
+  `amount` decimal(10,2) DEFAULT NULL,
+  `payment_method` varchar(50) DEFAULT NULL,
+  `payment_status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '0:unpaid,1:paid',
+  `payment_time` datetime DEFAULT NULL,
+  `transaction_id` varchar(100) DEFAULT NULL,
+  `status` tinyint(2) NOT NULL DEFAULT '0' COMMENT '0:accepted,1:in_progress,2:completed,3:cancelled',
+  `accepted_at` datetime DEFAULT NULL,
+  `completed_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  UNIQUE KEY `order_no` (`order_no`),
+  KEY `request_id` (`request_id`),
+  KEY `user_id` (`user_id`),
+  KEY `merchant_id` (`merchant_id`),
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`request_id`) REFERENCES `recycle_request` (`request_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_ibfk_3` FOREIGN KEY (`merchant_id`) REFERENCES `merchant` (`merchant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `rating` (
+  `rating_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `merchant_id` int(11) NOT NULL,
+  `score` tinyint(1) NOT NULL COMMENT '1-5 stars',
+  `comment` varchar(500) DEFAULT NULL,
+  `images` varchar(1000) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`rating_id`),
+  UNIQUE KEY `order_id` (`order_id`),
+  KEY `user_id` (`user_id`),
+  KEY `merchant_id` (`merchant_id`),
+  CONSTRAINT `rating_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `rating_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `rating_ibfk_3` FOREIGN KEY (`merchant_id`) REFERENCES `merchant` (`merchant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

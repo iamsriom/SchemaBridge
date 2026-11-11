@@ -1,0 +1,30 @@
+{
+  "text_number": 121,
+  "id": "67552f0a13602ec03b41a92b",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0121",
+  "question": "User Authentication and Management System\nThis system is designed to manage and authenticate users while tracking their interactions with various services and worker nodes in the system. The key functionalities of the system are:\n1.User Registration and Management:\nStore user registration information, including username, full name, email, password hash, registration date, and last login date.\nEnsure the uniqueness of usernames and email addresses.\n2.User Authentication:\nStore information of authenticated users, including username, full name, authentication level (ring), and authentication time.\nEnsure the uniqueness of authenticated usernames.\nRecord signatures and issuer information during the authentication process.\n3.User Migration:\nTrack user migrations from an old system to the new system, recording the old and new user IDs, along with the migration time.\n4.Authenticated Consumer Management:\nStore information of authenticated consumers, including name, description, type, and associated user ID.\nStore configuration data,permissions, and signatures for each consumer.\n5.Session Management:\nStore session information, including session ID, associated consumer ID, expiration time, and MFA (Multi-Factor Authentication) status.\nRecord session signatures and issuer information.\n6.Service Management:\nStore information of various services in the system, including service name, type, URL, and configuration.\nTrack the last heartbeat time and monitoring status of services.\nRecord service signatures and issuer information.\n7.Worker Node Management:\nStore information of worker nodes, including node name, status, associated service ID, operating system, architecture, and last heartbeat time.\nRecord worker node signatures and issuer information.\nEach service contains multiple worker nodes, each user may have multiple authenticated consumers, and each consumer will have multiple sessions.",
+  "ddl": "-- Schema for database: rschema_0121\n\nCREATE TABLE `users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `full_name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `password_hash` varchar(255) NOT NULL,\n  `registration_date` datetime NOT NULL,\n  `last_login_date` datetime DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `username` (`username`),\n  UNIQUE KEY `email` (`email`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `authenticated_users` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `full_name` varchar(255) NOT NULL,\n  `ring` int(11) NOT NULL,\n  `authentication_time` datetime NOT NULL,\n  `signature` text DEFAULT NULL,\n  `issuer` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `username` (`username`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_migrations` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `old_user_id` int(11) NOT NULL,\n  `new_user_id` int(11) NOT NULL,\n  `migration_time` datetime NOT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `user_migrations_ibfk_1` FOREIGN KEY (`new_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `authenticated_consumers` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` text DEFAULT NULL,\n  `type` varchar(100) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `config` text DEFAULT NULL,\n  `permissions` text DEFAULT NULL,\n  `signature` text DEFAULT NULL,\n  `issuer` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `authenticated_consumers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sessions` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `session_id` varchar(255) NOT NULL,\n  `consumer_id` int(11) NOT NULL,\n  `expiration_time` datetime NOT NULL,\n  `mfa_status` tinyint(1) NOT NULL DEFAULT 0,\n  `signature` text DEFAULT NULL,\n  `issuer` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `session_id` (`session_id`),\n  CONSTRAINT `sessions_ibfk_1` FOREIGN KEY (`consumer_id`) REFERENCES `authenticated_consumers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `services` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `service_name` varchar(255) NOT NULL,\n  `type` varchar(100) NOT NULL,\n  `url` varchar(255) DEFAULT NULL,\n  `config` text DEFAULT NULL,\n  `last_heartbeat_time` datetime DEFAULT NULL,\n  `monitoring_status` varchar(100) DEFAULT NULL,\n  `signature` text DEFAULT NULL,\n  `issuer` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `worker_nodes` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `node_name` varchar(255) NOT NULL,\n  `status` varchar(100) NOT NULL,\n  `service_id` int(11) NOT NULL,\n  `operating_system` varchar(255) DEFAULT NULL,\n  `architecture` varchar(100) DEFAULT NULL,\n  `last_heartbeat_time` datetime DEFAULT NULL,\n  `signature` text DEFAULT NULL,\n  `issuer` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `worker_nodes_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "authenticated_users",
+      "user_migrations",
+      "authenticated_consumers",
+      "sessions",
+      "services",
+      "worker_nodes"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "authenticated_users": [],
+      "user_migrations": [],
+      "authenticated_consumers": [],
+      "sessions": [],
+      "services": [],
+      "worker_nodes": []
+    }
+  }
+}

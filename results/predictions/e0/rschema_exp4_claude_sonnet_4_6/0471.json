@@ -1,0 +1,30 @@
+{
+  "text_number": 471,
+  "id": "67552f0b13602ec03b41aaee",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0471",
+  "question": "This is a credit card management system. For customer management, the system records basic information for each customer, including unique customer ID, name, address, contact number and application status. Non-credit card customers can fill out a credit card application form, specifying the type of credit card they want to apply for and the applicant's basic information. If the application is accepted, the system will record customer information and send a confirmation letter, informing the credit card's validity period and credit limit; otherwise, a rejection letter will be sent. For credit card management, the system records basic information for each credit card, including unique card number, type, validity period, credit limit and activation status. After receiving the credit card, customers need to activate it using the card number and password, and the system will send an activation notification to inform whether the activation is successful. For transaction management, the system records basic information for each transaction, including unique transaction ID, transaction date, transaction description, transaction amount and transaction status. Customers can query and modify their personal information online, as well as query and verify transaction information.",
+  "ddl": "-- Schema for database: rschema_0471\n\nCREATE TABLE `customer` (\n  `customer_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `address` varchar(500) DEFAULT NULL,\n  `contact_number` varchar(20) DEFAULT NULL,\n  `application_status` varchar(50) DEFAULT NULL,\n  PRIMARY KEY (`customer_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `credit_card_application` (\n  `application_id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_id` int(11) DEFAULT NULL,\n  `card_type` varchar(100) NOT NULL,\n  `applicant_name` varchar(255) NOT NULL,\n  `applicant_address` varchar(500) DEFAULT NULL,\n  `applicant_contact_number` varchar(20) DEFAULT NULL,\n  `application_date` datetime DEFAULT NULL,\n  `status` varchar(50) DEFAULT NULL,\n  PRIMARY KEY (`application_id`),\n  CONSTRAINT `credit_card_application_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `confirmation_letter` (\n  `letter_id` int(11) NOT NULL AUTO_INCREMENT,\n  `application_id` int(11) NOT NULL,\n  `customer_id` int(11) NOT NULL,\n  `validity_period` datetime DEFAULT NULL,\n  `credit_limit` decimal(15,2) DEFAULT NULL,\n  `sent_date` datetime DEFAULT NULL,\n  PRIMARY KEY (`letter_id`),\n  CONSTRAINT `confirmation_letter_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `credit_card_application` (`application_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `confirmation_letter_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `rejection_letter` (\n  `letter_id` int(11) NOT NULL AUTO_INCREMENT,\n  `application_id` int(11) NOT NULL,\n  `customer_id` int(11) DEFAULT NULL,\n  `reason` varchar(500) DEFAULT NULL,\n  `sent_date` datetime DEFAULT NULL,\n  PRIMARY KEY (`letter_id`),\n  CONSTRAINT `rejection_letter_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `credit_card_application` (`application_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `rejection_letter_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `credit_card` (\n  `card_number` varchar(20) NOT NULL,\n  `customer_id` int(11) NOT NULL,\n  `card_type` varchar(100) NOT NULL,\n  `validity_period` datetime NOT NULL,\n  `credit_limit` decimal(15,2) NOT NULL,\n  `activation_status` varchar(50) DEFAULT NULL,\n  `password` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`card_number`),\n  CONSTRAINT `credit_card_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `activation_notification` (\n  `notification_id` int(11) NOT NULL AUTO_INCREMENT,\n  `card_number` varchar(20) NOT NULL,\n  `customer_id` int(11) NOT NULL,\n  `activation_result` varchar(50) DEFAULT NULL,\n  `notification_date` datetime DEFAULT NULL,\n  PRIMARY KEY (`notification_id`),\n  CONSTRAINT `activation_notification_ibfk_1` FOREIGN KEY (`card_number`) REFERENCES `credit_card` (`card_number`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `activation_notification_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `transaction` (\n  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,\n  `card_number` varchar(20) NOT NULL,\n  `customer_id` int(11) NOT NULL,\n  `transaction_date` datetime NOT NULL,\n  `transaction_description` varchar(500) DEFAULT NULL,\n  `transaction_amount` decimal(15,2) NOT NULL,\n  `transaction_status` varchar(50) DEFAULT NULL,\n  PRIMARY KEY (`transaction_id`),\n  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`card_number`) REFERENCES `credit_card` (`card_number`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `transaction_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "customer",
+      "credit_card_application",
+      "confirmation_letter",
+      "rejection_letter",
+      "credit_card",
+      "activation_notification",
+      "transaction"
+    ],
+    "columns_by_table": {
+      "customer": [],
+      "credit_card_application": [],
+      "confirmation_letter": [],
+      "rejection_letter": [],
+      "credit_card": [],
+      "activation_notification": [],
+      "transaction": []
+    }
+  }
+}

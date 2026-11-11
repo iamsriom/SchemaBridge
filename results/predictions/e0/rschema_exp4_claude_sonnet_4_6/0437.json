@@ -1,0 +1,30 @@
+{
+  "text_number": 437,
+  "id": "67552f0b13602ec03b41aa43",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0437",
+  "question": "The course design management system of a university shall record and manage student information, task assignments, simulation modules, simulation results, and thesis submissions. Student information includes Student ID, Name, Class, and Major. Task information includes Task ID, Task Title, Task Description, Task Start Date, Task End Date, and Task Location. Simulation module information includes Module ID, Module Name, Module Type (e.g., PCM, DPCM, ΔM), Module Description, and Module Code. Simulation result information includes Student ID, Module ID, Simulation Result Data, Result Analysis, and Simulation Date. Thesis information includes Thesis ID, Student ID, Thesis Title, Thesis Content, and Submission Date. The system shall support students in viewing tasks, conducting simulation experiments, submitting simulation results, and writing and submitting theses. The system shall generate reports based on tasks and simulation results and record the completion status of students' course designs.",
+  "ddl": "-- Schema for database: rschema_0437\n\nCREATE TABLE `student` (\n  `student_id` varchar(20) NOT NULL,\n  `name` varchar(100) NOT NULL,\n  `class` varchar(50) NOT NULL,\n  `major` varchar(100) NOT NULL,\n  PRIMARY KEY (`student_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `task` (\n  `task_id` int(11) NOT NULL AUTO_INCREMENT,\n  `task_title` varchar(200) NOT NULL,\n  `task_description` text DEFAULT NULL,\n  `task_start_date` datetime NOT NULL,\n  `task_end_date` datetime NOT NULL,\n  `task_location` varchar(200) DEFAULT NULL,\n  PRIMARY KEY (`task_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `simulation_module` (\n  `module_id` int(11) NOT NULL AUTO_INCREMENT,\n  `module_name` varchar(200) NOT NULL,\n  `module_type` varchar(50) NOT NULL,\n  `module_description` text DEFAULT NULL,\n  `module_code` text DEFAULT NULL,\n  PRIMARY KEY (`module_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `task_assignment` (\n  `assignment_id` int(11) NOT NULL AUTO_INCREMENT,\n  `student_id` varchar(20) NOT NULL,\n  `task_id` int(11) NOT NULL,\n  `completion_status` varchar(50) DEFAULT 'pending',\n  `assigned_date` datetime DEFAULT NULL,\n  PRIMARY KEY (`assignment_id`),\n  CONSTRAINT `task_assignment_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `task_assignment_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `simulation_result` (\n  `result_id` int(11) NOT NULL AUTO_INCREMENT,\n  `student_id` varchar(20) NOT NULL,\n  `module_id` int(11) NOT NULL,\n  `simulation_result_data` text DEFAULT NULL,\n  `result_analysis` text DEFAULT NULL,\n  `simulation_date` datetime NOT NULL,\n  PRIMARY KEY (`result_id`),\n  CONSTRAINT `simulation_result_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `simulation_result_ibfk_2` FOREIGN KEY (`module_id`) REFERENCES `simulation_module` (`module_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `thesis` (\n  `thesis_id` int(11) NOT NULL AUTO_INCREMENT,\n  `student_id` varchar(20) NOT NULL,\n  `thesis_title` varchar(300) NOT NULL,\n  `thesis_content` longtext DEFAULT NULL,\n  `submission_date` datetime NOT NULL,\n  PRIMARY KEY (`thesis_id`),\n  CONSTRAINT `thesis_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `course_design_report` (\n  `report_id` int(11) NOT NULL AUTO_INCREMENT,\n  `student_id` varchar(20) NOT NULL,\n  `task_id` int(11) NOT NULL,\n  `result_id` int(11) DEFAULT NULL,\n  `report_content` text DEFAULT NULL,\n  `generated_date` datetime NOT NULL,\n  PRIMARY KEY (`report_id`),\n  CONSTRAINT `course_design_report_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `course_design_report_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `course_design_report_ibfk_3` FOREIGN KEY (`result_id`) REFERENCES `simulation_result` (`result_id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "student",
+      "task",
+      "simulation_module",
+      "task_assignment",
+      "simulation_result",
+      "thesis",
+      "course_design_report"
+    ],
+    "columns_by_table": {
+      "student": [],
+      "task": [],
+      "simulation_module": [],
+      "task_assignment": [],
+      "simulation_result": [],
+      "thesis": [],
+      "course_design_report": []
+    }
+  }
+}

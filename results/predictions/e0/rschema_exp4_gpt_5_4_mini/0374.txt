@@ -1,0 +1,87 @@
+-- Schema for database: rschema_0374
+CREATE TABLE `roles` (
+  `role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_name` varchar(100) NOT NULL,
+  `role_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`role_id`),
+  UNIQUE KEY `uk_roles_role_name` (`role_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_username` (`username`),
+  UNIQUE KEY `uk_users_email` (`email`),
+  KEY `users_ibfk_1` (`role_id`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `operation_logs` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `operation_description` varchar(255) NOT NULL,
+  PRIMARY KEY (`log_id`),
+  KEY `operation_logs_ibfk_1` (`user_id`),
+  CONSTRAINT `operation_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supervisory_departments` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(150) NOT NULL,
+  `responsibility_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`department_id`),
+  UNIQUE KEY `uk_supervisory_departments_department_name` (`department_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `work_units` (
+  `work_unit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_id` int(11) NOT NULL,
+  `work_unit_name` varchar(150) NOT NULL,
+  `responsibility_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`work_unit_id`),
+  UNIQUE KEY `uk_work_units_work_unit_name` (`work_unit_name`),
+  KEY `work_units_ibfk_1` (`department_id`),
+  CONSTRAINT `work_units_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `supervisory_departments` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resources` (
+  `resource_id` int(11) NOT NULL AUTO_INCREMENT,
+  `resource_code` varchar(100) NOT NULL,
+  `resource_name` varchar(150) NOT NULL,
+  PRIMARY KEY (`resource_id`),
+  UNIQUE KEY `uk_resources_resource_code` (`resource_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resource_transactions` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `work_unit_id` int(11) NOT NULL,
+  `resource_id` int(11) NOT NULL,
+  `receiver_user_id` int(11) NOT NULL,
+  `storage_location` varchar(255) DEFAULT NULL,
+  `budget_year` int(11) NOT NULL,
+  `acquisition_value` decimal(12,2) NOT NULL,
+  `transaction_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`transaction_id`),
+  KEY `resource_transactions_ibfk_1` (`work_unit_id`),
+  KEY `resource_transactions_ibfk_2` (`resource_id`),
+  KEY `resource_transactions_ibfk_3` (`receiver_user_id`),
+  CONSTRAINT `resource_transactions_ibfk_1` FOREIGN KEY (`work_unit_id`) REFERENCES `work_units` (`work_unit_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `resource_transactions_ibfk_2` FOREIGN KEY (`resource_id`) REFERENCES `resources` (`resource_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `resource_transactions_ibfk_3` FOREIGN KEY (`receiver_user_id`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `approval_documents` (
+  `document_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_id` int(11) NOT NULL,
+  `document_name` varchar(255) NOT NULL,
+  `document_content` text DEFAULT NULL,
+  PRIMARY KEY (`document_id`),
+  KEY `approval_documents_ibfk_1` (`transaction_id`),
+  CONSTRAINT `approval_documents_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `resource_transactions` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0371
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `user_email` varchar(255) NOT NULL,
+  `email_verification_time` datetime DEFAULT NULL,
+  `user_avatar_url` varchar(255) DEFAULT NULL,
+  `user_creation_time` datetime NOT NULL,
+  `user_update_time` datetime NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `account` (
+  `account_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `third_party_service_provider_type` varchar(100) NOT NULL,
+  `third_party_service_provider_id` varchar(255) NOT NULL,
+  `third_party_service_provider_account_id` varchar(255) NOT NULL,
+  `refresh_token` varchar(255) DEFAULT NULL,
+  `access_token` varchar(255) DEFAULT NULL,
+  `access_token_expiration_time` datetime DEFAULT NULL,
+  `account_creation_time` datetime NOT NULL,
+  `account_update_time` datetime NOT NULL,
+  PRIMARY KEY (`account_id`),
+  KEY `account_ibfk_1` (`user_id`),
+  CONSTRAINT `account_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `session` (
+  `session_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `session_expiration_time` datetime NOT NULL,
+  `session_token` varchar(255) NOT NULL,
+  `access_token` varchar(255) DEFAULT NULL,
+  `session_creation_time` datetime NOT NULL,
+  `session_update_time` datetime NOT NULL,
+  PRIMARY KEY (`session_id`),
+  KEY `session_ibfk_1` (`user_id`),
+  CONSTRAINT `session_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `verification_request` (
+  `verification_request_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `verification_request_identifier` varchar(255) NOT NULL,
+  `verification_token` varchar(255) NOT NULL,
+  `verification_request_expiration_time` datetime NOT NULL,
+  `verification_request_creation_time` datetime NOT NULL,
+  `verification_request_update_time` datetime NOT NULL,
+  PRIMARY KEY (`verification_request_id`),
+  KEY `verification_request_ibfk_1` (`user_id`),
+  CONSTRAINT `verification_request_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

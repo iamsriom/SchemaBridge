@@ -1,0 +1,82 @@
+-- Schema for database: rschema_0506
+
+CREATE TABLE `supervision_department` (
+  `supervision_dept_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supervision_dept_name` varchar(255) NOT NULL,
+  `responsible_person` varchar(255) NOT NULL,
+  `resource_allocation` varchar(255) DEFAULT NULL,
+  `personnel_management` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`supervision_dept_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `construction_management_unit` (
+  `unit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `unit_name` varchar(255) NOT NULL,
+  `contact_number` varchar(50) DEFAULT NULL,
+  `responsible_person` varchar(255) NOT NULL,
+  `annual_plan` varchar(255) DEFAULT NULL,
+  `supervision_dept_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`unit_id`),
+  CONSTRAINT `construction_management_unit_ibfk_1` FOREIGN KEY (`supervision_dept_id`) REFERENCES `supervision_department` (`supervision_dept_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `business_project_department` (
+  `project_dept_id` int(11) NOT NULL AUTO_INCREMENT,
+  `dept_name` varchar(255) NOT NULL,
+  `responsible_person` varchar(255) NOT NULL,
+  `project_progress` varchar(255) DEFAULT NULL,
+  `issue_reporting` text DEFAULT NULL,
+  PRIMARY KEY (`project_dept_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `electrical_grid_project` (
+  `project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_name` varchar(255) NOT NULL,
+  `construction_progress` varchar(255) DEFAULT NULL,
+  `resource_allocation` varchar(255) DEFAULT NULL,
+  `quality_control` varchar(255) DEFAULT NULL,
+  `safety_management` varchar(255) DEFAULT NULL,
+  `unit_id` int(11) DEFAULT NULL,
+  `project_dept_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`project_id`),
+  CONSTRAINT `electrical_grid_project_ibfk_1` FOREIGN KEY (`unit_id`) REFERENCES `construction_management_unit` (`unit_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `electrical_grid_project_ibfk_2` FOREIGN KEY (`project_dept_id`) REFERENCES `business_project_department` (`project_dept_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resource` (
+  `resource_id` int(11) NOT NULL AUTO_INCREMENT,
+  `resource_type` varchar(255) NOT NULL,
+  `resource_quantity` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`resource_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_resource_allocation` (
+  `allocation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `resource_id` int(11) NOT NULL,
+  `allocated_quantity` int(11) NOT NULL DEFAULT 0,
+  `usage_record` text DEFAULT NULL,
+  `allocation_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`allocation_id`),
+  CONSTRAINT `project_resource_allocation_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `electrical_grid_project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_resource_allocation_ibfk_2` FOREIGN KEY (`resource_id`) REFERENCES `resource` (`resource_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_name` varchar(255) NOT NULL,
+  `responsible_person` varchar(255) NOT NULL,
+  `task_progress` varchar(255) DEFAULT NULL,
+  `task_priority` varchar(50) DEFAULT NULL,
+  `completion_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`task_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_project` (
+  `task_project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  PRIMARY KEY (`task_project_id`),
+  CONSTRAINT `task_project_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_project_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `electrical_grid_project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

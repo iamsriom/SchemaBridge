@@ -1,0 +1,78 @@
+-- Schema for database: schemabench_0056
+CREATE TABLE `abilities` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `entity_type` varchar(255) DEFAULT NULL,
+  `entity_id` bigint(20) unsigned DEFAULT NULL,
+  `only_owned` tinyint(1) NOT NULL DEFAULT '0',
+  `options` text DEFAULT NULL,
+  `scope` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `abilities_entity_type_entity_id_index` (`entity_type`,`entity_id`),
+  KEY `abilities_scope_index` (`scope`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `roles` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `scope` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `roles_name_scope_unique` (`name`,`scope`),
+  KEY `roles_scope_index` (`scope`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `assigned_roles` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `role_id` bigint(20) unsigned NOT NULL,
+  `entity_type` varchar(255) NOT NULL,
+  `entity_id` bigint(20) unsigned NOT NULL,
+  `restricted_to_type` varchar(255) DEFAULT NULL,
+  `restricted_to_id` bigint(20) unsigned DEFAULT NULL,
+  `scope` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `assigned_roles_role_id_index` (`role_id`),
+  KEY `assigned_roles_entity_type_entity_id_index` (`entity_type`,`entity_id`),
+  KEY `assigned_roles_restricted_to_type_restricted_to_id_index` (`restricted_to_type`,`restricted_to_id`),
+  KEY `assigned_roles_scope_index` (`scope`),
+  CONSTRAINT `assigned_roles_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `permissions` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `ability_id` bigint(20) unsigned NOT NULL,
+  `entity_type` varchar(255) NOT NULL,
+  `entity_id` bigint(20) unsigned NOT NULL,
+  `forbidden` tinyint(1) NOT NULL DEFAULT '0',
+  `scope` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `permissions_ability_id_index` (`ability_id`),
+  KEY `permissions_entity_type_entity_id_index` (`entity_type`,`entity_id`),
+  KEY `permissions_scope_index` (`scope`),
+  CONSTRAINT `permissions_ibfk_1` FOREIGN KEY (`ability_id`) REFERENCES `abilities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `assigned_abilities` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `ability_id` bigint(20) unsigned NOT NULL,
+  `entity_type` varchar(255) NOT NULL,
+  `entity_id` bigint(20) unsigned NOT NULL,
+  `forbidden` tinyint(1) NOT NULL DEFAULT '0',
+  `scope` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `assigned_abilities_ability_id_index` (`ability_id`),
+  KEY `assigned_abilities_entity_type_entity_id_index` (`entity_type`,`entity_id`),
+  KEY `assigned_abilities_scope_index` (`scope`),
+  CONSTRAINT `assigned_abilities_ibfk_1` FOREIGN KEY (`ability_id`) REFERENCES `abilities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

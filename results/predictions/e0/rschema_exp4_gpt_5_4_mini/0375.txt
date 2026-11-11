@@ -1,0 +1,81 @@
+-- Schema for database: rschema_0375
+CREATE TABLE `device` (
+  `device_id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_name` varchar(255) NOT NULL,
+  `device_type` varchar(255) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `installation_location` varchar(255) DEFAULT NULL,
+  `installation_time` datetime DEFAULT NULL,
+  `device_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`device_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_account` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_account` varchar(255) NOT NULL,
+  `user_password` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `network_traffic` (
+  `traffic_id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_id` int(11) NOT NULL,
+  `traffic_time` datetime NOT NULL,
+  `upload_traffic` decimal(12,2) DEFAULT NULL,
+  `download_traffic` decimal(12,2) DEFAULT NULL,
+  `total_traffic` decimal(12,2) DEFAULT NULL,
+  `traffic_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`traffic_id`),
+  KEY `network_traffic_ibfk_1` (`device_id`),
+  CONSTRAINT `network_traffic_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `device` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device_failure` (
+  `failure_id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_id` int(11) NOT NULL,
+  `failure_time` datetime NOT NULL,
+  `failure_type` varchar(255) DEFAULT NULL,
+  `failure_description` text,
+  `handling_status` varchar(50) DEFAULT NULL,
+  `remarks` text,
+  PRIMARY KEY (`failure_id`),
+  KEY `device_failure_ibfk_1` (`device_id`),
+  CONSTRAINT `device_failure_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `device` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staff` (
+  `staff_id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_name` varchar(255) NOT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`staff_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_device_connection` (
+  `connection_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `device_id` int(11) NOT NULL,
+  `connection_time` datetime NOT NULL,
+  `disconnection_time` datetime DEFAULT NULL,
+  `bandwidth_used` decimal(12,2) DEFAULT NULL,
+  `user_ip` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`connection_id`),
+  KEY `user_device_connection_ibfk_1` (`user_id`),
+  KEY `user_device_connection_ibfk_2` (`device_id`),
+  CONSTRAINT `user_device_connection_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_account` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_device_connection_ibfk_2` FOREIGN KEY (`device_id`) REFERENCES `device` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device_maintenance` (
+  `maintenance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_id` int(11) NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  `maintenance_time` datetime NOT NULL,
+  `maintenance_content` text,
+  `maintenance_result` text,
+  `remarks` text,
+  PRIMARY KEY (`maintenance_id`),
+  KEY `device_maintenance_ibfk_1` (`device_id`),
+  KEY `device_maintenance_ibfk_2` (`staff_id`),
+  CONSTRAINT `device_maintenance_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `device` (`device_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `device_maintenance_ibfk_2` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

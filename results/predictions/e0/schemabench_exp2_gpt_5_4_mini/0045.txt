@@ -1,0 +1,72 @@
+-- Schema for database: schemabench_0045
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `github_login` varchar(255) NOT NULL,
+  `github_id` int(11) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `encrypted_github_token` varchar(255) DEFAULT NULL,
+  `encrypted_github_token_iv` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_users_on_github_login` (`github_login`),
+  UNIQUE KEY `index_users_on_github_id` (`github_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `repositories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `github_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `full_name` varchar(255) NOT NULL,
+  `owner_login` varchar(255) NOT NULL,
+  `private` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_repositories_on_github_id` (`github_id`),
+  UNIQUE KEY `index_repositories_on_full_name` (`full_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `repository_id` int(11) NOT NULL,
+  `github_id` varchar(255) NOT NULL,
+  `subject_type` varchar(255) NOT NULL,
+  `subject_title` varchar(255) NOT NULL,
+  `reason` varchar(255) DEFAULT NULL,
+  `unread` tinyint(1) NOT NULL DEFAULT 1,
+  `archived` tinyint(1) NOT NULL DEFAULT 0,
+  `updated_at_github` datetime DEFAULT NULL,
+  `last_read_at` datetime DEFAULT NULL,
+  `issue_state` varchar(255) DEFAULT NULL,
+  `ci_status` varchar(255) DEFAULT NULL,
+  `labels` text DEFAULT NULL,
+  `author_login` varchar(255) DEFAULT NULL,
+  `assignees` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_notifications_on_github_id` (`github_id`),
+  KEY `index_notifications_on_user_id` (`user_id`),
+  KEY `index_notifications_on_repository_id` (`repository_id`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`repository_id`) REFERENCES `repositories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `notification_filters` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `repository_name` varchar(255) DEFAULT NULL,
+  `organization_name` varchar(255) DEFAULT NULL,
+  `notification_type` varchar(255) DEFAULT NULL,
+  `action` varchar(255) DEFAULT NULL,
+  `state` varchar(255) DEFAULT NULL,
+  `ci_status` varchar(255) DEFAULT NULL,
+  `labels` text DEFAULT NULL,
+  `author_login` varchar(255) DEFAULT NULL,
+  `assignees` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_notification_filters_on_user_id` (`user_id`),
+  CONSTRAINT `notification_filters_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

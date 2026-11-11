@@ -1,0 +1,59 @@
+-- Schema for database: rschema_0469
+CREATE TABLE `owner` (
+  `owner_id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_name` varchar(100) NOT NULL,
+  `workplace` varchar(255) DEFAULT NULL,
+  `contact_number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(100) NOT NULL,
+  `department_phone` varchar(20) DEFAULT NULL,
+  `supervisor_employee_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`department_id`),
+  UNIQUE KEY `uk_department_supervisor_employee_id` (`supervisor_employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_id` int(11) NOT NULL,
+  `employee_name` varchar(100) NOT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `contact_number` varchar(20) DEFAULT NULL,
+  `position` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  KEY `employee_ibfk_1` (`department_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `house` (
+  `house_id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_id` int(11) NOT NULL,
+  `house_number` varchar(50) NOT NULL,
+  `floor_area` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`house_id`),
+  UNIQUE KEY `uk_house_number` (`house_number`),
+  KEY `house_ibfk_1` (`owner_id`),
+  CONSTRAINT `house_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `owner` (`owner_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fee_collection` (
+  `fee_collection_id` int(11) NOT NULL AUTO_INCREMENT,
+  `house_id` int(11) NOT NULL,
+  `fee_type` varchar(50) NOT NULL,
+  `quantity` decimal(10,2) NOT NULL,
+  `fee_amount` decimal(10,2) NOT NULL,
+  `collection_month` char(7) NOT NULL,
+  `receipt_number` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`fee_collection_id`),
+  KEY `fee_collection_ibfk_1` (`house_id`),
+  CONSTRAINT `fee_collection_ibfk_1` FOREIGN KEY (`house_id`) REFERENCES `house` (`house_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+ALTER TABLE `department`
+  ADD CONSTRAINT `department_ibfk_1` FOREIGN KEY (`supervisor_employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE;

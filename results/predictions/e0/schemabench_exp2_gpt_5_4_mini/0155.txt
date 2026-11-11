@@ -1,0 +1,149 @@
+-- Schema for database: schemabench_0155
+CREATE TABLE `person` (
+  `person_id` int(11) NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(255) NOT NULL,
+  `role` varchar(100) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`person_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `android` (
+  `android_id` int(11) NOT NULL AUTO_INCREMENT,
+  `android_name` varchar(255) NOT NULL,
+  `model` varchar(100) DEFAULT NULL,
+  `function` varchar(100) DEFAULT NULL,
+  `owner_person_id` int(11) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`android_id`),
+  KEY `android_ibfk_1` (`owner_person_id`),
+  CONSTRAINT `android_ibfk_1` FOREIGN KEY (`owner_person_id`) REFERENCES `person` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `bracelet` (
+  `bracelet_id` int(11) NOT NULL AUTO_INCREMENT,
+  `serial_number` varchar(100) NOT NULL,
+  `person_id` int(11) DEFAULT NULL,
+  `android_id` int(11) DEFAULT NULL,
+  `issued_at` datetime DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`bracelet_id`),
+  UNIQUE KEY `serial_number` (`serial_number`),
+  KEY `bracelet_ibfk_1` (`person_id`),
+  KEY `bracelet_ibfk_2` (`android_id`),
+  CONSTRAINT `bracelet_ibfk_1` FOREIGN KEY (`person_id`) REFERENCES `person` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `bracelet_ibfk_2` FOREIGN KEY (`android_id`) REFERENCES `android` (`android_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `room` (
+  `room_id` int(11) NOT NULL AUTO_INCREMENT,
+  `room_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`room_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `cctv_camera` (
+  `camera_id` int(11) NOT NULL AUTO_INCREMENT,
+  `camera_name` varchar(255) NOT NULL,
+  `room_id` int(11) DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`camera_id`),
+  KEY `cctv_camera_ibfk_1` (`room_id`),
+  CONSTRAINT `cctv_camera_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `room` (`room_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `movement_event` (
+  `movement_event_id` int(11) NOT NULL AUTO_INCREMENT,
+  `bracelet_id` int(11) NOT NULL,
+  `camera_id` int(11) DEFAULT NULL,
+  `room_id` int(11) DEFAULT NULL,
+  `event_time` datetime NOT NULL,
+  `event_type` varchar(100) DEFAULT NULL,
+  `confidence_score` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`movement_event_id`),
+  KEY `movement_event_ibfk_1` (`bracelet_id`),
+  KEY `movement_event_ibfk_2` (`camera_id`),
+  KEY `movement_event_ibfk_3` (`room_id`),
+  CONSTRAINT `movement_event_ibfk_1` FOREIGN KEY (`bracelet_id`) REFERENCES `bracelet` (`bracelet_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `movement_event_ibfk_2` FOREIGN KEY (`camera_id`) REFERENCES `cctv_camera` (`camera_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `movement_event_ibfk_3` FOREIGN KEY (`room_id`) REFERENCES `room` (`room_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `evidence` (
+  `evidence_id` int(11) NOT NULL AUTO_INCREMENT,
+  `evidence_type` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `room_id` int(11) DEFAULT NULL,
+  `collected_at` datetime DEFAULT NULL,
+  `collected_by_person_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`evidence_id`),
+  KEY `evidence_ibfk_1` (`room_id`),
+  KEY `evidence_ibfk_2` (`collected_by_person_id`),
+  CONSTRAINT `evidence_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `room` (`room_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `evidence_ibfk_2` FOREIGN KEY (`collected_by_person_id`) REFERENCES `person` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `disturbance` (
+  `disturbance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `evidence_id` int(11) DEFAULT NULL,
+  `disturbance_type` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `detected_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`disturbance_id`),
+  KEY `disturbance_ibfk_1` (`evidence_id`),
+  CONSTRAINT `disturbance_ibfk_1` FOREIGN KEY (`evidence_id`) REFERENCES `evidence` (`evidence_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `modification` (
+  `modification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `evidence_id` int(11) DEFAULT NULL,
+  `modified_by_person_id` int(11) DEFAULT NULL,
+  `modification_type` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `modified_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`modification_id`),
+  KEY `modification_ibfk_1` (`evidence_id`),
+  KEY `modification_ibfk_2` (`modified_by_person_id`),
+  CONSTRAINT `modification_ibfk_1` FOREIGN KEY (`evidence_id`) REFERENCES `evidence` (`evidence_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `modification_ibfk_2` FOREIGN KEY (`modified_by_person_id`) REFERENCES `person` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `android_memory_scan` (
+  `scan_id` int(11) NOT NULL AUTO_INCREMENT,
+  `android_id` int(11) NOT NULL,
+  `scanned_at` datetime NOT NULL,
+  `scan_result` text DEFAULT NULL,
+  `anomaly_detected` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`scan_id`),
+  KEY `android_memory_scan_ibfk_1` (`android_id`),
+  CONSTRAINT `android_memory_scan_ibfk_1` FOREIGN KEY (`android_id`) REFERENCES `android` (`android_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `android_code_scan` (
+  `code_scan_id` int(11) NOT NULL AUTO_INCREMENT,
+  `android_id` int(11) NOT NULL,
+  `scanned_at` datetime NOT NULL,
+  `code_hash` varchar(255) DEFAULT NULL,
+  `scan_result` text DEFAULT NULL,
+  `anomaly_detected` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`code_scan_id`),
+  KEY `android_code_scan_ibfk_1` (`android_id`),
+  CONSTRAINT `android_code_scan_ibfk_1` FOREIGN KEY (`android_id`) REFERENCES `android` (`android_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `suspect_classification` (
+  `classification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `bracelet_id` int(11) NOT NULL,
+  `person_id` int(11) DEFAULT NULL,
+  `android_id` int(11) DEFAULT NULL,
+  `classification_type` varchar(50) NOT NULL,
+  `classified_at` datetime DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`classification_id`),
+  KEY `suspect_classification_ibfk_1` (`bracelet_id`),
+  KEY `suspect_classification_ibfk_2` (`person_id`),
+  KEY `suspect_classification_ibfk_3` (`android_id`),
+  CONSTRAINT `suspect_classification_ibfk_1` FOREIGN KEY (`bracelet_id`) REFERENCES `bracelet` (`bracelet_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `suspect_classification_ibfk_2` FOREIGN KEY (`person_id`) REFERENCES `person` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `suspect_classification_ibfk_3` FOREIGN KEY (`android_id`) REFERENCES `android` (`android_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

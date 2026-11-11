@@ -1,0 +1,41 @@
+-- Schema for database: rschema_0293
+CREATE TABLE `mine` (
+  `mine_id` int(11) NOT NULL,
+  `mine_name` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `person_in_charge` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`mine_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment` (
+  `equipment_id` int(11) NOT NULL,
+  `mine_id` int(11) NOT NULL,
+  `equipment_name` varchar(255) NOT NULL,
+  `model` varchar(255) DEFAULT NULL,
+  `purchase_date` date DEFAULT NULL,
+  `details` text DEFAULT NULL,
+  PRIMARY KEY (`equipment_id`),
+  KEY `equipment_ibfk_1` (`mine_id`),
+  CONSTRAINT `equipment_ibfk_1` FOREIGN KEY (`mine_id`) REFERENCES `mine` (`mine_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_personnel` (
+  `personnel_id` int(11) NOT NULL,
+  `personnel_name` varchar(255) NOT NULL,
+  `contact_number` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`personnel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `equipment_maintenance` (
+  `maintenance_id` int(11) NOT NULL,
+  `equipment_id` int(11) NOT NULL,
+  `personnel_id` int(11) NOT NULL,
+  `maintenance_date` date NOT NULL,
+  `maintenance_content` text NOT NULL,
+  `maintenance_cost` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`maintenance_id`),
+  KEY `equipment_maintenance_ibfk_1` (`equipment_id`),
+  KEY `equipment_maintenance_ibfk_2` (`personnel_id`),
+  CONSTRAINT `equipment_maintenance_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `equipment_maintenance_ibfk_2` FOREIGN KEY (`personnel_id`) REFERENCES `maintenance_personnel` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,60 @@
+-- Schema for database: rschema_0405
+CREATE TABLE `drug` (
+  `drug_id` int(11) NOT NULL AUTO_INCREMENT,
+  `drug_name` varchar(255) NOT NULL,
+  `specification` varchar(255) DEFAULT NULL,
+  `usage_instructions` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`drug_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `doctor` (
+  `doctor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `doctor_name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`doctor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `patient` (
+  `patient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`patient_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prescription` (
+  `prescription_id` int(11) NOT NULL AUTO_INCREMENT,
+  `medical_orders` varchar(500) NOT NULL,
+  `prescription_date` datetime NOT NULL,
+  `category` varchar(100) DEFAULT NULL,
+  `doctor_id` int(11) NOT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`prescription_id`),
+  KEY `prescription_ibfk_1` (`doctor_id`),
+  CONSTRAINT `prescription_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `outpatient_visit` (
+  `visit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `doctor_id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `visit_datetime` datetime NOT NULL,
+  `consultation_notes` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`visit_id`),
+  KEY `outpatient_visit_ibfk_1` (`doctor_id`),
+  KEY `outpatient_visit_ibfk_2` (`patient_id`),
+  CONSTRAINT `outpatient_visit_ibfk_1` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `outpatient_visit_ibfk_2` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payment` (
+  `payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `prescription_id` int(11) NOT NULL,
+  `payment_amount` decimal(10,2) NOT NULL,
+  `discount_amount` decimal(10,2) DEFAULT NULL,
+  `payment_date` datetime NOT NULL,
+  PRIMARY KEY (`payment_id`),
+  KEY `payment_ibfk_1` (`prescription_id`),
+  CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`prescription_id`) REFERENCES `prescription` (`prescription_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

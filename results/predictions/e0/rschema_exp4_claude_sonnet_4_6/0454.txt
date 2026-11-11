@@ -1,0 +1,61 @@
+-- Schema for database: rschema_0454
+
+CREATE TABLE `supermarket` (
+  `supermarket_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supermarket_name` varchar(255) NOT NULL,
+  `supermarket_address` varchar(500) NOT NULL,
+  `supermarket_contact` varchar(255) NOT NULL,
+  PRIMARY KEY (`supermarket_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(255) NOT NULL,
+  `product_price` decimal(10,2) NOT NULL,
+  `inventory_quantity` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supply_request` (
+  `request_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supermarket_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `request_date` datetime NOT NULL,
+  `request_status` varchar(50) NOT NULL DEFAULT 'pending',
+  PRIMARY KEY (`request_id`),
+  CONSTRAINT `supply_request_ibfk_1` FOREIGN KEY (`supermarket_id`) REFERENCES `supermarket` (`supermarket_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `supply_request_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `distribution_order` (
+  `distribution_order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `request_id` int(11) NOT NULL,
+  `distribution_date` datetime NOT NULL,
+  `distribution_status` varchar(50) NOT NULL DEFAULT 'pending',
+  PRIMARY KEY (`distribution_order_id`),
+  CONSTRAINT `distribution_order_ibfk_1` FOREIGN KEY (`request_id`) REFERENCES `supply_request` (`request_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `purchase_order` (
+  `purchase_order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `purchase_date` datetime NOT NULL,
+  `purchase_status` varchar(50) NOT NULL DEFAULT 'pending',
+  PRIMARY KEY (`purchase_order_id`),
+  CONSTRAINT `purchase_order_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inventory_log` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `change_quantity` int(11) NOT NULL,
+  `change_type` varchar(50) NOT NULL,
+  `reference_id` int(11) DEFAULT NULL,
+  `change_date` datetime NOT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`log_id`),
+  CONSTRAINT `inventory_log_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

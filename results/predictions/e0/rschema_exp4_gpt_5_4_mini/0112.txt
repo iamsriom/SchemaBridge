@@ -1,0 +1,121 @@
+-- Schema for database: rschema_0112
+CREATE TABLE `offices` (
+  `office_id` int(11) NOT NULL AUTO_INCREMENT,
+  `city` varchar(50) NOT NULL,
+  `street_address` varchar(255) NOT NULL,
+  `postal_code` varchar(20) NOT NULL,
+  `country` varchar(50) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `fax` varchar(50) DEFAULT NULL,
+  `manager_employee_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`office_id`),
+  KEY `manager_employee_id` (`manager_employee_id`),
+  CONSTRAINT `offices_ibfk_1` FOREIGN KEY (`manager_employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `employees` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_number` varchar(20) NOT NULL,
+  `first_name` varchar(50) NOT NULL,
+  `last_name` varchar(50) NOT NULL,
+  `position` varchar(100) NOT NULL,
+  `office_id` int(11) DEFAULT NULL,
+  `office_phone` varchar(50) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `hire_date` date NOT NULL,
+  `supervisor_id` int(11) DEFAULT NULL,
+  `base_salary` decimal(10,2) DEFAULT NULL,
+  `commission_rate` decimal(5,2) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  UNIQUE KEY `employee_number` (`employee_number`),
+  KEY `office_id` (`office_id`),
+  KEY `supervisor_id` (`supervisor_id`),
+  CONSTRAINT `employees_ibfk_1` FOREIGN KEY (`office_id`) REFERENCES `offices` (`office_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `employees_ibfk_2` FOREIGN KEY (`supervisor_id`) REFERENCES `employees` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `employee_sales_performance` (
+  `performance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `fiscal_year` int(11) NOT NULL,
+  `total_sales` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `sales_trend` varchar(255) DEFAULT NULL,
+  `performance_change` varchar(255) DEFAULT NULL,
+  `strategy_effectiveness` varchar(255) DEFAULT NULL,
+  `sales_target` decimal(15,2) DEFAULT NULL,
+  PRIMARY KEY (`performance_id`),
+  UNIQUE KEY `employee_year_unique` (`employee_id`,`fiscal_year`),
+  KEY `employee_id` (`employee_id`),
+  CONSTRAINT `employee_sales_performance_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_number` varchar(20) NOT NULL,
+  `company_name` varchar(255) NOT NULL,
+  `contact_first_name` varchar(50) DEFAULT NULL,
+  `contact_last_name` varchar(50) DEFAULT NULL,
+  `contact_position` varchar(100) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `street_address` varchar(255) DEFAULT NULL,
+  `city` varchar(50) DEFAULT NULL,
+  `state_province` varchar(50) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `country` varchar(50) DEFAULT NULL,
+  `sales_rep_employee_id` int(11) DEFAULT NULL,
+  `credit_limit` decimal(15,2) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`),
+  UNIQUE KEY `customer_number` (`customer_number`),
+  KEY `sales_rep_employee_id` (`sales_rep_employee_id`),
+  CONSTRAINT `customers_ibfk_1` FOREIGN KEY (`sales_rep_employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(255) NOT NULL,
+  `product_line` varchar(100) DEFAULT NULL,
+  `product_model` varchar(100) DEFAULT NULL,
+  `product_specification` varchar(255) DEFAULT NULL,
+  `product_description` text DEFAULT NULL,
+  `quantity_in_stock` int(11) NOT NULL DEFAULT 0,
+  `buy_price` decimal(10,2) NOT NULL,
+  `msrp` decimal(10,2) NOT NULL,
+  `supplier_name` varchar(255) DEFAULT NULL,
+  `brand_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `order_date` date NOT NULL,
+  `required_date` date DEFAULT NULL,
+  `shipped_date` date DEFAULT NULL,
+  `status` varchar(50) NOT NULL,
+  `special_instructions` text DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `customer_id` (`customer_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `order_details` (
+  `order_detail_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `line_number` int(11) NOT NULL,
+  `quantity_ordered` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`order_detail_id`),
+  UNIQUE KEY `order_line_unique` (`order_id`,`line_number`),
+  KEY `order_id` (`order_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `order_details_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_details_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `payments` (
+  `payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `check_number` varchar(50) NOT NULL,
+  `payment_date` date NOT NULL,
+  `invoice_amount` decimal(15,2) NOT NULL,
+  `check_clearing_date` date DEFAULT NULL,
+  PRIMARY KEY (`payment_id`),
+  UNIQUE KEY `check_number` (`check_number`),
+  KEY `customer_id` (`customer_id`),
+  CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

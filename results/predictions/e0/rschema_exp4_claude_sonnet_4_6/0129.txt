@@ -1,0 +1,42 @@
+-- Schema for database: rschema_0129
+
+CREATE TABLE `User` (
+  `id` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `User_email_key` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Room` (
+  `id` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `Message` (
+  `id` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` datetime NOT NULL,
+  `roomId` varchar(255) NOT NULL,
+  `userId` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `Message_roomId_fkey` (`roomId`),
+  KEY `Message_userId_fkey` (`userId`),
+  CONSTRAINT `Message_ibfk_1` FOREIGN KEY (`roomId`) REFERENCES `Room` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Message_ibfk_2` FOREIGN KEY (`userId`) REFERENCES `User` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `_RoomToUser` (
+  `A` varchar(255) NOT NULL,
+  `B` varchar(255) NOT NULL,
+  PRIMARY KEY (`A`, `B`),
+  KEY `_RoomToUser_B_fkey` (`B`),
+  CONSTRAINT `_RoomToUser_ibfk_1` FOREIGN KEY (`A`) REFERENCES `Room` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `_RoomToUser_ibfk_2` FOREIGN KEY (`B`) REFERENCES `User` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

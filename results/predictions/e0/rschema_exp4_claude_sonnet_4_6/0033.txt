@@ -1,0 +1,55 @@
+-- Schema for database: rschema_0033
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(255) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_team` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_name` varchar(255) NOT NULL,
+  `manager` varchar(255) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_person` (
+  `sales_person_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `position` varchar(100) DEFAULT NULL,
+  `gender` char(6) DEFAULT NULL,
+  PRIMARY KEY (`sales_person_id`),
+  CONSTRAINT `sales_person_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `sales_team` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_task` (
+  `task_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sales_person_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  `customer_phone` varchar(50) DEFAULT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `sales_date` datetime NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `sales_cost` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`task_id`),
+  CONSTRAINT `sales_task_ibfk_1` FOREIGN KEY (`sales_person_id`) REFERENCES `sales_person` (`sales_person_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_task_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_feedback` (
+  `feedback_id` int(11) NOT NULL AUTO_INCREMENT,
+  `task_id` int(11) NOT NULL,
+  `feedback_content` varchar(1000) DEFAULT NULL,
+  `rating` int(11) DEFAULT NULL,
+  `feedback_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`feedback_id`),
+  CONSTRAINT `customer_feedback_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `sales_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

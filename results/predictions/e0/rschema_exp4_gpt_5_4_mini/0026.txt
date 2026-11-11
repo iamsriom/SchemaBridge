@@ -1,0 +1,79 @@
+-- Schema for database: rschema_0026
+CREATE TABLE `textile` (
+  `textile_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `production_date` date DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`textile_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `manager` varchar(255) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_id` int(11) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `position` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  KEY `department_id` (`department_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `production_record` (
+  `production_id` int(11) NOT NULL AUTO_INCREMENT,
+  `textile_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `producer_id` int(11) DEFAULT NULL,
+  `production_time` datetime NOT NULL,
+  PRIMARY KEY (`production_id`),
+  KEY `textile_id` (`textile_id`),
+  KEY `producer_id` (`producer_id`),
+  CONSTRAINT `production_record_ibfk_1` FOREIGN KEY (`textile_id`) REFERENCES `textile` (`textile_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `production_record_ibfk_2` FOREIGN KEY (`producer_id`) REFERENCES `employee` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inventory_record` (
+  `inventory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `textile_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `stock_in_time` datetime NOT NULL,
+  PRIMARY KEY (`inventory_id`),
+  KEY `textile_id` (`textile_id`),
+  CONSTRAINT `inventory_record_ibfk_1` FOREIGN KEY (`textile_id`) REFERENCES `textile` (`textile_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_record` (
+  `sales_id` int(11) NOT NULL AUTO_INCREMENT,
+  `textile_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `sales_person_id` int(11) DEFAULT NULL,
+  `customer` varchar(255) DEFAULT NULL,
+  `sales_time` datetime NOT NULL,
+  PRIMARY KEY (`sales_id`),
+  KEY `textile_id` (`textile_id`),
+  KEY `sales_person_id` (`sales_person_id`),
+  CONSTRAINT `sales_record_ibfk_1` FOREIGN KEY (`textile_id`) REFERENCES `textile` (`textile_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_record_ibfk_2` FOREIGN KEY (`sales_person_id`) REFERENCES `employee` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `performance_evaluation` (
+  `evaluation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `evaluation_date` date NOT NULL,
+  `performance_score` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`evaluation_id`),
+  KEY `department_id` (`department_id`),
+  KEY `employee_id` (`employee_id`),
+  CONSTRAINT `performance_evaluation_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `performance_evaluation_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

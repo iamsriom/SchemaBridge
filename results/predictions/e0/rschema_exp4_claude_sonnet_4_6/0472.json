@@ -1,0 +1,28 @@
+{
+  "text_number": 472,
+  "id": "67552f0b13602ec03b41aaf7",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0472",
+  "question": "This is an online homework grading system. For student management, the system records basic information for each student, including unique student ID, name, class, phone number and email. For instructor management, the system records basic information for each instructor, including unique instructor ID, name, courses taught, phone number and email. For homework management, students can submit electronic homework online, and the system records basic information for each homework submission, including unique homework ID, homework content, submission time and grading status. After successful submission, the system notifies both the student and instructor. Instructors can download ungraded homework, score each question and provide overall feedback, then upload the graded homework back to the system. The system records grading information (scores and feedback), grading time and notifies students when their homework has been graded. Students can view their submitted homework, scores and feedback.",
+  "ddl": "-- Schema for database: rschema_0472\n\nCREATE TABLE `student` (\n  `student_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `class` varchar(100) NOT NULL,\n  `phone_number` varchar(20) DEFAULT NULL,\n  `email` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`student_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `instructor` (\n  `instructor_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `courses_taught` varchar(255) DEFAULT NULL,\n  `phone_number` varchar(20) DEFAULT NULL,\n  `email` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`instructor_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `homework` (\n  `homework_id` int(11) NOT NULL AUTO_INCREMENT,\n  `student_id` int(11) NOT NULL,\n  `instructor_id` int(11) NOT NULL,\n  `homework_content` text NOT NULL,\n  `submission_time` datetime NOT NULL,\n  `grading_status` varchar(50) NOT NULL DEFAULT 'ungraded',\n  PRIMARY KEY (`homework_id`),\n  CONSTRAINT `homework_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `homework_ibfk_2` FOREIGN KEY (`instructor_id`) REFERENCES `instructor` (`instructor_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `grading` (\n  `grading_id` int(11) NOT NULL AUTO_INCREMENT,\n  `homework_id` int(11) NOT NULL,\n  `instructor_id` int(11) NOT NULL,\n  `overall_feedback` text DEFAULT NULL,\n  `total_score` decimal(5,2) DEFAULT NULL,\n  `grading_time` datetime NOT NULL,\n  PRIMARY KEY (`grading_id`),\n  CONSTRAINT `grading_ibfk_1` FOREIGN KEY (`homework_id`) REFERENCES `homework` (`homework_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `grading_ibfk_2` FOREIGN KEY (`instructor_id`) REFERENCES `instructor` (`instructor_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `question_score` (\n  `question_score_id` int(11) NOT NULL AUTO_INCREMENT,\n  `grading_id` int(11) NOT NULL,\n  `question_number` int(11) NOT NULL,\n  `score` decimal(5,2) DEFAULT NULL,\n  `comment` text DEFAULT NULL,\n  PRIMARY KEY (`question_score_id`),\n  CONSTRAINT `question_score_ibfk_1` FOREIGN KEY (`grading_id`) REFERENCES `grading` (`grading_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `notification` (\n  `notification_id` int(11) NOT NULL AUTO_INCREMENT,\n  `homework_id` int(11) NOT NULL,\n  `recipient_type` varchar(20) NOT NULL,\n  `recipient_student_id` int(11) DEFAULT NULL,\n  `recipient_instructor_id` int(11) DEFAULT NULL,\n  `notification_type` varchar(50) NOT NULL,\n  `message` text DEFAULT NULL,\n  `sent_time` datetime NOT NULL,\n  `is_read` tinyint(1) NOT NULL DEFAULT 0,\n  PRIMARY KEY (`notification_id`),\n  CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`homework_id`) REFERENCES `homework` (`homework_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `notification_ibfk_2` FOREIGN KEY (`recipient_student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `notification_ibfk_3` FOREIGN KEY (`recipient_instructor_id`) REFERENCES `instructor` (`instructor_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "student",
+      "instructor",
+      "homework",
+      "grading",
+      "question_score",
+      "notification"
+    ],
+    "columns_by_table": {
+      "student": [],
+      "instructor": [],
+      "homework": [],
+      "grading": [],
+      "question_score": [],
+      "notification": []
+    }
+  }
+}

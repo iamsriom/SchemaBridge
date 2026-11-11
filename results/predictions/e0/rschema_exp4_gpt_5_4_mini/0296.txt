@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0296
+CREATE TABLE `financial_advisor` (
+  `advisor_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `hire_date` date NOT NULL,
+  `contact_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`advisor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `client` (
+  `client_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `id_number` varchar(50) NOT NULL,
+  `contact_number` varchar(20) NOT NULL,
+  `risk_preference` varchar(50) NOT NULL,
+  `total_assets` decimal(15,2) NOT NULL,
+  PRIMARY KEY (`client_id`),
+  UNIQUE KEY `uk_client_id_number` (`id_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `financial_product` (
+  `product_code` varchar(50) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `product_type` varchar(100) NOT NULL,
+  `product_value` decimal(15,2) NOT NULL,
+  PRIMARY KEY (`product_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `investment_portfolio` (
+  `portfolio_id` int(11) NOT NULL,
+  `client_id` int(11) NOT NULL,
+  `product_code` varchar(50) NOT NULL,
+  `quantity_held` int(11) NOT NULL,
+  PRIMARY KEY (`portfolio_id`),
+  KEY `investment_portfolio_ibfk_1` (`client_id`),
+  KEY `investment_portfolio_ibfk_2` (`product_code`),
+  CONSTRAINT `investment_portfolio_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `client` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `investment_portfolio_ibfk_2` FOREIGN KEY (`product_code`) REFERENCES `financial_product` (`product_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction_record` (
+  `record_id` int(11) NOT NULL,
+  `portfolio_id` int(11) NOT NULL,
+  `product_code` varchar(50) NOT NULL,
+  `transaction_type` varchar(20) NOT NULL,
+  `transaction_quantity` int(11) NOT NULL,
+  `transaction_price` decimal(15,2) NOT NULL,
+  `transaction_time` datetime NOT NULL,
+  PRIMARY KEY (`record_id`),
+  KEY `transaction_record_ibfk_1` (`portfolio_id`),
+  KEY `transaction_record_ibfk_2` (`product_code`),
+  CONSTRAINT `transaction_record_ibfk_1` FOREIGN KEY (`portfolio_id`) REFERENCES `investment_portfolio` (`portfolio_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_record_ibfk_2` FOREIGN KEY (`product_code`) REFERENCES `financial_product` (`product_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,103 @@
+-- Schema for database: rschema_0227
+CREATE TABLE `region` (
+  `region_id` int(11) NOT NULL,
+  `region_name` varchar(255) NOT NULL,
+  `region_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`region_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `country` (
+  `country_id` int(11) NOT NULL,
+  `country_name` varchar(255) NOT NULL,
+  `country_description` varchar(255) DEFAULT NULL,
+  `region_id` int(11) NOT NULL,
+  PRIMARY KEY (`country_id`),
+  KEY `country_ibfk_1` (`region_id`),
+  CONSTRAINT `country_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `manufacturer` varchar(255) DEFAULT NULL,
+  `brand` varchar(255) DEFAULT NULL,
+  `product_type` varchar(255) DEFAULT NULL,
+  `size` varchar(255) DEFAULT NULL,
+  `retail_price` decimal(15,2) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supplier` (
+  `supplier_id` int(11) NOT NULL,
+  `supplier_name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `country_id` int(11) NOT NULL,
+  `phone_number` varchar(50) DEFAULT NULL,
+  `account_balance` decimal(15,2) DEFAULT NULL,
+  `region_id` int(11) NOT NULL,
+  PRIMARY KEY (`supplier_id`),
+  KEY `supplier_ibfk_1` (`country_id`),
+  KEY `supplier_ibfk_2` (`region_id`),
+  CONSTRAINT `supplier_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `supplier_ibfk_2` FOREIGN KEY (`region_id`) REFERENCES `region` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_supplier` (
+  `product_id` int(11) NOT NULL,
+  `supplier_id` int(11) NOT NULL,
+  `quantity_supplied` int(11) NOT NULL,
+  `supply_cost` decimal(15,2) DEFAULT NULL,
+  PRIMARY KEY (`product_id`,`supplier_id`),
+  KEY `product_supplier_ibfk_2` (`supplier_id`),
+  CONSTRAINT `product_supplier_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `product_supplier_ibfk_2` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `country_id` int(11) NOT NULL,
+  `phone_number` varchar(50) DEFAULT NULL,
+  `account_balance` decimal(15,2) DEFAULT NULL,
+  `market_segment` varchar(255) DEFAULT NULL,
+  `region_id` int(11) NOT NULL,
+  PRIMARY KEY (`customer_id`),
+  KEY `customer_ibfk_1` (`country_id`),
+  KEY `customer_ibfk_2` (`region_id`),
+  CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customer_ibfk_2` FOREIGN KEY (`region_id`) REFERENCES `region` (`region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_order` (
+  `order_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `order_status` varchar(50) DEFAULT NULL,
+  `total_price` decimal(15,2) DEFAULT NULL,
+  `order_date` datetime DEFAULT NULL,
+  `priority` varchar(50) DEFAULT NULL,
+  `handler` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `customer_order_ibfk_1` (`customer_id`),
+  CONSTRAINT `customer_order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_item` (
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `extended_price` decimal(15,2) DEFAULT NULL,
+  `discount` decimal(15,2) DEFAULT NULL,
+  `tax` decimal(15,2) DEFAULT NULL,
+  `return_indicator` char(1) DEFAULT NULL,
+  `item_status` varchar(50) DEFAULT NULL,
+  `shipment_date` datetime DEFAULT NULL,
+  `committed_date` datetime DEFAULT NULL,
+  `receipt_date` datetime DEFAULT NULL,
+  `shipping_instructions` varchar(255) DEFAULT NULL,
+  `shipping_method` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`order_id`,`product_id`),
+  KEY `order_item_ibfk_2` (`product_id`),
+  CONSTRAINT `order_item_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `customer_order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_item_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

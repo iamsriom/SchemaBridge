@@ -1,0 +1,56 @@
+-- Schema for database: rschema_0414
+CREATE TABLE `company` (
+  `company_id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_name` varchar(255) NOT NULL,
+  `company_address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `city` (
+  `city_id` int(11) NOT NULL AUTO_INCREMENT,
+  `city_name` varchar(255) NOT NULL,
+  `province` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`city_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `venue` (
+  `venue_id` int(11) NOT NULL AUTO_INCREMENT,
+  `venue_name` varchar(255) NOT NULL,
+  `venue_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`venue_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_point` (
+  `sales_point_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sales_point_name` varchar(255) NOT NULL,
+  `sales_point_address` varchar(255) DEFAULT NULL,
+  `venue_id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `city_id` int(11) NOT NULL,
+  PRIMARY KEY (`sales_point_id`),
+  KEY `sales_point_ibfk_1` (`venue_id`),
+  KEY `sales_point_ibfk_2` (`company_id`),
+  KEY `sales_point_ibfk_3` (`city_id`),
+  CONSTRAINT `sales_point_ibfk_1` FOREIGN KEY (`venue_id`) REFERENCES `venue` (`venue_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_point_ibfk_2` FOREIGN KEY (`company_id`) REFERENCES `company` (`company_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_point_ibfk_3` FOREIGN KEY (`city_id`) REFERENCES `city` (`city_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `device` (
+  `device_id` int(11) NOT NULL AUTO_INCREMENT,
+  `device_name` varchar(255) NOT NULL,
+  `device_model` varchar(255) DEFAULT NULL,
+  `sales_point_id` int(11) NOT NULL,
+  PRIMARY KEY (`device_id`),
+  KEY `device_ibfk_1` (`sales_point_id`),
+  CONSTRAINT `device_ibfk_1` FOREIGN KEY (`sales_point_id`) REFERENCES `sales_point` (`sales_point_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_plan` (
+  `sales_plan_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sales_plan_name` varchar(255) NOT NULL,
+  `sales_plan_description` varchar(255) DEFAULT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  PRIMARY KEY (`sales_plan_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

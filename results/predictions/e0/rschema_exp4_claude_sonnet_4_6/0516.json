@@ -1,0 +1,30 @@
+{
+  "text_number": 516,
+  "id": "67552f0b13602ec03b41ab2c",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0516",
+  "question": "Business Requirements:\n1.Customer: Each customer needs to record basic information, including Customer ID, Name, Phone, and Address.\n2.Sales Order: Each customer can have multiple sales orders. Each sales order contains Order ID, Customer ID, Pizza ID, Quantity, Expected Delivery Date, and Order Status.\n3.Pizza: Each type of pizza needs to record Pizza ID, Flavor, Ingredients, and Stock. Pizza ID is the Primary key used to uniquely identify each pizza.\n4.Production Plan: A production plan is generated based on sales orders. Each production plan records Order ID, Pizza ID, Production Sequence, and Production Quantity.\n5.Income/Expenditure: Records each income or expenditure. The record includes Record ID, Type (Income or Expenditure), Amount, Time, Description, and the related Pizza ID. Each income/expenditure record can be associated with multiple pizzas, for tracking and analyzing financial data related to pizzas.\n6.Delivery Content: Records the delivery information for each order, including Record ID, Order ID, Delivery Time, and Delivery Status. Each delivery record is associated with a sales order and records the delivery details.",
+  "ddl": "-- Schema for database: rschema_0516\n\nCREATE TABLE `customer` (\n  `customer_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `phone` varchar(50) NOT NULL,\n  `address` varchar(500) NOT NULL,\n  PRIMARY KEY (`customer_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `pizza` (\n  `pizza_id` int(11) NOT NULL AUTO_INCREMENT,\n  `flavor` varchar(255) NOT NULL,\n  `ingredients` text NOT NULL,\n  `stock` int(11) NOT NULL DEFAULT '0',\n  PRIMARY KEY (`pizza_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `sales_order` (\n  `order_id` int(11) NOT NULL AUTO_INCREMENT,\n  `customer_id` int(11) NOT NULL,\n  `pizza_id` int(11) NOT NULL,\n  `quantity` int(11) NOT NULL,\n  `expected_delivery_date` datetime NOT NULL,\n  `order_status` varchar(100) NOT NULL,\n  PRIMARY KEY (`order_id`),\n  CONSTRAINT `sales_order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `sales_order_ibfk_2` FOREIGN KEY (`pizza_id`) REFERENCES `pizza` (`pizza_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `production_plan` (\n  `plan_id` int(11) NOT NULL AUTO_INCREMENT,\n  `order_id` int(11) NOT NULL,\n  `pizza_id` int(11) NOT NULL,\n  `production_sequence` int(11) NOT NULL,\n  `production_quantity` int(11) NOT NULL,\n  PRIMARY KEY (`plan_id`),\n  CONSTRAINT `production_plan_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `sales_order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `production_plan_ibfk_2` FOREIGN KEY (`pizza_id`) REFERENCES `pizza` (`pizza_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `income_expenditure` (\n  `record_id` int(11) NOT NULL AUTO_INCREMENT,\n  `type` varchar(50) NOT NULL,\n  `amount` decimal(15,2) NOT NULL,\n  `time` datetime NOT NULL,\n  `description` text DEFAULT NULL,\n  PRIMARY KEY (`record_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `income_expenditure_pizza` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `record_id` int(11) NOT NULL,\n  `pizza_id` int(11) NOT NULL,\n  PRIMARY KEY (`id`),\n  CONSTRAINT `income_expenditure_pizza_ibfk_1` FOREIGN KEY (`record_id`) REFERENCES `income_expenditure` (`record_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `income_expenditure_pizza_ibfk_2` FOREIGN KEY (`pizza_id`) REFERENCES `pizza` (`pizza_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `delivery_content` (\n  `record_id` int(11) NOT NULL AUTO_INCREMENT,\n  `order_id` int(11) NOT NULL,\n  `delivery_time` datetime NOT NULL,\n  `delivery_status` varchar(100) NOT NULL,\n  PRIMARY KEY (`record_id`),\n  CONSTRAINT `delivery_content_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `sales_order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "customer",
+      "pizza",
+      "sales_order",
+      "production_plan",
+      "income_expenditure",
+      "income_expenditure_pizza",
+      "delivery_content"
+    ],
+    "columns_by_table": {
+      "customer": [],
+      "pizza": [],
+      "sales_order": [],
+      "production_plan": [],
+      "income_expenditure": [],
+      "income_expenditure_pizza": [],
+      "delivery_content": []
+    }
+  }
+}

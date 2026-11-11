@@ -1,0 +1,99 @@
+-- Schema for database: rschema_0328
+CREATE TABLE `administrator` (
+  `administrator_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `account` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`administrator_id`),
+  UNIQUE KEY `uk_administrator_account` (`account`),
+  UNIQUE KEY `uk_administrator_phone_number` (`phone_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `survey` (
+  `survey_id` int(11) NOT NULL AUTO_INCREMENT,
+  `administrator_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `access_restriction` varchar(100) DEFAULT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `access_rule` enum('public','password_protected') NOT NULL DEFAULT 'public',
+  `survey_status` enum('created','in_progress','ended') NOT NULL DEFAULT 'created',
+  `logo_url` varchar(500) DEFAULT NULL,
+  `background_image_url` varchar(500) DEFAULT NULL,
+  `is_anonymous` tinyint(1) NOT NULL DEFAULT '1',
+  `survey_password` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`survey_id`),
+  KEY `survey_ibfk_1` (`administrator_id`),
+  CONSTRAINT `survey_ibfk_1` FOREIGN KEY (`administrator_id`) REFERENCES `administrator` (`administrator_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `question` (
+  `question_id` int(11) NOT NULL AUTO_INCREMENT,
+  `survey_id` int(11) NOT NULL,
+  `question_type` enum('single_choice','multiple_choice','text','text_area') NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `is_required` tinyint(1) NOT NULL DEFAULT '0',
+  `validation_type` varchar(50) DEFAULT NULL,
+  `display_order` int(11) NOT NULL DEFAULT '1',
+  `display_style` varchar(50) DEFAULT NULL,
+  `is_evaluated` tinyint(1) NOT NULL DEFAULT '0',
+  `evaluation_score` decimal(10,2) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`question_id`),
+  KEY `question_ibfk_1` (`survey_id`),
+  CONSTRAINT `question_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `survey` (`survey_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `question_option` (
+  `option_id` int(11) NOT NULL AUTO_INCREMENT,
+  `question_id` int(11) NOT NULL,
+  `content` varchar(500) NOT NULL,
+  `display_order` int(11) NOT NULL DEFAULT '1',
+  `is_correct_answer` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`option_id`),
+  KEY `question_option_ibfk_1` (`question_id`),
+  CONSTRAINT `question_option_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `question` (`question_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `choice_answer` (
+  `choice_answer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `survey_id` int(11) NOT NULL,
+  `question_id` int(11) NOT NULL,
+  `option_id` int(11) NOT NULL,
+  `answer_type` enum('single_choice','multiple_choice') NOT NULL,
+  `respondent_name` varchar(100) DEFAULT NULL,
+  `respondent_phone_number` varchar(20) DEFAULT NULL,
+  `respondent_account` varchar(100) DEFAULT NULL,
+  `submitted_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`choice_answer_id`),
+  KEY `choice_answer_ibfk_1` (`survey_id`),
+  KEY `choice_answer_ibfk_2` (`question_id`),
+  KEY `choice_answer_ibfk_3` (`option_id`),
+  CONSTRAINT `choice_answer_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `survey` (`survey_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `choice_answer_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `question` (`question_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `choice_answer_ibfk_3` FOREIGN KEY (`option_id`) REFERENCES `question_option` (`option_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `text_answer` (
+  `text_answer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `survey_id` int(11) NOT NULL,
+  `question_id` int(11) NOT NULL,
+  `answer_content` text NOT NULL,
+  `respondent_name` varchar(100) DEFAULT NULL,
+  `respondent_phone_number` varchar(20) DEFAULT NULL,
+  `respondent_account` varchar(100) DEFAULT NULL,
+  `submitted_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`text_answer_id`),
+  KEY `text_answer_ibfk_1` (`survey_id`),
+  KEY `text_answer_ibfk_2` (`question_id`),
+  CONSTRAINT `text_answer_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `survey` (`survey_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `text_answer_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `question` (`question_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

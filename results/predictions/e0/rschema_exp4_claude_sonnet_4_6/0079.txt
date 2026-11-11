@@ -1,0 +1,75 @@
+-- Schema for database: rschema_0079
+
+CREATE TABLE `stock_fund` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(20) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `type` varchar(20) NOT NULL COMMENT 'stock or fund',
+  `category` varchar(50) DEFAULT NULL COMMENT 'category of stock or fund',
+  `sub_category` varchar(50) DEFAULT NULL COMMENT 'sub-category',
+  `market` varchar(20) NOT NULL COMMENT 'e.g. SH, SZ, HK, US',
+  `owner` varchar(50) NOT NULL COMMENT 'owner or account holder',
+  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '1=active, 0=inactive',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_code_market_owner` (`code`, `market`, `owner`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `holding` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `stock_fund_id` int(11) NOT NULL,
+  `total_investment` decimal(18,4) NOT NULL DEFAULT '0.0000' COMMENT 'total amount invested',
+  `holding_shares` decimal(18,4) NOT NULL DEFAULT '0.0000' COMMENT 'current holding shares',
+  `average_cost` decimal(18,4) DEFAULT NULL COMMENT 'average cost per share',
+  `current_price` decimal(18,4) DEFAULT NULL COMMENT 'latest market price',
+  `market_value` decimal(18,4) DEFAULT NULL COMMENT 'current market value',
+  `profit_loss` decimal(18,4) DEFAULT NULL COMMENT 'unrealized profit or loss',
+  `last_trade_date` date DEFAULT NULL COMMENT 'date of last transaction',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_stock_fund_id` (`stock_fund_id`),
+  CONSTRAINT `holding_ibfk_1` FOREIGN KEY (`stock_fund_id`) REFERENCES `stock_fund` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trade_config` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `stock_fund_id` int(11) NOT NULL,
+  `buy_fee_rate` decimal(10,6) NOT NULL DEFAULT '0.000300' COMMENT 'buy transaction fee rate',
+  `sell_fee_rate` decimal(10,6) NOT NULL DEFAULT '0.000300' COMMENT 'sell transaction fee rate',
+  `min_fee` decimal(10,4) NOT NULL DEFAULT '5.0000' COMMENT 'minimum fee per transaction',
+  `fixed_invest_enabled` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'whether fixed investment is enabled',
+  `fixed_invest_amount` decimal(18,4) DEFAULT NULL COMMENT 'fixed investment amount per period',
+  `fixed_invest_cycle` varchar(20) DEFAULT NULL COMMENT 'e.g. daily, weekly, monthly',
+  `fixed_invest_day` int(11) DEFAULT NULL COMMENT 'day of cycle to invest',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_stock_fund_id` (`stock_fund_id`),
+  CONSTRAINT `trade_config_ibfk_1` FOREIGN KEY (`stock_fund_id`) REFERENCES `stock_fund` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trade_order` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `out_id` varchar(64) NOT NULL COMMENT 'external unique order ID',
+  `stock_fund_id` int(11) NOT NULL,
+  `order_type` varchar(20) NOT NULL COMMENT 'buy, sell, compensation',
+  `trade_date` date NOT NULL COMMENT 'date of transaction',
+  `created_at` datetime NOT NULL,
+  `transaction_amount` decimal(18,4) NOT NULL COMMENT 'total transaction amount',
+  `transaction_quantity` decimal(18,4) NOT NULL COMMENT 'number of shares or units traded',
+  `transaction_price` decimal(18,4) DEFAULT NULL COMMENT 'price per share or unit',
+  `service_fee` decimal(18,4) NOT NULL DEFAULT '0.0000' COMMENT 'transaction service fee',
+  `status` varchar(20) NOT NULL DEFAULT 'pending' COMMENT 'pending, success, failed, cancelled',
+  `is_settled` tinyint(1) NOT NULL DEFAULT '0' COMMENT '0=not settled, 1=settled',
+  `settled_at` datetime DEFAULT NULL COMMENT 'settlement datetime',
+  `remark` varchar(255) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_out_id` (`out_id`),
+  KEY `idx_stock_fund_id` (`stock_fund_id`),
+  KEY `idx_trade_date` (`trade_date`),
+  KEY `idx_order_type` (`order_type`),
+  CONSTRAINT `trade_order_ibfk_1` FOREIGN KEY (`stock_fund_id`) REFERENCES `stock_fund` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

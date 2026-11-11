@@ -1,0 +1,60 @@
+-- Schema for database: rschema_0257
+CREATE TABLE `customer_type` (
+  `type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_name` varchar(50) NOT NULL,
+  `discount_rate` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(100) NOT NULL,
+  `gender` varchar(10) NOT NULL,
+  `type_id` int(11) NOT NULL,
+  `id_number` varchar(50) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `booking_date` date DEFAULT NULL,
+  `check_in_time` datetime DEFAULT NULL,
+  `check_out_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`customer_id`),
+  KEY `customer_ibfk_1` (`type_id`),
+  CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`type_id`) REFERENCES `customer_type` (`type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flight` (
+  `flight_id` int(11) NOT NULL AUTO_INCREMENT,
+  `flight_name` varchar(100) NOT NULL,
+  `flight_date` date NOT NULL,
+  `airline_name` varchar(100) NOT NULL,
+  `departure_location` varchar(100) NOT NULL,
+  `departure_time` datetime NOT NULL,
+  `destination` varchar(100) NOT NULL,
+  `arrival_time` datetime NOT NULL,
+  PRIMARY KEY (`flight_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `flight_booking` (
+  `booking_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `flight_id` int(11) NOT NULL,
+  `discount_rate` decimal(5,2) NOT NULL,
+  `ticket_order_number` varchar(50) NOT NULL,
+  PRIMARY KEY (`booking_id`),
+  KEY `flight_booking_ibfk_1` (`customer_id`),
+  KEY `flight_booking_ibfk_2` (`flight_id`),
+  CONSTRAINT `flight_booking_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `flight_booking_ibfk_2` FOREIGN KEY (`flight_id`) REFERENCES `flight` (`flight_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_order` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `flight_id` int(11) NOT NULL,
+  `ticket_order_number` varchar(50) NOT NULL,
+  `discount_rate` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `customer_order_ibfk_1` (`customer_id`),
+  KEY `customer_order_ibfk_2` (`flight_id`),
+  CONSTRAINT `customer_order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customer_order_ibfk_2` FOREIGN KEY (`flight_id`) REFERENCES `flight` (`flight_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

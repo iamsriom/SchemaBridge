@@ -1,0 +1,160 @@
+-- Schema for database: schemabench_0023
+CREATE TABLE `cms_page` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `content_type` varchar(100) NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `path` varchar(255) NOT NULL,
+  `depth` int(11) NOT NULL,
+  `numchild` int(11) NOT NULL DEFAULT 0,
+  `live` tinyint(1) NOT NULL DEFAULT 0,
+  `has_unpublished_changes` tinyint(1) NOT NULL DEFAULT 0,
+  `first_published_at` datetime DEFAULT NULL,
+  `last_published_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_cms_page_path` (`path`),
+  KEY `cms_page_ibfk_1` (`parent_id`),
+  CONSTRAINT `cms_page_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `cms_page` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `cms_page_revision` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_id` int(11) NOT NULL,
+  `content_json` longtext NOT NULL,
+  `created_at` datetime NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `approved_go_live_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `cms_page_revision_ibfk_1` (`page_id`),
+  KEY `cms_page_revision_ibfk_2` (`user_id`),
+  CONSTRAINT `cms_page_revision_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `cms_page` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cms_page_revision_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `cms_snippet` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `body` longtext NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_cms_snippet_slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `cms_form` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `intro` longtext DEFAULT NULL,
+  `thank_you_text` longtext DEFAULT NULL,
+  `submit_button_text` varchar(100) NOT NULL DEFAULT 'Submit',
+  `from_email` varchar(255) DEFAULT NULL,
+  `to_email` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_cms_form_slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `cms_form_field` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `form_id` int(11) NOT NULL,
+  `label` varchar(255) NOT NULL,
+  `field_type` varchar(50) NOT NULL,
+  `required` tinyint(1) NOT NULL DEFAULT 0,
+  `choices` longtext DEFAULT NULL,
+  `help_text` varchar(255) DEFAULT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `cms_form_field_ibfk_1` (`form_id`),
+  CONSTRAINT `cms_form_field_ibfk_1` FOREIGN KEY (`form_id`) REFERENCES `cms_form` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `cms_form_submission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `form_id` int(11) NOT NULL,
+  `submitted_at` datetime NOT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `data_json` longtext NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `cms_form_submission_ibfk_1` (`form_id`),
+  CONSTRAINT `cms_form_submission_ibfk_1` FOREIGN KEY (`form_id`) REFERENCES `cms_form` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `cms_image` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `file_path` varchar(500) NOT NULL,
+  `width` int(11) NOT NULL,
+  `height` int(11) NOT NULL,
+  `file_size` int(11) NOT NULL,
+  `uploaded_at` datetime NOT NULL,
+  `uploaded_by_id` int(11) DEFAULT NULL,
+  `alt_text` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `cms_image_ibfk_1` (`uploaded_by_id`),
+  CONSTRAINT `cms_image_ibfk_1` FOREIGN KEY (`uploaded_by_id`) REFERENCES `auth_user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `auth_group` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(150) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_auth_group_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `auth_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(150) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `is_staff` tinyint(1) NOT NULL DEFAULT 0,
+  `is_superuser` tinyint(1) NOT NULL DEFAULT 0,
+  `date_joined` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_auth_user_username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `auth_user_group` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_auth_user_group` (`user_id`,`group_id`),
+  KEY `auth_user_group_ibfk_2` (`group_id`),
+  CONSTRAINT `auth_user_group_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `auth_user_group_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `auth_permission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `codename` varchar(100) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `content_type` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_auth_permission_codename` (`codename`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `auth_group_permission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_auth_group_permission` (`group_id`,`permission_id`),
+  KEY `auth_group_permission_ibfk_2` (`permission_id`),
+  CONSTRAINT `auth_group_permission_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `auth_group_permission_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `auth_permission` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `cms_tag` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `slug` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_cms_tag_slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `cms_page_tag` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_id` int(11) NOT NULL,
+  `tag_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_cms_page_tag` (`page_id`,`tag_id`),
+  KEY `cms_page_tag_ibfk_2` (`tag_id`),
+  CONSTRAINT `cms_page_tag_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `cms_page` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cms_page_tag_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `cms_tag` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

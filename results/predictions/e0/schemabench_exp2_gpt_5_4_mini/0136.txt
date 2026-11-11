@@ -1,0 +1,52 @@
+-- Schema for database: schemabench_0136
+CREATE TABLE `students` (
+  `student_id` int(11) NOT NULL,
+  `student_name` varchar(255) NOT NULL,
+  `intelligence_score` int(11) NOT NULL,
+  `academic_rank` int(11) NOT NULL,
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `professors` (
+  `professor_id` int(11) NOT NULL,
+  `professor_name` varchar(255) NOT NULL,
+  `popularity_score` int(11) NOT NULL,
+  `teaching_ability_score` int(11) NOT NULL,
+  PRIMARY KEY (`professor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `courses` (
+  `course_id` int(11) NOT NULL,
+  `course_name` varchar(255) NOT NULL,
+  `difficulty_score` int(11) NOT NULL,
+  `student_rating` int(11) NOT NULL,
+  `professor_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`course_id`),
+  KEY `courses_ibfk_1` (`professor_id`),
+  CONSTRAINT `courses_ibfk_1` FOREIGN KEY (`professor_id`) REFERENCES `professors` (`professor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `registrations` (
+  `registration_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `grade` varchar(10) DEFAULT NULL,
+  `satisfaction_score` int(11) DEFAULT NULL,
+  `registration_order` int(11) NOT NULL,
+  PRIMARY KEY (`registration_id`),
+  KEY `registrations_ibfk_1` (`student_id`),
+  KEY `registrations_ibfk_2` (`course_id`),
+  CONSTRAINT `registrations_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `registrations_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `research_assistants` (
+  `assistant_id` int(11) NOT NULL,
+  `assistant_name` varchar(255) NOT NULL,
+  `professor_id` int(11) NOT NULL,
+  `capability_score` int(11) NOT NULL,
+  `salary` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`assistant_id`),
+  KEY `research_assistants_ibfk_1` (`professor_id`),
+  CONSTRAINT `research_assistants_ibfk_1` FOREIGN KEY (`professor_id`) REFERENCES `professors` (`professor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

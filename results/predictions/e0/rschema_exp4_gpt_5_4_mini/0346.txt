@@ -1,0 +1,64 @@
+-- Schema for database: rschema_0346
+CREATE TABLE `application_center` (
+  `application_center_id` int(11) NOT NULL AUTO_INCREMENT,
+  `center_name` varchar(255) NOT NULL,
+  `center_code` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`application_center_id`),
+  UNIQUE KEY `uk_application_center_code` (`center_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `accounting_account` (
+  `accounting_account_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_name` varchar(255) NOT NULL,
+  `account_code` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`accounting_account_id`),
+  UNIQUE KEY `uk_accounting_account_code` (`account_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `company_account` (
+  `company_account_id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_name` varchar(255) NOT NULL,
+  `account_number` varchar(100) DEFAULT NULL,
+  `bank_name` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`company_account_id`),
+  UNIQUE KEY `uk_company_account_number` (`account_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `supplier` (
+  `supplier_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_name` varchar(255) NOT NULL,
+  `supplier_code` varchar(100) DEFAULT NULL,
+  `contact_name` varchar(255) DEFAULT NULL,
+  `contact_phone` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`supplier_id`),
+  UNIQUE KEY `uk_supplier_code` (`supplier_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `expense` (
+  `expense_id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` varchar(500) NOT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `expense_month` char(6) NOT NULL,
+  `due_date` date DEFAULT NULL,
+  `payment_date` date DEFAULT NULL,
+  `expense_status` varchar(50) NOT NULL,
+  `application_center_id` int(11) DEFAULT NULL,
+  `accounting_account_id` int(11) DEFAULT NULL,
+  `company_account_id` int(11) DEFAULT NULL,
+  `supplier_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`expense_id`),
+  KEY `expense_ibfk_1` (`application_center_id`),
+  KEY `expense_ibfk_2` (`accounting_account_id`),
+  KEY `expense_ibfk_3` (`company_account_id`),
+  KEY `expense_ibfk_4` (`supplier_id`),
+  CONSTRAINT `expense_ibfk_1` FOREIGN KEY (`application_center_id`) REFERENCES `application_center` (`application_center_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `expense_ibfk_2` FOREIGN KEY (`accounting_account_id`) REFERENCES `accounting_account` (`accounting_account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `expense_ibfk_3` FOREIGN KEY (`company_account_id`) REFERENCES `company_account` (`company_account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `expense_ibfk_4` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,55 @@
+-- Schema for database: rschema_0089
+
+CREATE TABLE `account` (
+  `account_id` int(11) NOT NULL AUTO_INCREMENT,
+  `address` varchar(255) NOT NULL,
+  `balance` decimal(20,8) NOT NULL DEFAULT '0.00000000',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`account_id`),
+  UNIQUE KEY `address` (`address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `block` (
+  `block_id` int(11) NOT NULL AUTO_INCREMENT,
+  `block_hash` varchar(255) NOT NULL,
+  `height` int(11) NOT NULL,
+  `timestamp` datetime NOT NULL,
+  `previous_block_hash` varchar(255) DEFAULT NULL,
+  `merkle_root` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`block_id`),
+  UNIQUE KEY `block_hash` (`block_hash`),
+  UNIQUE KEY `height` (`height`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `block_id` int(11) DEFAULT NULL,
+  `tx_hash` varchar(255) NOT NULL,
+  `timestamp` datetime NOT NULL,
+  `fee` decimal(20,8) NOT NULL DEFAULT '0.00000000',
+  `input_address` varchar(255) NOT NULL,
+  `output_address` varchar(255) NOT NULL,
+  `amount` decimal(20,8) NOT NULL DEFAULT '0.00000000',
+  `status` varchar(50) NOT NULL DEFAULT 'pending',
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  UNIQUE KEY `tx_hash` (`tx_hash`),
+  KEY `block_id` (`block_id`),
+  KEY `input_address` (`input_address`),
+  KEY `output_address` (`output_address`),
+  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`block_id`) REFERENCES `block` (`block_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction_account` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `role` varchar(50) NOT NULL COMMENT 'sender or receiver',
+  PRIMARY KEY (`id`),
+  KEY `transaction_id` (`transaction_id`),
+  KEY `account_id` (`account_id`),
+  CONSTRAINT `transaction_account_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_account_ibfk_2` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

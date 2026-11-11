@@ -22,7 +22,7 @@ Canonical closed Direct inference: `run_direct_api.py` (also via `run.py --onlin
 | nGED | Structural `names_only=True` (no type/nullability in labels) |
 | Nullability | MySQL dialect; bare → YES; NOT NULL / inline PK → NO |
 | Failures | Empty prediction kept in population; nGED=1; Hall not forced to 1 |
-| Parser | `legacy=False`; prediction structure from DDL (JSON metadata compared, not preferred) |
+| Parser | `legacy=False`; F1–F6 + headers on original DDL (recovers `--Foreachtable:CREATE TABLE`); DDL authoritative |
 
 ### Coverage status (Direct / baselines)
 
@@ -41,6 +41,10 @@ Never substitute `configs/paper_reference_values.json` for missing prediction fi
 
 ```bash
 pip install -r requirements.txt
+# one-shot helper:
+bash scripts/reproduce_e0_offline.sh
+
+# or step-by-step:
 python3 -m pytest -q
 python3 experiments/E0/evaluate.py
 # equivalent:
@@ -49,11 +53,16 @@ python3 experiments/E0/reproduce_genuine_tables.py --validate-only
 python3 experiments/E0/reproduce_genuine_tables.py --dataset rschema
 python3 experiments/E0/reproduce_genuine_tables.py --model 'CodeLlama-13B' --skip-pytest
 python3 experiments/E0/reproduce_genuine_tables.py --write-gpm --no-render
-python3 experiments/E0/reproduce_genuine_tables.py --strict   # exit 2 if Direct dirs incomplete
+python3 experiments/E0/reproduce_genuine_tables.py --strict   # exit 2 if Direct dirs incomplete / baselines blocked
 python3 experiments/E0/reproduce_genuine_tables.py --include-gpt4o-mini   # optional
 ```
 
-Outputs (local, gitignored): `results/metrics/reproduced/E0_TABLE_{V,VI}_FINAL.*`
+Outputs: `results/metrics/reproduced/E0_TABLE_{V,VI}_FINAL.*`
+Verification: `audit/E0_VERIFICATION_REPORT.md`, `audit/E0_PAPER_COMPARISON.csv`
+
+**Honesty note:** Historical PaperMethods `results.jsonl` trees were not recovered. Offline Table VI prompting currently uses `ARCHIVE_AGGREGATE` (pooled G/P/M) as provisional evidence; a `REGENERATED_NEW_RUN` campaign (`results/predictions/e0/rschema_papermethods_regenerated/`) is in progress with the packaged `original_benchmarks/run_baselines.py` runner. Do **not** substitute `prompt_conditions_v2`. SchemaAgent is intentionally **not** shipped. Direct Table V is `VERIFIED_FROM_PREDICTIONS` after parser F1–F6 + comment-prefix CREATE recovery (`audit/E0_FINAL_SECTION.tex`, `audit/E0_FINAL_INDEPENDENT_VERIFICATION.csv`).
+
+Status vocabulary: `COMPLETE` | `INCOMPLETE` | `INVALID` | `BLOCKED` | `ARCHIVE_AGGREGATE` | experiment-level `PARTIAL`.
 
 ## Closed Direct inference (paid; opt-in)
 

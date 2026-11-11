@@ -1,0 +1,69 @@
+-- Schema for database: rschema_0403
+
+CREATE TABLE `student` (
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `student_number` varchar(50) NOT NULL,
+  `grade` varchar(50) NOT NULL,
+  `major` varchar(255) NOT NULL,
+  `contact_number` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `administrator` (
+  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `job_number` varchar(50) NOT NULL,
+  `contact_number` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`admin_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `book` (
+  `book_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `author` varchar(255) NOT NULL,
+  `publisher` varchar(255) DEFAULT NULL,
+  `publication_date` datetime DEFAULT NULL,
+  `category` varchar(100) DEFAULT NULL,
+  `stock_quantity` int(11) NOT NULL DEFAULT '0',
+  `borrowed_quantity` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`book_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `borrow_record` (
+  `borrow_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `borrow_date` datetime NOT NULL,
+  `return_date` datetime DEFAULT NULL,
+  `review_status` varchar(50) NOT NULL DEFAULT 'pending',
+  PRIMARY KEY (`borrow_id`),
+  CONSTRAINT `borrow_record_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `borrow_record_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `book` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `return_record` (
+  `return_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `return_date` datetime NOT NULL,
+  `review_status` varchar(50) NOT NULL DEFAULT 'pending',
+  PRIMARY KEY (`return_id`),
+  CONSTRAINT `return_record_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `return_record_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `book` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `audit` (
+  `audit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `admin_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `borrowing_status` varchar(50) NOT NULL,
+  `audit_date` datetime NOT NULL,
+  `audit_result` varchar(50) NOT NULL,
+  PRIMARY KEY (`audit_id`),
+  CONSTRAINT `audit_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `administrator` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `audit_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `book` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

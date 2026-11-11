@@ -1,0 +1,30 @@
+{
+  "text_number": 426,
+  "id": "67552f0b13602ec03b41aa18",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0426",
+  "question": "The mini-program shall allow users to register or log in via WeChat authorization. The system shall store each user's account information (such as account number, password, nickname, bio, etc.) and related authorization information, enabling users to view some attraction information after logging in, including attraction name, pictures, reference prices, and text descriptions. Users shall be able to bookmark attractions they are interested in and submit reservation information, recording the reservation time, ticket purchase time, number of tickets purchased, etc., for later viewing or modification. Users shall also be able to submit brief comments for attractions, including comment time, comment content, comment status, etc., which shall be displayed on the front-end only after back-end review.",
+  "ddl": "-- Schema for database: rschema_0426\n\nCREATE TABLE `user` (\n  `user_id` int(11) NOT NULL AUTO_INCREMENT,\n  `account` varchar(64) NOT NULL,\n  `password` varchar(255) NOT NULL,\n  `nickname` varchar(64) DEFAULT NULL,\n  `bio` varchar(255) DEFAULT NULL,\n  `avatar_url` varchar(512) DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`user_id`),\n  UNIQUE KEY `account` (`account`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `wechat_auth` (\n  `auth_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `openid` varchar(128) NOT NULL,\n  `unionid` varchar(128) DEFAULT NULL,\n  `session_key` varchar(255) DEFAULT NULL,\n  `authorized_at` datetime NOT NULL,\n  PRIMARY KEY (`auth_id`),\n  UNIQUE KEY `openid` (`openid`),\n  CONSTRAINT `wechat_auth_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `attraction` (\n  `attraction_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(128) NOT NULL,\n  `description` text DEFAULT NULL,\n  `reference_price` decimal(10,2) DEFAULT NULL,\n  `location` varchar(255) DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`attraction_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `attraction_picture` (\n  `picture_id` int(11) NOT NULL AUTO_INCREMENT,\n  `attraction_id` int(11) NOT NULL,\n  `picture_url` varchar(512) NOT NULL,\n  `sort_order` int(11) DEFAULT NULL,\n  `uploaded_at` datetime NOT NULL,\n  PRIMARY KEY (`picture_id`),\n  CONSTRAINT `attraction_picture_ibfk_1` FOREIGN KEY (`attraction_id`) REFERENCES `attraction` (`attraction_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `bookmark` (\n  `bookmark_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `attraction_id` int(11) NOT NULL,\n  `bookmarked_at` datetime NOT NULL,\n  PRIMARY KEY (`bookmark_id`),\n  UNIQUE KEY `user_attraction` (`user_id`, `attraction_id`),\n  CONSTRAINT `bookmark_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `bookmark_ibfk_2` FOREIGN KEY (`attraction_id`) REFERENCES `attraction` (`attraction_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `reservation` (\n  `reservation_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `attraction_id` int(11) NOT NULL,\n  `reservation_time` datetime NOT NULL,\n  `ticket_purchase_time` datetime DEFAULT NULL,\n  `ticket_count` int(11) NOT NULL DEFAULT 1,\n  `status` varchar(32) NOT NULL DEFAULT 'pending',\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`reservation_id`),\n  CONSTRAINT `reservation_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `reservation_ibfk_2` FOREIGN KEY (`attraction_id`) REFERENCES `attraction` (`attraction_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `comment` (\n  `comment_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `attraction_id` int(11) NOT NULL,\n  `content` varchar(1024) NOT NULL,\n  `comment_time` datetime NOT NULL,\n  `status` tinyint(4) NOT NULL DEFAULT 0 COMMENT '0=pending,1=approved,2=rejected',\n  `reviewed_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`comment_id`),\n  CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`attraction_id`) REFERENCES `attraction` (`attraction_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "user",
+      "wechat_auth",
+      "attraction",
+      "attraction_picture",
+      "bookmark",
+      "reservation",
+      "comment"
+    ],
+    "columns_by_table": {
+      "user": [],
+      "wechat_auth": [],
+      "attraction": [],
+      "attraction_picture": [],
+      "bookmark": [],
+      "reservation": [],
+      "comment": []
+    }
+  }
+}

@@ -1,0 +1,43 @@
+-- Schema for database: rschema_0053
+
+CREATE TABLE `staff` (
+  `staff_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `responsibilities` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`staff_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `processing_pool` (
+  `pool_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `responsible_staff_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`pool_id`),
+  CONSTRAINT `processing_pool_ibfk_1` FOREIGN KEY (`responsible_staff_id`) REFERENCES `staff` (`staff_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pool_operation_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pool_id` int(11) NOT NULL,
+  `record_time` datetime NOT NULL,
+  `processing_capacity` decimal(10,2) DEFAULT NULL,
+  `efficiency` decimal(5,2) DEFAULT NULL,
+  `recording_staff_id` int(11) NOT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `pool_operation_record_ibfk_1` FOREIGN KEY (`pool_id`) REFERENCES `processing_pool` (`pool_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pool_operation_record_ibfk_2` FOREIGN KEY (`recording_staff_id`) REFERENCES `staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pool_maintenance_record` (
+  `maintenance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pool_id` int(11) NOT NULL,
+  `maintenance_content` varchar(1000) DEFAULT NULL,
+  `cost` decimal(10,2) DEFAULT NULL,
+  `maintenance_staff_id` int(11) NOT NULL,
+  `maintenance_date` datetime NOT NULL,
+  PRIMARY KEY (`maintenance_id`),
+  CONSTRAINT `pool_maintenance_record_ibfk_1` FOREIGN KEY (`pool_id`) REFERENCES `processing_pool` (`pool_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pool_maintenance_record_ibfk_2` FOREIGN KEY (`maintenance_staff_id`) REFERENCES `staff` (`staff_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

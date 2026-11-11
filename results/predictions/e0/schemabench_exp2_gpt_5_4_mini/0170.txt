@@ -1,0 +1,109 @@
+-- Schema for database: schemabench_0170
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_name` varchar(255) NOT NULL,
+  `address` varchar(500) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `contact_person` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `items` (
+  `item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `item_type` varchar(100) NOT NULL,
+  `item_name` varchar(255) NOT NULL,
+  `dimensions` varchar(255) DEFAULT NULL,
+  `hs_code` varchar(50) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`item_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `exchange_rates` (
+  `exchange_rate_id` int(11) NOT NULL AUTO_INCREMENT,
+  `rate_date` date NOT NULL,
+  `currency_code` char(3) NOT NULL,
+  `rate_to_usd` decimal(18,6) NOT NULL,
+  `rate_to_krw` decimal(18,6) DEFAULT NULL,
+  PRIMARY KEY (`exchange_rate_id`),
+  UNIQUE KEY `uniq_exchange_rates_date_currency` (`rate_date`,`currency_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `order_date` date NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(18,2) NOT NULL,
+  `currency_code` char(3) NOT NULL,
+  `order_status` varchar(50) DEFAULT NULL,
+  `notes` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `orders_ibfk_1` (`customer_id`),
+  KEY `orders_ibfk_2` (`item_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `items` (`item_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `payments` (
+  `payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `payment_date` date NOT NULL,
+  `payment_method` varchar(100) NOT NULL,
+  `remittance_amount` decimal(18,2) NOT NULL,
+  `currency_code` char(3) NOT NULL,
+  `exchange_rate_id` int(11) DEFAULT NULL,
+  `reference_no` varchar(100) DEFAULT NULL,
+  `payment_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`payment_id`),
+  KEY `payments_ibfk_1` (`order_id`),
+  KEY `payments_ibfk_2` (`exchange_rate_id`),
+  CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `payments_ibfk_2` FOREIGN KEY (`exchange_rate_id`) REFERENCES `exchange_rates` (`exchange_rate_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `production` (
+  `production_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `production_sequence` int(11) NOT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `quantity_produced` int(11) DEFAULT NULL,
+  `production_status` varchar(50) DEFAULT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`production_id`),
+  KEY `production_ibfk_1` (`order_id`),
+  CONSTRAINT `production_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `exports` (
+  `export_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `destination_country` varchar(100) NOT NULL,
+  `destination_port` varchar(100) DEFAULT NULL,
+  `freight_company` varchar(255) DEFAULT NULL,
+  `freight_charge` decimal(18,2) DEFAULT NULL,
+  `currency_code` char(3) DEFAULT NULL,
+  `export_date` date DEFAULT NULL,
+  `shipping_method` varchar(100) DEFAULT NULL,
+  `tracking_no` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`export_id`),
+  KEY `exports_ibfk_1` (`order_id`),
+  CONSTRAINT `exports_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `imports` (
+  `import_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) DEFAULT NULL,
+  `arrival_date` date NOT NULL,
+  `origin_country` varchar(100) DEFAULT NULL,
+  `port_of_entry` varchar(100) DEFAULT NULL,
+  `freight_charge` decimal(18,2) DEFAULT NULL,
+  `currency_code` char(3) DEFAULT NULL,
+  `customs_clearance_status` varchar(50) DEFAULT NULL,
+  `remarks` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`import_id`),
+  KEY `imports_ibfk_1` (`order_id`),
+  CONSTRAINT `imports_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

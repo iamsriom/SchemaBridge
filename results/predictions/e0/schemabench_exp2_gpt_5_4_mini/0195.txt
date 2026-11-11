@@ -1,0 +1,62 @@
+-- Schema for database: schemabench_0195
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL,
+  `customer_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `runners` (
+  `runner_id` int(11) NOT NULL,
+  `registration_date` date DEFAULT NULL,
+  PRIMARY KEY (`runner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pizza_names` (
+  `pizza_id` int(11) NOT NULL,
+  `pizza_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`pizza_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pizza_toppings` (
+  `topping_id` int(11) NOT NULL,
+  `topping_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`topping_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer_orders` (
+  `order_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `pizza_id` int(11) NOT NULL,
+  `order_time` datetime DEFAULT NULL,
+  `exclusions` varchar(255) DEFAULT NULL,
+  `extras` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `customer_orders_ibfk_1` (`customer_id`),
+  KEY `customer_orders_ibfk_2` (`pizza_id`),
+  CONSTRAINT `customer_orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customer_orders_ibfk_2` FOREIGN KEY (`pizza_id`) REFERENCES `pizza_names` (`pizza_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `runner_orders` (
+  `runner_order_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `runner_id` int(11) NOT NULL,
+  `pickup_time` datetime DEFAULT NULL,
+  `distance` decimal(5,2) DEFAULT NULL,
+  `duration` int(11) DEFAULT NULL,
+  `cancellation` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`runner_order_id`),
+  KEY `runner_orders_ibfk_1` (`order_id`),
+  KEY `runner_orders_ibfk_2` (`runner_id`),
+  CONSTRAINT `runner_orders_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `customer_orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `runner_orders_ibfk_2` FOREIGN KEY (`runner_id`) REFERENCES `runners` (`runner_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pizza_recipes` (
+  `pizza_id` int(11) NOT NULL,
+  `topping_id` int(11) NOT NULL,
+  PRIMARY KEY (`pizza_id`,`topping_id`),
+  KEY `pizza_recipes_ibfk_2` (`topping_id`),
+  CONSTRAINT `pizza_recipes_ibfk_1` FOREIGN KEY (`pizza_id`) REFERENCES `pizza_names` (`pizza_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pizza_recipes_ibfk_2` FOREIGN KEY (`topping_id`) REFERENCES `pizza_toppings` (`topping_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

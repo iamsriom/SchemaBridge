@@ -1,0 +1,38 @@
+-- Schema for database: rschema_0358
+
+CREATE TABLE `execution_instance` (
+  `execution_instance_id` varchar(64) NOT NULL,
+  `process_instance_id` varchar(64) DEFAULT NULL,
+  `process_definition_id` varchar(64) DEFAULT NULL,
+  PRIMARY KEY (`execution_instance_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `scheduled_task` (
+  `task_id` varchar(64) NOT NULL,
+  `task_type` varchar(64) DEFAULT NULL,
+  `lock_info` varchar(255) DEFAULT NULL,
+  `execution_instance_id` varchar(64) DEFAULT NULL,
+  `process_instance_id` varchar(64) DEFAULT NULL,
+  `process_definition_id` varchar(64) DEFAULT NULL,
+  `retry_count` int(11) DEFAULT NULL,
+  `exception_info` text DEFAULT NULL,
+  `expiration_time` datetime DEFAULT NULL,
+  `repeat_config` varchar(255) DEFAULT NULL,
+  `processor_config` varchar(255) DEFAULT NULL,
+  `tenant_id` varchar(64) DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  CONSTRAINT `scheduled_task_ibfk_1` FOREIGN KEY (`execution_instance_id`) REFERENCES `execution_instance` (`execution_instance_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `task_execution_record` (
+  `record_id` varchar(64) NOT NULL,
+  `task_id` varchar(64) NOT NULL,
+  `execution_instance_id` varchar(64) NOT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `execution_result` varchar(64) DEFAULT NULL,
+  `exception_info` text DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `task_execution_record_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `scheduled_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `task_execution_record_ibfk_2` FOREIGN KEY (`execution_instance_id`) REFERENCES `execution_instance` (`execution_instance_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,83 @@
+-- Schema for database: schemabench_0213
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  `segment` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `addresses` (
+  `address_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `country` varchar(100) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `street_address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`address_id`),
+  KEY `addresses_ibfk_1` (`customer_id`),
+  CONSTRAINT `addresses_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `categories` (
+  `category_id` int(11) NOT NULL,
+  `category_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sub_categories` (
+  `sub_category_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `sub_category_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`sub_category_id`),
+  KEY `sub_categories_ibfk_1` (`category_id`),
+  CONSTRAINT `sub_categories_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL,
+  `sub_category_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `product_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`product_id`),
+  KEY `products_ibfk_1` (`sub_category_id`),
+  CONSTRAINT `products_ibfk_1` FOREIGN KEY (`sub_category_id`) REFERENCES `sub_categories` (`sub_category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `shipping_modes` (
+  `shipping_mode_id` int(11) NOT NULL,
+  `shipping_mode_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`shipping_mode_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `address_id` int(11) NOT NULL,
+  `shipping_mode_id` int(11) NOT NULL,
+  `order_date` datetime NOT NULL,
+  `ship_date` datetime DEFAULT NULL,
+  `order_priority` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `orders_ibfk_1` (`customer_id`),
+  KEY `orders_ibfk_2` (`address_id`),
+  KEY `orders_ibfk_3` (`shipping_mode_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`address_id`) REFERENCES `addresses` (`address_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_3` FOREIGN KEY (`shipping_mode_id`) REFERENCES `shipping_modes` (`shipping_mode_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_items` (
+  `order_item_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `discount` decimal(10,2) DEFAULT NULL,
+  `sales` decimal(12,2) NOT NULL,
+  `profit` decimal(12,2) DEFAULT NULL,
+  PRIMARY KEY (`order_item_id`),
+  KEY `order_items_ibfk_1` (`order_id`),
+  KEY `order_items_ibfk_2` (`product_id`),
+  CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

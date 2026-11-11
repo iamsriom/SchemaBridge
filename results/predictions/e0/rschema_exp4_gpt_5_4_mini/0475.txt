@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0475
+CREATE TABLE `supermarket` (
+  `supermarket_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `manager_employee_id` int(11) NOT NULL,
+  `contact_number` varchar(50) NOT NULL,
+  PRIMARY KEY (`supermarket_id`),
+  UNIQUE KEY `uk_supermarket_name` (`name`),
+  UNIQUE KEY `uk_supermarket_manager_employee_id` (`manager_employee_id`),
+  CONSTRAINT `supermarket_ibfk_1` FOREIGN KEY (`manager_employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supermarket_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `manager_employee_id` int(11) NOT NULL,
+  `contact_number` varchar(50) NOT NULL,
+  PRIMARY KEY (`department_id`),
+  UNIQUE KEY `uk_department_name` (`name`),
+  UNIQUE KEY `uk_department_manager_employee_id` (`manager_employee_id`),
+  KEY `department_ibfk_1` (`supermarket_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`supermarket_id`) REFERENCES `supermarket` (`supermarket_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `department_ibfk_2` FOREIGN KEY (`manager_employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `position` varchar(100) NOT NULL,
+  `salary` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  KEY `employee_ibfk_1` (`department_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `model` varchar(255) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`product_id`),
+  UNIQUE KEY `uk_product_name_model` (`name`,`model`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `salesperson_product` (
+  `salesperson_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  PRIMARY KEY (`salesperson_id`,`product_id`),
+  KEY `salesperson_product_ibfk_2` (`product_id`),
+  CONSTRAINT `salesperson_product_ibfk_1` FOREIGN KEY (`salesperson_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `salesperson_product_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,54 @@
+-- Schema for database: rschema_0324
+CREATE TABLE `geo_location` (
+  `geo_location_id` int(11) NOT NULL AUTO_INCREMENT,
+  `continent_name` varchar(100) DEFAULT NULL,
+  `continent_code` char(2) DEFAULT NULL,
+  `country_name` varchar(150) DEFAULT NULL,
+  `country_iso_code` char(2) NOT NULL,
+  `is_in_european_union` tinyint(1) NOT NULL DEFAULT 0,
+  `region_name` varchar(150) DEFAULT NULL,
+  `city_name` varchar(150) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `latitude` decimal(10,6) DEFAULT NULL,
+  `longitude` decimal(10,6) DEFAULT NULL,
+  PRIMARY KEY (`geo_location_id`),
+  UNIQUE KEY `uk_geo_location_country_iso_code` (`country_iso_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ip_network` (
+  `ip_network_id` int(11) NOT NULL AUTO_INCREMENT,
+  `network_cidr` varchar(43) NOT NULL,
+  `ip_version` tinyint(1) NOT NULL,
+  `geo_location_id` int(11) NOT NULL,
+  `is_anonymous_proxy` tinyint(1) NOT NULL DEFAULT 0,
+  `is_satellite_provider` tinyint(1) NOT NULL DEFAULT 0,
+  `import_batch_id` int(11) DEFAULT NULL,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ip_network_id`),
+  UNIQUE KEY `uk_ip_network_network_cidr` (`network_cidr`),
+  KEY `ip_network_ibfk_1` (`geo_location_id`),
+  CONSTRAINT `ip_network_ibfk_1` FOREIGN KEY (`geo_location_id`) REFERENCES `geo_location` (`geo_location_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_import_batch` (
+  `import_batch_id` int(11) NOT NULL AUTO_INCREMENT,
+  `source_name` varchar(255) NOT NULL,
+  `source_version` varchar(100) DEFAULT NULL,
+  `imported_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` varchar(30) NOT NULL,
+  `notes` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`import_batch_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `ip_network_import` (
+  `ip_network_import_id` int(11) NOT NULL AUTO_INCREMENT,
+  `import_batch_id` int(11) NOT NULL,
+  `ip_network_id` int(11) NOT NULL,
+  `action_type` varchar(20) NOT NULL,
+  `processed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ip_network_import_id`),
+  KEY `ip_network_import_ibfk_1` (`import_batch_id`),
+  KEY `ip_network_import_ibfk_2` (`ip_network_id`),
+  CONSTRAINT `ip_network_import_ibfk_1` FOREIGN KEY (`import_batch_id`) REFERENCES `data_import_batch` (`import_batch_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ip_network_import_ibfk_2` FOREIGN KEY (`ip_network_id`) REFERENCES `ip_network` (`ip_network_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

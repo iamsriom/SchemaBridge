@@ -1,0 +1,35 @@
+-- Schema for database: rschema_0386
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `public_key` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `block` (
+  `block_id` int(11) NOT NULL AUTO_INCREMENT,
+  `block_hash` varchar(255) NOT NULL,
+  `creation_time` datetime NOT NULL,
+  `block_size` int(11) NOT NULL,
+  `previous_block_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`block_id`),
+  CONSTRAINT `block_ibfk_1` FOREIGN KEY (`previous_block_id`) REFERENCES `block` (`block_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction_record` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sender_id` int(11) NOT NULL,
+  `receiver_id` int(11) NOT NULL,
+  `transaction_amount` decimal(20,8) NOT NULL,
+  `transaction_time` datetime NOT NULL,
+  `block_id` int(11) NOT NULL,
+  `operation_type` varchar(255) NOT NULL,
+  `operation_content` text NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  CONSTRAINT `transaction_record_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_record_ibfk_2` FOREIGN KEY (`receiver_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_record_ibfk_3` FOREIGN KEY (`block_id`) REFERENCES `block` (`block_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

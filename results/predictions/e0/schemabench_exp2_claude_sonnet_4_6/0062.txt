@@ -1,0 +1,73 @@
+-- Schema for database: schemabench_0062
+
+CREATE TABLE `love_reaction_types` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `mass` int(11) NOT NULL DEFAULT 1,
+  `slug` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `love_reaction_types_slug_unique` (`slug`),
+  UNIQUE KEY `love_reaction_types_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `love_reactants` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `love_reacters` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `love_reactions` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `reaction_type_id` int(10) unsigned NOT NULL,
+  `reactant_id` bigint(20) unsigned NOT NULL,
+  `reacter_id` bigint(20) unsigned NOT NULL,
+  `rate` float NOT NULL DEFAULT 1,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `love_reactions_unique` (`reaction_type_id`, `reactant_id`, `reacter_id`),
+  KEY `love_reactions_reactant_id_foreign` (`reactant_id`),
+  KEY `love_reactions_reacter_id_foreign` (`reacter_id`),
+  CONSTRAINT `love_reactions_ibfk_1` FOREIGN KEY (`reaction_type_id`) REFERENCES `love_reaction_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `love_reactions_ibfk_2` FOREIGN KEY (`reactant_id`) REFERENCES `love_reactants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `love_reactions_ibfk_3` FOREIGN KEY (`reacter_id`) REFERENCES `love_reacters` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `love_reactant_reaction_counters` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `reactant_id` bigint(20) unsigned NOT NULL,
+  `reaction_type_id` int(10) unsigned NOT NULL,
+  `count` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `weight` float NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `love_reactant_reaction_counters_unique` (`reactant_id`, `reaction_type_id`),
+  KEY `love_reactant_reaction_counters_reaction_type_id_foreign` (`reaction_type_id`),
+  CONSTRAINT `love_reactant_reaction_counters_ibfk_1` FOREIGN KEY (`reactant_id`) REFERENCES `love_reactants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `love_reactant_reaction_counters_ibfk_2` FOREIGN KEY (`reaction_type_id`) REFERENCES `love_reaction_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `love_reactant_reaction_totals` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `reactant_id` bigint(20) unsigned NOT NULL,
+  `count` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `weight` float NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `love_reactant_reaction_totals_reactant_id_unique` (`reactant_id`),
+  CONSTRAINT `love_reactant_reaction_totals_ibfk_1` FOREIGN KEY (`reactant_id`) REFERENCES `love_reactants` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

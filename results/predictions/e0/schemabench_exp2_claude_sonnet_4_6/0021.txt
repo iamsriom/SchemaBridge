@@ -1,0 +1,65 @@
+-- Schema for database: schemabench_0021
+
+CREATE TABLE `reversion_revision` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date_created` datetime NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `comment` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reversion_version` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `revision_id` int(11) NOT NULL,
+  `object_id` varchar(191) NOT NULL,
+  `content_type_id` int(11) NOT NULL,
+  `format` varchar(255) NOT NULL,
+  `serialized_data` longtext NOT NULL,
+  `object_repr` longtext NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `revision_id` (`revision_id`),
+  KEY `content_type_id` (`content_type_id`),
+  CONSTRAINT `reversion_version_ibfk_1` FOREIGN KEY (`revision_id`) REFERENCES `reversion_revision` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reversion_content_type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `app_label` varchar(100) NOT NULL,
+  `model` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `app_label_model` (`app_label`, `model`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reversion_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(150) NOT NULL,
+  `email` varchar(254) NOT NULL DEFAULT '',
+  `password` varchar(128) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `is_staff` tinyint(1) NOT NULL DEFAULT 0,
+  `date_joined` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reversion_ignored_field` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content_type_id` int(11) NOT NULL,
+  `field_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `content_type_id` (`content_type_id`),
+  CONSTRAINT `reversion_ignored_field_ibfk_1` FOREIGN KEY (`content_type_id`) REFERENCES `reversion_content_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reversion_follow_relation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content_type_id` int(11) NOT NULL,
+  `related_content_type_id` int(11) NOT NULL,
+  `field_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `content_type_id` (`content_type_id`),
+  KEY `related_content_type_id` (`related_content_type_id`),
+  CONSTRAINT `reversion_follow_relation_ibfk_1` FOREIGN KEY (`content_type_id`) REFERENCES `reversion_content_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reversion_follow_relation_ibfk_2` FOREIGN KEY (`related_content_type_id`) REFERENCES `reversion_content_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

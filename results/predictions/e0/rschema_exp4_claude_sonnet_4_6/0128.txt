@@ -1,0 +1,39 @@
+-- Schema for database: rschema_0128
+
+CREATE TABLE `batch_job_execution` (
+  `job_execution_id` bigint(20) NOT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `job_name` varchar(255) NOT NULL,
+  `exit_code` varchar(100) DEFAULT NULL,
+  `exit_message` varchar(2500) DEFAULT NULL,
+  `error_message` varchar(2500) DEFAULT NULL,
+  `last_updated` datetime DEFAULT NULL,
+  `external_execution_id` varchar(255) DEFAULT NULL,
+  `parent_execution_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`job_execution_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `batch_job_execution_params` (
+  `job_execution_id` bigint(20) NOT NULL,
+  `parameter_name` varchar(100) NOT NULL,
+  `parameter_value` varchar(2500) DEFAULT NULL,
+  PRIMARY KEY (`job_execution_id`, `parameter_name`),
+  CONSTRAINT `batch_job_execution_params_ibfk_1` FOREIGN KEY (`job_execution_id`) REFERENCES `batch_job_execution` (`job_execution_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `batch_job_instance` (
+  `job_instance_id` bigint(20) NOT NULL,
+  `job_name` varchar(255) NOT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`job_instance_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `batch_job_execution_instance` (
+  `job_execution_id` bigint(20) NOT NULL,
+  `job_instance_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`job_execution_id`, `job_instance_id`),
+  CONSTRAINT `batch_job_execution_instance_ibfk_1` FOREIGN KEY (`job_execution_id`) REFERENCES `batch_job_execution` (`job_execution_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `batch_job_execution_instance_ibfk_2` FOREIGN KEY (`job_instance_id`) REFERENCES `batch_job_instance` (`job_instance_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

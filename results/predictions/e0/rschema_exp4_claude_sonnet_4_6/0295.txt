@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0295
+
+CREATE TABLE `trader` (
+  `trader_id` int(11) NOT NULL AUTO_INCREMENT,
+  `trader_name` varchar(255) NOT NULL,
+  `hire_date` datetime NOT NULL,
+  `contact_number` varchar(50) NOT NULL,
+  PRIMARY KEY (`trader_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `client` (
+  `client_id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_name` varchar(255) NOT NULL,
+  `id_number` varchar(100) NOT NULL,
+  `contact_number` varchar(50) NOT NULL,
+  `risk_level` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`client_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `futures` (
+  `futures_code` varchar(50) NOT NULL,
+  `futures_name` varchar(255) NOT NULL,
+  `futures_type` varchar(100) DEFAULT NULL,
+  `contract_size` decimal(15,4) DEFAULT NULL,
+  PRIMARY KEY (`futures_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `trader_id` int(11) NOT NULL,
+  `client_id` int(11) NOT NULL,
+  `futures_code` varchar(50) NOT NULL,
+  `transaction_type` varchar(10) NOT NULL,
+  `transaction_quantity` decimal(15,4) NOT NULL,
+  `transaction_price` decimal(15,4) NOT NULL,
+  `transaction_time` datetime NOT NULL,
+  PRIMARY KEY (`transaction_id`),
+  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`trader_id`) REFERENCES `trader` (`trader_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `client` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_ibfk_3` FOREIGN KEY (`futures_code`) REFERENCES `futures` (`futures_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `trader_performance` (
+  `performance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `trader_id` int(11) NOT NULL,
+  `performance_period` varchar(50) NOT NULL,
+  `total_transactions` int(11) DEFAULT NULL,
+  `total_volume` decimal(20,4) DEFAULT NULL,
+  `total_profit_loss` decimal(20,4) DEFAULT NULL,
+  `performance_score` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`performance_id`),
+  CONSTRAINT `trader_performance_ibfk_1` FOREIGN KEY (`trader_id`) REFERENCES `trader` (`trader_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

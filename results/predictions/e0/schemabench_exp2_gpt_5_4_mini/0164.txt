@@ -1,0 +1,119 @@
+-- Schema for database: schemabench_0164
+CREATE TABLE `customer` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) DEFAULT NULL,
+  `last_name` varchar(100) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(30) DEFAULT NULL,
+  `loyalty_number` varchar(50) DEFAULT NULL,
+  `preferences` varchar(500) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`customer_id`),
+  UNIQUE KEY `uk_customer_email` (`email`),
+  UNIQUE KEY `uk_customer_loyalty_number` (`loyalty_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_outlet` (
+  `outlet_id` int(11) NOT NULL AUTO_INCREMENT,
+  `outlet_name` varchar(255) NOT NULL,
+  `address_line1` varchar(255) DEFAULT NULL,
+  `address_line2` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state_province` varchar(100) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `outlet_size_sqft` int(11) DEFAULT NULL,
+  `manager_name` varchar(255) DEFAULT NULL,
+  `opened_date` date DEFAULT NULL,
+  PRIMARY KEY (`outlet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `staff` (
+  `staff_id` int(11) NOT NULL AUTO_INCREMENT,
+  `outlet_id` int(11) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `role_name` varchar(100) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(30) DEFAULT NULL,
+  `start_date` date NOT NULL,
+  `active_flag` char(1) NOT NULL DEFAULT 'Y',
+  PRIMARY KEY (`staff_id`),
+  KEY `staff_ibfk_1` (`outlet_id`),
+  CONSTRAINT `staff_ibfk_1` FOREIGN KEY (`outlet_id`) REFERENCES `sales_outlet` (`outlet_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_category` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(150) NOT NULL,
+  `category_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`category_id`),
+  UNIQUE KEY `uk_product_category_name` (`category_name`) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `product_description` varchar(1000) DEFAULT NULL,
+  `list_price` decimal(10,2) NOT NULL,
+  `promotion_price` decimal(10,2) DEFAULT NULL,
+  `promotion_start_date` date DEFAULT NULL,
+  `promotion_end_date` date DEFAULT NULL,
+  `active_flag` char(1) NOT NULL DEFAULT 'Y',
+  PRIMARY KEY (`product_id`),
+  KEY `product_ibfk_1` (`category_id`),
+  CONSTRAINT `product_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `product_category` (`category_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `inventory` (
+  `inventory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `outlet_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `inventory_date` date NOT NULL,
+  `opening_qty` int(11) NOT NULL DEFAULT 0,
+  `received_qty` int(11) NOT NULL DEFAULT 0,
+  `sold_qty` int(11) NOT NULL DEFAULT 0,
+  `waste_qty` int(11) NOT NULL DEFAULT 0,
+  `closing_qty` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`inventory_id`),
+  KEY `inventory_ibfk_1` (`outlet_id`),
+  KEY `inventory_ibfk_2` (`product_id`),
+  CONSTRAINT `inventory_ibfk_1` FOREIGN KEY (`outlet_id`) REFERENCES `sales_outlet` (`outlet_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `inventory_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_receipt` (
+  `receipt_id` int(11) NOT NULL AUTO_INCREMENT,
+  `outlet_id` int(11) NOT NULL,
+  `customer_id` int(11) DEFAULT NULL,
+  `staff_id` int(11) DEFAULT NULL,
+  `receipt_datetime` datetime NOT NULL,
+  `sales_channel` varchar(20) NOT NULL,
+  `subtotal_amount` decimal(10,2) NOT NULL,
+  `tax_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `discount_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `total_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`receipt_id`),
+  KEY `sales_receipt_ibfk_1` (`outlet_id`),
+  KEY `sales_receipt_ibfk_2` (`customer_id`),
+  KEY `sales_receipt_ibfk_3` (`staff_id`),
+  CONSTRAINT `sales_receipt_ibfk_1` FOREIGN KEY (`outlet_id`) REFERENCES `sales_outlet` (`outlet_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_receipt_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `sales_receipt_ibfk_3` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`staff_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_receipt_line` (
+  `receipt_line_id` int(11) NOT NULL AUTO_INCREMENT,
+  `receipt_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `line_discount_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `line_total_amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`receipt_line_id`),
+  KEY `sales_receipt_line_ibfk_1` (`receipt_id`),
+  KEY `sales_receipt_line_ibfk_2` (`product_id`),
+  CONSTRAINT `sales_receipt_line_ibfk_1` FOREIGN KEY (`receipt_id`) REFERENCES `sales_receipt` (`receipt_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_receipt_line_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

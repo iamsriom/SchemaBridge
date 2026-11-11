@@ -1,0 +1,66 @@
+-- Schema for database: schemabench_0048
+CREATE TABLE `framework_components` (
+  `component_id` int(11) NOT NULL AUTO_INCREMENT,
+  `component_name` varchar(255) NOT NULL,
+  `component_type` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `is_reusable` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`component_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `framework_features` (
+  `feature_id` int(11) NOT NULL AUTO_INCREMENT,
+  `feature_name` varchar(255) NOT NULL,
+  `feature_category` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `is_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`feature_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `framework_stakeholders` (
+  `stakeholder_id` int(11) NOT NULL AUTO_INCREMENT,
+  `stakeholder_name` varchar(255) NOT NULL,
+  `stakeholder_type` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`stakeholder_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `framework_requirements` (
+  `requirement_id` int(11) NOT NULL AUTO_INCREMENT,
+  `requirement_type` varchar(50) NOT NULL,
+  `requirement_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `priority` varchar(20) NOT NULL DEFAULT 'medium',
+  `is_mandatory` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`requirement_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `feature_components` (
+  `feature_id` int(11) NOT NULL,
+  `component_id` int(11) NOT NULL,
+  PRIMARY KEY (`feature_id`,`component_id`),
+  KEY `feature_components_ibfk_2` (`component_id`),
+  CONSTRAINT `feature_components_ibfk_1` FOREIGN KEY (`feature_id`) REFERENCES `framework_features` (`feature_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `feature_components_ibfk_2` FOREIGN KEY (`component_id`) REFERENCES `framework_components` (`component_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `feature_requirements` (
+  `feature_id` int(11) NOT NULL,
+  `requirement_id` int(11) NOT NULL,
+  PRIMARY KEY (`feature_id`,`requirement_id`),
+  KEY `feature_requirements_ibfk_2` (`requirement_id`),
+  CONSTRAINT `feature_requirements_ibfk_1` FOREIGN KEY (`feature_id`) REFERENCES `framework_features` (`feature_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `feature_requirements_ibfk_2` FOREIGN KEY (`requirement_id`) REFERENCES `framework_requirements` (`requirement_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `stakeholder_requirements` (
+  `stakeholder_id` int(11) NOT NULL,
+  `requirement_id` int(11) NOT NULL,
+  PRIMARY KEY (`stakeholder_id`,`requirement_id`),
+  KEY `stakeholder_requirements_ibfk_2` (`requirement_id`),
+  CONSTRAINT `stakeholder_requirements_ibfk_1` FOREIGN KEY (`stakeholder_id`) REFERENCES `framework_stakeholders` (`stakeholder_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `stakeholder_requirements_ibfk_2` FOREIGN KEY (`requirement_id`) REFERENCES `framework_requirements` (`requirement_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

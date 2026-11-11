@@ -1,0 +1,53 @@
+-- Schema for database: rschema_0012
+
+CREATE TABLE `warehouse` (
+  `warehouse_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address` varchar(500) NOT NULL,
+  `capacity` decimal(15,2) NOT NULL,
+  `current_inventory` decimal(15,2) NOT NULL DEFAULT '0.00',
+  PRIMARY KEY (`warehouse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `agricultural_product` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `warehouse_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `specification` varchar(255) DEFAULT NULL,
+  `storage_date` datetime DEFAULT NULL,
+  `dispatch_date` datetime DEFAULT NULL,
+  `quantity_stored` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `quantity_dispatched` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `current_inventory` decimal(15,2) NOT NULL DEFAULT '0.00',
+  PRIMARY KEY (`product_id`),
+  KEY `warehouse_id` (`warehouse_id`),
+  CONSTRAINT `agricultural_product_ibfk_1` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `storage_record` (
+  `storage_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `warehouse_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `storage_date` datetime NOT NULL,
+  `quantity_stored` decimal(15,2) NOT NULL,
+  `operator` varchar(255) NOT NULL,
+  PRIMARY KEY (`storage_record_id`),
+  KEY `warehouse_id` (`warehouse_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `storage_record_ibfk_1` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `storage_record_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `agricultural_product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dispatch_record` (
+  `dispatch_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `warehouse_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `dispatch_date` datetime NOT NULL,
+  `quantity_dispatched` decimal(15,2) NOT NULL,
+  `operator` varchar(255) NOT NULL,
+  PRIMARY KEY (`dispatch_record_id`),
+  KEY `warehouse_id` (`warehouse_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `dispatch_record_ibfk_1` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouse` (`warehouse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `dispatch_record_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `agricultural_product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

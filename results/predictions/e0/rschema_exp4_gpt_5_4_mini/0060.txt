@@ -1,0 +1,44 @@
+-- Schema for database: rschema_0060
+CREATE TABLE `project` (
+  `project_id` int(11) NOT NULL,
+  `project_name` varchar(255) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date DEFAULT NULL,
+  `project_leader` varchar(255) NOT NULL,
+  `budget` decimal(12,2) NOT NULL,
+  PRIMARY KEY (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `researcher` (
+  `employee_number` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `researcher_name` varchar(255) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `gender` char(1) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `position` varchar(255) NOT NULL,
+  PRIMARY KEY (`employee_number`),
+  KEY `researcher_ibfk_1` (`project_id`),
+  CONSTRAINT `researcher_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `research_result` (
+  `result_id` int(11) NOT NULL,
+  `result_name` varchar(255) NOT NULL,
+  `publication_date` date NOT NULL,
+  `employee_number` int(11) NOT NULL,
+  PRIMARY KEY (`result_id`),
+  KEY `research_result_ibfk_1` (`employee_number`),
+  CONSTRAINT `research_result_ibfk_1` FOREIGN KEY (`employee_number`) REFERENCES `researcher` (`employee_number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_fund_usage` (
+  `fund_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `purpose` varchar(255) NOT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `usage_date` date NOT NULL,
+  PRIMARY KEY (`fund_id`),
+  KEY `project_fund_usage_ibfk_1` (`project_id`),
+  CONSTRAINT `project_fund_usage_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

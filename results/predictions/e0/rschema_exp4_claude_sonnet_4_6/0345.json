@@ -1,0 +1,28 @@
+{
+  "text_number": 345,
+  "id": "67552f0a13602ec03b41a902",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0345",
+  "question": "An education management system is required to manage information on courses, professors, students, and subjects. Each course has a code, total credits, name, and a professor as the course coordinator. Professors may be responsible for different courses and their names and email information are recorded. Subjects need to record the number of credits, subject names, possible equivalent subjects, and manage prerequisite relationships to ensure students have completed relevant prerequisites before enrolling in a subject. The system must also store each course's subjects arranged in different semesters.\n\nFor students, the system needs to record their student ID, name, email, courses taken, date of birth, credits completed, and average grade.",
+  "ddl": "-- Schema for database: rschema_0345\n\nCREATE TABLE `professor` (\n  `professor_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  PRIMARY KEY (`professor_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `course` (\n  `course_code` char(10) NOT NULL,\n  `name` varchar(255) NOT NULL,\n  `total_credits` int(11) NOT NULL,\n  `coordinator_id` int(11) NOT NULL,\n  PRIMARY KEY (`course_code`),\n  CONSTRAINT `course_ibfk_1` FOREIGN KEY (`coordinator_id`) REFERENCES `professor` (`professor_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `subject` (\n  `subject_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `credits` int(11) NOT NULL,\n  `equivalent_subject_id` int(11) DEFAULT NULL,\n  PRIMARY KEY (`subject_id`),\n  CONSTRAINT `subject_ibfk_1` FOREIGN KEY (`equivalent_subject_id`) REFERENCES `subject` (`subject_id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `subject_prerequisite` (\n  `subject_id` int(11) NOT NULL,\n  `prerequisite_subject_id` int(11) NOT NULL,\n  PRIMARY KEY (`subject_id`, `prerequisite_subject_id`),\n  CONSTRAINT `subject_prerequisite_ibfk_1` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `subject_prerequisite_ibfk_2` FOREIGN KEY (`prerequisite_subject_id`) REFERENCES `subject` (`subject_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `course_subject` (\n  `course_code` char(10) NOT NULL,\n  `subject_id` int(11) NOT NULL,\n  `semester` int(11) NOT NULL,\n  PRIMARY KEY (`course_code`, `subject_id`),\n  CONSTRAINT `course_subject_ibfk_1` FOREIGN KEY (`course_code`) REFERENCES `course` (`course_code`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `course_subject_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `student` (\n  `student_id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `date_of_birth` date NOT NULL,\n  `credits_completed` int(11) NOT NULL DEFAULT 0,\n  `average_grade` decimal(5,2) DEFAULT NULL,\n  `course_code` char(10) DEFAULT NULL,\n  PRIMARY KEY (`student_id`),\n  CONSTRAINT `student_ibfk_1` FOREIGN KEY (`course_code`) REFERENCES `course` (`course_code`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "professor",
+      "course",
+      "subject",
+      "subject_prerequisite",
+      "course_subject",
+      "student"
+    ],
+    "columns_by_table": {
+      "professor": [],
+      "course": [],
+      "subject": [],
+      "subject_prerequisite": [],
+      "course_subject": [],
+      "student": []
+    }
+  }
+}

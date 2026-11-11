@@ -1,0 +1,34 @@
+{
+  "text_number": 505,
+  "id": "67552f0b13602ec03b41aa68",
+  "llm": "gpt54mini",
+  "model_id": "gpt-5.4-mini",
+  "database": "rschema_0505",
+  "question": "The university's digitized archive management system shall store and manage basic information such as student records, faculty and staff records, and research project records. It shall provide users with flexible search and query functions while meeting the requirements for security and stability in terms of access control, operation auditing, and data backup. The system shall record information such as name, major, and grades in student records, and store personal information, job title, and work history of teachers in faculty and staff records. For research projects, the system shall record information such as project name, principal investigator, funding, and research outcomes. Users shall be granted different system access permissions based on their roles, and the system shall perform granular management of these permissions and retain user operation logs for auditing purposes. To ensure the security of records, the system shall perform regular backups and support incremental or differential backup mechanisms for rapid recovery in case of failures.",
+  "ddl": "-- Schema for database: rschema_0505\nCREATE TABLE `roles` (\n  `role_id` int(11) NOT NULL AUTO_INCREMENT,\n  `role_name` varchar(100) NOT NULL,\n  `role_description` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`role_id`),\n  UNIQUE KEY `uk_roles_role_name` (`role_name`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `users` (\n  `user_id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(100) NOT NULL,\n  `password_hash` varchar(255) NOT NULL,\n  `full_name` varchar(100) NOT NULL,\n  `email` varchar(255) DEFAULT NULL,\n  `role_id` int(11) NOT NULL,\n  `is_active` tinyint(1) NOT NULL DEFAULT '1',\n  `created_at` datetime NOT NULL,\n  PRIMARY KEY (`user_id`),\n  UNIQUE KEY `uk_users_username` (`username`),\n  KEY `users_ibfk_1` (`role_id`),\n  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `students` (\n  `student_id` int(11) NOT NULL AUTO_INCREMENT,\n  `student_number` varchar(50) NOT NULL,\n  `name` varchar(100) NOT NULL,\n  `major` varchar(100) NOT NULL,\n  `grade_level` varchar(50) DEFAULT NULL,\n  `gpa` decimal(4,2) DEFAULT NULL,\n  `enrollment_date` date DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  PRIMARY KEY (`student_id`),\n  UNIQUE KEY `uk_students_student_number` (`student_number`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `faculty_staff` (\n  `staff_id` int(11) NOT NULL AUTO_INCREMENT,\n  `employee_number` varchar(50) NOT NULL,\n  `name` varchar(100) NOT NULL,\n  `personal_info` text DEFAULT NULL,\n  `job_title` varchar(100) NOT NULL,\n  `work_history` text DEFAULT NULL,\n  `hire_date` date DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  PRIMARY KEY (`staff_id`),\n  UNIQUE KEY `uk_faculty_staff_employee_number` (`employee_number`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `research_projects` (\n  `project_id` int(11) NOT NULL AUTO_INCREMENT,\n  `project_code` varchar(50) NOT NULL,\n  `project_name` varchar(255) NOT NULL,\n  `principal_investigator` varchar(100) NOT NULL,\n  `funding_amount` decimal(12,2) DEFAULT NULL,\n  `funding_source` varchar(255) DEFAULT NULL,\n  `research_outcomes` text DEFAULT NULL,\n  `start_date` date DEFAULT NULL,\n  `end_date` date DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  PRIMARY KEY (`project_id`),\n  UNIQUE KEY `uk_research_projects_project_code` (`project_code`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `permissions` (\n  `permission_id` int(11) NOT NULL AUTO_INCREMENT,\n  `permission_name` varchar(100) NOT NULL,\n  `permission_code` varchar(100) NOT NULL,\n  `permission_description` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`permission_id`),\n  UNIQUE KEY `uk_permissions_permission_code` (`permission_code`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `role_permissions` (\n  `role_permission_id` int(11) NOT NULL AUTO_INCREMENT,\n  `role_id` int(11) NOT NULL,\n  `permission_id` int(11) NOT NULL,\n  `granted_at` datetime NOT NULL,\n  PRIMARY KEY (`role_permission_id`),\n  UNIQUE KEY `uk_role_permissions_role_permission` (`role_id`,`permission_id`),\n  KEY `role_permissions_ibfk_2` (`permission_id`),\n  CONSTRAINT `role_permissions_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `role_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`permission_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `operation_logs` (\n  `log_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `operation_type` varchar(100) NOT NULL,\n  `target_table` varchar(100) DEFAULT NULL,\n  `target_record_id` int(11) DEFAULT NULL,\n  `operation_detail` text DEFAULT NULL,\n  `ip_address` varchar(45) DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  PRIMARY KEY (`log_id`),\n  KEY `operation_logs_ibfk_1` (`user_id`),\n  CONSTRAINT `operation_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `backup_records` (\n  `backup_id` int(11) NOT NULL AUTO_INCREMENT,\n  `backup_type` varchar(50) NOT NULL,\n  `backup_mode` varchar(50) NOT NULL,\n  `backup_path` varchar(255) NOT NULL,\n  `backup_size_mb` decimal(12,2) DEFAULT NULL,\n  `status` varchar(50) NOT NULL,\n  `started_at` datetime NOT NULL,\n  `completed_at` datetime DEFAULT NULL,\n  `created_by` int(11) DEFAULT NULL,\n  PRIMARY KEY (`backup_id`),\n  KEY `backup_records_ibfk_1` (`created_by`),\n  CONSTRAINT `backup_records_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "roles",
+      "users",
+      "students",
+      "faculty_staff",
+      "research_projects",
+      "permissions",
+      "role_permissions",
+      "operation_logs",
+      "backup_records"
+    ],
+    "columns_by_table": {
+      "roles": [],
+      "users": [],
+      "students": [],
+      "faculty_staff": [],
+      "research_projects": [],
+      "permissions": [],
+      "role_permissions": [],
+      "operation_logs": [],
+      "backup_records": []
+    }
+  }
+}

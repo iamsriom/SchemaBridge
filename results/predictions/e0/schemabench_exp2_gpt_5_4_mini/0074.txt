@@ -1,0 +1,47 @@
+-- Schema for database: schemabench_0074
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `recovery_key` varchar(255) DEFAULT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'user',
+  `api_key` varchar(255) DEFAULT NULL,
+  `api_quota` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_username_unique` (`username`),
+  UNIQUE KEY `users_email_unique` (`email`),
+  UNIQUE KEY `users_api_key_unique` (`api_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `links` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `long_url` text NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `is_custom` tinyint(1) NOT NULL DEFAULT 0,
+  `is_api_created` tinyint(1) NOT NULL DEFAULT 0,
+  `click_count` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `links_slug_unique` (`slug`),
+  KEY `links_user_id_index` (`user_id`),
+  CONSTRAINT `links_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `clicks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `link_id` int(11) NOT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `referer` text DEFAULT NULL,
+  `user_agent` text DEFAULT NULL,
+  `clicked_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `clicks_link_id_index` (`link_id`),
+  CONSTRAINT `clicks_ibfk_1` FOREIGN KEY (`link_id`) REFERENCES `links` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

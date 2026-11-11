@@ -1,0 +1,87 @@
+-- Schema for database: schemabench_0075
+
+CREATE TABLE `organizations_organization` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(200) NOT NULL,
+  `slug` varchar(200) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organizations_organizationuser` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `organization_id` int(11) NOT NULL,
+  `is_admin` tinyint(1) NOT NULL DEFAULT 0,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `organizations_organizationuser_user_id_organization_id` (`user_id`, `organization_id`),
+  KEY `organizations_organizationuser_organization_id` (`organization_id`),
+  CONSTRAINT `organizations_organizationuser_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations_organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organizations_organizationowner` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `organization_id` int(11) NOT NULL,
+  `organization_user_id` int(11) NOT NULL,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `organization_id` (`organization_id`),
+  UNIQUE KEY `organization_user_id` (`organization_user_id`),
+  CONSTRAINT `organizations_organizationowner_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations_organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organizations_organizationowner_ibfk_2` FOREIGN KEY (`organization_user_id`) REFERENCES `organizations_organizationuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organizations_organizationinvitation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `guid` varchar(36) NOT NULL,
+  `organization_id` int(11) NOT NULL,
+  `invitee_identifier` varchar(254) NOT NULL,
+  `inviter_id` int(11) NOT NULL,
+  `invited_by_id` int(11) DEFAULT NULL,
+  `is_accepted` tinyint(1) NOT NULL DEFAULT 0,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `guid` (`guid`),
+  KEY `organizations_organizationinvitation_organization_id` (`organization_id`),
+  KEY `organizations_organizationinvitation_inviter_id` (`inviter_id`),
+  KEY `organizations_organizationinvitation_invited_by_id` (`invited_by_id`),
+  CONSTRAINT `organizations_organizationinvitation_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations_organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organizations_organizationinvitation_ibfk_2` FOREIGN KEY (`inviter_id`) REFERENCES `organizations_organizationuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organizations_organizationinvitation_ibfk_3` FOREIGN KEY (`invited_by_id`) REFERENCES `organizations_organizationuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organizations_organizationregistration` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `guid` varchar(36) NOT NULL,
+  `organization_id` int(11) NOT NULL,
+  `registrant_identifier` varchar(254) NOT NULL,
+  `is_completed` tinyint(1) NOT NULL DEFAULT 0,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `guid` (`guid`),
+  KEY `organizations_organizationregistration_organization_id` (`organization_id`),
+  CONSTRAINT `organizations_organizationregistration_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations_organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `organizations_organizationmessage` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `organization_id` int(11) NOT NULL,
+  `sender_id` int(11) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `body` longtext NOT NULL,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `organizations_organizationmessage_organization_id` (`organization_id`),
+  KEY `organizations_organizationmessage_sender_id` (`sender_id`),
+  CONSTRAINT `organizations_organizationmessage_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations_organization` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organizations_organizationmessage_ibfk_2` FOREIGN KEY (`sender_id`) REFERENCES `organizations_organizationuser` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

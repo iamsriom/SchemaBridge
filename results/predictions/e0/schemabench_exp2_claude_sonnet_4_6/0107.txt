@@ -1,0 +1,117 @@
+-- Schema for database: schemabench_0107
+
+CREATE TABLE `district` (
+  `district_id` int(11) NOT NULL,
+  `district_name` varchar(255) NOT NULL,
+  `region` varchar(255) NOT NULL,
+  `num_inhabitants` int(11) DEFAULT NULL,
+  `num_municipalities_lt_499` int(11) DEFAULT NULL,
+  `num_municipalities_500_1999` int(11) DEFAULT NULL,
+  `num_municipalities_2000_9999` int(11) DEFAULT NULL,
+  `num_municipalities_gt_10000` int(11) DEFAULT NULL,
+  `num_cities` int(11) DEFAULT NULL,
+  `ratio_urban_inhabitants` decimal(5,2) DEFAULT NULL,
+  `avg_salary` decimal(10,2) DEFAULT NULL,
+  `unemployment_rate_95` decimal(5,2) DEFAULT NULL,
+  `unemployment_rate_96` decimal(5,2) DEFAULT NULL,
+  `num_entrepreneurs_per_1000` int(11) DEFAULT NULL,
+  `num_crimes_95` int(11) DEFAULT NULL,
+  `num_crimes_96` int(11) DEFAULT NULL,
+  PRIMARY KEY (`district_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `account` (
+  `account_id` int(11) NOT NULL,
+  `district_id` int(11) NOT NULL,
+  `frequency` varchar(50) NOT NULL,
+  `date` date NOT NULL,
+  PRIMARY KEY (`account_id`),
+  CONSTRAINT `account_ibfk_1` FOREIGN KEY (`district_id`) REFERENCES `district` (`district_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `client` (
+  `client_id` int(11) NOT NULL,
+  `birth_number` char(6) NOT NULL,
+  `district_id` int(11) NOT NULL,
+  PRIMARY KEY (`client_id`),
+  CONSTRAINT `client_ibfk_1` FOREIGN KEY (`district_id`) REFERENCES `district` (`district_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `disposition` (
+  `disp_id` int(11) NOT NULL,
+  `client_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  PRIMARY KEY (`disp_id`),
+  CONSTRAINT `disposition_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `client` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `disposition_ibfk_2` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `card` (
+  `card_id` int(11) NOT NULL,
+  `disp_id` int(11) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `issued` date NOT NULL,
+  PRIMARY KEY (`card_id`),
+  CONSTRAINT `card_ibfk_1` FOREIGN KEY (`disp_id`) REFERENCES `disposition` (`disp_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `loan` (
+  `loan_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `duration` int(11) NOT NULL,
+  `payments` decimal(12,2) NOT NULL,
+  `status` char(1) NOT NULL COMMENT 'A: successful, B: unsuccessful',
+  PRIMARY KEY (`loan_id`),
+  CONSTRAINT `loan_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction` (
+  `trans_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `operation` varchar(100) DEFAULT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `balance` decimal(12,2) NOT NULL,
+  `k_symbol` varchar(50) DEFAULT NULL,
+  `bank` varchar(50) DEFAULT NULL,
+  `account_partner` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`trans_id`),
+  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `order_payment` (
+  `order_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `bank_to` varchar(50) DEFAULT NULL,
+  `account_to` varchar(50) DEFAULT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `k_symbol` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `order_payment_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prediction_model` (
+  `model_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `accuracy` decimal(5,4) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `loan_prediction` (
+  `prediction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `loan_id` int(11) NOT NULL,
+  `model_id` int(11) NOT NULL,
+  `predicted_status` char(1) NOT NULL COMMENT 'A: successful, B: unsuccessful',
+  `confidence_score` decimal(5,4) DEFAULT NULL,
+  `predicted_at` datetime NOT NULL,
+  PRIMARY KEY (`prediction_id`),
+  CONSTRAINT `loan_prediction_ibfk_1` FOREIGN KEY (`loan_id`) REFERENCES `loan` (`loan_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `loan_prediction_ibfk_2` FOREIGN KEY (`model_id`) REFERENCES `prediction_model` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

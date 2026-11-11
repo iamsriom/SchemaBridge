@@ -1,0 +1,46 @@
+-- Schema for database: rschema_0378
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `posts` (
+  `post_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `summary` varchar(500) DEFAULT NULL,
+  `author_id` int(11) NOT NULL,
+  `body_content` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`post_id`),
+  KEY `posts_ibfk_1` (`author_id`),
+  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `comments` (
+  `comment_id` int(11) NOT NULL,
+  `post_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `comment_content` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`comment_id`),
+  KEY `comments_ibfk_1` (`post_id`),
+  KEY `comments_ibfk_2` (`user_id`),
+  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `post_activities` (
+  `activity_id` int(11) NOT NULL,
+  `post_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `operation_type` varchar(20) NOT NULL,
+  `activity_timestamp` datetime NOT NULL,
+  PRIMARY KEY (`activity_id`),
+  KEY `post_activities_ibfk_1` (`post_id`),
+  KEY `post_activities_ibfk_2` (`user_id`),
+  CONSTRAINT `post_activities_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `post_activities_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

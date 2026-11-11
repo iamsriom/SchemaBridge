@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0236
+CREATE TABLE `camera` (
+  `camera_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `rtsp_stream_address` varchar(255) NOT NULL,
+  `real_time_stream_path` varchar(255) DEFAULT NULL,
+  `analysis_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`camera_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `video_recording` (
+  `video_id` int(11) NOT NULL AUTO_INCREMENT,
+  `camera_id` int(11) NOT NULL,
+  `video_file_path` varchar(255) NOT NULL,
+  `cover_path` varchar(255) DEFAULT NULL,
+  `start_time` datetime NOT NULL,
+  `duration` int(11) NOT NULL,
+  PRIMARY KEY (`video_id`),
+  KEY `video_recording_ibfk_1` (`camera_id`),
+  CONSTRAINT `video_recording_ibfk_1` FOREIGN KEY (`camera_id`) REFERENCES `camera` (`camera_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alarm_record` (
+  `alarm_id` int(11) NOT NULL AUTO_INCREMENT,
+  `video_id` int(11) NOT NULL,
+  `alarm_type` varchar(100) NOT NULL,
+  `alarm_level` varchar(50) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`alarm_id`),
+  KEY `alarm_record_ibfk_1` (`video_id`),
+  CONSTRAINT `alarm_record_ibfk_1` FOREIGN KEY (`video_id`) REFERENCES `video_recording` (`video_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `event_record` (
+  `event_id` int(11) NOT NULL AUTO_INCREMENT,
+  `video_id` int(11) NOT NULL,
+  `event_type` varchar(100) NOT NULL,
+  `occurrence_time` datetime NOT NULL,
+  `x_coordinate` int(11) DEFAULT NULL,
+  `y_coordinate` int(11) DEFAULT NULL,
+  `width` int(11) DEFAULT NULL,
+  `height` int(11) DEFAULT NULL,
+  PRIMARY KEY (`event_id`),
+  KEY `event_record_ibfk_1` (`video_id`),
+  CONSTRAINT `event_record_ibfk_1` FOREIGN KEY (`video_id`) REFERENCES `video_recording` (`video_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

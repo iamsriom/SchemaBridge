@@ -1,0 +1,70 @@
+-- Schema for database: rschema_0399
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `registration_time` datetime NOT NULL,
+  `personal_info` text DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `problems` (
+  `problem_id` int(11) NOT NULL AUTO_INCREMENT,
+  `problem_name` varchar(255) NOT NULL,
+  `problem_description` text DEFAULT NULL,
+  `difficulty_level` varchar(50) DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`problem_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `codes` (
+  `code_id` int(11) NOT NULL AUTO_INCREMENT,
+  `code_content` text NOT NULL,
+  `upload_time` datetime NOT NULL,
+  `problem_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`code_id`),
+  CONSTRAINT `codes_ibfk_1` FOREIGN KEY (`problem_id`) REFERENCES `problems` (`problem_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `projects` (
+  `project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_name` varchar(255) NOT NULL,
+  `project_description` text DEFAULT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sign_ins` (
+  `sign_in_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `sign_in_time` datetime NOT NULL,
+  `sign_in_date` date NOT NULL,
+  PRIMARY KEY (`sign_in_id`),
+  CONSTRAINT `sign_ins_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_codes` (
+  `user_id` int(11) NOT NULL,
+  `code_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`, `code_id`),
+  CONSTRAINT `user_codes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_codes_ibfk_2` FOREIGN KEY (`code_id`) REFERENCES `codes` (`code_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_problems` (
+  `user_id` int(11) NOT NULL,
+  `problem_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`, `problem_id`),
+  CONSTRAINT `user_problems_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_problems_ibfk_2` FOREIGN KEY (`problem_id`) REFERENCES `problems` (`problem_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_projects` (
+  `user_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`, `project_id`),
+  CONSTRAINT `user_projects_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_projects_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

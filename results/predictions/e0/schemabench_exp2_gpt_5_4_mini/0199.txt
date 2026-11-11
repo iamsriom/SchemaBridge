@@ -1,0 +1,45 @@
+-- Schema for database: schemabench_0199
+CREATE TABLE `product_hierarchy` (
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `segment_id` int(11) DEFAULT NULL,
+  `style_id` int(11) DEFAULT NULL,
+  `category_name` varchar(255) DEFAULT NULL,
+  `segment_name` varchar(255) DEFAULT NULL,
+  `style_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_details` (
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `segment_name` varchar(255) DEFAULT NULL,
+  `category_name` varchar(255) DEFAULT NULL,
+  `style_name` varchar(255) DEFAULT NULL,
+  `product_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_prices` (
+  `product_id` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`product_id`,`start_date`),
+  CONSTRAINT `product_prices_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product_details` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales` (
+  `sale_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sale_date` datetime NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `customer_id` int(11) DEFAULT NULL,
+  `quantity` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `discount` decimal(5,2) DEFAULT NULL,
+  `revenue` decimal(12,2) NOT NULL,
+  PRIMARY KEY (`sale_id`),
+  KEY `sales_ibfk_1` (`product_id`),
+  CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product_details` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,28 @@
+-- Schema for database: rschema_0487
+CREATE TABLE `kodeliste` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code_system_name` varchar(255) NOT NULL,
+  `code_value` varchar(255) NOT NULL,
+  `code_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_kodeliste_code_system_value` (`code_system_name`,`code_value`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `code_relationship` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `source_kodeliste_id` int(11) NOT NULL,
+  `target_kodeliste_id` int(11) NOT NULL,
+  `relationship_type` varchar(100) NOT NULL,
+  `effective_start_date` date NOT NULL,
+  `effective_end_date` date DEFAULT NULL,
+  `created_by` varchar(100) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `modified_by` varchar(100) DEFAULT NULL,
+  `modified_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_code_relationship_unique_pair` (`source_kodeliste_id`,`target_kodeliste_id`,`relationship_type`,`effective_start_date`),
+  KEY `code_relationship_ibfk_1` (`source_kodeliste_id`),
+  KEY `code_relationship_ibfk_2` (`target_kodeliste_id`),
+  CONSTRAINT `code_relationship_ibfk_1` FOREIGN KEY (`source_kodeliste_id`) REFERENCES `kodeliste` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `code_relationship_ibfk_2` FOREIGN KEY (`target_kodeliste_id`) REFERENCES `kodeliste` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

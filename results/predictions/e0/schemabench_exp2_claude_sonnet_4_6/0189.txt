@@ -1,0 +1,122 @@
+-- Schema for database: schemabench_0189
+
+CREATE TABLE `artists` (
+  `artist_id` int(11) NOT NULL AUTO_INCREMENT,
+  `artist_name` varchar(255) NOT NULL,
+  `country_of_origin` varchar(100) DEFAULT NULL,
+  `genre` varchar(100) DEFAULT NULL,
+  `debut_year` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`artist_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `albums` (
+  `album_id` int(11) NOT NULL AUTO_INCREMENT,
+  `artist_id` int(11) NOT NULL,
+  `album_title` varchar(255) NOT NULL,
+  `release_year` int(11) DEFAULT NULL,
+  `label` varchar(255) DEFAULT NULL,
+  `total_tracks` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`album_id`),
+  CONSTRAINT `albums_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`artist_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `songs` (
+  `song_id` int(11) NOT NULL AUTO_INCREMENT,
+  `album_id` int(11) DEFAULT NULL,
+  `artist_id` int(11) NOT NULL,
+  `song_title` varchar(255) NOT NULL,
+  `release_year` int(11) DEFAULT NULL,
+  `duration_ms` int(11) DEFAULT NULL,
+  `explicit` tinyint(1) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`song_id`),
+  CONSTRAINT `songs_ibfk_1` FOREIGN KEY (`album_id`) REFERENCES `albums` (`album_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `songs_ibfk_2` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`artist_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `billboard_charts` (
+  `chart_id` int(11) NOT NULL AUTO_INCREMENT,
+  `song_id` int(11) NOT NULL,
+  `chart_name` varchar(100) NOT NULL,
+  `chart_date` datetime NOT NULL,
+  `peak_position` int(11) DEFAULT NULL,
+  `weeks_on_chart` int(11) DEFAULT NULL,
+  `chart_position` int(11) DEFAULT NULL,
+  `year` int(11) DEFAULT NULL,
+  PRIMARY KEY (`chart_id`),
+  CONSTRAINT `billboard_charts_ibfk_1` FOREIGN KEY (`song_id`) REFERENCES `songs` (`song_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `spotify_attributes` (
+  `attribute_id` int(11) NOT NULL AUTO_INCREMENT,
+  `song_id` int(11) NOT NULL,
+  `spotify_track_id` varchar(255) DEFAULT NULL,
+  `danceability` float DEFAULT NULL,
+  `energy` float DEFAULT NULL,
+  `loudness` float DEFAULT NULL,
+  `speechiness` float DEFAULT NULL,
+  `acousticness` float DEFAULT NULL,
+  `instrumentalness` float DEFAULT NULL,
+  `liveness` float DEFAULT NULL,
+  `valence` float DEFAULT NULL,
+  `tempo` float DEFAULT NULL,
+  `time_signature` int(11) DEFAULT NULL,
+  `key` int(11) DEFAULT NULL,
+  `mode` int(11) DEFAULT NULL,
+  `popularity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`attribute_id`),
+  CONSTRAINT `spotify_attributes_ibfk_1` FOREIGN KEY (`song_id`) REFERENCES `songs` (`song_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `music_trends` (
+  `trend_id` int(11) NOT NULL AUTO_INCREMENT,
+  `year` int(11) NOT NULL,
+  `genre` varchar(100) DEFAULT NULL,
+  `avg_danceability` float DEFAULT NULL,
+  `avg_energy` float DEFAULT NULL,
+  `avg_loudness` float DEFAULT NULL,
+  `avg_tempo` float DEFAULT NULL,
+  `avg_valence` float DEFAULT NULL,
+  `avg_popularity` float DEFAULT NULL,
+  `total_charting_songs` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`trend_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `influential_songs` (
+  `influential_id` int(11) NOT NULL AUTO_INCREMENT,
+  `song_id` int(11) NOT NULL,
+  `influence_score` float DEFAULT NULL,
+  `reason` varchar(500) DEFAULT NULL,
+  `identified_year` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`influential_id`),
+  CONSTRAINT `influential_songs_ibfk_1` FOREIGN KEY (`song_id`) REFERENCES `songs` (`song_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `reports` (
+  `report_id` int(11) NOT NULL AUTO_INCREMENT,
+  `report_title` varchar(255) NOT NULL,
+  `report_type` varchar(100) DEFAULT NULL,
+  `generated_at` datetime DEFAULT NULL,
+  `year_range_start` int(11) DEFAULT NULL,
+  `year_range_end` int(11) DEFAULT NULL,
+  `summary` text DEFAULT NULL,
+  `created_by` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`report_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dashboard_configurations` (
+  `config_id` int(11) NOT NULL AUTO_INCREMENT,
+  `dashboard_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `filter_year_start` int(11) DEFAULT NULL,
+  `filter_year_end` int(11) DEFAULT NULL,
+  `filter_genre` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `created_by` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`config_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,49 @@
+-- Schema for database: rschema_0489
+CREATE TABLE `applications` (
+  `app_id` varchar(64) NOT NULL,
+  `app_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`app_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `clients` (
+  `client_id` varchar(64) NOT NULL,
+  `user_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`client_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `channels` (
+  `channel_id` varchar(64) NOT NULL,
+  `app_id` varchar(64) NOT NULL,
+  `channel_name` varchar(255) NOT NULL,
+  `is_closed` tinyint(1) NOT NULL DEFAULT '0',
+  `is_persistent` tinyint(1) NOT NULL DEFAULT '0',
+  `is_private` tinyint(1) NOT NULL DEFAULT '0',
+  `is_online` tinyint(1) NOT NULL DEFAULT '0',
+  `push_enabled` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL,
+  `closed_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`channel_id`),
+  KEY `channels_ibfk_1` (`app_id`),
+  CONSTRAINT `channels_ibfk_1` FOREIGN KEY (`app_id`) REFERENCES `applications` (`app_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `channel_subscriptions` (
+  `channel_id` varchar(64) NOT NULL,
+  `client_id` varchar(64) NOT NULL,
+  `subscribed_at` datetime NOT NULL,
+  PRIMARY KEY (`channel_id`,`client_id`),
+  KEY `channel_subscriptions_ibfk_2` (`client_id`),
+  CONSTRAINT `channel_subscriptions_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `channels` (`channel_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `channel_subscriptions_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `channel_events` (
+  `event_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `channel_id` varchar(64) NOT NULL,
+  `event_type` varchar(100) NOT NULL,
+  `event_timestamp` datetime NOT NULL,
+  `payload` text DEFAULT NULL,
+  PRIMARY KEY (`event_id`),
+  KEY `channel_events_ibfk_1` (`channel_id`,`event_timestamp`),
+  CONSTRAINT `channel_events_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `channels` (`channel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

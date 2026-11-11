@@ -1,0 +1,122 @@
+-- Schema for database: rschema_0496
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `password_hash` varchar(255) DEFAULT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
+  `nickname` varchar(50) DEFAULT NULL,
+  `gender` tinyint(1) DEFAULT NULL COMMENT '0=unknown,1=male,2=female',
+  `age` int(11) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `introduction` text DEFAULT NULL,
+  `is_phone_bound` tinyint(1) NOT NULL DEFAULT 0,
+  `is_email_bound` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `phone` (`phone`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `real_name_authentications` (
+  `auth_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `real_name` varchar(100) NOT NULL,
+  `id_card_number` varchar(30) NOT NULL,
+  `id_card_front_photo` varchar(255) NOT NULL,
+  `id_card_back_photo` varchar(255) NOT NULL,
+  `face_recognition_photo` varchar(255) DEFAULT NULL,
+  `face_recognition_passed` tinyint(1) NOT NULL DEFAULT 0,
+  `auth_status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0=pending,1=approved,2=rejected',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`auth_id`),
+  UNIQUE KEY `user_id` (`user_id`),
+  CONSTRAINT `real_name_authentications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `categories` (
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent_id` int(11) DEFAULT NULL,
+  `category_name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`category_id`),
+  CONSTRAINT `categories_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `categories` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `seller_id` int(11) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `condition_description` varchar(255) DEFAULT NULL,
+  `original_price` decimal(10,2) DEFAULT NULL,
+  `selling_price` decimal(10,2) NOT NULL,
+  `min_negotiable_price` decimal(10,2) DEFAULT NULL,
+  `max_negotiable_price` decimal(10,2) DEFAULT NULL,
+  `is_negotiable` tinyint(1) NOT NULL DEFAULT 0,
+  `transaction_location` varchar(255) DEFAULT NULL,
+  `valid_until` datetime DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0=pending_review,1=on_sale,2=sold,3=removed',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`product_id`),
+  KEY `seller_id` (`seller_id`),
+  KEY `category_id` (`category_id`),
+  CONSTRAINT `products_ibfk_1` FOREIGN KEY (`seller_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `products_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_photos` (
+  `photo_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `photo_url` varchar(255) NOT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`photo_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `product_photos_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transactions` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `buyer_id` int(11) NOT NULL,
+  `seller_id` int(11) NOT NULL,
+  `transaction_amount` decimal(10,2) NOT NULL,
+  `transaction_status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0=pending,1=completed,2=cancelled,3=disputed',
+  `transaction_time` datetime DEFAULT NULL,
+  `transaction_location` varchar(255) DEFAULT NULL,
+  `transaction_method` varchar(50) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`transaction_id`),
+  KEY `product_id` (`product_id`),
+  KEY `buyer_id` (`buyer_id`),
+  KEY `seller_id` (`seller_id`),
+  CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`buyer_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactions_ibfk_3` FOREIGN KEY (`seller_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction_evaluations` (
+  `evaluation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_id` int(11) NOT NULL,
+  `evaluator_id` int(11) NOT NULL,
+  `evaluatee_id` int(11) NOT NULL,
+  `rating` tinyint(1) NOT NULL COMMENT '1=bad,2=neutral,3=good',
+  `comment` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`evaluation_id`),
+  KEY `transaction_id` (`transaction_id`),
+  KEY `evaluator_id` (`evaluator_id`),
+  KEY `evaluatee_id` (`evaluatee_id`),
+  CONSTRAINT `transaction_evaluations_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_evaluations_ibfk_2` FOREIGN KEY (`evaluator_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_evaluations_ibfk_3` FOREIGN KEY (`evaluatee_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

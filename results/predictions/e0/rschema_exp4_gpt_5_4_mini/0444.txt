@@ -1,0 +1,60 @@
+-- Schema for database: rschema_0444
+CREATE TABLE `student` (
+  `student_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `age` int(11) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `game_preference` varchar(255) DEFAULT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `instructor` (
+  `instructor_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `work_duration` int(11) DEFAULT NULL,
+  PRIMARY KEY (`instructor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `course` (
+  `course_id` int(11) NOT NULL,
+  `course_name` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `credits` decimal(4,1) DEFAULT NULL,
+  `instructor_id` int(11) NOT NULL,
+  PRIMARY KEY (`course_id`),
+  KEY `course_ibfk_1` (`instructor_id`),
+  CONSTRAINT `course_ibfk_1` FOREIGN KEY (`instructor_id`) REFERENCES `instructor` (`instructor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attendance` (
+  `attendance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `check_in_time` datetime NOT NULL,
+  `attendance_status` varchar(50) NOT NULL,
+  `class_time` datetime DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`attendance_id`),
+  KEY `attendance_ibfk_1` (`student_id`),
+  KEY `attendance_ibfk_2` (`course_id`),
+  CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `leave_request` (
+  `leave_id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `leave_time` datetime NOT NULL,
+  `class_time` datetime DEFAULT NULL,
+  `leave_reason` varchar(255) DEFAULT NULL,
+  `leave_status` varchar(50) NOT NULL,
+  PRIMARY KEY (`leave_id`),
+  KEY `leave_request_ibfk_1` (`student_id`),
+  KEY `leave_request_ibfk_2` (`course_id`),
+  CONSTRAINT `leave_request_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `leave_request_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

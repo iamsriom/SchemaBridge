@@ -1,0 +1,79 @@
+-- Schema for database: schemabench_0008
+CREATE TABLE `sites` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `hostname` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `locale` varchar(10) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_sites_on_hostname` (`hostname`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `layouts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `site_id` int(11) NOT NULL,
+  `identifier` varchar(255) NOT NULL,
+  `label` varchar(255) NOT NULL,
+  `content` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_layouts_on_site_id_and_identifier` (`site_id`,`identifier`),
+  KEY `index_layouts_on_site_id` (`site_id`),
+  CONSTRAINT `layouts_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `pages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `site_id` int(11) NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `layout_id` int(11) DEFAULT NULL,
+  `slug` varchar(255) NOT NULL,
+  `path` varchar(255) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `content` longtext DEFAULT NULL,
+  `published` tinyint(1) NOT NULL DEFAULT '0',
+  `position` int(11) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_pages_on_site_id_and_path` (`site_id`,`path`),
+  KEY `index_pages_on_site_id` (`site_id`),
+  KEY `index_pages_on_parent_id` (`parent_id`),
+  KEY `index_pages_on_layout_id` (`layout_id`),
+  CONSTRAINT `pages_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pages_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `pages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pages_ibfk_3` FOREIGN KEY (`layout_id`) REFERENCES `layouts` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `page_translations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_id` int(11) NOT NULL,
+  `locale` varchar(10) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `content` longtext DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_page_translations_on_page_id_and_locale` (`page_id`,`locale`),
+  KEY `index_page_translations_on_page_id` (`page_id`),
+  CONSTRAINT `page_translations_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `pages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `revisions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `revisable_type` varchar(255) NOT NULL,
+  `revisable_id` int(11) NOT NULL,
+  `site_id` int(11) DEFAULT NULL,
+  `locale` varchar(10) DEFAULT NULL,
+  `content` longtext NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_revisions_on_revisable_type_and_revisable_id` (`revisable_type`,`revisable_id`),
+  KEY `index_revisions_on_site_id` (`site_id`),
+  CONSTRAINT `revisions_ibfk_1` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

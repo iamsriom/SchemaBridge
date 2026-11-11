@@ -1,0 +1,114 @@
+-- Schema for database: rschema_0446
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `registration_time` datetime NOT NULL,
+  `last_login_time` datetime DEFAULT NULL,
+  `role` varchar(50) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_username` (`username`),
+  UNIQUE KEY `uk_users_phone_number` (`phone_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `crops` (
+  `crop_id` int(11) NOT NULL AUTO_INCREMENT,
+  `crop_name` varchar(255) NOT NULL,
+  `crop_type` varchar(255) NOT NULL,
+  `growth_model_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`crop_id`),
+  KEY `idx_crops_growth_model_id` (`growth_model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `growth_models` (
+  `growth_model_id` int(11) NOT NULL AUTO_INCREMENT,
+  `crop_id` int(11) NOT NULL,
+  `model_name` varchar(255) NOT NULL,
+  `parameters` text NOT NULL,
+  `creation_time` datetime NOT NULL,
+  PRIMARY KEY (`growth_model_id`),
+  UNIQUE KEY `uk_growth_models_crop_id` (`crop_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sensors` (
+  `sensor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sensor_location` varchar(255) NOT NULL,
+  `burial_depth` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`sensor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `meteorological_records` (
+  `meteorological_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sensor_id` int(11) NOT NULL,
+  `record_time` datetime NOT NULL,
+  `soil_moisture` decimal(10,2) DEFAULT NULL,
+  `temperature` decimal(10,2) DEFAULT NULL,
+  `humidity` decimal(10,2) DEFAULT NULL,
+  `rainfall` decimal(10,2) DEFAULT NULL,
+  `wind_speed` decimal(10,2) DEFAULT NULL,
+  `light_intensity` decimal(10,2) DEFAULT NULL,
+  `location` varchar(255) NOT NULL,
+  PRIMARY KEY (`meteorological_record_id`),
+  KEY `idx_meteorological_records_sensor_id` (`sensor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sensor_supply_records` (
+  `supply_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `crop_id` int(11) NOT NULL,
+  `supply_time` datetime NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `water_amount` decimal(10,2) DEFAULT NULL,
+  `fertilizer_amount` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`supply_record_id`),
+  KEY `idx_sensor_supply_records_user_id` (`user_id`),
+  KEY `idx_sensor_supply_records_crop_id` (`crop_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_crop_actions` (
+  `action_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `crop_id` int(11) NOT NULL,
+  `action_time` datetime NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `action_type` varchar(100) NOT NULL,
+  `action_details` text DEFAULT NULL,
+  PRIMARY KEY (`action_id`),
+  KEY `idx_user_crop_actions_user_id` (`user_id`),
+  KEY `idx_user_crop_actions_crop_id` (`crop_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `crop_evaluations` (
+  `evaluation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `crop_id` int(11) NOT NULL,
+  `metric_name` varchar(255) NOT NULL,
+  `metric_value` decimal(10,2) NOT NULL,
+  `evaluation_time` datetime NOT NULL,
+  `location` varchar(255) NOT NULL,
+  PRIMARY KEY (`evaluation_id`),
+  KEY `idx_crop_evaluations_user_id` (`user_id`),
+  KEY `idx_crop_evaluations_crop_id` (`crop_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+ALTER TABLE `crops`
+  ADD CONSTRAINT `crops_ibfk_1` FOREIGN KEY (`growth_model_id`) REFERENCES `growth_models` (`growth_model_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE `growth_models`
+  ADD CONSTRAINT `growth_models_ibfk_1` FOREIGN KEY (`crop_id`) REFERENCES `crops` (`crop_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `meteorological_records`
+  ADD CONSTRAINT `meteorological_records_ibfk_1` FOREIGN KEY (`sensor_id`) REFERENCES `sensors` (`sensor_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `sensor_supply_records`
+  ADD CONSTRAINT `sensor_supply_records_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `sensor_supply_records_ibfk_2` FOREIGN KEY (`crop_id`) REFERENCES `crops` (`crop_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `user_crop_actions`
+  ADD CONSTRAINT `user_crop_actions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `user_crop_actions_ibfk_2` FOREIGN KEY (`crop_id`) REFERENCES `crops` (`crop_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `crop_evaluations`
+  ADD CONSTRAINT `crop_evaluations_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `crop_evaluations_ibfk_2` FOREIGN KEY (`crop_id`) REFERENCES `crops` (`crop_id`) ON DELETE CASCADE ON UPDATE CASCADE;

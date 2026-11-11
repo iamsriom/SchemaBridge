@@ -1,0 +1,83 @@
+-- Schema for database: rschema_0439
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `mobile_phone` varchar(20) DEFAULT NULL,
+  `wechat_openid` varchar(128) DEFAULT NULL,
+  `nickname` varchar(100) DEFAULT NULL,
+  `avatar_url` varchar(255) DEFAULT NULL,
+  `password_hash` varchar(255) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_users_mobile_phone` (`mobile_phone`),
+  UNIQUE KEY `uk_users_wechat_openid` (`wechat_openid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `merchants` (
+  `merchant_id` int(11) NOT NULL AUTO_INCREMENT,
+  `merchant_name` varchar(150) NOT NULL,
+  `contact_person` varchar(100) DEFAULT NULL,
+  `mobile_phone` varchar(20) DEFAULT NULL,
+  `wechat_openid` varchar(128) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`merchant_id`),
+  UNIQUE KEY `uk_merchants_mobile_phone` (`mobile_phone`),
+  UNIQUE KEY `uk_merchants_wechat_openid` (`wechat_openid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `admins` (
+  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `real_name` varchar(100) DEFAULT NULL,
+  `mobile_phone` varchar(20) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`admin_id`),
+  UNIQUE KEY `uk_admins_username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `recycling_orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `merchant_id` int(11) DEFAULT NULL,
+  `order_no` varchar(32) NOT NULL,
+  `waste_type` varchar(100) NOT NULL,
+  `quantity` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `unit` varchar(20) DEFAULT NULL,
+  `pickup_address` varchar(255) NOT NULL,
+  `pickup_time` datetime DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `status` varchar(30) NOT NULL DEFAULT 'pending',
+  `payment_status` varchar(30) NOT NULL DEFAULT 'unpaid',
+  `payment_method` varchar(30) DEFAULT NULL,
+  `payment_amount` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `accepted_at` datetime DEFAULT NULL,
+  `completed_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`order_id`),
+  UNIQUE KEY `uk_recycling_orders_order_no` (`order_no`),
+  KEY `recycling_orders_ibfk_1` (`user_id`),
+  KEY `recycling_orders_ibfk_2` (`merchant_id`),
+  CONSTRAINT `recycling_orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `recycling_orders_ibfk_2` FOREIGN KEY (`merchant_id`) REFERENCES `merchants` (`merchant_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `order_ratings` (
+  `rating_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `merchant_id` int(11) DEFAULT NULL,
+  `score` tinyint(4) NOT NULL,
+  `comment` varchar(1000) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`rating_id`),
+  UNIQUE KEY `uk_order_ratings_order_id` (`order_id`),
+  KEY `order_ratings_ibfk_2` (`user_id`),
+  KEY `order_ratings_ibfk_3` (`merchant_id`),
+  CONSTRAINT `order_ratings_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `recycling_orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_ratings_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_ratings_ibfk_3` FOREIGN KEY (`merchant_id`) REFERENCES `merchants` (`merchant_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

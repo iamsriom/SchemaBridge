@@ -1,0 +1,56 @@
+-- Schema for database: rschema_0165
+
+CREATE TABLE `operator` (
+  `operator_id` int(11) NOT NULL AUTO_INCREMENT,
+  `operator_name` varchar(255) NOT NULL,
+  `operator_level` varchar(50) NOT NULL COMMENT 'e.g. provincial, city, county',
+  `operator_role` varchar(100) NOT NULL COMMENT 'e.g. system administrator, city and county user',
+  `operator_email` varchar(255) DEFAULT NULL,
+  `operator_phone` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`operator_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `meteorological_station` (
+  `station_id` int(11) NOT NULL AUTO_INCREMENT,
+  `station_type` varchar(100) NOT NULL COMMENT 'e.g. national station, regional station, marine station, sounding station',
+  `station_name` varchar(255) NOT NULL,
+  `latitude` decimal(9,6) NOT NULL,
+  `longitude` decimal(9,6) NOT NULL,
+  `elevation` decimal(10,2) DEFAULT NULL,
+  `geographic_environment_description` text DEFAULT NULL,
+  `observation_elements_list` text DEFAULT NULL,
+  `observation_instrument_name_model` varchar(255) DEFAULT NULL,
+  `observation_time` varchar(255) DEFAULT NULL,
+  `observation_record_medium` varchar(255) DEFAULT NULL,
+  `observation_standards` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`station_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `historical_evolution` (
+  `change_id` int(11) NOT NULL AUTO_INCREMENT,
+  `station_id` int(11) NOT NULL,
+  `change_type` varchar(100) NOT NULL COMMENT 'e.g. station name, station number, station location, observation elements, observation instruments, observation time, observation record medium, observation standards',
+  `old_value` text DEFAULT NULL,
+  `new_value` text DEFAULT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `reason_for_change` text DEFAULT NULL,
+  `operator_id` int(11) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `operation_status` varchar(50) NOT NULL COMMENT 'e.g. pending selection, selected, historical data',
+  PRIMARY KEY (`change_id`),
+  CONSTRAINT `historical_evolution_ibfk_1` FOREIGN KEY (`station_id`) REFERENCES `meteorological_station` (`station_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `historical_evolution_ibfk_2` FOREIGN KEY (`operator_id`) REFERENCES `operator` (`operator_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `audit_record` (
+  `audit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `change_id` int(11) NOT NULL,
+  `operator_id` int(11) NOT NULL,
+  `audit_time` datetime NOT NULL,
+  `audit_status` varchar(50) NOT NULL COMMENT 'e.g. approved, not approved',
+  `audit_comments` text DEFAULT NULL,
+  PRIMARY KEY (`audit_id`),
+  CONSTRAINT `audit_record_ibfk_1` FOREIGN KEY (`change_id`) REFERENCES `historical_evolution` (`change_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `audit_record_ibfk_2` FOREIGN KEY (`operator_id`) REFERENCES `operator` (`operator_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

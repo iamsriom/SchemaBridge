@@ -1,0 +1,61 @@
+-- Schema for database: rschema_0130
+
+CREATE TABLE `client` (
+  `client_id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_type` varchar(20) NOT NULL COMMENT 'corporate or individual',
+  PRIMARY KEY (`client_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `corporate_client` (
+  `corporate_client_id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` int(11) NOT NULL,
+  `corporate_tax_id` varchar(50) NOT NULL,
+  `corporate_name` varchar(255) NOT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `corporate_size` varchar(50) DEFAULT NULL,
+  `corporate_type` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`corporate_client_id`),
+  CONSTRAINT `corporate_client_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `client` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `individual_client` (
+  `individual_client_id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` int(11) NOT NULL,
+  `person_name` varchar(255) NOT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `personal_tax_id` varchar(50) NOT NULL,
+  PRIMARY KEY (`individual_client_id`),
+  CONSTRAINT `individual_client_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `client` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project` (
+  `project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` int(11) NOT NULL,
+  `project_value` decimal(15,2) DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `project_status` varchar(50) DEFAULT NULL,
+  `service_type` varchar(100) DEFAULT NULL,
+  `is_digital` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`project_id`),
+  CONSTRAINT `project_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `client` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `member` (
+  `member_id` int(11) NOT NULL AUTO_INCREMENT,
+  `member_name` varchar(255) NOT NULL,
+  `position` varchar(100) DEFAULT NULL,
+  `domain` varchar(100) DEFAULT NULL,
+  `date_of_hire` date DEFAULT NULL,
+  `date_of_departure` date DEFAULT NULL,
+  PRIMARY KEY (`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `project_member` (
+  `project_member_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `member_id` int(11) NOT NULL,
+  PRIMARY KEY (`project_member_id`),
+  CONSTRAINT `project_member_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `project_member_ibfk_2` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

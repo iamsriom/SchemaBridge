@@ -1,0 +1,164 @@
+-- Schema for database: schemabench_0222
+CREATE TABLE `artist_info_t` (
+  `artist_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `specialty` varchar(255) DEFAULT NULL,
+  `date_joined` datetime DEFAULT NULL,
+  PRIMARY KEY (`artist_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `artist_contract_t` (
+  `contract_id` int(11) NOT NULL AUTO_INCREMENT,
+  `artist_id` int(11) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `contract_terms` text DEFAULT NULL,
+  `status` varchar(50) NOT NULL,
+  PRIMARY KEY (`contract_id`),
+  KEY `artist_id` (`artist_id`),
+  CONSTRAINT `artist_contract_t_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artist_info_t` (`artist_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `artistcontract_audit_t` (
+  `audit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `contract_id` int(11) NOT NULL,
+  `changed_at` datetime NOT NULL,
+  `changed_by` varchar(100) DEFAULT NULL,
+  `old_status` varchar(50) DEFAULT NULL,
+  `new_status` varchar(50) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`audit_id`),
+  KEY `contract_id` (`contract_id`),
+  CONSTRAINT `artistcontract_audit_t_ibfk_1` FOREIGN KEY (`contract_id`) REFERENCES `artist_contract_t` (`contract_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `employee_info_t` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `job_title` varchar(100) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `hire_date` datetime DEFAULT NULL,
+  `salary` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `customer_info_t` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `customer_interest_t` (
+  `interest_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `interest_type` varchar(100) NOT NULL,
+  `interest_value` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`interest_id`),
+  KEY `customer_id` (`customer_id`),
+  CONSTRAINT `customer_interest_t_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer_info_t` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `product_info_t` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `artist_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `category` varchar(100) DEFAULT NULL,
+  `medium` varchar(100) DEFAULT NULL,
+  `creation_date` datetime DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`product_id`),
+  KEY `artist_id` (`artist_id`),
+  CONSTRAINT `product_info_t_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artist_info_t` (`artist_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `inventory_art_t` (
+  `inventory_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `quantity_on_hand` int(11) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `last_updated` datetime DEFAULT NULL,
+  PRIMARY KEY (`inventory_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `inventory_art_t_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product_info_t` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `sales_t` (
+  `sale_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `sale_date` datetime NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  `payment_method` varchar(50) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`sale_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `employee_id` (`employee_id`),
+  CONSTRAINT `sales_t_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer_info_t` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_t_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `employee_info_t` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `ledger_t` (
+  `ledger_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sale_id` int(11) NOT NULL,
+  `entry_date` datetime NOT NULL,
+  `entry_type` varchar(20) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ledger_id`),
+  KEY `sale_id` (`sale_id`),
+  CONSTRAINT `ledger_t_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `sales_t` (`sale_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `credit_t` (
+  `credit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ledger_id` int(11) NOT NULL,
+  `credit_date` datetime NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `reference_no` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`credit_id`),
+  KEY `ledger_id` (`ledger_id`),
+  CONSTRAINT `credit_t_ibfk_1` FOREIGN KEY (`ledger_id`) REFERENCES `ledger_t` (`ledger_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `debit_t` (
+  `debit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ledger_id` int(11) NOT NULL,
+  `debit_date` datetime NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `reference_no` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`debit_id`),
+  KEY `ledger_id` (`ledger_id`),
+  CONSTRAINT `debit_t_ibfk_1` FOREIGN KEY (`ledger_id`) REFERENCES `ledger_t` (`ledger_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `event_t` (
+  `event_id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_name` varchar(255) NOT NULL,
+  `event_type` varchar(100) DEFAULT NULL,
+  `start_datetime` datetime NOT NULL,
+  `end_datetime` datetime DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`event_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `collab_t` (
+  `collab_id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_id` int(11) NOT NULL,
+  `artist_id` int(11) NOT NULL,
+  `collaboration_role` varchar(100) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`collab_id`),
+  KEY `event_id` (`event_id`),
+  KEY `artist_id` (`artist_id`),
+  CONSTRAINT `collab_t_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `event_t` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `collab_t_ibfk_2` FOREIGN KEY (`artist_id`) REFERENCES `artist_info_t` (`artist_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `partner_org_audit_t` (
+  `partner_audit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `partner_name` varchar(255) NOT NULL,
+  `audit_date` datetime NOT NULL,
+  `audited_by` varchar(100) DEFAULT NULL,
+  `audit_result` varchar(100) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`partner_audit_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

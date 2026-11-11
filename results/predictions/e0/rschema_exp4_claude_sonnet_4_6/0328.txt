@@ -1,0 +1,80 @@
+-- Schema for database: rschema_0328
+
+CREATE TABLE `administrator` (
+  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `account` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`admin_id`),
+  UNIQUE KEY `account` (`account`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `survey` (
+  `survey_id` int(11) NOT NULL AUTO_INCREMENT,
+  `admin_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `access_restriction` varchar(50) DEFAULT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `access_rule` varchar(20) DEFAULT NULL COMMENT 'public or password-protected',
+  `access_password` varchar(255) DEFAULT NULL,
+  `status` varchar(20) DEFAULT NULL COMMENT 'created, in_progress, ended',
+  `logo_url` varchar(500) DEFAULT NULL,
+  `background_image_url` varchar(500) DEFAULT NULL,
+  `is_anonymous` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`survey_id`),
+  CONSTRAINT `survey_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `administrator` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `question` (
+  `question_id` int(11) NOT NULL AUTO_INCREMENT,
+  `survey_id` int(11) NOT NULL,
+  `title` varchar(500) NOT NULL,
+  `description` text DEFAULT NULL,
+  `question_type` varchar(20) NOT NULL COMMENT 'single_choice, multiple_choice, text, textarea',
+  `is_required` tinyint(1) NOT NULL DEFAULT 0,
+  `validation_type` varchar(50) DEFAULT NULL,
+  `display_order` int(11) NOT NULL DEFAULT 0,
+  `display_style` varchar(50) DEFAULT NULL,
+  `is_evaluated` tinyint(1) NOT NULL DEFAULT 0,
+  `evaluation_score` decimal(10,2) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`question_id`),
+  CONSTRAINT `question_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `survey` (`survey_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `option` (
+  `option_id` int(11) NOT NULL AUTO_INCREMENT,
+  `question_id` int(11) NOT NULL,
+  `content` varchar(500) NOT NULL,
+  `display_order` int(11) NOT NULL DEFAULT 0,
+  `is_correct` tinyint(1) NOT NULL DEFAULT 0,
+  `option_type` varchar(20) DEFAULT NULL COMMENT 'single or multiple',
+  PRIMARY KEY (`option_id`),
+  CONSTRAINT `option_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `question` (`question_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `choice_answer` (
+  `choice_answer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `option_id` int(11) NOT NULL,
+  `answer_type` varchar(20) NOT NULL COMMENT 'single or multiple',
+  `submitted_at` datetime DEFAULT NULL,
+  `respondent_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`choice_answer_id`),
+  CONSTRAINT `choice_answer_ibfk_1` FOREIGN KEY (`option_id`) REFERENCES `option` (`option_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `text_answer` (
+  `text_answer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `question_id` int(11) NOT NULL,
+  `answer_content` text DEFAULT NULL,
+  `submitted_at` datetime DEFAULT NULL,
+  `respondent_info` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`text_answer_id`),
+  CONSTRAINT `text_answer_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `question` (`question_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

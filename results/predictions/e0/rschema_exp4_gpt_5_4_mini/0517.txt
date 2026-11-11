@@ -1,0 +1,55 @@
+-- Schema for database: rschema_0517
+CREATE TABLE `supermarket` (
+  `supermarket_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supermarket_name` varchar(255) NOT NULL,
+  `manager` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  PRIMARY KEY (`supermarket_id`),
+  UNIQUE KEY `uk_supermarket_name` (`supermarket_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `supermarket_id` int(11) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
+  `manager` varchar(255) NOT NULL,
+  PRIMARY KEY (`department_id`),
+  UNIQUE KEY `uk_department_name` (`department_name`),
+  KEY `department_ibfk_1` (`supermarket_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`supermarket_id`) REFERENCES `supermarket` (`supermarket_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` varchar(50) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `position` varchar(255) NOT NULL,
+  `contact_information` varchar(255) DEFAULT NULL,
+  `salary` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  KEY `employee_ibfk_1` (`department_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product` (
+  `product_id` varchar(50) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `model` varchar(255) DEFAULT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sales_allocation` (
+  `allocation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` varchar(50) NOT NULL,
+  `product_id` varchar(50) NOT NULL,
+  `allocation_time` datetime NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`allocation_id`),
+  KEY `sales_allocation_ibfk_1` (`employee_id`),
+  KEY `sales_allocation_ibfk_2` (`product_id`),
+  CONSTRAINT `sales_allocation_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sales_allocation_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

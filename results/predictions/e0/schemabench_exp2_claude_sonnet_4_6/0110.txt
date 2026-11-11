@@ -1,0 +1,112 @@
+-- Schema for database: schemabench_0110
+
+CREATE TABLE `institution` (
+  `institution_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` char(2) DEFAULT NULL,
+  `zip` varchar(20) DEFAULT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `phone` varchar(30) DEFAULT NULL,
+  `street_address` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`institution_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `investigator` (
+  `investigator_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `role` varchar(50) DEFAULT NULL,
+  `institution_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`investigator_id`),
+  CONSTRAINT `investigator_ibfk_1` FOREIGN KEY (`institution_id`) REFERENCES `institution` (`institution_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `program_element` (
+  `program_element_id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(20) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `directorate` varchar(255) DEFAULT NULL,
+  `division` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`program_element_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `grant_award` (
+  `award_id` int(11) NOT NULL AUTO_INCREMENT,
+  `nsf_award_number` varchar(50) NOT NULL,
+  `title` varchar(500) NOT NULL,
+  `abstract` text DEFAULT NULL,
+  `award_amount` decimal(15,2) DEFAULT NULL,
+  `award_start_date` datetime DEFAULT NULL,
+  `award_end_date` datetime DEFAULT NULL,
+  `award_type` varchar(100) DEFAULT NULL,
+  `nsf_directorate` varchar(255) DEFAULT NULL,
+  `nsf_division` varchar(255) DEFAULT NULL,
+  `institution_id` int(11) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`award_id`),
+  CONSTRAINT `grant_award_ibfk_1` FOREIGN KEY (`institution_id`) REFERENCES `institution` (`institution_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `award_investigator` (
+  `award_investigator_id` int(11) NOT NULL AUTO_INCREMENT,
+  `award_id` int(11) NOT NULL,
+  `investigator_id` int(11) NOT NULL,
+  `role` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`award_investigator_id`),
+  CONSTRAINT `award_investigator_ibfk_1` FOREIGN KEY (`award_id`) REFERENCES `grant_award` (`award_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `award_investigator_ibfk_2` FOREIGN KEY (`investigator_id`) REFERENCES `investigator` (`investigator_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `award_program_element` (
+  `award_program_element_id` int(11) NOT NULL AUTO_INCREMENT,
+  `award_id` int(11) NOT NULL,
+  `program_element_id` int(11) NOT NULL,
+  PRIMARY KEY (`award_program_element_id`),
+  CONSTRAINT `award_program_element_ibfk_1` FOREIGN KEY (`award_id`) REFERENCES `grant_award` (`award_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `award_program_element_ibfk_2` FOREIGN KEY (`program_element_id`) REFERENCES `program_element` (`program_element_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `prediction` (
+  `prediction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `award_id` int(11) DEFAULT NULL,
+  `predicted_amount` decimal(15,2) DEFAULT NULL,
+  `actual_amount` decimal(15,2) DEFAULT NULL,
+  `model_version` varchar(50) DEFAULT NULL,
+  `prediction_date` datetime DEFAULT NULL,
+  `error_margin` decimal(15,2) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`prediction_id`),
+  CONSTRAINT `prediction_ibfk_1` FOREIGN KEY (`award_id`) REFERENCES `grant_award` (`award_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `report` (
+  `report_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `generated_by` varchar(100) DEFAULT NULL,
+  `generated_at` datetime DEFAULT NULL,
+  `report_type` varchar(100) DEFAULT NULL,
+  `file_path` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`report_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `role` varchar(50) DEFAULT NULL,
+  `institution_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `last_login` datetime DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`institution_id`) REFERENCES `institution` (`institution_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

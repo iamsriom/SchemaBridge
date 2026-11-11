@@ -1,0 +1,145 @@
+-- Schema for database: rschema_0168
+
+CREATE TABLE `equipment` (
+  `equipment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_name` varchar(255) NOT NULL,
+  `equipment_type` varchar(100) NOT NULL,
+  `manufacturer` varchar(255) DEFAULT NULL,
+  `installation_date` datetime DEFAULT NULL,
+  `health_indicator` decimal(5,2) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`equipment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `operational_state` (
+  `state_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `recorded_at` datetime NOT NULL,
+  `temperature` decimal(8,2) DEFAULT NULL,
+  `vibration` decimal(8,4) DEFAULT NULL,
+  `voltage` decimal(8,2) DEFAULT NULL,
+  `current` decimal(8,2) DEFAULT NULL,
+  `pressure` decimal(8,2) DEFAULT NULL,
+  `humidity` decimal(5,2) DEFAULT NULL,
+  `operational_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`state_id`),
+  CONSTRAINT `operational_state_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fault_prediction` (
+  `prediction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `predicted_at` datetime NOT NULL,
+  `fault_type` varchar(100) DEFAULT NULL,
+  `fault_probability` decimal(5,4) DEFAULT NULL,
+  `predicted_fault_time` datetime DEFAULT NULL,
+  `model_name` varchar(100) DEFAULT NULL,
+  `model_version` varchar(50) DEFAULT NULL,
+  `regularization_param` decimal(10,6) DEFAULT NULL,
+  `gradient_descent_iterations` int(11) DEFAULT NULL,
+  `confidence_score` decimal(5,4) DEFAULT NULL,
+  `is_confirmed` tinyint(1) DEFAULT 0,
+  PRIMARY KEY (`prediction_id`),
+  CONSTRAINT `fault_prediction_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `data_buffer` (
+  `buffer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `buffered_at` datetime NOT NULL,
+  `data_type` varchar(100) NOT NULL,
+  `raw_data` text DEFAULT NULL,
+  `is_transmitted` tinyint(1) DEFAULT 0,
+  `transmitted_at` datetime DEFAULT NULL,
+  `retry_count` int(11) DEFAULT 0,
+  PRIMARY KEY (`buffer_id`),
+  CONSTRAINT `data_buffer_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `remote_monitoring_interface` (
+  `interface_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `interface_name` varchar(255) NOT NULL,
+  `interface_type` varchar(100) DEFAULT NULL,
+  `endpoint_url` varchar(500) DEFAULT NULL,
+  `protocol` varchar(50) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `last_connected_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`interface_id`),
+  CONSTRAINT `remote_monitoring_interface_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_personnel` (
+  `personnel_id` int(11) NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(255) NOT NULL,
+  `employee_code` varchar(50) DEFAULT NULL,
+  `department` varchar(100) DEFAULT NULL,
+  `contact_phone` varchar(50) DEFAULT NULL,
+  `contact_email` varchar(255) DEFAULT NULL,
+  `specialization` varchar(100) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`personnel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_record` (
+  `maintenance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `personnel_id` int(11) NOT NULL,
+  `maintenance_time` datetime NOT NULL,
+  `maintenance_type` varchar(100) NOT NULL,
+  `maintenance_cost` decimal(12,2) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `result` varchar(255) DEFAULT NULL,
+  `next_maintenance_date` datetime DEFAULT NULL,
+  `health_indicator_before` decimal(5,2) DEFAULT NULL,
+  `health_indicator_after` decimal(5,2) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`maintenance_id`),
+  CONSTRAINT `maintenance_record_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_record_ibfk_2` FOREIGN KEY (`personnel_id`) REFERENCES `maintenance_personnel` (`personnel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `historical_data` (
+  `history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `record_date` datetime NOT NULL,
+  `data_category` varchar(100) NOT NULL,
+  `metric_name` varchar(100) NOT NULL,
+  `metric_value` decimal(15,4) DEFAULT NULL,
+  `trend_direction` varchar(20) DEFAULT NULL,
+  `anomaly_flag` tinyint(1) DEFAULT 0,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`history_id`),
+  CONSTRAINT `historical_data_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `decision_model` (
+  `model_id` int(11) NOT NULL AUTO_INCREMENT,
+  `model_name` varchar(255) NOT NULL,
+  `model_version` varchar(50) DEFAULT NULL,
+  `model_type` varchar(100) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `training_date` datetime DEFAULT NULL,
+  `accuracy_score` decimal(5,4) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resource_allocation` (
+  `allocation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipment_id` int(11) NOT NULL,
+  `model_id` int(11) NOT NULL,
+  `allocation_date` datetime NOT NULL,
+  `resource_type` varchar(100) NOT NULL,
+  `allocated_quantity` decimal(12,2) DEFAULT NULL,
+  `allocation_cost` decimal(12,2) DEFAULT NULL,
+  `strategy` varchar(255) DEFAULT NULL,
+  `optimization_score` decimal(5,4) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`allocation_id`),
+  CONSTRAINT `resource_allocation_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `resource_allocation_ibfk_2` FOREIGN KEY (`model_id`) REFERENCES `decision_model` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

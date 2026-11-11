@@ -1,0 +1,73 @@
+-- Schema for database: rschema_0174
+CREATE TABLE `patients` (
+  `patient_id` int(11) NOT NULL AUTO_INCREMENT,
+  `medical_record_number` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `gender` varchar(10) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `id_card_number` varchar(20) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `admission_time` datetime NOT NULL,
+  PRIMARY KEY (`patient_id`),
+  UNIQUE KEY `uk_patients_medical_record_number` (`medical_record_number`),
+  UNIQUE KEY `uk_patients_id_card_number` (`id_card_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vital_sign_types` (
+  `vital_sign_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_name` varchar(100) NOT NULL,
+  `unit` varchar(20) DEFAULT NULL,
+  `normal_lower_limit` decimal(10,2) DEFAULT NULL,
+  `normal_upper_limit` decimal(10,2) DEFAULT NULL,
+  `updated_by` varchar(100) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`vital_sign_type_id`),
+  UNIQUE KEY `uk_vital_sign_types_type_name` (`type_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `vital_sign_logs` (
+  `vital_sign_log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `vital_sign_type_id` int(11) NOT NULL,
+  `measured_value` decimal(10,2) NOT NULL,
+  `formatted_value` varchar(255) DEFAULT NULL,
+  `measured_at` datetime NOT NULL,
+  `is_out_of_range` tinyint(1) NOT NULL DEFAULT '0',
+  `warning_message` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`vital_sign_log_id`),
+  KEY `vital_sign_logs_ibfk_1` (`patient_id`),
+  KEY `vital_sign_logs_ibfk_2` (`vital_sign_type_id`),
+  CONSTRAINT `vital_sign_logs_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `vital_sign_logs_ibfk_2` FOREIGN KEY (`vital_sign_type_id`) REFERENCES `vital_sign_types` (`vital_sign_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `medical_records` (
+  `medical_record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `vital_sign_log_id` int(11) DEFAULT NULL,
+  `diagnosis_time` datetime NOT NULL,
+  `diagnosis_content` text NOT NULL,
+  PRIMARY KEY (`medical_record_id`),
+  KEY `medical_records_ibfk_1` (`patient_id`),
+  KEY `medical_records_ibfk_2` (`vital_sign_log_id`),
+  CONSTRAINT `medical_records_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `medical_records_ibfk_2` FOREIGN KEY (`vital_sign_log_id`) REFERENCES `vital_sign_logs` (`vital_sign_log_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `treatment_recommendations` (
+  `treatment_recommendation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `medical_record_id` int(11) DEFAULT NULL,
+  `vital_sign_log_id` int(11) DEFAULT NULL,
+  `recommendation_time` datetime NOT NULL,
+  `recommendation_content` text NOT NULL,
+  `recommended_by` varchar(100) DEFAULT NULL,
+  `status` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`treatment_recommendation_id`),
+  KEY `treatment_recommendations_ibfk_1` (`patient_id`),
+  KEY `treatment_recommendations_ibfk_2` (`medical_record_id`),
+  KEY `treatment_recommendations_ibfk_3` (`vital_sign_log_id`),
+  CONSTRAINT `treatment_recommendations_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `treatment_recommendations_ibfk_2` FOREIGN KEY (`medical_record_id`) REFERENCES `medical_records` (`medical_record_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `treatment_recommendations_ibfk_3` FOREIGN KEY (`vital_sign_log_id`) REFERENCES `vital_sign_logs` (`vital_sign_log_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0296
+
+CREATE TABLE `financial_advisor` (
+  `advisor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `hire_date` datetime NOT NULL,
+  `contact_number` varchar(50) NOT NULL,
+  PRIMARY KEY (`advisor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `client` (
+  `client_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `id_number` varchar(100) NOT NULL,
+  `contact_number` varchar(50) NOT NULL,
+  `risk_preference` varchar(100) DEFAULT NULL,
+  `total_assets` decimal(18,2) DEFAULT NULL,
+  PRIMARY KEY (`client_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `financial_product` (
+  `product_code` varchar(50) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `product_type` varchar(100) DEFAULT NULL,
+  `product_value` decimal(18,2) DEFAULT NULL,
+  PRIMARY KEY (`product_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `investment_portfolio` (
+  `portfolio_id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` int(11) NOT NULL,
+  `product_code` varchar(50) NOT NULL,
+  `quantity_held` decimal(18,4) NOT NULL,
+  PRIMARY KEY (`portfolio_id`),
+  CONSTRAINT `investment_portfolio_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `client` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `investment_portfolio_ibfk_2` FOREIGN KEY (`product_code`) REFERENCES `financial_product` (`product_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `portfolio_id` int(11) NOT NULL,
+  `product_code` varchar(50) NOT NULL,
+  `transaction_type` varchar(50) NOT NULL,
+  `transaction_quantity` decimal(18,4) NOT NULL,
+  `transaction_price` decimal(18,2) NOT NULL,
+  `transaction_time` datetime NOT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `transaction_record_ibfk_1` FOREIGN KEY (`portfolio_id`) REFERENCES `investment_portfolio` (`portfolio_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transaction_record_ibfk_2` FOREIGN KEY (`product_code`) REFERENCES `financial_product` (`product_code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

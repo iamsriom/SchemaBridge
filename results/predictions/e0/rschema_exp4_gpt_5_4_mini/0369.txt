@@ -1,0 +1,99 @@
+-- Schema for database: rschema_0369
+CREATE TABLE `workflow_types` (
+  `workflow_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `workflow_name` varchar(255) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`workflow_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `content_items` (
+  `content_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `workflow_type_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content_body` longtext DEFAULT NULL,
+  `current_state` varchar(100) NOT NULL,
+  `version_number` int(11) NOT NULL DEFAULT '1',
+  `created_by` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`content_item_id`),
+  KEY `content_items_ibfk_1` (`workflow_type_id`),
+  CONSTRAINT `content_items_ibfk_1` FOREIGN KEY (`workflow_type_id`) REFERENCES `workflow_types` (`workflow_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `workflow_states` (
+  `workflow_state_id` int(11) NOT NULL AUTO_INCREMENT,
+  `workflow_type_id` int(11) NOT NULL,
+  `state_name` varchar(100) NOT NULL,
+  `state_order` int(11) NOT NULL,
+  `is_terminal` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`workflow_state_id`),
+  KEY `workflow_states_ibfk_1` (`workflow_type_id`),
+  CONSTRAINT `workflow_states_ibfk_1` FOREIGN KEY (`workflow_type_id`) REFERENCES `workflow_types` (`workflow_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `content_versions` (
+  `content_version_id` int(11) NOT NULL AUTO_INCREMENT,
+  `content_item_id` int(11) NOT NULL,
+  `version_number` int(11) NOT NULL,
+  `state_id` int(11) NOT NULL,
+  `version_comment` varchar(500) DEFAULT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`content_version_id`),
+  KEY `content_versions_ibfk_1` (`content_item_id`),
+  KEY `content_versions_ibfk_2` (`state_id`),
+  CONSTRAINT `content_versions_ibfk_1` FOREIGN KEY (`content_item_id`) REFERENCES `content_items` (`content_item_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `content_versions_ibfk_2` FOREIGN KEY (`state_id`) REFERENCES `workflow_states` (`workflow_state_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `workflow_operations` (
+  `workflow_operation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `content_item_id` int(11) NOT NULL,
+  `content_version_id` int(11) DEFAULT NULL,
+  `operation_type` varchar(100) NOT NULL,
+  `operation_time` datetime NOT NULL,
+  `operating_user_id` int(11) NOT NULL,
+  `from_state_id` int(11) DEFAULT NULL,
+  `to_state_id` int(11) DEFAULT NULL,
+  `comments` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`workflow_operation_id`),
+  KEY `workflow_operations_ibfk_1` (`content_item_id`),
+  KEY `workflow_operations_ibfk_2` (`content_version_id`),
+  KEY `workflow_operations_ibfk_3` (`from_state_id`),
+  KEY `workflow_operations_ibfk_4` (`to_state_id`),
+  CONSTRAINT `workflow_operations_ibfk_1` FOREIGN KEY (`content_item_id`) REFERENCES `content_items` (`content_item_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `workflow_operations_ibfk_2` FOREIGN KEY (`content_version_id`) REFERENCES `content_versions` (`content_version_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `workflow_operations_ibfk_3` FOREIGN KEY (`from_state_id`) REFERENCES `workflow_states` (`workflow_state_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `workflow_operations_ibfk_4` FOREIGN KEY (`to_state_id`) REFERENCES `workflow_states` (`workflow_state_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `operation_audit_logs` (
+  `audit_log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `workflow_operation_id` int(11) NOT NULL,
+  `audit_action` varchar(100) NOT NULL,
+  `audit_time` datetime NOT NULL,
+  `audited_by` int(11) NOT NULL,
+  `audit_result` varchar(50) NOT NULL,
+  `details` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`audit_log_id`),
+  KEY `operation_audit_logs_ibfk_1` (`workflow_operation_id`),
+  CONSTRAINT `operation_audit_logs_ibfk_1` FOREIGN KEY (`workflow_operation_id`) REFERENCES `workflow_operations` (`workflow_operation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user_permissions` (
+  `user_permission_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `workflow_type_id` int(11) NOT NULL,
+  `permission_name` varchar(100) NOT NULL,
+  `granted_by` int(11) NOT NULL,
+  `granted_at` datetime NOT NULL,
+  `is_allowed` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`user_permission_id`),
+  KEY `user_permissions_ibfk_1` (`workflow_type_id`),
+  CONSTRAINT `user_permissions_ibfk_1` FOREIGN KEY (`workflow_type_id`) REFERENCES `workflow_types` (`workflow_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

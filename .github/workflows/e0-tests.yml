@@ -2,7 +2,7 @@ name: E0 offline tests
 
 on:
   push:
-    branches: [main, e0-direct-api-reproduce]
+    branches: [main, e0-direct-api-reproduce, icde2027-e0-verified]
   pull_request:
     branches: [main]
 
@@ -36,5 +36,62 @@ jobs:
           OPENAI_API_KEY: ""
           ANTHROPIC_API_KEY: ""
 
+      - name: Baseline runner dry-run (no GPU)
+        run: |
+          python experiments/E0/original_benchmarks/run_baselines.py \
+            --model codellama-13b --method one_shot --dry-run --limit 2
+          python experiments/E0/original_benchmarks/run_baselines.py \
+            --model qwen2.5-7b --method one_shot --dry-run --limit 1 && exit 1 || true
+
       - name: E0 gold-reference validation
         run: python experiments/E0/reproduce_genuine_tables.py --validate-only --skip-pytest
+
+      - name: E0 offline Tables V/VI recompute
+        run: |
+          python experiments/E0/reproduce_genuine_tables.py --skip-pytest --no-render --write-gpm
+          python scripts/build_e0_paper_comparison.py
+
+      - name: All Direct models present + V↔VI consistency + lock check
+        run: |
+          python - <<'PY'
+          import csv, json
+          from pathlib import Path
+
+          tv = list(csv.DictReader(open("results/metrics/reproduced/E0_TABLE_V_FINAL.csv")))
+          tvi = list(csv.DictReader(open("results/metrics/reproduced/E0_TABLE_VI_FINAL.csv")))
+          lock = json.loads(Path("audit/E0_CURRENT_MANUSCRIPT_VALUES.json").read_text())
+          expect_models = [
+              "CodeLlama-13B", "Llama-3.1-8B", "DeepSeek-Coder-6.7B",
+              "Claude Sonnet 4.6", "GPT-5.4-mini",
+          ]
+          by = {(r["dataset"], r["model"]): r for r in tv}
+          for ds in ("RSchema", "SchemaBench"):
+              for m in expect_models:
+                  assert (ds, m) in by, (ds, m)
+                  assert by[(ds, m)]["status"] == "COMPLETE", (ds, m, by[(ds, m)]["status"])
+
+          # Table VI Direct == Table V RSchema
+          tv_rs = {r["model"]: r for r in tv if r["dataset"] == "RSchema"}
+          for r in tvi:
+              if r["dataset"] != "RSchema" or r["method"] != "Direct":
+                  continue
+              if r["model"] not in tv_rs:
+                  continue
+              a, b = tv_rs[r["model"]], r
+              for k in ("nged", "halluc", "tables", "attributes", "domain", "entity", "referential"):
+                  assert abs(float(a[k]) - float(b[k])) < 1e-12, (r["model"], k, a[k], b[k])
+
+          # CodeLlama RSchema must match locked manuscript to 3dp
+          r = by[("RSchema", "CodeLlama-13B")]
+          exp = lock["tab:e0_overall"]["RSchema|CodeLlama-13B"]
+          for k, v in exp.items():
+              got = float(f"{float(r[k]):.3f}")
+              assert got == float(v), (k, got, v)
+          print("Direct coverage + V↔VI + CodeLlama lock PASS")
+          PY
+
+      - name: Paper comparison diagnostic (non-fatal summary)
+        run: python scripts/build_e0_paper_comparison.py
+
+      - name: Paper comparison verify (allow archive prompting until regen completes)
+        run: python scripts/build_e0_paper_comparison.py --verify --allow-archive

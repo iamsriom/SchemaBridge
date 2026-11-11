@@ -1,0 +1,170 @@
+-- Schema for database: rschema_0162
+
+CREATE TABLE `sensor` (
+  `sensor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sensor_type` varchar(50) NOT NULL,
+  `installation_location` varchar(255) NOT NULL,
+  `collection_frequency` decimal(10,2) NOT NULL,
+  `transmission_protocol` varchar(20) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`sensor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tower` (
+  `tower_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tower_name` varchar(100) NOT NULL,
+  `location_description` varchar(255) DEFAULT NULL,
+  `latitude` decimal(10,6) DEFAULT NULL,
+  `longitude` decimal(10,6) DEFAULT NULL,
+  `installation_date` datetime DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`tower_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tower_sensor` (
+  `tower_sensor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tower_id` int(11) NOT NULL,
+  `sensor_id` int(11) NOT NULL,
+  `mount_position` varchar(100) DEFAULT NULL,
+  `installed_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`tower_sensor_id`),
+  CONSTRAINT `tower_sensor_ibfk_1` FOREIGN KEY (`tower_id`) REFERENCES `tower` (`tower_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `tower_sensor_ibfk_2` FOREIGN KEY (`sensor_id`) REFERENCES `sensor` (`sensor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `sensor_data` (
+  `data_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tower_sensor_id` int(11) NOT NULL,
+  `collected_at` datetime NOT NULL,
+  `displacement_value` decimal(10,4) DEFAULT NULL,
+  `wind_speed` decimal(10,4) DEFAULT NULL,
+  `wind_direction` decimal(10,4) DEFAULT NULL,
+  `acceleration_x` decimal(10,6) DEFAULT NULL,
+  `acceleration_y` decimal(10,6) DEFAULT NULL,
+  `acceleration_z` decimal(10,6) DEFAULT NULL,
+  `tilt_angle` decimal(10,4) DEFAULT NULL,
+  `raw_data` text DEFAULT NULL,
+  PRIMARY KEY (`data_id`),
+  CONSTRAINT `sensor_data_ibfk_1` FOREIGN KEY (`tower_sensor_id`) REFERENCES `tower_sensor` (`tower_sensor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `theoretical_displacement_model` (
+  `model_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tower_id` int(11) NOT NULL,
+  `regulation_reference` varchar(255) DEFAULT NULL,
+  `wind_speed_threshold` decimal(10,4) DEFAULT NULL,
+  `max_displacement` decimal(10,4) DEFAULT NULL,
+  `model_parameters` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`model_id`),
+  CONSTRAINT `theoretical_displacement_model_ibfk_1` FOREIGN KEY (`tower_id`) REFERENCES `tower` (`tower_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `monitoring_point` (
+  `point_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tower_id` int(11) NOT NULL,
+  `point_name` varchar(100) NOT NULL,
+  `point_description` varchar(255) DEFAULT NULL,
+  `height` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`point_id`),
+  CONSTRAINT `monitoring_point_ibfk_1` FOREIGN KEY (`tower_id`) REFERENCES `tower` (`tower_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `displacement_analysis` (
+  `analysis_id` int(11) NOT NULL AUTO_INCREMENT,
+  `point_id` int(11) NOT NULL,
+  `model_id` int(11) NOT NULL,
+  `analysis_time` datetime NOT NULL,
+  `measured_displacement` decimal(10,4) DEFAULT NULL,
+  `theoretical_displacement` decimal(10,4) DEFAULT NULL,
+  `wind_speed_displacement` decimal(10,4) DEFAULT NULL,
+  `deviation` decimal(10,4) DEFAULT NULL,
+  `exceeds_threshold` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`analysis_id`),
+  CONSTRAINT `displacement_analysis_ibfk_1` FOREIGN KEY (`point_id`) REFERENCES `monitoring_point` (`point_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `displacement_analysis_ibfk_2` FOREIGN KEY (`model_id`) REFERENCES `theoretical_displacement_model` (`model_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `statistical_graph` (
+  `graph_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tower_id` int(11) NOT NULL,
+  `graph_type` varchar(50) NOT NULL,
+  `graph_title` varchar(255) DEFAULT NULL,
+  `generated_at` datetime NOT NULL,
+  `file_path` varchar(500) DEFAULT NULL,
+  `time_range_start` datetime DEFAULT NULL,
+  `time_range_end` datetime DEFAULT NULL,
+  PRIMARY KEY (`graph_id`),
+  CONSTRAINT `statistical_graph_ibfk_1` FOREIGN KEY (`tower_id`) REFERENCES `tower` (`tower_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `env_sensor` (
+  `env_sensor_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tower_id` int(11) NOT NULL,
+  `sensor_model` varchar(50) NOT NULL DEFAULT 'HDC1080',
+  `installation_location` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `installed_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`env_sensor_id`),
+  CONSTRAINT `env_sensor_ibfk_1` FOREIGN KEY (`tower_id`) REFERENCES `tower` (`tower_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `env_data` (
+  `env_data_id` int(11) NOT NULL AUTO_INCREMENT,
+  `env_sensor_id` int(11) NOT NULL,
+  `collected_at` datetime NOT NULL,
+  `temperature` decimal(6,2) DEFAULT NULL,
+  `humidity` decimal(6,2) DEFAULT NULL,
+  PRIMARY KEY (`env_data_id`),
+  CONSTRAINT `env_data_ibfk_1` FOREIGN KEY (`env_sensor_id`) REFERENCES `env_sensor` (`env_sensor_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_personnel` (
+  `employee_id` varchar(20) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `contact_info` varchar(100) DEFAULT NULL,
+  `responsible_area` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alarm` (
+  `alarm_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tower_id` int(11) NOT NULL,
+  `alarm_type` varchar(50) NOT NULL,
+  `alarm_level` varchar(20) DEFAULT NULL,
+  `alarm_message` text DEFAULT NULL,
+  `triggered_at` datetime NOT NULL,
+  `is_resolved` tinyint(1) NOT NULL DEFAULT 0,
+  `resolved_at` datetime DEFAULT NULL,
+  `source_data_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`alarm_id`),
+  CONSTRAINT `alarm_ibfk_1` FOREIGN KEY (`tower_id`) REFERENCES `tower` (`tower_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `alarm_notification` (
+  `notification_id` int(11) NOT NULL AUTO_INCREMENT,
+  `alarm_id` int(11) NOT NULL,
+  `employee_id` varchar(20) NOT NULL,
+  `notified_at` datetime NOT NULL,
+  `notification_method` varchar(50) DEFAULT NULL,
+  `is_acknowledged` tinyint(1) NOT NULL DEFAULT 0,
+  `acknowledged_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`notification_id`),
+  CONSTRAINT `alarm_notification_ibfk_1` FOREIGN KEY (`alarm_id`) REFERENCES `alarm` (`alarm_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `alarm_notification_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `maintenance_personnel` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `fault_processing_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `alarm_id` int(11) NOT NULL,
+  `employee_id` varchar(20) NOT NULL,
+  `processing_description` text DEFAULT NULL,
+  `processed_at` datetime NOT NULL,
+  `result` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  CONSTRAINT `fault_processing_record_ibfk_1` FOREIGN KEY (`alarm_id`) REFERENCES `alarm` (`alarm_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fault_processing_record_ibfk_2` FOREIGN KEY (`employee_id`) REFERENCES `maintenance_personnel` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

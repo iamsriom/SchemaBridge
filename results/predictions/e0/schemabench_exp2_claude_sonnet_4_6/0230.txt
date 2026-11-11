@@ -1,0 +1,56 @@
+-- Schema for database: schemabench_0230
+
+CREATE TABLE `stadium` (
+  `stadium_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `capacity` int(11) DEFAULT NULL,
+  `condition` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`stadium_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `team` (
+  `team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `team_name` varchar(255) NOT NULL,
+  `num_players` int(11) DEFAULT NULL,
+  `manager` varchar(255) DEFAULT NULL,
+  `captain_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `player` (
+  `player_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `age` int(11) DEFAULT NULL,
+  `team_id` int(11) DEFAULT NULL,
+  `team_number` int(11) DEFAULT NULL,
+  `injury_status` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`player_id`),
+  CONSTRAINT `player_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `team` (`team_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+ALTER TABLE `team` ADD CONSTRAINT `team_ibfk_1` FOREIGN KEY (`captain_id`) REFERENCES `player` (`player_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+CREATE TABLE `match` (
+  `match_id` int(11) NOT NULL AUTO_INCREMENT,
+  `home_team_id` int(11) DEFAULT NULL,
+  `away_team_id` int(11) DEFAULT NULL,
+  `stadium_id` int(11) DEFAULT NULL,
+  `match_date` datetime DEFAULT NULL,
+  `home_score` int(11) DEFAULT NULL,
+  `away_score` int(11) DEFAULT NULL,
+  `referee` varchar(255) DEFAULT NULL,
+  `linesman_1` varchar(255) DEFAULT NULL,
+  `linesman_2` varchar(255) DEFAULT NULL,
+  `man_of_the_match_id` int(11) DEFAULT NULL,
+  `home_captain_id` int(11) DEFAULT NULL,
+  `away_captain_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`match_id`),
+  CONSTRAINT `match_ibfk_1` FOREIGN KEY (`home_team_id`) REFERENCES `team` (`team_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `match_ibfk_2` FOREIGN KEY (`away_team_id`) REFERENCES `team` (`team_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `match_ibfk_3` FOREIGN KEY (`stadium_id`) REFERENCES `stadium` (`stadium_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `match_ibfk_4` FOREIGN KEY (`man_of_the_match_id`) REFERENCES `player` (`player_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `match_ibfk_5` FOREIGN KEY (`home_captain_id`) REFERENCES `player` (`player_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `match_ibfk_6` FOREIGN KEY (`away_captain_id`) REFERENCES `player` (`player_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

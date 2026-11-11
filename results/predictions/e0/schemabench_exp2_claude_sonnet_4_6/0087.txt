@@ -1,0 +1,63 @@
+-- Schema for database: schemabench_0087
+
+CREATE TABLE `customers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `billable_id` int(11) NOT NULL,
+  `billable_type` varchar(255) NOT NULL,
+  `paddle_id` varchar(255) DEFAULT NULL,
+  `paddle_email` varchar(255) DEFAULT NULL,
+  `card_brand` varchar(255) DEFAULT NULL,
+  `card_last_four` char(4) DEFAULT NULL,
+  `trial_ends_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `paddle_id` varchar(255) NOT NULL,
+  `paddle_status` varchar(255) NOT NULL,
+  `paddle_plan` varchar(255) DEFAULT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `trial_ends_at` datetime DEFAULT NULL,
+  `paused_from` datetime DEFAULT NULL,
+  `ends_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `subscriptions_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `subscription_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `subscription_id` int(11) NOT NULL,
+  `paddle_product` varchar(255) NOT NULL,
+  `paddle_price` varchar(255) NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `subscription_items_ibfk_1` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `receipts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `paddle_subscription_id` varchar(255) DEFAULT NULL,
+  `checkout_id` varchar(255) NOT NULL,
+  `order_id` varchar(255) NOT NULL,
+  `amount` varchar(255) NOT NULL,
+  `tax` varchar(255) NOT NULL,
+  `currency` char(3) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `receipt_url` varchar(255) DEFAULT NULL,
+  `paid_at` datetime NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `receipts_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

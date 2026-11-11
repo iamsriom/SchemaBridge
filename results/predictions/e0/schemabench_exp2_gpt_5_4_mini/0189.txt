@@ -1,0 +1,76 @@
+-- Schema for database: schemabench_0189
+CREATE TABLE `artists` (
+  `artist_id` int(11) NOT NULL AUTO_INCREMENT,
+  `artist_name` varchar(255) NOT NULL,
+  `country` varchar(100) DEFAULT NULL,
+  `active_start_year` int(11) DEFAULT NULL,
+  `active_end_year` int(11) DEFAULT NULL,
+  PRIMARY KEY (`artist_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `albums` (
+  `album_id` int(11) NOT NULL AUTO_INCREMENT,
+  `artist_id` int(11) NOT NULL,
+  `album_name` varchar(255) NOT NULL,
+  `release_date` date DEFAULT NULL,
+  `label_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`album_id`),
+  KEY `artist_id` (`artist_id`),
+  CONSTRAINT `albums_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`artist_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `songs` (
+  `song_id` int(11) NOT NULL AUTO_INCREMENT,
+  `artist_id` int(11) NOT NULL,
+  `album_id` int(11) DEFAULT NULL,
+  `song_title` varchar(255) NOT NULL,
+  `release_date` date DEFAULT NULL,
+  `duration_ms` int(11) DEFAULT NULL,
+  PRIMARY KEY (`song_id`),
+  KEY `artist_id` (`artist_id`),
+  KEY `album_id` (`album_id`),
+  CONSTRAINT `songs_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`artist_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `songs_ibfk_2` FOREIGN KEY (`album_id`) REFERENCES `albums` (`album_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `billboard_charts` (
+  `chart_entry_id` int(11) NOT NULL AUTO_INCREMENT,
+  `song_id` int(11) NOT NULL,
+  `chart_date` date NOT NULL,
+  `chart_name` varchar(100) NOT NULL,
+  `rank_position` int(11) NOT NULL,
+  `weeks_on_chart` int(11) DEFAULT NULL,
+  PRIMARY KEY (`chart_entry_id`),
+  KEY `song_id` (`song_id`),
+  CONSTRAINT `billboard_charts_ibfk_1` FOREIGN KEY (`song_id`) REFERENCES `songs` (`song_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `spotify_tracks` (
+  `spotify_track_id` int(11) NOT NULL AUTO_INCREMENT,
+  `song_id` int(11) NOT NULL,
+  `spotify_track_uri` varchar(255) DEFAULT NULL,
+  `popularity` int(11) DEFAULT NULL,
+  `danceability` decimal(5,4) DEFAULT NULL,
+  `energy` decimal(5,4) DEFAULT NULL,
+  `key_signature` int(11) DEFAULT NULL,
+  `loudness` decimal(6,2) DEFAULT NULL,
+  `mode` int(11) DEFAULT NULL,
+  `speechiness` decimal(5,4) DEFAULT NULL,
+  `acousticness` decimal(5,4) DEFAULT NULL,
+  `instrumentalness` decimal(5,4) DEFAULT NULL,
+  `liveness` decimal(5,4) DEFAULT NULL,
+  `valence` decimal(5,4) DEFAULT NULL,
+  `tempo` decimal(7,3) DEFAULT NULL,
+  PRIMARY KEY (`spotify_track_id`),
+  UNIQUE KEY `spotify_track_uri` (`spotify_track_uri`),
+  KEY `song_id` (`song_id`),
+  CONSTRAINT `spotify_tracks_ibfk_1` FOREIGN KEY (`song_id`) REFERENCES `songs` (`song_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `dashboard_reports` (
+  `report_id` int(11) NOT NULL AUTO_INCREMENT,
+  `report_name` varchar(255) NOT NULL,
+  `report_description` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`report_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,111 @@
+-- Schema for database: rschema_0118
+
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_name` varchar(255) NOT NULL,
+  `department_head_id` int(11) DEFAULT NULL,
+  `department_responsibilities` text DEFAULT NULL,
+  `department_location` varchar(255) DEFAULT NULL,
+  `total_personnel` int(11) DEFAULT NULL,
+  PRIMARY KEY (`department_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `contact_phone` varchar(20) DEFAULT NULL,
+  `contact_email` varchar(255) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  `entry_time` datetime DEFAULT NULL,
+  `salary` decimal(10,2) DEFAULT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`employee_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+ALTER TABLE `department` ADD CONSTRAINT `department_ibfk_1` FOREIGN KEY (`department_head_id`) REFERENCES `employee` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+CREATE TABLE `employee_department_history` (
+  `history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `from_department_id` int(11) DEFAULT NULL,
+  `to_department_id` int(11) DEFAULT NULL,
+  `transfer_time` datetime NOT NULL,
+  `remark` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`history_id`),
+  CONSTRAINT `employee_department_history_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_department_history_ibfk_2` FOREIGN KEY (`from_department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `employee_department_history_ibfk_3` FOREIGN KEY (`to_department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `attendance` (
+  `attendance_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `punch_time` datetime NOT NULL,
+  `punch_type` varchar(50) NOT NULL,
+  PRIMARY KEY (`attendance_id`),
+  CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `leave_record` (
+  `leave_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `leave_start_time` datetime NOT NULL,
+  `leave_end_time` datetime DEFAULT NULL,
+  `leave_type` varchar(100) NOT NULL,
+  `reason` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`leave_id`),
+  CONSTRAINT `leave_record_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `overtime_record` (
+  `overtime_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `overtime_start_time` datetime NOT NULL,
+  `overtime_end_time` datetime DEFAULT NULL,
+  `overtime_type` varchar(100) NOT NULL,
+  `remark` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`overtime_id`),
+  CONSTRAINT `overtime_record_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `role` (
+  `role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_name` varchar(255) NOT NULL,
+  `role_description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `employee_role` (
+  `employee_role_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  PRIMARY KEY (`employee_role_id`),
+  CONSTRAINT `employee_role_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_role_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `enterprise_goal` (
+  `goal_id` int(11) NOT NULL AUTO_INCREMENT,
+  `goal_name` varchar(255) NOT NULL,
+  `goal_description` text DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`goal_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `performance_appraisal` (
+  `appraisal_id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) NOT NULL,
+  `appraisal_date` date NOT NULL,
+  `score` decimal(5,2) DEFAULT NULL,
+  `comments` text DEFAULT NULL,
+  `appraiser_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`appraisal_id`),
+  CONSTRAINT `performance_appraisal_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `performance_appraisal_ibfk_2` FOREIGN KEY (`appraiser_id`) REFERENCES `employee` (`employee_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

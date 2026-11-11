@@ -1,0 +1,59 @@
+-- Schema for database: rschema_0105
+CREATE TABLE `user_profile` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account` varchar(100) NOT NULL,
+  `nickname` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `gender` char(1) DEFAULT NULL,
+  `registration_time` datetime NOT NULL,
+  `birthday` date DEFAULT NULL,
+  `privacy_setting` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uk_user_profile_account` (`account`),
+  UNIQUE KEY `uk_user_profile_phone` (`phone`),
+  UNIQUE KEY `uk_user_profile_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `post` (
+  `post_id` int(11) NOT NULL AUTO_INCREMENT,
+  `publisher_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `media_url` varchar(500) DEFAULT NULL,
+  `publish_time` datetime NOT NULL,
+  `like_count` int(11) NOT NULL DEFAULT '0',
+  `comment_count` int(11) NOT NULL DEFAULT '0',
+  `favorite_count` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`post_id`),
+  KEY `idx_post_publisher_id` (`publisher_id`),
+  CONSTRAINT `post_ibfk_1` FOREIGN KEY (`publisher_id`) REFERENCES `user_profile` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `contact` (
+  `contact_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `contact_user_id` int(11) NOT NULL,
+  `relationship_type` varchar(50) NOT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  `added_time` datetime NOT NULL,
+  PRIMARY KEY (`contact_id`),
+  UNIQUE KEY `uk_contact_user_pair` (`user_id`,`contact_user_id`),
+  KEY `idx_contact_contact_user_id` (`contact_user_id`),
+  CONSTRAINT `contact_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_profile` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `contact_ibfk_2` FOREIGN KEY (`contact_user_id`) REFERENCES `user_profile` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `social_activity` (
+  `activity_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `post_id` int(11) NOT NULL,
+  `interaction_type` varchar(20) NOT NULL,
+  `interaction_time` datetime NOT NULL,
+  `comment_content` text DEFAULT NULL,
+  PRIMARY KEY (`activity_id`),
+  KEY `idx_social_activity_user_id` (`user_id`),
+  KEY `idx_social_activity_post_id` (`post_id`),
+  CONSTRAINT `social_activity_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_profile` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `social_activity_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `post` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

@@ -1,0 +1,46 @@
+-- Schema for database: rschema_0468
+
+CREATE TABLE `credit_card_type` (
+  `type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `customer` (
+  `customer_id` varchar(50) NOT NULL,
+  `customer_name` varchar(100) NOT NULL,
+  `card_type_id` int(11) NOT NULL,
+  `credit_card_number` varchar(20) NOT NULL,
+  `validity_period` date NOT NULL,
+  `credit_limit` decimal(15,2) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`customer_id`),
+  UNIQUE KEY `credit_card_number` (`credit_card_number`),
+  CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`card_type_id`) REFERENCES `credit_card_type` (`type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `credit_card_application` (
+  `application_id` varchar(50) NOT NULL,
+  `customer_id` varchar(50) DEFAULT NULL,
+  `card_type_id` int(11) NOT NULL,
+  `applicant_name` varchar(100) NOT NULL,
+  `id_number` varchar(30) NOT NULL,
+  `submitted_at` datetime NOT NULL,
+  `application_result` varchar(20) NOT NULL DEFAULT 'pending review',
+  PRIMARY KEY (`application_id`),
+  CONSTRAINT `credit_card_application_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `credit_card_application_ibfk_2` FOREIGN KEY (`card_type_id`) REFERENCES `credit_card_type` (`type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `transaction` (
+  `transaction_id` varchar(50) NOT NULL,
+  `customer_id` varchar(50) NOT NULL,
+  `transaction_time` datetime NOT NULL,
+  `transaction_amount` decimal(15,2) NOT NULL,
+  `transaction_type` varchar(50) NOT NULL,
+  `transaction_description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`transaction_id`),
+  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

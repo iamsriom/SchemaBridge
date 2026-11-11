@@ -1,0 +1,85 @@
+-- Schema for database: rschema_0125
+
+CREATE TABLE `language` (
+  `language_id` int(11) NOT NULL AUTO_INCREMENT,
+  `language_code` varchar(10) NOT NULL,
+  `language_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`language_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `page` (
+  `page_id` int(11) NOT NULL AUTO_INCREMENT,
+  `language_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `is_editable` tinyint(1) NOT NULL DEFAULT 1,
+  `is_visible` tinyint(1) NOT NULL DEFAULT 1,
+  `current_version_id` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`page_id`),
+  CONSTRAINT `page_ibfk_1` FOREIGN KEY (`language_id`) REFERENCES `language` (`language_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `page_version` (
+  `version_id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_id` int(11) NOT NULL,
+  `version_number` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `comment` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`version_id`),
+  CONSTRAINT `page_version_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `page` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `page_version_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+ALTER TABLE `page` ADD CONSTRAINT `page_ibfk_2` FOREIGN KEY (`current_version_id`) REFERENCES `page_version` (`version_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+CREATE TABLE `page_image` (
+  `image_id` int(11) NOT NULL AUTO_INCREMENT,
+  `version_id` int(11) NOT NULL,
+  `image_url` varchar(500) NOT NULL,
+  `image_name` varchar(255) DEFAULT NULL,
+  `uploaded_at` datetime NOT NULL,
+  `uploaded_by` int(11) NOT NULL,
+  PRIMARY KEY (`image_id`),
+  CONSTRAINT `page_image_ibfk_1` FOREIGN KEY (`version_id`) REFERENCES `page_version` (`version_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `page_image_ibfk_2` FOREIGN KEY (`uploaded_by`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `page_comment` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `parent_comment_id` int(11) DEFAULT NULL,
+  `content` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`comment_id`),
+  CONSTRAINT `page_comment_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `page` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `page_comment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `page_comment_ibfk_3` FOREIGN KEY (`parent_comment_id`) REFERENCES `page_comment` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `page_history` (
+  `history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_id` int(11) NOT NULL,
+  `version_id` int(11) NOT NULL,
+  `action` varchar(100) NOT NULL,
+  `performed_by` int(11) NOT NULL,
+  `performed_at` datetime NOT NULL,
+  `notes` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`history_id`),
+  CONSTRAINT `page_history_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `page` (`page_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `page_history_ibfk_2` FOREIGN KEY (`version_id`) REFERENCES `page_version` (`version_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `page_history_ibfk_3` FOREIGN KEY (`performed_by`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

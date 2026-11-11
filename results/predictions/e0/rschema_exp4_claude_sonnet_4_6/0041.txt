@@ -1,0 +1,50 @@
+-- Schema for database: rschema_0041
+
+CREATE TABLE `property_manager` (
+  `manager_id` int(11) NOT NULL AUTO_INCREMENT,
+  `manager_name` varchar(255) NOT NULL,
+  `phone` varchar(50) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`manager_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `community` (
+  `community_id` int(11) NOT NULL AUTO_INCREMENT,
+  `community_name` varchar(255) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `manager_id` int(11) NOT NULL,
+  PRIMARY KEY (`community_id`),
+  CONSTRAINT `community_ibfk_1` FOREIGN KEY (`manager_id`) REFERENCES `property_manager` (`manager_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `resident` (
+  `resident_id` int(11) NOT NULL AUTO_INCREMENT,
+  `resident_name` varchar(255) NOT NULL,
+  `phone` varchar(50) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `building_number` varchar(100) NOT NULL,
+  `community_id` int(11) NOT NULL,
+  PRIMARY KEY (`resident_id`),
+  CONSTRAINT `resident_ibfk_1` FOREIGN KEY (`community_id`) REFERENCES `community` (`community_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_worker` (
+  `worker_id` int(11) NOT NULL AUTO_INCREMENT,
+  `worker_name` varchar(255) NOT NULL,
+  `phone` varchar(50) NOT NULL,
+  PRIMARY KEY (`worker_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `maintenance_order` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `community_id` int(11) NOT NULL,
+  `resident_id` int(11) NOT NULL,
+  `maintenance_date` datetime NOT NULL,
+  `maintenance_content` varchar(1000) NOT NULL,
+  `maintenance_cost` decimal(10,2) NOT NULL,
+  `worker_id` int(11) NOT NULL,
+  PRIMARY KEY (`order_id`),
+  CONSTRAINT `maintenance_order_ibfk_1` FOREIGN KEY (`community_id`) REFERENCES `community` (`community_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_order_ibfk_2` FOREIGN KEY (`resident_id`) REFERENCES `resident` (`resident_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `maintenance_order_ibfk_3` FOREIGN KEY (`worker_id`) REFERENCES `maintenance_worker` (`worker_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

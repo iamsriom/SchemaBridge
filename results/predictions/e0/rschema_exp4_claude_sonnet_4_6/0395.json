@@ -1,0 +1,30 @@
+{
+  "text_number": 395,
+  "id": "67552f0a13602ec03b41a9a2",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0395",
+  "question": "This is a student meal card management system for universities, mainly used for managing students' consumption behavior on campus, including scenarios such as dining in cafeterias and shopping in supermarkets, while also handling daily meal card management tasks. For student information management, the system maintains students' basic information, including student ID, name, department, etc., and records students' contact information for easy communication. For meal card recharge and consumption, students can recharge their meal cards at designated locations, and the system updates and displays card balances in real-time, while supporting card payments at locations such as cafeterias and supermarkets. For consumption record management, the system records detailed information for each transaction, including time, amount, location, etc., supports querying historical consumption records, and performs consumption data statistics and analysis.",
+  "ddl": "-- Schema for database: rschema_0395\n\nCREATE TABLE `department` (\n  `department_id` int(11) NOT NULL AUTO_INCREMENT,\n  `department_name` varchar(100) NOT NULL,\n  `department_code` varchar(20) DEFAULT NULL,\n  `created_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`department_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `student` (\n  `student_id` varchar(20) NOT NULL,\n  `name` varchar(50) NOT NULL,\n  `department_id` int(11) DEFAULT NULL,\n  `gender` char(1) DEFAULT NULL,\n  `birth_date` datetime DEFAULT NULL,\n  `enrollment_year` int(11) DEFAULT NULL,\n  `email` varchar(100) DEFAULT NULL,\n  `phone` varchar(20) DEFAULT NULL,\n  `address` varchar(255) DEFAULT NULL,\n  `created_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`student_id`),\n  CONSTRAINT `student_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `meal_card` (\n  `card_id` varchar(20) NOT NULL,\n  `student_id` varchar(20) NOT NULL,\n  `balance` decimal(10,2) NOT NULL DEFAULT '0.00',\n  `status` varchar(20) NOT NULL DEFAULT 'active',\n  `issue_date` datetime DEFAULT NULL,\n  `expiry_date` datetime DEFAULT NULL,\n  `last_updated` datetime DEFAULT NULL,\n  PRIMARY KEY (`card_id`),\n  CONSTRAINT `meal_card_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `location` (\n  `location_id` int(11) NOT NULL AUTO_INCREMENT,\n  `location_name` varchar(100) NOT NULL,\n  `location_type` varchar(50) NOT NULL,\n  `building` varchar(100) DEFAULT NULL,\n  `floor` int(11) DEFAULT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`location_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `recharge_record` (\n  `recharge_id` int(11) NOT NULL AUTO_INCREMENT,\n  `card_id` varchar(20) NOT NULL,\n  `student_id` varchar(20) NOT NULL,\n  `amount` decimal(10,2) NOT NULL,\n  `balance_before` decimal(10,2) NOT NULL,\n  `balance_after` decimal(10,2) NOT NULL,\n  `recharge_time` datetime NOT NULL,\n  `location_id` int(11) DEFAULT NULL,\n  `operator` varchar(50) DEFAULT NULL,\n  `remark` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`recharge_id`),\n  CONSTRAINT `recharge_record_ibfk_1` FOREIGN KEY (`card_id`) REFERENCES `meal_card` (`card_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `recharge_record_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `recharge_record_ibfk_3` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `consumption_record` (\n  `consumption_id` int(11) NOT NULL AUTO_INCREMENT,\n  `card_id` varchar(20) NOT NULL,\n  `student_id` varchar(20) NOT NULL,\n  `amount` decimal(10,2) NOT NULL,\n  `balance_before` decimal(10,2) NOT NULL,\n  `balance_after` decimal(10,2) NOT NULL,\n  `consumption_time` datetime NOT NULL,\n  `location_id` int(11) NOT NULL,\n  `consumption_type` varchar(50) DEFAULT NULL,\n  `description` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`consumption_id`),\n  CONSTRAINT `consumption_record_ibfk_1` FOREIGN KEY (`card_id`) REFERENCES `meal_card` (`card_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `consumption_record_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `consumption_record_ibfk_3` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `consumption_statistics` (\n  `stat_id` int(11) NOT NULL AUTO_INCREMENT,\n  `student_id` varchar(20) NOT NULL,\n  `stat_date` datetime NOT NULL,\n  `stat_period` varchar(20) NOT NULL,\n  `total_amount` decimal(10,2) NOT NULL DEFAULT '0.00',\n  `transaction_count` int(11) NOT NULL DEFAULT '0',\n  `location_id` int(11) DEFAULT NULL,\n  `created_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`stat_id`),\n  CONSTRAINT `consumption_statistics_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `consumption_statistics_ibfk_2` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "department",
+      "student",
+      "meal_card",
+      "location",
+      "recharge_record",
+      "consumption_record",
+      "consumption_statistics"
+    ],
+    "columns_by_table": {
+      "department": [],
+      "student": [],
+      "meal_card": [],
+      "location": [],
+      "recharge_record": [],
+      "consumption_record": [],
+      "consumption_statistics": []
+    }
+  }
+}

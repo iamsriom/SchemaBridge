@@ -1,0 +1,40 @@
+-- Schema for database: schemabench_0232
+CREATE TABLE `ocean_region` (
+  `ocean_region_id` int(11) NOT NULL AUTO_INCREMENT,
+  `region_name` varchar(255) NOT NULL,
+  `region_code` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`ocean_region_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `channel_type` (
+  `channel_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`channel_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `channel_name` (
+  `channel_name_id` int(11) NOT NULL AUTO_INCREMENT,
+  `channel_type_id` int(11) NOT NULL,
+  `ocean_region_id` int(11) DEFAULT NULL,
+  `channel_name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`channel_name_id`),
+  KEY `channel_name_ibfk_1` (`channel_type_id`),
+  KEY `channel_name_ibfk_2` (`ocean_region_id`),
+  CONSTRAINT `channel_name_ibfk_1` FOREIGN KEY (`channel_type_id`) REFERENCES `channel_type` (`channel_type_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `channel_name_ibfk_2` FOREIGN KEY (`ocean_region_id`) REFERENCES `ocean_region` (`ocean_region_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `communication_log` (
+  `communication_log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `channel_name_id` int(11) NOT NULL,
+  `log_datetime` datetime NOT NULL,
+  `bto` decimal(10,3) DEFAULT NULL,
+  `bfo` decimal(10,3) DEFAULT NULL,
+  `raw_message` text DEFAULT NULL,
+  `summary_text` text DEFAULT NULL,
+  PRIMARY KEY (`communication_log_id`),
+  KEY `communication_log_ibfk_1` (`channel_name_id`),
+  CONSTRAINT `communication_log_ibfk_1` FOREIGN KEY (`channel_name_id`) REFERENCES `channel_name` (`channel_name_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

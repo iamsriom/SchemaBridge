@@ -1,0 +1,48 @@
+-- Schema for database: rschema_0461
+CREATE TABLE `products` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `stock_quantity` int(11) NOT NULL,
+  `unit_of_measurement` varchar(50) NOT NULL,
+  `category` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `storage_location` varchar(255) NOT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `delivery_personnel` (
+  `delivery_personnel_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone` varchar(20) NOT NULL,
+  `gender` varchar(10) NOT NULL,
+  `position` varchar(100) NOT NULL,
+  PRIMARY KEY (`delivery_personnel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `gender` varchar(10) NOT NULL,
+  `age` int(11) NOT NULL,
+  `phone` varchar(20) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  PRIMARY KEY (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `order_creation_time` datetime NOT NULL,
+  `product_quantity` int(11) NOT NULL,
+  `total_order_price` decimal(10,2) NOT NULL,
+  `delivery_address` varchar(255) NOT NULL,
+  `order_status` varchar(50) NOT NULL,
+  `estimated_delivery_time` datetime DEFAULT NULL,
+  `delivery_personnel_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `orders_ibfk_1` (`customer_id`),
+  KEY `orders_ibfk_2` (`product_id`),
+  KEY `orders_ibfk_3` (`delivery_personnel_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `orders_ibfk_3` FOREIGN KEY (`delivery_personnel_id`) REFERENCES `delivery_personnel` (`delivery_personnel_id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;

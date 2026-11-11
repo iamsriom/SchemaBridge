@@ -1,0 +1,32 @@
+{
+  "text_number": 239,
+  "id": "67552f0a13602ec03b41a9a8",
+  "llm": "sonnet46",
+  "model_id": "claude-sonnet-4-6",
+  "database": "rschema_0239",
+  "question": "The blog management system requires the recording of information for both platform users and administrators, and allows users to publish articles, post comments, and reply to comments. The system must be able to distinguish between regular users and administrators, and store the status (such as pending review, reviewed) and publication time for each article, comment, and reply. The system shall support viewing the number of reads and likes on articles, and be capable of tracking which articles, comments, or replies a user has made at what times.",
+  "ddl": "-- Schema for database: rschema_0239\n\nCREATE TABLE `users` (\n  `user_id` int(11) NOT NULL AUTO_INCREMENT,\n  `username` varchar(255) NOT NULL,\n  `email` varchar(255) NOT NULL,\n  `password_hash` varchar(255) NOT NULL,\n  `role` varchar(50) NOT NULL DEFAULT 'user',\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`user_id`),\n  UNIQUE KEY `email` (`email`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `administrators` (\n  `admin_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `admin_level` int(11) NOT NULL DEFAULT 1,\n  `assigned_at` datetime NOT NULL,\n  PRIMARY KEY (`admin_id`),\n  UNIQUE KEY `user_id` (`user_id`),\n  CONSTRAINT `administrators_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `articles` (\n  `article_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `title` varchar(255) NOT NULL,\n  `content` text NOT NULL,\n  `status` varchar(50) NOT NULL DEFAULT 'pending_review',\n  `read_count` int(11) NOT NULL DEFAULT 0,\n  `like_count` int(11) NOT NULL DEFAULT 0,\n  `published_at` datetime DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`article_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `articles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `comments` (\n  `comment_id` int(11) NOT NULL AUTO_INCREMENT,\n  `article_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `content` text NOT NULL,\n  `status` varchar(50) NOT NULL DEFAULT 'pending_review',\n  `published_at` datetime DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`comment_id`),\n  KEY `article_id` (`article_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `replies` (\n  `reply_id` int(11) NOT NULL AUTO_INCREMENT,\n  `comment_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `content` text NOT NULL,\n  `status` varchar(50) NOT NULL DEFAULT 'pending_review',\n  `published_at` datetime DEFAULT NULL,\n  `created_at` datetime NOT NULL,\n  `updated_at` datetime DEFAULT NULL,\n  PRIMARY KEY (`reply_id`),\n  KEY `comment_id` (`comment_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `replies_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `replies_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `article_reads` (\n  `read_id` int(11) NOT NULL AUTO_INCREMENT,\n  `article_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `read_at` datetime NOT NULL,\n  PRIMARY KEY (`read_id`),\n  KEY `article_id` (`article_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `article_reads_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `article_reads_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `article_likes` (\n  `like_id` int(11) NOT NULL AUTO_INCREMENT,\n  `article_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `liked_at` datetime NOT NULL,\n  PRIMARY KEY (`like_id`),\n  UNIQUE KEY `article_user_unique` (`article_id`, `user_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `article_likes_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`article_id`) ON DELETE CASCADE ON UPDATE CASCADE,\n  CONSTRAINT `article_likes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;\n\nCREATE TABLE `user_activity_log` (\n  `log_id` int(11) NOT NULL AUTO_INCREMENT,\n  `user_id` int(11) NOT NULL,\n  `activity_type` varchar(50) NOT NULL,\n  `target_type` varchar(50) NOT NULL,\n  `target_id` int(11) NOT NULL,\n  `activity_at` datetime NOT NULL,\n  PRIMARY KEY (`log_id`),\n  KEY `user_id` (`user_id`),\n  CONSTRAINT `user_activity_log_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;",
+  "metadata": {
+    "database": "",
+    "tables": [
+      "users",
+      "administrators",
+      "articles",
+      "comments",
+      "replies",
+      "article_reads",
+      "article_likes",
+      "user_activity_log"
+    ],
+    "columns_by_table": {
+      "users": [],
+      "administrators": [],
+      "articles": [],
+      "comments": [],
+      "replies": [],
+      "article_reads": [],
+      "article_likes": [],
+      "user_activity_log": []
+    }
+  }
+}
