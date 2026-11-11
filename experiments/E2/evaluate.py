@@ -9,10 +9,20 @@ reconstructed schema (``NNNN.json`` with ``ddl`` / ``metadata``) is scored with
 * micro-F1 for Tables / Attributes / Domain / Entity / Referential (summed counts),
 * mean nGED (macro over schemas).
 
-Failed, missing, unreadable or empty reconstructions follow ``--fail-policy``:
-``score`` (default) -> ``empty_prediction_against_gold``: gold counts are kept, recreated/matched
-are 0 (so every F1 dimension takes the loss) and nGED = 1; ``skip`` drops them from all
-aggregates.  Files are written ONLY below ``--out-dir`` (git-ignored by default):
+Every reconstruction gets a ``status`` (``rio.ddl_outcome``; column ``status`` of ``per_schema.csv``):
+
+* ``ok``              non-empty reconstruction, scored with ``evaluate_schema_pair``;
+* ``valid_empty``     successful record (no error, ``ddl`` key present) with an empty / comment-only DDL
+                      for an EMPTY gold schema: scored through ``evaluate_schema_pair`` (nGED = 0), not failed;
+* ``incorrect_empty`` successful but empty DDL against a NON-empty gold: scored through
+                      ``evaluate_schema_pair`` as an empty prediction (natural nGED, not forced), not failed;
+* ``scored_failure``  failed / missing / unreadable / error / skipped reconstruction under ``--fail-policy
+                      score`` (default) -> ``empty_prediction_against_gold``: gold counts are kept,
+                      recreated/matched are 0 and nGED = 1;
+* ``skipped``         the same failures under ``--fail-policy skip``: dropped from all aggregates.
+
+A missing prediction file is never a valid empty schema.  Files are written ONLY below ``--out-dir``
+(git-ignored by default):
 
     <out-dir>/<dataset>_<prompt>_<describer>/metrics.json
     <out-dir>/<dataset>_<prompt>_<describer>/per_schema.csv
@@ -53,13 +63,16 @@ def evaluate_combo(dataset: str, describer: str, prompt: str, pred_dir: Path, *,
     aligned = rio.align_predictions(gold, rio.load_prediction_dir(pred_dir))
     items: list[dict] = []
     rows: list[dict] = []
-    n_failed = 0
+    n_failed = n_valid_empty = n_incorrect_empty = 0
     for rec, entry, align_reason in aligned:
         g_meta = metadata_from_ddl(rec.ddl, database=rec.database)
         tc = len(g_meta.get("tables") or [])
         cc = sum(len(v or []) for v in (g_meta.get("columns_by_table") or {}).values())
-        reason = align_reason or rio.ddl_failure(entry)
-        if reason is not None:
+        if align_reason is not None:
+            outcome, reason = "failed", align_reason
+        else:
+            outcome, reason = rio.ddl_outcome(entry, rec.ddl, g_meta, schema_id=rec.schema_id)
+        if outcome == "failed":
             n_failed += 1
             if fail_policy == "skip":
                 rows.append({"serial": rec.serial, "schema_id": rec.schema_id, "status": "skipped",
@@ -67,14 +80,26 @@ def evaluate_combo(dataset: str, describer: str, prompt: str, pred_dir: Path, *,
                 continue
             res = empty_prediction_against_gold(g_meta, rec.ddl, table_count=tc, column_count=cc,
                                                 failure_reason=reason)
-            status = "scored_empty"
+            res["normalized_graph_edit_distance"] = 1.0  # failure policy: nGED = 1 even for an empty gold
+            res["failed"] = True
+            status = "scored_failure"
+        elif outcome in ("valid_empty", "incorrect_empty"):
+            # A successful but empty reconstruction: scored naturally as an empty prediction against the
+            # gold (nGED 0 if the gold is empty too; whatever the evaluator yields otherwise -- not forced 1).
+            res = evaluate_schema_pair(g_meta, rec.ddl, {}, "", table_count=tc, column_count=cc)
+            res["failed"] = False
+            status = outcome
+            n_valid_empty += outcome == "valid_empty"
+            n_incorrect_empty += outcome == "incorrect_empty"
         else:
             res = evaluate_schema_pair(g_meta, rec.ddl, entry.get("metadata") or {}, entry["ddl"],
                                        table_count=tc, column_count=cc)
+            res["failed"] = False
             status = "ok"
         res["id"] = rec.schema_id
         items.append(res)
-        row = {"serial": rec.serial, "schema_id": rec.schema_id, "status": status, "failure_reason": reason or "",
+        row = {"serial": rec.serial, "schema_id": rec.schema_id, "status": status,
+               "failure_reason": (reason or "") if status != "valid_empty" else "",
                "nged": res["normalized_graph_edit_distance"]}
         for e in ELEMENTS:
             row.update({f"{e}_{k}": res[e][k] for k in ("gold", "recreated", "matched")})
@@ -89,6 +114,7 @@ def evaluate_combo(dataset: str, describer: str, prompt: str, pred_dir: Path, *,
         "constructor_prompt_sha256": pa.EXPECTED_SHA256["constructor"],
         "gold_source": "annotation_ddl (genuine DDL)" if dataset != "enterprise145" else "enterprise145 .sql files",
         "fail_policy": fail_policy, "n_gold": len(gold), "n_scored": len(items), "n_failed": n_failed,
+        "n_valid_empty": n_valid_empty, "n_incorrect_empty": n_incorrect_empty,
         "metrics": {"micro_f1": micro, "mean_nged": agg["mean_normalized_graph_edit_distance"]},
         "five_elements": agg["five_elements"], "exact_match_count": agg["exact_match_count"],
         "hallucination_micro": agg["mean_hallucination_rate_micro"], "pred_dir": str(pred_dir),

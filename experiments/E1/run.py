@@ -6,10 +6,11 @@
     python experiments/E1/run.py --dataset schemabench --model sonnet46 --prompt basic \\
         --execute --confirm-paid                                                                # PAID API
 
-Nothing is generated, downloaded or sent unless ``--execute`` is given; paid providers
-(``sonnet46`` -> Anthropic, ``gpt54mini`` -> OpenAI) additionally need ``--confirm-paid`` and an
-API key in ``ANTHROPIC_API_KEY`` / ``OPENAI_API_KEY`` (environment only; keys are never read
-from files, printed or stored).
+Dry-run is the default: nothing is generated, downloaded or sent unless ``--execute`` is given.
+Paid providers (``sonnet46`` -> Anthropic, ``gpt54mini`` -> OpenAI) are allowed but opt-in: they
+need BOTH ``--execute`` and ``--confirm-paid`` (they cost money) plus an API key in
+``ANTHROPIC_API_KEY`` / ``OPENAI_API_KEY`` (environment only; keys are never read from files,
+printed or stored).  Missing flag or key -> exit code 2 before any request is made.
 
 Output per schema (``NNNN`` = serial; for RSchema the 1-based position in the 518-record
 ``annotation.jsonl``, so serials are NOT contiguous for the 381 DDL-matched schemas):
@@ -43,8 +44,8 @@ MODEL_CHOICES = tuple(ic.DESCRIBER_KEYS) + ("all",)
 
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
-        description="E1 Schema2Text generation. Dry-run by default: use --execute to generate "
-        "(and --confirm-paid for sonnet46 / gpt54mini).",
+        description="E1 Schema2Text generation. Dry-run by default: use --execute to generate; paid "
+        "providers (sonnet46 / gpt54mini) need BOTH --execute and --confirm-paid plus an API key in the environment.",
     )
     ap.add_argument("--dataset", choices=rio.DATASET_CHOICES, required=True)
     ap.add_argument("--model", choices=MODEL_CHOICES, required=True)
@@ -74,7 +75,8 @@ def build_parser() -> argparse.ArgumentParser:
     mode.add_argument("--dry-run", action="store_true", help="default behaviour: no generation, no network")
     mode.add_argument("--execute", action="store_true", help="actually generate (required)")
     ap.add_argument("--confirm-paid", action="store_true",
-                    help="required with --execute for paid providers (sonnet46, gpt54mini)")
+                    help="required together with --execute for paid providers (sonnet46, gpt54mini); "
+                         "acknowledges that real, billed API calls are made")
     ap.add_argument("--write-plan", action="store_true",
                     help="dry-run only: write dry_run_plan.json (counts, hashes, sizes; no text) under --out-dir")
     return ap
@@ -218,11 +220,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     models = rio.expand(args.model, ic.DESCRIBER_KEYS)
     multi = len(datasets) * len(models) > 1
     paid = [m for m in models if ic.MODELS[m].paid]
-    if args.execute and paid:
+    if args.execute and paid and not args.confirm_paid:
         ap.error(
-            f"{', '.join(paid)}: paid API methods are disabled. "
-            "Use an open-weight model (codellama13b / llama31 / deepseek) with --execute, "
-            "or dry-run without --execute."
+            f"{', '.join(paid)}: paid API model(s) need BOTH --execute and --confirm-paid "
+            "(real, billed calls). Add --confirm-paid, use an open-weight model "
+            "(codellama13b / llama31 / deepseek), or dry-run without --execute."
         )
     if args.write_plan and args.execute:
         ap.error("--write-plan is a dry-run option")
@@ -250,16 +252,17 @@ def main(argv: Sequence[str] | None = None) -> int:
                     dry_run_one(d, m, args.prompt, args, dirs[(d, m)])
             return 0
         errors = 0
-        clients: dict[str, object] = {}
+        # build every client first: unconfirmed / key-less paid models fail before any request is made
+        clients: dict[str, object] = {
+            m: ic.get_client(m, dry_run=False, confirm_paid=args.confirm_paid,
+                             load_in_4bit=args.load_in_4bit, device_map=args.device, dtype=args.dtype)
+            for m in models
+        }
         for d in datasets:
             for m in models:
-                if m not in clients:
-                    clients[m] = ic.get_client(m, dry_run=False, confirm_paid=args.confirm_paid,
-                                               load_in_4bit=args.load_in_4bit, device_map=args.device,
-                                               dtype=args.dtype)
                 errors += execute_one(d, m, args.prompt, args, dirs[(d, m)], clients[m])
         return 1 if errors else 0
-    except (ic.ApiMethodsDisabled, ic.MissingApiKey) as e:
+    except (ic.PaidCallNotConfirmed, ic.MissingApiKey, ic.ApiMethodsDisabled) as e:
         print(f"error: {e}", file=sys.stderr)
         return 2
     except (ValueError, FileNotFoundError, KeyError) as e:

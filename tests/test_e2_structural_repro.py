@@ -90,7 +90,8 @@ def test_e2_evaluate_combo_policies(tmp_path):
     assert m["gold_source"].startswith("annotation_ddl")
     by_serial = {r["serial"]: r for r in rows}
     assert by_serial["0001"]["nged"] == 0.0
-    assert by_serial["0003"]["status"] == "scored_empty" and by_serial["0003"]["nged"] == 1.0
+    assert by_serial["0003"]["status"] == "scored_failure" and by_serial["0003"]["nged"] == 1.0
+    assert by_serial["0004"]["status"] == "scored_failure" and by_serial["0004"]["failure_reason"] == "error_field"
     assert by_serial["0003"]["tables_gold"] == 2 and by_serial["0003"]["tables_recreated"] == 0
     assert m["metrics"]["mean_nged"] == pytest.approx(2 / 3)
     assert set(m["metrics"]["micro_f1"]) == set(ELEMENTS)

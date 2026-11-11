@@ -15,12 +15,36 @@ Constructor prompt SHA-256: `392a396f7073bc015d206460055f7e3b8a3c94a21ed09c059bc
 ## Modes
 
 * **Offline (default)**: evaluate existing reconstructed `NNNN.json` (archived or local).
+* **Dry-run (default for `run.py`)**: validates every constructor payload; no API call, no key needed.
 * **Online (opt-in, PAID)**: `run.py --execute --confirm-paid` sends the E1 descriptions to GPT-4o-mini
-  (`OPENAI_API_KEY` from the environment). Without `--execute` the run is a dry-run that validates
-  every payload without any API call.
+  and works as documented; it needs BOTH flags and `OPENAI_API_KEY` in the environment (never read from
+  files, printed or stored; no keys ship with this repository). Calls are billed by OpenAI per token:
+  try `--limit 1` first; `--skip-existing` (default) never re-bills finished schemas.
 
-Failed / missing reconstructions (`--fail-policy score`, default): all five F1 dimensions keep the gold
-counts with recreated = matched = 0, and nGED = 1. `--fail-policy skip` drops them.
+## E1 -> E2 provenance (strict by default)
+
+Each E1 `NNNN.json` must prove it was produced by the requested `--describer-model` and `--prompt`:
+`id` = gold schema id, `llm` = describer key, `model_id` = that model's id, `prompt_style`
+(`schema2text1` / `schema2text2`) and `generation.prompt_sha256` = pinned hash (plus
+`generation.prompt_variant` when present), usable `nl_text`, no `error`. Anything else is treated as a
+missing description (error record, no API call) and is never relabelled. Duplicate schema ids and mixed
+prompt styles inside one E1 directory abort the run. `--allow-legacy-e1` accepts old files whose provenance
+fields are *missing* (with a recorded warning); *wrong* fields are always rejected. The validated provenance
+is written into each E2 record (`source_*` fields).
+
+## Empty schemas and statuses
+
+A reconstruction `{"ddl": "", "metadata": {...}}` is a valid answer, stored as a successful record.
+`evaluate.py` writes a `status` per schema:
+
+* `ok`: non-empty reconstruction, `evaluate_schema_pair`;
+* `valid_empty`: successful empty/comment-only DDL and the gold is empty too (nGED = 0, not a failure);
+* `incorrect_empty`: successful empty DDL but the gold is non-empty (natural nGED via `evaluate_schema_pair`, not a failure);
+* `scored_failure` (`--fail-policy score`, default): missing file / error / unparseable / id mismatch. All five F1
+  dimensions keep the gold counts with recreated = matched = 0, and nGED = 1;
+* `skipped` (`--fail-policy skip`): the same failures, dropped from every aggregate.
+
+A missing file is never a valid empty schema.
 
 ## Commands
 
@@ -30,6 +54,7 @@ python experiments/E2/run.py --dataset rschema --describer-model llama31 --promp
     --e1-pred-dir experiments/E1/outputs/rschema_detailed_llama31
 python experiments/E2/run.py --dataset rschema --describer-model llama31 --prompt detailed \
     --e1-pred-dir experiments/E1/outputs/rschema_detailed_llama31 --execute --confirm-paid
+# (old E1 files without provenance fields: add --allow-legacy-e1)
 
 # 2. offline evaluation
 python experiments/E2/evaluate.py --dataset rschema --describer-model llama31 --prompt detailed \

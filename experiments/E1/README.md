@@ -23,9 +23,15 @@ Prompt SHA-256 (verified on every load by `src/prompt_assets.py`):
 ## Modes
 
 * **Offline (default)**: score existing `NNNN.json` descriptions (archived or locally generated).
-* **Online (opt-in)**: `run.py --execute` generates descriptions. Open models run locally (GPU);
-  `sonnet46` / `gpt54mini` are paid and also need `--confirm-paid` plus `ANTHROPIC_API_KEY` /
-  `OPENAI_API_KEY` in the environment. Without `--execute` everything is a dry-run.
+* **Online (opt-in)**: `run.py --execute` generates descriptions. Open models run locally (GPU).
+  `sonnet46` / `gpt54mini` are paid APIs and work with BOTH `--execute --confirm-paid` plus
+  `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` in the environment (never read from files, printed or stored;
+  no keys ship with this repository). Billing is per token by the provider: start with `--limit 1`;
+  `--skip-existing` (default) never re-bills finished schemas. Without `--execute` everything is a free
+  dry-run; `--execute` for a paid model without `--confirm-paid`, or without the key, exits with code 2
+  before any request.
+* Every record carries the provenance E2 verifies: `llm`, `model_id`, `prompt_style` and
+  `generation.prompt_variant` / `prompt_sha256`.
 
 All generated files go to git-ignored locations (`experiments/E1/outputs/`, or any path outside the repo).
 

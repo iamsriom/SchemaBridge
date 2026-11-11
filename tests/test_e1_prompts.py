@@ -76,13 +76,28 @@ def test_constructor_request_and_role_guards():
         ic.build_request("llama31", task="schema2text", database="d", ddl=None, variant="basic")
 
 
-def test_paid_api_methods_are_disabled(monkeypatch):
+def test_paid_api_methods_are_opt_in(monkeypatch):
+    """Dry-run is free; paid needs confirm_paid, then a key from the environment (no SDK is touched here)."""
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-    assert isinstance(ic.get_client("sonnet46", dry_run=True), ic.DryRunClient)
-    with pytest.raises(ic.ApiMethodsDisabled):
-        ic.get_client("gpt54mini", dry_run=False, confirm_paid=False)
-    with pytest.raises(ic.ApiMethodsDisabled):
-        ic.get_client("gpt54mini", dry_run=False, confirm_paid=True)
-    with pytest.raises(ic.ApiMethodsDisabled):
-        ic.get_client("gpt4omini", dry_run=False, confirm_paid=True)
+    assert ic.API_METHODS_DISABLED is False
+    for key in ("sonnet46", "gpt54mini", "gpt4omini"):
+        assert isinstance(ic.get_client(key, dry_run=True), ic.DryRunClient)
+        with pytest.raises(ic.PaidCallNotConfirmed):
+            ic.get_client(key, dry_run=False, confirm_paid=False)
+        with pytest.raises(ic.MissingApiKey):
+            ic.get_client(key, dry_run=False, confirm_paid=True)
+
+
+def test_api_key_comes_from_environment_only(monkeypatch):
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    with pytest.raises(ic.MissingApiKey) as ei:
+        ic.require_api_key("openai")
+    assert "OPENAI_API_KEY" in str(ei.value)
+    monkeypatch.setenv("OPENAI_API_KEY", "   ")
+    with pytest.raises(ic.MissingApiKey):
+        ic.require_api_key("openai")
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-fake-for-test")
+    assert ic.require_api_key("openai") == "sk-fake-for-test"
+    with pytest.raises(ValueError):
+        ic.require_api_key("hf")

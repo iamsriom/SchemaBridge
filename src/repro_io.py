@@ -6,7 +6,8 @@ Contents
 * ``<dataset>_<prompt>_<model>`` run-directory naming used by every E1/E2 CLI,
 * prediction-directory loading and alignment against the gold records (by serial / schema id),
 * retry-with-backoff wrapper for rate limits,
-* constructor (E2) JSON response parsing,
+* constructor (E2) JSON response parsing (an explicit empty reconstruction is a valid answer),
+* empty-schema classification (``ddl_outcome``: ok / valid_empty / incorrect_empty / failed),
 * small CSV / JSON helpers.
 """
 
@@ -183,7 +184,11 @@ def nl_failure(entry: dict | None) -> str | None:
 
 
 def ddl_failure(entry: dict | None) -> str | None:
-    """Reason a reconstructed-schema entry is unusable, else ``None``."""
+    """Reason a reconstructed-schema entry is unusable, else ``None``.
+
+    Legacy helper: ANY empty ``ddl`` counts as a failure.  Prefer :func:`ddl_outcome`, which
+    separates a *valid empty* reconstruction (gold is empty too) from a failed one.
+    """
     if entry is None:
         return "missing"
     if entry.get("error") or entry.get("skipped"):
@@ -192,6 +197,107 @@ def ddl_failure(entry: dict | None) -> str | None:
     if not isinstance(ddl, str) or not ddl.strip():
         return "empty_ddl"
     return None
+
+
+# --------------------------------------------------------------------------- empty-schema handling
+
+OUTCOME_STATUSES = ("ok", "valid_empty", "incorrect_empty", "failed")
+
+def _meta_sizes(meta: dict | None) -> tuple[int, int]:
+    tables = (meta or {}).get("tables") or []
+    cols = (meta or {}).get("columns_by_table") or {}
+    n_cols = sum(len(v or []) for v in cols.values()) if isinstance(cols, dict) else 0
+    return (len(tables) if isinstance(tables, (list, tuple)) else 0), n_cols
+
+
+def _blank_or_comment_only(ddl: str | None) -> bool:
+    """True for ``''``, whitespace, or text that is nothing but SQL comments."""
+    if not isinstance(ddl, str) or not ddl.strip():
+        return True
+    from .schema_parser import _strip_comments  # lazy: keeps this module cheap to import
+
+    return not _strip_comments(ddl).strip().strip(";").strip()
+
+
+def gold_is_empty(ddl: str, meta: dict | None = None) -> bool:
+    """True if the gold schema has no tables and no columns.
+
+    Uses ``meta`` (``{"tables": [...], "columns_by_table": {...}}``) when given, else the
+    metadata parsed from ``ddl`` via :func:`src.schema_parser.metadata_from_ddl`.
+    """
+    if meta is None:
+        from .schema_parser import metadata_from_ddl
+
+        meta = metadata_from_ddl(ddl or "")
+    n_tables, n_cols = _meta_sizes(meta)
+    return n_tables == 0 and n_cols == 0
+
+
+def pred_is_structurally_empty(ddl: str, meta: dict | None = None) -> bool:
+    """True for an empty / comment-only / table-less reconstruction.
+
+    Empty means: ``ddl`` is blank, comment-only, or has no ``CREATE TABLE`` that parses into tables /
+    columns, AND (if ``meta`` is given) ``meta`` lists no tables / columns either.
+    """
+    if meta is not None and _meta_sizes(meta) != (0, 0):
+        return False
+    if _blank_or_comment_only(ddl):
+        return True
+    from .schema_parser import metadata_from_ddl
+
+    return _meta_sizes(metadata_from_ddl(ddl)) == (0, 0)
+
+
+def ddl_outcome(
+    entry: dict | None,
+    gold_ddl: str,
+    gold_meta: dict | None = None,
+    *,
+    schema_id: str | None = None,
+) -> tuple[str, str | None]:
+    """Classify a reconstructed-schema entry against its gold.  Returns ``(status, reason)``.
+
+    ``status``:
+
+    * ``failed``          missing / unreadable entry, ``error`` / ``skipped`` field, no ``ddl`` key,
+                          an id that does not match ``schema_id`` (if given), or non-comment text that
+                          parses to no schema.  Scored by the fail policy (nGED = 1 under ``score``).
+    * ``valid_empty``     a *successful* record (no error, ``ddl`` key present, id matches) whose DDL is
+                          empty / comment-only and whose gold is empty too (Case: genuinely empty schema).
+    * ``incorrect_empty`` a successful record with an empty DDL against a NON-empty gold.  It is
+                          evaluated as an empty prediction through ``evaluate_schema_pair`` (natural
+                          nGED), NOT through the forced-failure policy.
+    * ``ok``              a successful record with a non-empty reconstruction.
+
+    ``reason`` is ``None`` for ``ok``; otherwise a short code (``missing``, ``error_field``,
+    ``missing_ddl``, ``id_mismatch``, ``unparseable_ddl``, ``empty_gold_empty_pred``,
+    ``empty_prediction``).  A missing file is NEVER a valid empty reconstruction.
+    """
+    if not isinstance(entry, dict):
+        return "failed", "missing"
+    if entry.get("error") or entry.get("skipped"):
+        return "failed", "error_field"
+    ddl = entry.get("ddl")
+    if "ddl" not in entry or not isinstance(ddl, str):
+        return "failed", "missing_ddl"
+    if schema_id is not None and entry.get("id") is not None and str(entry["id"]) != str(schema_id):
+        return "failed", "id_mismatch"
+
+    meta = entry.get("metadata") if isinstance(entry.get("metadata"), dict) else None
+    if not pred_is_structurally_empty(ddl, meta):
+        return "ok", None
+
+    gold_empty = gold_is_empty(gold_ddl, gold_meta)
+    if not _blank_or_comment_only(ddl):
+        # text that is neither comments nor a schema: an unparseable answer, not an empty schema
+        if gold_empty:
+            return "failed", "unparseable_ddl"
+        return "incorrect_empty", "empty_prediction"
+    if schema_id is not None and entry.get("id") is None:
+        return "failed", "missing_id"  # no evidence tying this record to the schema
+    if gold_empty:
+        return "valid_empty", "empty_gold_empty_pred"
+    return "incorrect_empty", "empty_prediction"
 
 
 def _complete(path: Path, schema_id: str, failure: Callable[[dict | None], str | None]) -> bool:
@@ -208,8 +314,22 @@ def is_complete_nl_record(path: Path, schema_id: str) -> bool:
 
 
 def is_complete_ddl_record(path: Path, schema_id: str) -> bool:
-    """True if ``path`` is a readable JSON with a non-empty reconstructed ``ddl`` for ``schema_id``."""
-    return _complete(path, schema_id, ddl_failure)
+    """Resume check: True if ``path`` holds a finished reconstruction for ``schema_id``.
+
+    Complete = readable JSON object, no ``error`` / ``skipped`` field, ``id`` matches, AND either a
+    non-empty ``ddl`` or an explicitly recorded empty reconstruction (``ddl`` key present, possibly
+    ``""``, no error).  Missing files, unreadable JSON, error records and records without a ``ddl``
+    key are NOT complete (they are retried).
+    """
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return False
+    if not isinstance(data, dict) or data.get("error") or data.get("skipped"):
+        return False
+    if str(data.get("id") or "") != str(schema_id):
+        return False
+    return isinstance(data.get("ddl"), str)
 
 
 # --------------------------------------------------------------------------- retries
@@ -253,11 +373,17 @@ def generate_with_backoff(
 _FENCE_RE = re.compile(r"^```[a-zA-Z0-9_-]*\s*\n?(.*?)\n?```\s*$", re.DOTALL)
 
 
-def parse_constructor_response(text: str) -> tuple[dict | None, str | None]:
+def parse_constructor_response(text: str, allow_empty_ddl: bool = True) -> tuple[dict | None, str | None]:
     """Parse the constructor reply into ``{"ddl": str, "metadata": dict}``.
 
     Tolerates markdown fences and leading/trailing prose around the single JSON object.
     Returns ``(obj, None)`` or ``(None, reason)``.
+
+    ``allow_empty_ddl=True`` (default, used by E2): an explicit empty reconstruction
+    ``{"ddl": "", "metadata": {...}}`` (``ddl`` a string, ``metadata`` an object) is a SUCCESS with
+    ``ddl == ""`` -- a genuinely empty schema is a legitimate answer.  An empty ``ddl`` without a
+    ``metadata`` object is still ``missing_ddl`` (indistinguishable from a truncated reply).
+    With ``allow_empty_ddl=False`` any empty ``ddl`` is ``missing_ddl`` (legacy behaviour).
     """
     raw = (text or "").strip()
     if not raw:
@@ -278,9 +404,11 @@ def parse_constructor_response(text: str) -> tuple[dict | None, str | None]:
     if not isinstance(obj, dict):
         return None, "invalid_json"
     ddl = obj.get("ddl")
-    if not isinstance(ddl, str) or not ddl.strip():
-        return None, "missing_ddl"
     meta = obj.get("metadata")
+    if not isinstance(ddl, str):
+        return None, "missing_ddl"
+    if not ddl.strip() and not (allow_empty_ddl and isinstance(meta, dict)):
+        return None, "missing_ddl"
     return {"ddl": ddl.strip(), "metadata": meta if isinstance(meta, dict) else {}}, None
 
 
@@ -294,15 +422,19 @@ __all__ = [
     "assert_ignored_out_dir",
     "combo_dir",
     "combo_name",
+    "OUTCOME_STATUSES",
     "ddl_failure",
+    "ddl_outcome",
     "expand",
     "generate_with_backoff",
+    "gold_is_empty",
     "is_complete_ddl_record",
     "is_complete_nl_record",
     "is_transient_error",
     "load_prediction_dir",
     "nl_failure",
     "parse_constructor_response",
+    "pred_is_structurally_empty",
     "read_csv",
     "upsert_csv",
     "write_csv",

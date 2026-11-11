@@ -55,8 +55,13 @@ def build_data_root(tmp_path: Path) -> Path:
     return root
 
 
-def write_e1_preds(pred_dir: Path, gold, texts: dict[str, str | None], *, errors: dict[str, str] | None = None) -> None:
-    """Write NNNN.json (historical format) for ``gold`` records; ``texts`` maps serial -> nl_text."""
+def write_e1_preds(pred_dir: Path, gold, texts: dict[str, str | None], *, errors: dict[str, str] | None = None,
+                   describer: str | None = None, prompt: str | None = None) -> None:
+    """Write NNNN.json (historical format) for ``gold`` records; ``texts`` maps serial -> nl_text.
+
+    With ``describer`` + ``prompt`` the records carry full, correct E1 provenance (llm, model_id,
+    prompt_style, generation.prompt_variant / prompt_sha256) as written by ``experiments/E1/run.py``.
+    """
     pred_dir.mkdir(parents=True, exist_ok=True)
     for rec in gold:
         if rec.serial not in texts:
@@ -64,6 +69,14 @@ def write_e1_preds(pred_dir: Path, gold, texts: dict[str, str | None], *, errors
         d = {"text_number": int(rec.serial), "id": rec.schema_id, "llm": "synthetic", "model_id": "synthetic",
              "database": rec.database, "ddl": rec.ddl, "gold_question": rec.gold_nl, "ddl_source": rec.ddl_source,
              "prompt_style": "schema2text1", "nl_text": texts[rec.serial] or ""}
+        if describer and prompt:
+            from src import inference_clients as ic
+            from src import prompt_assets as pa
+            from src import repro_io as rio
+
+            d.update(llm=describer, model_id=ic.MODELS[describer].model_id, prompt_style=rio.PROMPT_STYLE[prompt])
+            d["generation"] = {"prompt_variant": prompt, "prompt_sha256": pa.EXPECTED_SHA256[prompt],
+                               "temperature": 0.2, "max_tokens": 1024}
         if errors and rec.serial in errors:
             d["error"] = errors[rec.serial]
         (pred_dir / f"{rec.serial}.json").write_text(json.dumps(d), encoding="utf-8")

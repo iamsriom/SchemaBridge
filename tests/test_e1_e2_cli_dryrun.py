@@ -7,6 +7,7 @@ import sys
 import pytest
 
 from _synthetic import ROOT, build_data_root, load_script
+from src import prompt_assets as pa
 
 CLIS = [
     "experiments/E1/run.py", "experiments/E1/evaluate.py", "experiments/E1/prepare_dataset.py",
@@ -33,7 +34,8 @@ def test_documented_flags_exist_in_help():
                  "--confirm-paid", "--resume", "--write-plan"):
         assert flag in h1, flag
     h2 = _run(["experiments/E2/run.py", "--help"]).stdout
-    for flag in ("--describer-model", "--e1-pred-dir", "--execute", "--confirm-paid", "--skip-existing", "--limit"):
+    for flag in ("--describer-model", "--e1-pred-dir", "--execute", "--confirm-paid", "--skip-existing", "--limit",
+                 "--allow-legacy-e1"):
         assert flag in h2, flag
 
 
@@ -64,16 +66,51 @@ def test_e1_write_plan_only_writes_plan(tmp_path):
 
 
 @pytest.mark.parametrize("model", ["sonnet46", "gpt54mini", "all"])
-def test_e1_paid_execute_is_disabled(model, tmp_path):
+def test_e1_paid_execute_requires_confirm_paid(model, tmp_path):
     p = _run(["experiments/E1/run.py", "--dataset", "rschema", "--model", model, "--prompt", "basic", "--execute",
               "--limit", "1", "--out-dir", str(tmp_path / "o")])
-    assert p.returncode == 2 and "paid API methods are disabled" in p.stderr and not (tmp_path / "o").exists()
+    assert p.returncode == 2 and "--confirm-paid" in p.stderr and "disabled" not in p.stderr
+    assert not (tmp_path / "o").exists()
 
 
-def test_e1_paid_execute_disabled_even_with_confirm_paid(tmp_path):
-    p = _run(["experiments/E1/run.py", "--dataset", "rschema", "--model", "gpt54mini", "--prompt", "basic",
+@pytest.mark.parametrize("model,env", [("gpt54mini", "OPENAI_API_KEY"), ("sonnet46", "ANTHROPIC_API_KEY")])
+def test_e1_paid_with_confirm_but_no_key_fails_missing_key(model, env, tmp_path):
+    """--execute --confirm-paid is accepted; without a key the run stops before any request."""
+    p = _run(["experiments/E1/run.py", "--dataset", "rschema", "--model", model, "--prompt", "basic",
               "--execute", "--confirm-paid", "--limit", "1", "--out-dir", str(tmp_path / "o")])
-    assert p.returncode == 2 and "paid API methods are disabled" in p.stderr
+    assert p.returncode == 2 and env in p.stderr and "not set" in p.stderr
+    assert "disabled" not in p.stderr and not (tmp_path / "o").exists()
+
+
+def test_e1_paid_dry_run_needs_no_flags_or_key(tmp_path):
+    p = _run(["experiments/E1/run.py", "--dataset", "schemabench", "--model", "sonnet46", "--prompt", "basic",
+              "--limit", "1", "--out-dir", str(tmp_path / "o")])
+    assert p.returncode == 0 and "DRY-RUN" in p.stdout and "PAID" in p.stdout and not (tmp_path / "o").exists()
+
+
+def test_e1_execute_paid_with_mocked_client(tmp_path, monkeypatch):
+    """Paid path with an injected fake client (get_client monkeypatched): no network, no key."""
+    root = build_data_root(tmp_path)
+    mod = load_script("experiments/E1/run.py", "e1_run_paid")
+    _non_strict(mod, monkeypatch)
+    seen = {}
+
+    class Fake:
+        def generate(self, req):
+            seen["model"] = req.model_key
+            return "A mocked paid description."
+
+    def fake_get_client(key, **kw):
+        seen["kw"] = kw
+        return Fake()
+
+    monkeypatch.setattr(mod.ic, "get_client", fake_get_client)
+    out = tmp_path / "o"
+    rc = mod.main(["--dataset", "schemabench", "--model", "sonnet46", "--prompt", "basic", "--execute",
+                   "--confirm-paid", "--data-root", str(root), "--out-dir", str(out)])
+    assert rc == 0 and seen["model"] == "sonnet46" and seen["kw"]["confirm_paid"] is True
+    rec = json.loads((out / "0001.json").read_text())
+    assert rec["llm"] == "sonnet46" and rec["model_id"] == "claude-sonnet-4-6" and rec["nl_text"].startswith("A mocked")
 
 
 def test_e1_refuses_tracked_out_dir():
@@ -90,13 +127,23 @@ def test_e2_dry_run_validates_payload_without_descriptions(tmp_path):
     assert "placeholder" in p.stdout and not (tmp_path / "o").exists()
 
 
-def test_e2_execute_constructor_is_disabled(tmp_path):
+def test_e2_execute_requires_confirm_paid(tmp_path):
     p = _run(["experiments/E2/run.py", "--dataset", "rschema", "--describer-model", "llama31", "--prompt", "basic",
               "--execute", "--out-dir", str(tmp_path / "o")])
-    assert p.returncode == 2 and "Paid API methods are disabled" in p.stderr
-    p2 = _run(["experiments/E2/run.py", "--dataset", "rschema", "--describer-model", "llama31", "--prompt", "basic",
-               "--execute", "--confirm-paid", "--out-dir", str(tmp_path / "o")])
-    assert p2.returncode == 2 and "Paid API methods are disabled" in p2.stderr
+    assert p.returncode == 2 and "--confirm-paid" in p.stderr and "disabled" not in p.stderr
+    assert not (tmp_path / "o").exists()
+
+
+def test_e2_execute_with_confirm_but_no_key_fails_missing_key(tmp_path):
+    p = _run(["experiments/E2/run.py", "--dataset", "rschema", "--describer-model", "llama31", "--prompt", "basic",
+              "--execute", "--confirm-paid", "--limit", "1", "--out-dir", str(tmp_path / "o")])
+    assert p.returncode == 2 and "OPENAI_API_KEY" in p.stderr and "not set" in p.stderr
+    assert not (tmp_path / "o").exists()
+
+
+def test_e2_help_documents_provenance_and_paid_flags():
+    h = _run(["experiments/E2/run.py", "--help"]).stdout
+    assert "--allow-legacy-e1" in h and "--confirm-paid" in h and "disabled" not in h.lower()
 
 
 def _non_strict(mod, monkeypatch):
@@ -114,7 +161,8 @@ def test_e2_dry_run_uses_real_e1_descriptions(tmp_path, monkeypatch):
     root = build_data_root(tmp_path)
     gold = dio.load_schemabench(root, strict=False)
     s = corpus()["schemas"]
-    write_e1_preds(tmp_path / "e1", gold, {g.serial: s[i]["description_good"] for i, g in enumerate(gold)})
+    write_e1_preds(tmp_path / "e1", gold, {g.serial: s[i]["description_good"] for i, g in enumerate(gold)},
+                   describer="llama31", prompt="basic")
     mod = load_script("experiments/E2/run.py", "e2_run")
     _non_strict(mod, monkeypatch)
     args = mod.build_parser().parse_args(["--dataset", "schemabench", "--describer-model", "llama31", "--prompt", "basic",
@@ -132,7 +180,8 @@ def test_e2_execute_pipeline_with_fake_client(tmp_path, monkeypatch):
     root = build_data_root(tmp_path)
     gold = dio.load_schemabench(root, strict=False)
     s = corpus()["schemas"]
-    write_e1_preds(tmp_path / "e1", gold, {g.serial: s[i]["description_good"] for i, g in enumerate(gold)})
+    write_e1_preds(tmp_path / "e1", gold, {g.serial: s[i]["description_good"] for i, g in enumerate(gold)},
+                   describer="llama31", prompt="basic")
     mod = load_script("experiments/E2/run.py", "e2_run2")
 
     class Fake:
@@ -151,6 +200,10 @@ def test_e2_execute_pipeline_with_fake_client(tmp_path, monkeypatch):
     assert Fake.calls == 3 and sorted(p.name for p in out.glob("*.json")) == ["0001.json", "0002.json", "0003.json"]
     rec = json.loads((out / "0001.json").read_text())
     assert rec["llm"] == "gpt4omini" and rec["ddl"].startswith("CREATE TABLE") and "error" not in rec
+    # validated E1 provenance is carried into the E2 record
+    assert rec["source_schema2text_llm"] == "llama31" and rec["source_prompt_style"] == "schema2text1"
+    assert rec["source_model_id"] == "meta-llama/Meta-Llama-3.1-8B-Instruct"
+    assert rec["source_prompt_sha256"] == pa.EXPECTED_SHA256["basic"] and rec["source_provenance_mode"] == "strict"
     # resume: nothing re-sent
     assert mod.execute_one("schemabench", "llama31", "basic", args, tmp_path / "e1", out, Fake()) == 0
     assert Fake.calls == 3

@@ -4,10 +4,14 @@ Safety model
 ------------
 * Importing this module performs no network access and imports no heavy dependency.
 * Dry-run is the default everywhere: requests are built and sized, nothing is sent.
-* **Paid API methods are DISABLED** (Anthropic / OpenAI).  ``get_client`` refuses
-  ``sonnet46``, ``gpt54mini``, and ``gpt4omini`` whenever ``dry_run=False``.
-  Dry-run request sizing for documentation remains allowed; no keys are read or used.
-* Open-weight HF generation remains available with ``--execute`` (local GPU only).
+* **Dry-run is the default.**  Paid providers (Anthropic ``sonnet46``; OpenAI ``gpt54mini`` and the
+  E2 constructor ``gpt4omini``) are opt-in: a real call needs BOTH ``--execute`` and
+  ``--confirm-paid`` (``dry_run=False`` and ``confirm_paid=True`` in code).  Without the
+  confirmation ``get_client`` raises :class:`PaidCallNotConfirmed`.
+* API keys come from the environment ONLY (``ANTHROPIC_API_KEY`` / ``OPENAI_API_KEY``); a missing
+  key raises :class:`MissingApiKey`.  Keys are never read from files, printed or stored.
+* The ``anthropic`` / ``openai`` SDKs are imported lazily, only when a paid client is constructed.
+* Open-weight HF generation is available with ``--execute`` (local GPU only).
 * Generated text is written only when ``--out-dir`` is given and it lies outside the repo tree or
   inside an ``outputs/`` directory (git-ignored).
 
@@ -128,29 +132,38 @@ class MissingApiKey(RuntimeError):
 
 
 class ApiMethodsDisabled(RuntimeError):
-    """Raised when a paid Anthropic/OpenAI client would be constructed.
+    """Legacy exception kept for backwards compatibility.
 
-    SchemaBridge E1/E2 reproduction no longer runs hosted API inference from this package.
-    Use open-weight HF models locally, or evaluate already-saved predictions offline.
+    Paid API methods are enabled (opt-in) again; nothing in this module raises this any more.
     """
 
 
-API_METHODS_DISABLED = True
+API_METHODS_DISABLED = False  # legacy flag; never used to block anything
 API_DISABLED_MESSAGE = (
-    "Paid API methods are disabled in this package "
-    "(Anthropic Claude / OpenAI GPT describers and the GPT-4o-mini constructor). "
-    "Use open-weight HF models with --execute, or evaluate saved predictions offline. "
-    "Dry-run request sizing still works without contacting any provider."
+    "Paid API methods are opt-in: pass --execute together with --confirm-paid and set "
+    "ANTHROPIC_API_KEY / OPENAI_API_KEY in the environment."
 )
 
 
 def require_api_key(provider: str) -> str:
     """Return the key from the environment ONLY; never log it.
 
-    Note: paid API clients are disabled via :data:`API_METHODS_DISABLED`; this helper is
-    retained only for compatibility and will not be reached in normal E1/E2 flows.
+    Raises :class:`MissingApiKey` (without echoing any value) if the variable is unset or blank.
     """
-    raise ApiMethodsDisabled(API_DISABLED_MESSAGE)
+    if provider not in ENV_KEYS:
+        raise ValueError(f"unknown paid provider {provider!r}; expected one of {sorted(ENV_KEYS)}")
+    name = ENV_KEYS[provider]
+    key = (os.environ.get(name) or "").strip()
+    if not key:
+        raise MissingApiKey(f"{name} is not set in the environment (needed for provider {provider!r})")
+    return key
+
+
+def _require_confirmation(model: ModelSpec, confirm_paid: bool) -> None:
+    if not confirm_paid:
+        raise PaidCallNotConfirmed(
+            f"{model.model_id} is a paid API model: pass confirm_paid=True (CLI: --execute --confirm-paid)"
+        )
 
 
 def _assert_out_dir_ok(out_dir: Path) -> Path:
@@ -198,7 +211,12 @@ def _retry(fn, max_retries: int = 3):
 
 class AnthropicClient:
     def __init__(self, model: ModelSpec, *, confirm_paid: bool) -> None:
-        raise ApiMethodsDisabled(API_DISABLED_MESSAGE)
+        _require_confirmation(model, confirm_paid)
+        key = require_api_key("anthropic")
+        import anthropic  # lazy: only needed for real paid calls
+
+        self.model = model
+        self._client = anthropic.Anthropic(api_key=key)
 
     def generate(self, req: Request) -> str:
         def call() -> str:
@@ -219,7 +237,12 @@ class AnthropicClient:
 
 class OpenAIClient:
     def __init__(self, model: ModelSpec, *, confirm_paid: bool) -> None:
-        raise ApiMethodsDisabled(API_DISABLED_MESSAGE)
+        _require_confirmation(model, confirm_paid)
+        key = require_api_key("openai")
+        import openai  # lazy: only needed for real paid calls
+
+        self.model = model
+        self._client = openai.OpenAI(api_key=key)
 
     def generate(self, req: Request) -> str:
         def call() -> str:
@@ -315,15 +338,20 @@ def get_client(
 ) -> Client:
     """Return a client.  ``dry_run=True`` NEVER touches the network or loads weights.
 
-    Paid Anthropic/OpenAI models always raise :class:`ApiMethodsDisabled` when
-    ``dry_run=False`` (``confirm_paid`` is ignored).
+    Paid Anthropic/OpenAI models with ``dry_run=False`` need ``confirm_paid=True``
+    (:class:`PaidCallNotConfirmed` otherwise) and an API key in the environment
+    (:class:`MissingApiKey` otherwise).  Open-weight models return a lazily-loading :class:`HFClient`.
     """
-    del confirm_paid  # retained for CLI compatibility; API execute paths are hard-disabled
     model = MODELS[model_key]
     if dry_run:
         return DryRunClient()
-    if model.provider in PAID_PROVIDERS or model.paid:
-        raise ApiMethodsDisabled(API_DISABLED_MESSAGE)
+    if model.paid:
+        _require_confirmation(model, confirm_paid)
+        if model.provider == "anthropic":
+            return AnthropicClient(model, confirm_paid=confirm_paid)
+        if model.provider == "openai":
+            return OpenAIClient(model, confirm_paid=confirm_paid)
+        raise ValueError(f"unsupported paid provider {model.provider!r}")
     return HFClient(model, load_in_4bit=load_in_4bit, device_map=device_map, dtype=dtype)
 
 
@@ -355,7 +383,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.execute and model.paid and not args.confirm_paid:
         ap.error(f"{model.model_id} is a paid API model: add --confirm-paid together with --execute")
     out_dir = _assert_out_dir_ok(Path(args.out_dir)) if args.out_dir else None
-    client = get_client(args.model, dry_run=not args.execute, confirm_paid=args.confirm_paid, load_in_4bit=args.load_in_4bit)
+    try:
+        client = get_client(args.model, dry_run=not args.execute, confirm_paid=args.confirm_paid,
+                            load_in_4bit=args.load_in_4bit)
+    except (PaidCallNotConfirmed, MissingApiKey) as e:
+        ap.error(str(e))
 
     n = 0
     for rec, req in _iter_requests(args.model, args.dataset, args.variant, args.data_root, args.limit):
