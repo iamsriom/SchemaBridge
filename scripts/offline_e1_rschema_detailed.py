@@ -29,7 +29,9 @@ for model, paper in PAPER.items():
             refs.append(o.get("gold_nl") or "")
             hyps.append(o.get("hyp_nl") or "")
             scrs.append(float(o["schema_coverage"]))
-    bleu = sacrebleu.corpus_bleu(hyps, [[r] for r in refs]).score
+    # HISTORICAL BUG (fixed): ``corpus_bleu(hyps, [[r] for r in refs])`` passes one reference
+    # stream per record. Correct single-reference layout: ONE stream holding all references.
+    bleu = sacrebleu.corpus_bleu(hyps, [refs]).score
     rl = sum(rouge.score(r, h)["rougeL"].fmeasure for r, h in zip(refs, hyps)) / len(refs)
     scr = sum(scrs) / len(scrs)
     row = {
