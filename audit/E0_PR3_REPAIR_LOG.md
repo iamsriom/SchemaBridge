@@ -87,3 +87,10 @@
 - Relocked manuscript targets with proper 3dp rounding; Claude RSchema Domain 0.207→0.208.
 - Wave1 regeneration (CodeLlama×3 + Llama×3) continues on cuda:0–5; DeepSeek queued for after free GPUs (resume from partial jsonl).
 - Comparison: VERIFY PASS with `--allow-archive` (100 PASS + 54 PASS_ARCHIVE).
+
+## 2026-11-11 — Reconcile with remote PR tip
+
+- Remote `icde2027-e0-verified` had advanced with forensic audits (`audit/historical_repro/`, ROOT_CAUSE_MATRIX, etc.).
+- Merged remote tip; kept local scientific repair tree for parser/CI/runner/FINAL tables/locks.
+- Retained remote forensic evidence artifacts.
+- Clean-clone offline: 236 passed, VERIFY PASS (--allow-archive), baseline dry-run OK.
