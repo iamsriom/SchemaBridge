@@ -108,7 +108,8 @@ def test_experiment_files_exist(exp):
     assert (d / "run.py").is_file() == (exp != "E5")
 
 
-@pytest.mark.parametrize("exp", ["E1", "E2", "E3", "E4"])
+# E1 / E2 run.py are real (dry-run by default) generation CLIs now; see tests/test_e1_e2_cli_dryrun.py.
+@pytest.mark.parametrize("exp", ["E3", "E4"])
 def test_run_py_refuses_online(exp):
     p = subprocess.run([sys.executable, str(ROOT / "experiments" / exp / "run.py"), "--online"],
                        capture_output=True, text=True, cwd=ROOT, timeout=60,

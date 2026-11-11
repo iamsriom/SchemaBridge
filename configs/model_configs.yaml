@@ -1,68 +1,116 @@
 # Model registry for the SchemaBridge paper (E0-E5).
 #
-# NOTE: this package is OFFLINE-ONLY.  Nothing here is used to call an API or load weights;
-# the file documents which model produced which archived artefact.  Generation settings were
-# read from the original generation scripts (RSchema_ExpResults4/Code/*.py), not invented.
+# Registry only: nothing in this file calls an API or loads weights.  Live inference code lives
+# in src/inference_clients.py (dry-run by default; paid calls need --execute --confirm-paid).
+# API keys are read ONLY from the environment (ANTHROPIC_API_KEY, OPENAI_API_KEY).
 # No credentials belong in this file.
+#
+# Model ids below are the exact ids passed to the providers in the E1/E2 schema2text runs
+# (RSchema/SchemaBench: rschema_exp2_schema2text_api.py LLM_CONFIG).  The `key` field is the
+# short name accepted by src/inference_clients.py.
 
 models:
   # ---- open-weight describers/constructors (local archives exist) ----------------------
   codellama13b:
+    key: codellama13b
     display_name: "CodeLlama-13B"
     provider: huggingface
     model_id: codellama/CodeLlama-13b-Instruct-hf
     open_weights: true
     archived_predictions: true
   llama31:
+    key: llama31
     display_name: "Llama-3.1-8B"
     provider: huggingface
     model_id: meta-llama/Meta-Llama-3.1-8B-Instruct
     open_weights: true
     archived_predictions: true
   deepseek:
+    key: deepseek
     display_name: "DeepSeek-Coder-6.7B"
     provider: huggingface
     model_id: deepseek-ai/deepseek-coder-6.7b-instruct
     open_weights: true
     archived_predictions: true
 
-  # ---- proprietary models: PAPER NUMBERS ONLY, no predictions on disk --------------------
-  # (see figures/fig5_source_audit.md: 0/518 RSchema and 0/239 SchemaBench per-schema outputs)
+  # ---- proprietary describers (E1 schema2text) --------------------------------------------
   claude_sonnet_4_6:
+    key: sonnet46
     display_name: "Claude Sonnet 4.6"
     provider: anthropic
-    model_id: null            # exact API id is not recorded anywhere on disk
+    model_id: claude-sonnet-4-6
+    api_key_env: ANTHROPIC_API_KEY
     open_weights: false
+    paid: true
     archived_predictions: false
   gpt_5_4_mini:
+    key: gpt54mini
     display_name: "GPT-5.4-mini"
     provider: openai
-    model_id: null            # exact API id is not recorded anywhere on disk
+    model_id: gpt-5.4-mini
+    api_key_env: OPENAI_API_KEY
     open_weights: false
+    paid: true
     archived_predictions: false
 
   # ---- fixed constructor of E2 (round trip) ----------------------------------------------
   gpt4omini_constructor:
+    key: gpt4omini
     display_name: "GPT-4o-mini (E2 constructor)"
     provider: openai
     model_id: gpt-4o-mini
+    api_key_env: OPENAI_API_KEY
     open_weights: false
-    archived_predictions: true     # results/predictions/e2/*_rt_*
+    paid: true
+    archived_predictions: true     # results/predictions/e2/*_rt_* when present
     role: e2_constructor
 
-# Generation settings used by the ORIGINAL runs (kept for provenance only).
+# Generation settings (taken from the original generation scripts, not invented).
 generation:
-  text2schema:            # E0 (Exp4) open models
+  text2schema:            # E0 open models
     temperature: 0.1
     max_new_tokens: 2048
     source: RSchema_ExpResults4/Code/rschema_exp4_text2schema_allLLM.py
-  schema2text:            # E1 (Exp4 / Experiment2) open describers
+  schema2text:            # E1 describers
     temperature: 0.2
-    max_new_tokens: 3072
-    source: RSchema_ExpResults4/Code/rschema_exp4_schema2text_allLLM.py
-  gpt4omini_constructor:  # E2 constructor
+    max_new_tokens:
+      huggingface: 3072          # open-weight describers
+      api_basic: 1024            # Claude / GPT-5.4-mini, basic prompt
+      api_detailed: 2048         # Claude / GPT-5.4-mini, detailed prompt
+    ddl_truncation_chars:        # API runs only; open models see the full DDL
+      basic: 60000
+      detailed: 120000
+    system_prompts:
+      basic: prompts/describer_basic.txt
+      detailed: prompts/describer_detailed.txt
+    prompt_sha256:
+      basic: e1422bc806119c375d89e44759feee44f13eb2717335154ad3c9ca933b6e6c20
+      detailed: f09fc8cae8d8ec73deb79f8bc7c2e71842d5fd35e92d833a02954b539755622d
+    source: RSchema_ExpResults4/Code/rschema_exp4_schema2text_allLLM.py; rschema_exp2_schema2text_api.py
+  constructor:            # E2 constructor (fixed: GPT-4o-mini)
     temperature: 0.2
+    max_tokens: 16384
+    system_prompt: prompts/constructor.txt
+    prompt_sha256: 392a396f7073bc015d206460055f7e3b8a3c94a21ed09c059bc47c13d3884ad4
     source: RSchemaCode/rschema_text2schema_allLLM.py (GPT-4o-mini branch)
+
+# Evaluation populations used by the E1/E2 reproduction code.
+populations:
+  enterprise145:
+    n: 145
+    gold_nl: false          # BLEU / ROUGE-L / BERTScore not applicable; only SCR is defined
+  schemabench:
+    n: 239
+  rschema:
+    n: 381                  # PRIMARY N: IDs present in BOTH annotation.jsonl and annotation_ddl.jsonl
+    logical_annotations: 518  # listed separately (datasets_io.load_rschema_logical_518); not the primary N
+    note: "Never use first-381 truncation of the 518 logical annotations."
+
+text_metrics:
+  bleu: "sacrebleu.corpus_bleu(hyps, [refs]) (single reference stream)"
+  rougeL: "rouge-score, use_stemmer=True, mean F1"
+  bertscore: "roberta-large, idf=false, rescale_with_baseline=false, mean F1"
+  scr: "macro-average schema coverage rate over DDL table/column names"
 
 defaults:
   online: false

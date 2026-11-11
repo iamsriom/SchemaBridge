@@ -2,18 +2,38 @@ experiment: E1
 title: "Schema -> Text (Table VII, `tab:e1_s2t`)"
 paper_table_label: "tab:e1_s2t"
 reference_values: configs/paper_reference_values.json
-online: false            # generation is disabled; offline evaluation of archived artefacts only
+# Default mode is OFFLINE: archived artefacts + local evaluation.  Generation (experiments/E1/run.py)
+# is dry-run by default and only runs with --execute (paid APIs additionally need --confirm-paid).
+online: false
+online_generation: opt-in          # run.py --execute [--confirm-paid]
 tolerance:
   float_3dp: 0.0005
-  float_2dp: 0.005       # BLEU-4 (0-100 scale, 2dp)
+  float_2dp: 0.005                 # BLEU-4 (0-100 scale, 2dp)
 datasets:
-  - "RSchema (518)"
-  - "SchemaBench (239)"
-  - "Enterprise-145 (145, SCR only)"
-models: "CodeLlama-13B, Llama-3.1-8B, DeepSeek-Coder (open); Claude Sonnet 4.6, GPT-5.4-mini (paper only)"
-metrics: "BLEU-4 (0-100), ROUGE-L, BERTScore-F1, SCR (schema coverage) for Basic (B) and Detailed (D) describer prompts"
-prompts: "prompts/describer_basic.txt, prompts/describer_detailed.txt"
-predictions:
-  - "results/predictions/e1/rschema_schema2text_{codellama13b,llama31,deepseek}"
-  - "results/predictions/e1/schemabench_schema2text_{codellama13b,llama31,deepseek}"
-status: "RSchema Detailed BLEU/ROUGE/SCR for the 3 open models PASS; Basic, BERTScore, Claude/GPT, SchemaBench, Enterprise-145 BLOCKED."
+  enterprise145: {n: 145, gold_text: false, metrics: [scr]}
+  schemabench:   {n: 239, gold_text: true,  metrics: [bleu4, rougeL, bertscore_f1, scr]}
+  rschema:       {n: 381, gold_text: true,  metrics: [bleu4, rougeL, bertscore_f1, scr],
+                  note: "381 DDL-matched schemas out of 518 logical annotations; serials = positions in the 518-record file"}
+models:
+  codellama13b: {model_id: "codellama/CodeLlama-13b-Instruct-hf", provider: hf}
+  llama31:      {model_id: "meta-llama/Meta-Llama-3.1-8B-Instruct", provider: hf}
+  deepseek:     {model_id: "deepseek-ai/deepseek-coder-6.7b-instruct", provider: hf}
+  sonnet46:     {model_id: "claude-sonnet-4-6", provider: anthropic, paid: true, env_key: ANTHROPIC_API_KEY}
+  gpt54mini:    {model_id: "gpt-5.4-mini", provider: openai, paid: true, env_key: OPENAI_API_KEY}
+prompts:
+  basic:    {file: prompts/describer_basic.txt,    prompt_style: schema2text1, sha256: e1422bc806119c375d89e44759feee44f13eb2717335154ad3c9ca933b6e6c20}
+  detailed: {file: prompts/describer_detailed.txt, prompt_style: schema2text2, sha256: f09fc8cae8d8ec73deb79f8bc7c2e71842d5fd35e92d833a02954b539755622d}
+generation:
+  temperature: 0.2
+  max_new_tokens: {open_models: 3072, api_basic: 1024, api_detailed: 2048}
+  api_ddl_truncation_chars: {basic: 60000, detailed: 120000}
+metrics:
+  bleu4: "sacrebleu corpus_bleu(hyps, [refs])  (single reference stream; historical [[r] for r in refs] layout is a bug)"
+  rougeL: "rouge-score, Porter stemmer, mean F1"
+  bertscore_f1: "bert-score, roberta-large, no IDF, no baseline rescaling"
+  scr: "macro-average schema coverage rate vs. gold DDL"
+fail_policy_default: score
+outputs:                            # all git-ignored
+  generation: "experiments/E1/outputs/<dataset>_<prompt>_<model>/NNNN.{txt,json}"
+  metrics: "experiments/E1/outputs/metrics/"
+  tables: "experiments/E1/outputs/latex_generated/"

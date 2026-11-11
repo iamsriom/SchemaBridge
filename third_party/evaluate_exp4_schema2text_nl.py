@@ -293,8 +293,10 @@ def compute_pair_metrics(
 ) -> dict:
     ensure_nltk_data()
 
-    ref_lists = [[r] for r in refs]
-    bleu_corpus = sacrebleu.corpus_bleu(hyps, ref_lists)
+    # HISTORICAL BUG (fixed): this used ``corpus_bleu(hyps, [[r] for r in refs])``, which hands
+    # sacrebleu one reference *stream* per record instead of ONE stream holding all references.
+    # The correct layout for a single-reference corpus is ``corpus_bleu(hyps, [refs])``.
+    bleu_corpus = sacrebleu.corpus_bleu(hyps, [list(refs)])
 
     sent_bleu: list[float] = []
     rougeL: list[float] = []
