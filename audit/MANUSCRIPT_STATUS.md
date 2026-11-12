@@ -18,3 +18,8 @@ No ICDE 2027 LaTeX manuscript (`main.tex`, `Text2Schema_ICDE_2027`, or any `*.te
 ## Limitation
 
 Exact paper reproduction **cannot be claimed** for tables/figures whose numbers are not in the comparison dump (E3 constructor isolation, E4 published masking tables, E5 cost, size-cliff, trajectories, FK-support). Those are marked **BLOCKED** pending the manuscript and matching artifacts.
+
+
+## E4 (updated)
+
+**Status: VERIFIED PRIMARY.** Camera-ready tables and Evidence-guided paragraph: `results/metrics/reproduced/E4_AUDIT/latex/`. Domain = joint type+nullability (pooled). No full `main.tex` is vendored in this repo; drop-ins are for Overleaf.

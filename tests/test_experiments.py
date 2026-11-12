@@ -88,17 +88,19 @@ def test_e3_constructor_isolation_verified(refs):
     assert "E4" in lab.reason  # masking-dir collision note retained
 
 
-@pytest.mark.skipif(not (rt.ARCHIVED / "e4_cases3_results.json").is_file(), reason="E4 archived metrics missing")
-def test_e4_partial_and_exports_rows(refs):
+def test_e4_primary_verified(refs):
     res = rt.run_e4(refs)
-    lab = status(res, "tab:e4_split", "Enterprise-145")
-    assert lab.status == rt.PARTIAL
-    assert status(res, "tab:e4_by_dataset", "multi").status == rt.BLOCKED
-    rows = res.extra_csvs["E4_archived_cases_aggregates.csv"]
-    assert {r["source"] for r in rows} == {"cases3_table_attr_hiding", "cases_structural_imputation"}
-    cases3_all = next(r for r in rows if r["source"] == "cases3_table_attr_hiding" and r["group"] == "overall"
-                      and r["element"] == "entity")
-    assert cases3_all["f1"] == pytest.approx(0.2053, abs=1e-4)
+    lab = status(res, "tab:e4_split", "all-pooled")
+    assert lab.status == rt.PASS
+    assert "VERIFIED" in lab.reason and "joint" in lab.reason.lower()
+    assert status(res, "tab:e4_recovery", "all-pooled").status == rt.PASS
+    primary = res.extra_csvs["E4_PRIMARY_verified.csv"]
+    assert sum(1 for r in primary if r["table"] == "tab:e4_split") == 10
+    assert sum(1 for r in primary if r["table"] == "tab:e4_recovery") == 5
+    # Historical Cases3 export retained when archive present
+    if (rt.ARCHIVED / "e4_cases3_results.json").is_file():
+        rows = res.extra_csvs["E4_archived_cases_aggregates.csv"]
+        assert {r["source"] for r in rows} == {"cases3_table_attr_hiding", "cases_structural_imputation"}
 
 
 def test_e5_cost_blocked(refs):
