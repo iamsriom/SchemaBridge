@@ -715,72 +715,15 @@ def write_outputs(results: list[dict], isolation: dict) -> None:
 
 
 def write_latex(sum_rows: list[dict], latex_dir: Path) -> None:
-    """Bold best-in-dataset: min nGED/Hall, max T/A/D/E/R. Ties all bolded."""
-    by_ds: dict[str, list] = {}
-    for row in sum_rows:
-        by_ds.setdefault(row["Dataset"], []).append(row)
+    """Delegate to generate_table.py so evaluate and CSV→LaTeX stay in sync.
 
-    def fmt(ds_rows, metric, lower_better=False):
-        vals = [r[f"{metric}_3dec"] for r in ds_rows]
-        best = min(vals) if lower_better else max(vals)
-        out = []
-        for r in ds_rows:
-            v = r[f"{metric}_3dec"]
-            s = f"{v:.3f}"
-            if v == best:
-                s = f"\\textbf{{{s}}}"
-            out.append(s)
-        return out
+    Emits PRIMARY verified + paper-historical (screenshot TABLE IX) tables.
+    ``sum_rows`` / ``latex_dir`` are unused; CSV on disk is the source of truth.
+    """
+    del sum_rows, latex_dir
+    import runpy
 
-    lines = []
-    lines.append("% Auto-generated from E3 PRIMARY independent evaluation.")
-    lines.append("% Population: Enterprise-145=145, RSchema=381 DDL-matched, SchemaBench=239.")
-    lines.append("\\begin{table*}[t]")
-    lines.append("\\centering")
-    lines.append(
-        "\\caption{Constructor isolation (E3): frozen GPT-5.4-mini detailed descriptions "
-        "reconstructed by five constructors. Mean nGED and four-dimensional hallucination "
-        "(Tables/Attributes/Entity/Referential; Domain excluded); micro-averaged structural "
-        "$F_1$ for Tables (T), Attributes (A), Domain (D), Entity (E), Referential (R). "
-        "Lower is better for nGED and Hall.; higher is better for $F_1$. "
-        "Bold = best within each dataset column (ties shared).}"
-    )
-    lines.append("\\label{tab:e3_overall}")
-    lines.append("\\resizebox{\\textwidth}{!}{%")
-    lines.append("\\begin{tabular}{llccccccc}")
-    lines.append("\\toprule")
-    lines.append(
-        "Dataset & Constructor & nGED $\\downarrow$ & Hall. $\\downarrow$ & T & A & D & E & R \\\\"
-    )
-    lines.append("\\midrule")
-
-    order = ["Enterprise-145", "RSchema", "SchemaBench"]
-    model_order = [lab for _, lab in MODELS]
-    for ds in order:
-        rows = sorted(by_ds[ds], key=lambda r: model_order.index(r["Constructor"]))
-        cols = {
-            "nGED": fmt(rows, "nGED", lower_better=True),
-            "Hall": fmt(rows, "Hall", lower_better=True),
-            "T": fmt(rows, "T"),
-            "A": fmt(rows, "A"),
-            "D": fmt(rows, "D"),
-            "E": fmt(rows, "E"),
-            "R": fmt(rows, "R"),
-        }
-        for i, r in enumerate(rows):
-            ds_cell = ds if i == 0 else ""
-            lines.append(
-                f"{ds_cell} & {r['Constructor']} & {cols['nGED'][i]} & {cols['Hall'][i]} & "
-                f"{cols['T'][i]} & {cols['A'][i]} & {cols['D'][i]} & {cols['E'][i]} & {cols['R'][i]} \\\\"
-            )
-        if ds != order[-1]:
-            lines.append("\\midrule")
-
-    lines.append("\\bottomrule")
-    lines.append("\\end{tabular}%")
-    lines.append("}")
-    lines.append("\\end{table*}")
-    (latex_dir / "tab_e3_overall_verified.tex").write_text("\n".join(lines) + "\n")
+    runpy.run_path(str(ROOT / "experiments" / "E3" / "generate_table.py"), run_name="__main__")
 
 
 def main() -> None:
