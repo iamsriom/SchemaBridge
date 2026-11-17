@@ -111,7 +111,7 @@ SchemaBridge consists of six experiments:
 | **E1** | **Schema2Text:** Evaluate natural-language schema descriptions using BLEU-4, ROUGE-L, BERTScore-F1, and SCR | VERIFIED — full `tab:e1_s2t` |
 | **E2** | **Round-Trip Preservation:** Measure structural fidelity while varying the describer and fixing the constructor | VERIFIED — PRIMARY 765; see `E2_AUDIT/` |
 | **E3** | **Constructor Isolation:** Measure reconstruction performance across constructors using fixed generated descriptions | VERIFIED — PRIMARY 765; see `E3_AUDIT/` |
-| **E4** | **Masking and Inferability:** Evaluate recovery of hidden schema elements from remaining structural evidence | UNVERIFIED — Tables X–XI not recovered |
+| **E4** | **Masking and Inferability:** Evaluate recovery of hidden schema elements from remaining structural evidence | VERIFIED — `tab:e4_split`, `tab:e4_recovery`; joint Domain; see `E4_AUDIT/` |
 | **E5** | **Inference Efficiency:** Analyze end-to-end latency, token consumption, and API cost | REPRODUCED, PROVENANCE INCOMPLETE (N=30) |
 
 Detailed experimental documentation is available in [`docs/experiments/`](docs/experiments/).
@@ -177,13 +177,25 @@ For additional information:
 - [E2 Experiment Documentation](experiments/E2/README.md)
 - [E1–E2 Reproducibility Guide](docs/REPRODUCE_E1_E2.md)
 
+### E4: Masking and Inferability
+
+Publish verified PRIMARY tables (joint Domain) without private prediction dumps:
+
+```bash
+python3 experiments/E4/evaluate.py
+python3 experiments/E4/generate_tables.py
+pytest -q tests/test_e4_primary.py
+```
+
+See [E4 Experiment Documentation](experiments/E4/README.md) and [REPRODUCE_E4.md](docs/REPRODUCE_E4.md).
+
 ### Reproducibility
 
 The public repository provides evaluation implementations, documentation, and available experimental artifacts.
 
 However, **not every experiment can currently be reproduced from a fresh public clone**.
 
-Some evaluations depend on archived model predictions or provider logs stored separately from the repository. **E3** metrics and checksums are published under `results/metrics/reproduced/E3_AUDIT/`, but the frozen descriptions and Exp4 prediction JSON remain private (see [REPRODUCE_E3.md](docs/REPRODUCE_E3.md)). **E4** is not yet recovered. E0 prompting baselines and E5 provenance also have documented limitations.
+Some evaluations depend on archived model predictions or provider logs stored separately from the repository. **E3** metrics and checksums are published under `results/metrics/reproduced/E3_AUDIT/`, but the frozen descriptions and Exp4 prediction JSON remain private (see [REPRODUCE_E3.md](docs/REPRODUCE_E3.md)). **E4** verified Split/Recovery tables and joint-Domain metrics are published under `results/metrics/reproduced/E4_AUDIT/` (masked prediction dumps remain private; see [REPRODUCE_E4.md](docs/REPRODUCE_E4.md)). E0 prompting baselines and E5 provenance also have documented limitations.
 
 See the experiment documentation and audit reports for details.
 

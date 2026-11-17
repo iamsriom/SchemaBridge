@@ -23,11 +23,14 @@ Original Exp4 constructor predictions and frozen GPT-5.4-mini descriptions are *
 # Recompute all 15 groups → E3_AUDIT/metrics/
 PYTHONHASHSEED=0 python3 experiments/E3/evaluate.py
 
-# Build Overleaf table
+# Build Overleaf tables (PRIMARY verified + manuscript screenshot historical)
 python3 experiments/E3/generate_table.py
 
 pytest -q tests/test_e3_primary.py
 ```
+
+Camera-ready: `E3_AUDIT/latex/tab_e3_overall_verified.tex` (PRIMARY).
+Manuscript TABLE IX screenshot cells: `tab_e3_overall_paper_historical.tex` (frozen `*_paper`; 27 cells differ by ≤0.002 — see `E3_27_MISMATCH_CAUSES.md`).
 
 Generation is disabled:
 

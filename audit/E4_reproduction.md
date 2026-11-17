@@ -1,31 +1,34 @@
 # E4 reproduction — Masking / structural inferability
 
-**Status: PARTIAL (artifacts) / BLOCKED (vs paper tables)**
+**Status: VERIFIED (PRIMARY)**
 
 ## Paper intent
 
-Five masks: 1Q1 tables, 1Q2 non-key attrs, 1Q3 domain, 1Q4 entity, 1Q5 referential; direct GPT-4o-mini and round-trip tracks; tables `tab:e4_split`, `tab:e4_fk_support`, `tab:e4_by_dataset`, figures recall/retention.
+Five masks (MT–MR); Direct GPT-4o-mini and Round-trip tracks; tables `tab:e4_split`, `tab:e4_recovery`; Domain = joint type + nullability.
 
-## What exists
+## PRIMARY artifacts
 
-| Piece | Location | Notes |
-|---|---|---|
-| Masking code | `third_party/structural_imputation_pipeline.py`, `MASKING_VERIFICATION.md` | 1Q1–1Q6 definitions |
-| Enterprise RT translations | `results/predictions/e4/enterprise_cases_translations` | CodeLlama/Mistral describers → GPT-4o-mini |
-| RSchema masked describer outs | `results/predictions/e3/rschema_cases_describer` (hist. Exp3) | 1Q2–1Q6 only; **no** scored reconstructions |
-| Cases3 alternate family | `e4_cases3_results.json` | Table/Attr Case 0–75% hide; n=1143 |
-| Analysis summary | `e4_cases_analysis_summary.json` | Inferability reports under Text2ER |
+| Piece | Location |
+|---|---|
+| Verified metrics | `results/metrics/reproduced/E4_AUDIT/metrics/` |
+| Corrected LaTeX | `results/metrics/reproduced/E4_AUDIT/latex/` |
+| Audit report | `results/metrics/reproduced/E4_AUDIT/E4_FINAL_VERIFICATION_REPORT.md` |
+| Evaluator entry | `experiments/E4/evaluate.py` |
+| Frozen values | `experiments/E4/verified_values.py` |
+| Masking reference | `third_party/MASKING_VERIFICATION.md` |
 
-## SchemaBench masking
+## Commands
 
-**None found.**
+```bash
+python3 experiments/E4/evaluate.py
+python3 experiments/E4/generate_tables.py
+pytest -q tests/test_e4_primary.py
+```
 
-## Leakage / denominator audits
+See `docs/REPRODUCE_E4.md`.
 
-- Mask functions strip designated DDL aspects; metadata leakage not exhaustively proven for every track — see `MASKING_VERIFICATION.md`
-- Domain-fact counting (per column vs per property) **not settled** against a manuscript definition — report archived aggregates only
-- Evidence-supported FKs ≠ semantic correctness (FK graph analysis exists; do not auto-promote)
+## Historical (not PRIMARY)
 
-## Paper table match
-
-No `tab:e4_*` numbers in the on-disk paper dump → **cannot PASS/MISMATCH** published cells. Offline export: `results/metrics/reproduced/E4_archived_cases_aggregates.csv`.
+- Exp5 `domain_facts` Domain scoring
+- SchemaBench-only Domain extracts (0.409 / 1,574)
+- Archived Cases3 aggregates (`results/metrics/archived/e4_*`)

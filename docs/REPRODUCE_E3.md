@@ -35,13 +35,23 @@ Do **not** call `experiments/E3/run.py` for generation — it refuses paid infer
 | File | Role |
 |---|---|
 | `E3_AUDIT/E3_AUDIT_REPORT.md` | Scientific audit report |
-| `E3_AUDIT/metrics/E3_PRIMARY_FINAL.csv` | 15-group aggregates |
+| `E3_AUDIT/metrics/E3_PRIMARY_FINAL.csv` | 15-group aggregates (`*_3dec` = PRIMARY, `*_paper` = screenshot) |
 | `E3_AUDIT/metrics/E3_CELL_COMPARISON_105.csv` | Manuscript vs PRIMARY |
 | `E3_AUDIT/metrics/E3_27_MISMATCH_CAUSES.md` | Cause of each ±0.001–0.002 cell |
-| `E3_AUDIT/latex/tab_e3_overall_verified.tex` | Verified LaTeX table |
+| `E3_AUDIT/latex/tab_e3_overall_verified.tex` | Camera-ready LaTeX (PRIMARY) |
+| `E3_AUDIT/latex/tab_e3_overall_paper_historical.tex` | Exact manuscript TABLE IX screenshot cells |
 | `E3_AUDIT/isolation/` | Constructor-isolation hashes |
 | `E3_AUDIT/inventory/group_completeness.csv` | Per-group counts |
 | `E3_AUDIT/provenance/` | Paths, protocol, checksums |
+
+## Screenshot vs camera-ready
+
+The manuscript TABLE IX screenshot matches the frozen `*_paper` column and
+`tab_e3_overall_paper_historical.tex` (105/105). The published camera-ready table
+is PRIMARY (`*_3dec` / `tab_e3_overall_verified.tex`), which differs in **27** cells
+by at most **0.002** (3-dec rounding + locked SchemaBench `_norm_map`). Public clones
+verify either table from git without private predictions; full numerical recompute
+needs the local Exp4 prediction dumps listed above.
 
 ## Notes
 
